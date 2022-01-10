@@ -1,0 +1,15 @@
+repositories {
+  jcenter()
+
+  maven {
+    url "https://sandec.jfrog.io/artifactory/repo"
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+
+compileJava {
+  sourceCompatibility = 11
+  targetCompatibility = 11
+}
