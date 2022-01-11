@@ -1,3 +1,11 @@
+buildscript {
+  repositories {
+    gradlePluginPortal()
+  }
+  dependencies {
+    classpath 'org.openjfx:javafx-plugin:0.0.10'
+  }
+}
 repositories {
   jcenter()
 
@@ -8,8 +16,32 @@ repositories {
 
 apply plugin: 'java'
 apply plugin: 'java-library'
+apply plugin: 'org.openjfx.javafxplugin'
 
 compileJava {
   sourceCompatibility = 11
   targetCompatibility = 11
+}
+
+javafx {
+  version = '17.0.1'
+  configuration = "implementation"
+  modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
+}
+
+dependencies {
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+  testImplementation "de.sandec:JMemoryBuddy:0.5.1"
+}
+
+test {
+  useJUnitPlatform()
+  testLogging.showStandardStreams = true
+  testLogging.exceptionFormat = "full"
+}
+
+tasks.named('jar') {
+  manifest {
+    attributes('Automatic-Module-Name': 'one.jpro.jfxutils.treeshowing')
+  }
 }
