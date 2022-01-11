@@ -10,13 +10,12 @@ To use them, you need the following repository:
 
 ## TreeShowing
 #### Motivation
-In JavaFX, you often want to stop an animation when a node is no longer used.
-Internally in JavaFX, the property "treeShowing" can be used. But as an end user, no elegant options are available.
-This leads to various incomplete solutions and memory leaks in applications.
-
-With this project, we want to make the property available to the common JavaFX Developer.
-
-This is also useful for other cleanup-scenarios, like stopping background tasks.
+In JavaFX, when a node could be collected - it's often prevented by ongoing animation or background tasks.
+For this reason, it's often necessary to stop the animation or background task, 
+when a node is no longer used.
+Internally in JavaFX, the property "treeShowing" is used, to check whether a Node is still used.
+But as an end-user, this property is not accessible in their application.
+With this project, we want to make the property available to the common JavaFX Developer - allowing them to write bug-free and leak-free applications.
 
 Maven
 ```
