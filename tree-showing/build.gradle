@@ -45,3 +45,25 @@ tasks.named('jar') {
     attributes('Automatic-Module-Name': 'one.jpro.jfxutils.treeshowing')
   }
 }
+
+apply plugin: 'maven-publish'
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      groupId "one.jpro.jfxutils"
+      artifactId "treeshowing"
+      version JFX_UTILS_VERSION
+    }
+  }
+  repositories {
+    maven {
+      name = "artifactory"
+      url = "https://sandec.jfrog.io/artifactory/repo"
+      credentials {
+        username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
+        password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
+      }
+    }
+  }
+}
