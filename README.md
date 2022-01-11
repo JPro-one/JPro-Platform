@@ -1,4 +1,4 @@
-#JFX Utils
+# JFX Utils
 
 Various utilities for JavaFX.
 To use them, you need the following repository:
@@ -9,7 +9,7 @@ To use them, you need the following repository:
 ```
 
 ## TreeShowing
-####Motivation
+#### Motivation
 In JavaFX, you often want to stop an animation when a node is no longer used.
 Internally in JavaFX, the property "treeShowing" can be used. But as an end user, no elegant options are available.
 This leads to various incomplete solutions and memory leaks in applications.
