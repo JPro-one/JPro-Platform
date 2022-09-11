@@ -1,0 +1,10 @@
+
+apply plugin: 'application'
+apply plugin: 'com.sandec.jpro'
+
+mainClassName = 'one.jpro.sound.example.JProSoundSample'
+
+dependencies {
+  implementation project(":jpro-sound")
+  implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+}

@@ -53,6 +53,10 @@ if(treeShowing.get()) {
 ```
 
 Internal Notes:
+
 ```
-./gradlew tree-showing:publish
+# local build
+./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal
+# publish release
+./gradlew tree-showing:publish jpro-sound:publish
 ```
