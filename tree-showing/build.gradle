@@ -3,7 +3,7 @@ buildscript {
     gradlePluginPortal()
   }
   dependencies {
-    classpath 'org.openjfx:javafx-plugin:0.0.10'
+    classpath 'org.openjfx:javafx-plugin:0.0.13'
   }
 }
 repositories {
@@ -24,7 +24,7 @@ compileJava {
 }
 
 javafx {
-  version = '17.0.1'
+  version = "$JAVAFX_VERSION"
   configuration = "implementation"
   modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
 }
@@ -51,7 +51,7 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
-      groupId "one.jpro.jfxutils"
+      groupId "one.jpro.jproutils"
       artifactId "treeshowing"
       version JFX_UTILS_VERSION
     }
