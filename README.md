@@ -1,4 +1,4 @@
-# JFX Utils
+# JPro Utils
 
 Various utilities for JavaFX.
 To use them, you need the following repository:
@@ -7,6 +7,35 @@ To use them, you need the following repository:
     url "https://sandec.jfrog.io/artifactory/repo"
   }
 ```
+
+## JPro Sessions
+#### Explanation
+This library provides a simple implementation of a session manager for JavaFX/JPro applications.
+It remembers the user, based on a cookie.
+A simple ObservableMap is used to store the session data.
+This data is only accessible in the JPro Server, not in the browser - which can be important for some security reasons.
+
+Maven
+```
+<dependency>
+  <groupId>one.jpro.jfxutils</groupId>
+  <artifactId>jpro-sessions</artifactId>
+  <version>0.2.0-SNAPSHOT</version>
+</dependency>
+```
+### Usage
+```
+import one.jpro.sessionmanager.SessionManager;
+...
+static SessionManager sessionManager = new SessionManager("myapp");
+...
+ObservableMap session = sm.getSession(WebAPI.getWebAPI(primaryStage));
+session.put("key", "value");
+session.get("key");
+session.remove("key");
+```
+
+
 
 ## TreeShowing
 #### Motivation
@@ -22,7 +51,7 @@ Maven
 <dependency>
   <groupId>one.jpro.jfxutils</groupId>
   <artifactId>treeshowing</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
 

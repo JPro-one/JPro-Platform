@@ -120,7 +120,7 @@ public class SessionManager {
         return session;
     }
 
-    public Boolean isValidCookie(String cookieValue) {
+     private Boolean isValidCookie(String cookieValue) {
         try {
             int i = Integer.valueOf(cookieValue);
             return i >= 0 && i <= Integer.MAX_VALUE;
@@ -130,7 +130,7 @@ public class SessionManager {
         }
     }
 
-    public String createUniqueIdentifier() {
+    private String createUniqueIdentifier() {
         while (true) {
             String newValue = createIdentifier();
             if (!new File(baseDirectory, newValue).exists()) {
