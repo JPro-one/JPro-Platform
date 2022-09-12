@@ -1,3 +1,4 @@
 include "tree-showing"
 include "jpro-sound"
+ include "jpro-sessions"
 include "example"

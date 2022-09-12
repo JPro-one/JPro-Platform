@@ -38,6 +38,7 @@ allprojects {
 
   dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation "de.sandec:JMemoryBuddy:0.5.1"
   }
 
@@ -48,7 +49,7 @@ allprojects {
   }
 }
 
-configure([project("tree-showing"), project("jpro-sound")]) {
+configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions")]) {
   apply plugin: 'maven-publish'
   publishing {
     publications {
