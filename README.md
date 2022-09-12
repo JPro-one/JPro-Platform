@@ -18,7 +18,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 Maven
 ```
 <dependency>
-  <groupId>one.jpro.jfxutils</groupId>
+  <groupId>one.jpro.jproutils</groupId>
   <artifactId>jpro-sessions</artifactId>
   <version>0.2.0-SNAPSHOT</version>
 </dependency>
@@ -49,7 +49,7 @@ With this project, we want to make the property available to the common JavaFX D
 Maven
 ```
 <dependency>
-  <groupId>one.jpro.jfxutils</groupId>
+  <groupId>one.jpro.jproutils</groupId>
   <artifactId>treeshowing</artifactId>
   <version>0.2.0-SNAPSHOT</version>
 </dependency>
@@ -58,7 +58,7 @@ Maven
 #### Gradle
 ```
 dependencies {
-    implementation "one.jpro.jfxutils:treeshowing:0.1.0"
+    implementation 'one.jpro.jproutils:treeshowing:0.2.0-SNAPSHOT'
 }
 ```
 The module name is `one.jpro.jfxutils.treeshowing`
@@ -85,7 +85,7 @@ Internal Notes:
 
 ```
 # local build
-./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal
+./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal jpro-sessions:publishToMavenLocal
 # publish release
-./gradlew tree-showing:publish jpro-sound:publish
+./gradlew tree-showing:publish jpro-sound:publish jpro-session:publish
 ```
