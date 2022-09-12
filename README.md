@@ -34,6 +34,10 @@ session.put("key", "value");
 session.get("key");
 session.remove("key");
 ```
+Notes:
+ * The SessionManager should be created only once, and should be static.
+ * The SessionManager needs a name, which is used to identify the application.
+ Different applications should use different names.
 
 
 
