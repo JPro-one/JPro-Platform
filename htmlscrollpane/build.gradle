@@ -1,0 +1,6 @@
+
+dependencies {
+  implementation project(":tree-showing")
+  implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+  implementation "de.sandec:JMemoryBuddy:0.5.1"
+}

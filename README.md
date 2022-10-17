@@ -54,7 +54,7 @@ Maven
 ```
 <dependency>
   <groupId>one.jpro.jproutils</groupId>
-  <artifactId>treeshowing</artifactId>
+  <artifactId>tree-showing</artifactId>
   <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -62,10 +62,10 @@ Maven
 #### Gradle
 ```
 dependencies {
-    implementation 'one.jpro.jproutils:treeshowing:0.2.0-SNAPSHOT'
+    implementation 'one.jpro.jproutils:tree-showing:0.2.0-SNAPSHOT'
 }
 ```
-The module name is `one.jpro.jfxutils.treeshowing`
+The module name is `one.jpro.jfxutils.tree-showing`
 
 #### Typical Usage:
 ```

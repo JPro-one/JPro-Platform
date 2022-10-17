@@ -32,7 +32,7 @@ allprojects {
 
   javafx {
     version = "$JAVAFX_VERSION"
-    configuration = "implementation"
+    configuration = "compileOnly"
     modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
   }
 
@@ -49,7 +49,7 @@ allprojects {
   }
 }
 
-configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions")]) {
+configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane")]) {
   apply plugin: 'maven-publish'
   publishing {
     publications {

@@ -1,4 +1,4 @@
-package one.jpro.jfxutils.treeshowing;
+package one.jpro.jproutils.treeshowing;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

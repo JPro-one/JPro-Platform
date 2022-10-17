@@ -8,5 +8,6 @@ mainClassName = 'one.jpro.sound.example.SessionManagerSample'
 dependencies {
   implementation project(":jpro-sound")
   implementation project(":jpro-sessions")
+  implementation project(":htmlscrollpane")
   implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
 }
