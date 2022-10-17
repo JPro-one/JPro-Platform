@@ -4,6 +4,7 @@ apply plugin: 'com.sandec.jpro'
 
 mainClassName = 'one.jpro.sound.example.JProSoundSample'
 mainClassName = 'one.jpro.sound.example.SessionManagerSample'
+mainClassName = 'one.jpro.sound.example.HTMLScrollPaneSample'
 
 dependencies {
   implementation project(":jpro-sound")
