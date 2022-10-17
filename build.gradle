@@ -32,7 +32,7 @@ allprojects {
 
   javafx {
     version = "$JAVAFX_VERSION"
-    configuration = "compileOnly"
+    configuration = "implementation"
     modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
   }
 

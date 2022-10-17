@@ -8,7 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import one.jpro.jfxutils.treeshowing.TreeShowing;
+import one.jpro.jproutils.treeshowing.TreeShowing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,10 +33,6 @@ public class TestTreeShowing {
         Parent node = new Group();
         BooleanProperty prop = TreeShowing.treeShowing(node);
         Assertions.assertFalse(prop.get());
-
-        JMemoryBuddy.memoryTest(checker -> {
-
-        });
     });}
 
     @Test
