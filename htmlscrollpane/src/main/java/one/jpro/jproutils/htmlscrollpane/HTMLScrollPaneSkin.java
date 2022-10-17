@@ -4,13 +4,10 @@ package one.jpro.jproutils.htmlscrollpane;
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
 import de.sandec.jmemorybuddy.CleanupDetector;
-import de.sandec.jmemorybuddy.JMemoryBuddy;
-import de.sandec.jmemorybuddy.JMemoryBuddyLive;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
-import javafx.event.EventTarget;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -18,7 +15,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
 import one.jpro.jproutils.treeshowing.TreeShowing;
@@ -40,11 +36,6 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
     ChangeListener<Number> widthListener;
     public HTMLScrollPaneSkin(ScrollPane control) {
         super(control);
-
-        //Rectangle clip = new Rectangle();
-        //clip.widthProperty().bind(control.widthProperty());
-        //clip.heightProperty().bind(control.heightProperty());
-        // control.setClip(clip);
 
         viewContent = new StackPane();
         htmlView = new HTMLView();
@@ -141,7 +132,6 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
                         "console.log('Disposed jpro."+idapp+"');", WebAPI.getWebAPI(contentPage)));
 
         // Update width and height of the htmlView
-
         ((Region) getNode()).widthProperty().addListener((p,o,n) -> {
             webapi.executeScript("document.getElementById('"+id+"').style.width = '"+n+"px';");
         });

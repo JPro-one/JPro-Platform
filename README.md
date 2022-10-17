@@ -20,7 +20,7 @@ Maven
 <dependency>
   <groupId>one.jpro.jproutils</groupId>
   <artifactId>jpro-sessions</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.1-SNAPSHOT</version>
 </dependency>
 ```
 ### Usage
@@ -55,7 +55,7 @@ Maven
 <dependency>
   <groupId>one.jpro.jproutils</groupId>
   <artifactId>tree-showing</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -89,7 +89,7 @@ Internal Notes:
 
 ```
 # local build
-./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal jpro-sessions:publishToMavenLocal
+./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal jpro-sessions:publishToMavenLocal htmlscrollpane:publishToMavenLocal
 # publish release
-./gradlew tree-showing:publish jpro-sound:publish jpro-session:publish
+./gradlew tree-showing:publish jpro-sound:publish jpro-session:publish htmlscrollpane:publish
 ```
