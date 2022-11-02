@@ -34,8 +34,16 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
     Pane htmlViewContent;
 
     ChangeListener<Number> widthListener;
+
+    String attributes;
+
     public HTMLScrollPaneSkin(ScrollPane control) {
+        this(control, "");
+    }
+    public HTMLScrollPaneSkin(ScrollPane control, String attributes) {
         super(control);
+
+        this.attributes = attributes;
 
         viewContent = new StackPane();
         htmlView = new HTMLView();
@@ -120,7 +128,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         String id = "scrollelem_" + number;
         String idapp = "scrollelemapp_" + number;
 
-        String content = "<div id=\""+id+"\" style=\"overflow-x: hidden; overflow-y:scroll; \"><jpro-app loader=\"none\" id=\""+idapp+"\" href=\"/app/"+windowId+"\" fxwidth=\"true\" fxheight=\"true\" nativeScrolling=\"true\"></jpro-app></div>";
+        String content = "<div id=\""+id+"\" style=\"overflow-x: hidden; overflow-y:scroll; \"><jpro-app loader=\"none\" id=\""+idapp+"\" href=\"/app/"+windowId+"\" fxwidth=\"true\" fxheight=\"true\" nativeScrolling=\"true\" "+attributes+"></jpro-app></div>";
         System.out.println("Setting content to: " + content);
 
         webapi.executeScript("jpro."+idapp+" = document.getElementById('"+idapp+"');");
