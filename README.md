@@ -85,6 +85,12 @@ if(treeShowing.get()) {
 }
 ```
 
+### Freeze Detector
+This library allows you to track whether the JavaFX Application Thread is frozen for a given time.
+This can be useful for debugging purposes, detecting deadlocks or other optimize performance.
+
+
+
 Internal Notes:
 
 ```

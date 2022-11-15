@@ -49,7 +49,7 @@ allprojects {
   }
 }
 
-configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane")]) {
+configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {
     publications {
