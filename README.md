@@ -95,7 +95,7 @@ Internal Notes:
 
 ```
 # local build
-./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal jpro-sessions:publishToMavenLocal htmlscrollpane:publishToMavenLocal
+./gradlew tree-showing:publishToMavenLocal jpro-sound:publishToMavenLocal jpro-sessions:publishToMavenLocal htmlscrollpane:publishToMavenLocal freeze-detector:publishToMavenLocal
 # publish release
-./gradlew tree-showing:publish jpro-sound:publish jpro-session:publish htmlscrollpane:publish
+./gradlew tree-showing:publish jpro-sound:publish jpro-session:publish htmlscrollpane:publish freeze-detector:publish
 ```
