@@ -17,7 +17,11 @@ public class TreeShowing {
         }
         return prop;
     }
-    public static boolean isTreeShowing() { return false; }
+    public static boolean isTreeShowing(Node node) {
+        return node.getScene() != null &&
+                node.getScene().getWindow() != null &&
+                node.getScene().getWindow().isShowing();
+    }
 
     private static class TreeShowingProperty extends SimpleBooleanProperty {
 
