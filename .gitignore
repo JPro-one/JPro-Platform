@@ -1,5 +1,7 @@
+.idea/
 .history
 .gradle
 bin/
 build/
+example/logs/
 .DS_Store
