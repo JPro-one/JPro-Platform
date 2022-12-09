@@ -3,7 +3,7 @@
  *
  * @author Besmir Beqiri
  */
-module one.jpro.recorder {
+module one.jpro.media {
     requires javafx.controls;
     requires javafx.media;
     requires jpro.webapi;
