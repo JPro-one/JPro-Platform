@@ -32,7 +32,7 @@ public interface MediaRecorder extends EventTarget {
         PAUSED
     }
 
-    public HTMLView getCameraView();
+    HTMLView getCameraView();
 
     String getMimeType();
 
