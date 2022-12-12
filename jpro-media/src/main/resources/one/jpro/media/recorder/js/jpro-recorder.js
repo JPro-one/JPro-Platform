@@ -23,6 +23,10 @@ enableCamera = async function(videoId, options) {
         var videoUrl = URL.createObjectURL(recordedBlob);
         jpro.mediaRecorderOnStop(videoUrl);
     });
+
+    media_recorder.onerror = (event) => {
+        jpro.mediaRecorderOnError(event.error);
+    }
 }
 
 startRecording = function() {

@@ -62,6 +62,13 @@ public class JProMediaRecorder implements MediaRecorder {
                     new MediaRecorderEvent(JProMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_DATA_AVAILABLE));
         });
+
+        webAPI.registerJavaFunction("mediaRecorderOnError", result -> {
+            // Fire error event
+            Event.fireEvent(JProMediaRecorder.this,
+                    new MediaRecorderEvent(JProMediaRecorder.this,
+                            MediaRecorderEvent.MEDIA_RECORDER_ERROR));
+        });
     }
 
     public final HTMLView getCameraView() {
@@ -219,6 +226,33 @@ public class JProMediaRecorder implements MediaRecorder {
             };
         }
         return onStopped;
+    }
+
+    // On error event handler
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onError;
+
+    @Override
+    public final EventHandler<MediaRecorderEvent> getOnError() {
+        return (onError == null) ? null : onError.get();
+    }
+
+    @Override
+    public final void setOnError(EventHandler<MediaRecorderEvent> value) {
+        onErrorProperty().set(value);
+    }
+
+    @Override
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onErrorProperty() {
+        if (onError == null) {
+            onError = new SimpleObjectProperty<>(this, "onError") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaRecorderEvent.MEDIA_RECORDER_ERROR, get());
+                }
+            };
+        }
+        return onError;
     }
 
     // Recorder controller methods
