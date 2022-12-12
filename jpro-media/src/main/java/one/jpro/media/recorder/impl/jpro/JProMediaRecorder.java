@@ -89,6 +89,9 @@ public final class JProMediaRecorder implements MediaRecorder {
         });
 
         webAPI.registerJavaFunction("mediaRecorderOnError", result -> {
+            // Reset state to inactive
+            setState(State.INACTIVE);
+
             // Set error
             setError(MediaRecorderException.fromJSON(result));
 
