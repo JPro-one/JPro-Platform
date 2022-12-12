@@ -298,6 +298,7 @@ public final class JProMediaRecorder implements MediaRecorder {
     // Error property
     private ReadOnlyObjectWrapper<MediaRecorderException> error;
 
+    @Override
     public MediaRecorderException getError() {
         return (error == null) ? null : error.get();
     }
@@ -306,6 +307,7 @@ public final class JProMediaRecorder implements MediaRecorder {
         errorPropertyImpl().set(error);
     }
 
+    @Override
     public ReadOnlyObjectProperty<MediaRecorderException> errorProperty() {
         return errorPropertyImpl().getReadOnlyProperty();
     }

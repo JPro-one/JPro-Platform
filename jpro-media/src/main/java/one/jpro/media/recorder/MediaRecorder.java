@@ -67,6 +67,10 @@ public interface MediaRecorder extends EventTarget {
 
     ObjectProperty<EventHandler<MediaRecorderEvent>> onErrorProperty();
 
+    MediaRecorderException getError();
+
+    ReadOnlyObjectProperty<MediaRecorderException> errorProperty();
+
     // Recorder controller methods
     void enable();
 

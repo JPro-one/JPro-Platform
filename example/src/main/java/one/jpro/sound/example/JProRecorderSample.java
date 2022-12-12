@@ -50,6 +50,7 @@ public class JProRecorderSample extends JProApplication {
         downloadButton.setOnAction(event -> mediaRecorder.download());
         mediaRecorder.setOnStart(event -> System.out.println("MediaRecorder started!"));
         mediaRecorder.setOnStopped(event -> System.out.println("MediaRecorder stopped!"));
+        mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 
         var scene = new Scene(new StackPane(box), 640, 480);
         primaryStage.setScene(scene);
