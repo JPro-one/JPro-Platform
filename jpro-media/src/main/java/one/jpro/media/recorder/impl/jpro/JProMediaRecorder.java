@@ -68,6 +68,22 @@ public class JProMediaRecorder implements MediaRecorder {
         return cameraView;
     }
 
+    /**
+     * Returns a boolean which is <code>true</code> if the MIME type specified is one that this media recorder should
+     * be able to successfully record.
+     *
+     * @param mimeType the MIME media type to check
+     * @return <code>true</code> if this MediaRecorder implementation is capable of recording Blob objects for the
+     * specified MIME type. Recording may still fail if there are insufficient resources to support the recording
+     * and encoding process. If the value is <code>false</code>, the user agent is incapable of recording the
+     * specified format.
+     * @throws Exception
+     */
+    public final boolean isTypeSupported(String mimeType) throws Exception {
+        return Boolean.getBoolean(webAPI.executeScriptWithReturn(
+                "MediaRecorder.isTypeSupported(\"" + mimeType + "\")"));
+    }
+
     private ReadOnlyObjectWrapper<JSVariable> objectURL;
 
     public final JSVariable getObjectURL() {
