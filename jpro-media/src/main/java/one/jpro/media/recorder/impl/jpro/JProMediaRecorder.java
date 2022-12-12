@@ -50,8 +50,8 @@ public final class JProMediaRecorder implements MediaRecorder {
                         "preview.height=" + cameraView.getHeight() + ";"));
 
         webAPI.registerJavaFunction("mediaRecorderOnStart", result -> {
-            // Set state to recording
-            setState(State.RECORDING);
+            // Set state
+            State.fromJS(result).ifPresent(this::setState);
 
             // Fire start event
             Event.fireEvent(JProMediaRecorder.this,
@@ -60,20 +60,20 @@ public final class JProMediaRecorder implements MediaRecorder {
         });
 
         webAPI.registerJavaFunction("mediaRecorderOnPause", result -> {
-            // Set state to paused
-            setState(State.PAUSED);
+            // Set state
+            State.fromJS(result).ifPresent(this::setState);
 
-            // Fire start event
+            // Fire pause event
             Event.fireEvent(JProMediaRecorder.this,
                     new MediaRecorderEvent(JProMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
         });
 
         webAPI.registerJavaFunction("mediaRecorderOnResume", result -> {
-            // Set state to recording
-            setState(State.RECORDING);
+            // Set state
+            State.fromJS(result).ifPresent(this::setState);
 
-            // Fire start event
+            // Fire resume event
             Event.fireEvent(JProMediaRecorder.this,
                     new MediaRecorderEvent(JProMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_RESUME));

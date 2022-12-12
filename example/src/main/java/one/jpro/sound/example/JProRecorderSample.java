@@ -37,6 +37,7 @@ public class JProRecorderSample extends JProApplication {
         var stopButton = new Button("Stop Recording");
         stopButton.setDisable(true);
         var downloadButton = new Button("Download Button");
+        downloadButton.setDisable(true);
 
         var hBox = new HBox(startButton, pauseResumeButton, stopButton, downloadButton);
         hBox.setAlignment(Pos.CENTER);
@@ -72,6 +73,7 @@ public class JProRecorderSample extends JProApplication {
             startButton.setDisable(false);
             pauseResumeButton.setDisable(true);
             stopButton.setDisable(true);
+            downloadButton.setDisable(false);
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 

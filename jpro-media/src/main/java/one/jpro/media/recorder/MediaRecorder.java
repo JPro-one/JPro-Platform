@@ -10,6 +10,8 @@ import javafx.event.EventTarget;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
 import one.jpro.media.recorder.impl.jpro.JProMediaRecorder;
 
+import java.util.Optional;
+
 /**
  * The MediaRecorder interface of the MediaStream Recording API
  * provides functionality to easily record media.
@@ -29,7 +31,19 @@ public interface MediaRecorder extends EventTarget {
 
         INACTIVE,
         RECORDING,
-        PAUSED
+        PAUSED;
+
+        public static Optional<State> fromJS(String jsStr) {
+            if (jsStr != null && !jsStr.isBlank()) {
+                var str = jsStr.replace("\"", "").trim();
+                for (State s : values()) {
+                    if (s.name().equalsIgnoreCase(str)) {
+                        return Optional.of(s);
+                    }
+                }
+            }
+            return Optional.empty();
+        }
     }
 
     HTMLView getCameraView();
