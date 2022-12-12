@@ -5,5 +5,5 @@ dependencies {
 }
 
 compileJava {
-    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.recorder"]
+    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"]
 }
