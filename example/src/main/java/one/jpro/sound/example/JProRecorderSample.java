@@ -33,6 +33,7 @@ public class JProRecorderSample extends JProApplication {
         cameraView.setStyle("-fx-background-color: black, white; -fx-background-insets: 0, 1;");
 
         var stopButton = new Button("Stop Recording");
+        stopButton.setDisable(true);
         var downloadButton = new Button("Download Button");
 
         var hBox = new HBox(startButton, stopButton, downloadButton);
@@ -48,8 +49,15 @@ public class JProRecorderSample extends JProApplication {
         startButton.setOnAction(event -> mediaRecorder.start());
         stopButton.setOnAction(event -> mediaRecorder.stop());
         downloadButton.setOnAction(event -> mediaRecorder.download());
-        mediaRecorder.setOnStart(event -> System.out.println("MediaRecorder started!"));
-        mediaRecorder.setOnStopped(event -> System.out.println("MediaRecorder stopped!"));
+        mediaRecorder.setOnStart(event -> {
+            startButton.setDisable(true);
+            stopButton.setDisable(false);
+        });
+        mediaRecorder.setOnPause(event -> System.out.println("MediaRecorder paused!"));
+        mediaRecorder.setOnStopped(event -> {
+            startButton.setDisable(false);
+            stopButton.setDisable(true);
+        });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 
         var scene = new Scene(new StackPane(box), 640, 480);

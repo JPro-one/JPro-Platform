@@ -28,9 +28,8 @@ enableCamera = async function(videoId, options) {
         jpro.mediaRecorderOnError(JSON.stringify({type: event.error.code, message: event.error.message}));
     }
 
-    media_recorder.onstart = (event) => {
-        jpro.mediaRecorderOnStart(event.type)
-    }
+    media_recorder.onstart = (event) => jpro.mediaRecorderOnStart(event.type)
+    media_recorder.onpause = (event) => jpro.mediaRecorderOnPause(event.type)
 }
 
 startRecording = function() {

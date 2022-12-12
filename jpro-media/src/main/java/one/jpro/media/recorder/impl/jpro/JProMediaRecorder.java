@@ -59,6 +59,16 @@ public final class JProMediaRecorder implements MediaRecorder {
                             MediaRecorderEvent.MEDIA_RECORDER_START));
         });
 
+        webAPI.registerJavaFunction("mediaRecorderOnPause", result -> {
+            // Set state to paused
+            setState(State.PAUSED);
+
+            // Fire start event
+            Event.fireEvent(JProMediaRecorder.this,
+                    new MediaRecorderEvent(JProMediaRecorder.this,
+                            MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
+        });
+
         webAPI.registerJavaFunction("mediaRecorderOnStop", result -> {
             // Update ObjectURL value
             setObjectURL(new JSVariable(webAPI, result, "URL.revokeObjectURL(" + result + ")"));
@@ -241,6 +251,33 @@ public final class JProMediaRecorder implements MediaRecorder {
         return onStart;
     }
 
+    // On pause event handler
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onPause;
+
+    @Override
+    public EventHandler<MediaRecorderEvent> getOnPause() {
+        return (onPause == null) ? null : onPause.get();
+    }
+
+    @Override
+    public void setOnPause(EventHandler<MediaRecorderEvent> value) {
+        onPauseProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty() {
+        if (onPause == null) {
+            onPause = new SimpleObjectProperty<>(this, "onPause") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaRecorderEvent.MEDIA_RECORDER_PAUSE, get());
+                }
+            };
+        }
+        return onPause;
+    }
+
     // On stopped event handler
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onStopped;
 
@@ -341,7 +378,6 @@ public final class JProMediaRecorder implements MediaRecorder {
     @Override
     public void pause() {
         webAPI.executeScript("pauseRecording();");
-        setState(State.PAUSED);
     }
 
     @Override
