@@ -57,8 +57,10 @@ public class JProMediaRecorder implements MediaRecorder {
         });
 
         webAPI.registerJavaFunction("mediaRecorderOnDataavailable", result -> {
-            System.out.println("MediaRecorder onDataavailable: " + result);
-            // TODO: fire MEDIA_RECORDER_DATA_AVAILABLE event
+            // Fire data available event
+            Event.fireEvent(JProMediaRecorder.this,
+                    new MediaRecorderEvent(JProMediaRecorder.this,
+                            MediaRecorderEvent.MEDIA_RECORDER_DATA_AVAILABLE));
         });
     }
 
@@ -149,9 +151,34 @@ public class JProMediaRecorder implements MediaRecorder {
         return state;
     }
 
-    /**
-     * Called on {@link MediaRecorder} is stopped.
-     */
+    // On data available event handler
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailable;
+
+    @Override
+    public final EventHandler<MediaRecorderEvent> getOnDataAvailable() {
+        return (onDataAvailable == null) ? null : onDataAvailable.get();
+    }
+
+    @Override
+    public final void setOnDataAvailable(EventHandler<MediaRecorderEvent> value) {
+        onDataAvailableProperty().set(value);
+    }
+
+    @Override
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailableProperty() {
+        if (onDataAvailable == null) {
+            onDataAvailable = new SimpleObjectProperty<>(this, "onDataAvailable") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaRecorderEvent.MEDIA_RECORDER_DATA_AVAILABLE, get());
+                }
+            };
+        }
+        return onDataAvailable;
+    }
+
+    // On stopped event handler
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onStopped;
 
     @Override

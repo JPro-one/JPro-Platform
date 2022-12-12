@@ -47,6 +47,12 @@ public interface MediaRecorder extends EventTarget {
     ReadOnlyObjectProperty<State> stateProperty();
 
 
+    EventHandler<MediaRecorderEvent> getOnDataAvailable();
+
+    void setOnDataAvailable(EventHandler<MediaRecorderEvent> value);
+
+    ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailableProperty();
+
     EventHandler<MediaRecorderEvent> getOnStopped();
 
     void setOnStopped(EventHandler<MediaRecorderEvent> value);
