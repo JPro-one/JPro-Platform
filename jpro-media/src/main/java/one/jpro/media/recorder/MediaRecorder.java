@@ -36,13 +36,9 @@ public interface MediaRecorder extends EventTarget {
 
     String getMimeType();
 
-    void setMimeType(String value);
-
     ReadOnlyStringProperty mimeTypeProperty();
 
     State getState();
-
-    void setState(State value);
 
     ReadOnlyObjectProperty<State> stateProperty();
 
