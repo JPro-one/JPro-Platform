@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -34,7 +35,11 @@ public class JProRecorderSample extends JProApplication {
         var stopButton = new Button("Stop Recording");
         var downloadButton = new Button("Download Button");
 
-        var box = new VBox(enableCamera, previewLabel, cameraView, startButton, stopButton, downloadButton);
+        var hBox = new HBox(startButton, stopButton, downloadButton);
+        hBox.setAlignment(Pos.CENTER);
+        hBox.setSpacing(12.0);
+
+        var box = new VBox(enableCamera, previewLabel, cameraView, hBox);
         box.setAlignment(Pos.CENTER);
         box.setMaxWidth(640.0);
         box.setSpacing(8.0);
@@ -43,6 +48,7 @@ public class JProRecorderSample extends JProApplication {
         startButton.setOnAction(event -> mediaRecorder.start());
         stopButton.setOnAction(event -> mediaRecorder.stop());
         downloadButton.setOnAction(event -> mediaRecorder.download());
+        mediaRecorder.setOnStart(event -> System.out.println("MediaRecorder started!"));
         mediaRecorder.setOnStopped(event -> System.out.println("MediaRecorder stopped!"));
 
         var scene = new Scene(new StackPane(box), 640, 480);

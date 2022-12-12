@@ -49,6 +49,16 @@ public final class JProMediaRecorder implements MediaRecorder {
                 "let preview = document.getElementById(\"" + videoId + "\");\n" +
                         "preview.height=" + cameraView.getHeight() + ";"));
 
+        webAPI.registerJavaFunction("mediaRecorderOnStart", result -> {
+            // Set state to recording
+            setState(State.RECORDING);
+
+            // Fire start event
+            Event.fireEvent(JProMediaRecorder.this,
+                    new MediaRecorderEvent(JProMediaRecorder.this,
+                            MediaRecorderEvent.MEDIA_RECORDER_START));
+        });
+
         webAPI.registerJavaFunction("mediaRecorderOnStop", result -> {
             // Update ObjectURL value
             setObjectURL(new JSVariable(webAPI, result, "URL.revokeObjectURL(" + result + ")"));
@@ -204,6 +214,33 @@ public final class JProMediaRecorder implements MediaRecorder {
         return onDataAvailable;
     }
 
+    // On start event handler
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onStart;
+
+    @Override
+    public EventHandler<MediaRecorderEvent> getOnStart() {
+        return (onStart == null) ? null : onStart.get();
+    }
+
+    @Override
+    public void setOnStart(EventHandler<MediaRecorderEvent> value) {
+        onStartProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<EventHandler<MediaRecorderEvent>> onStartProperty() {
+        if (onStart == null) {
+            onStart = new SimpleObjectProperty<>(this, "onStart"){
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaRecorderEvent.MEDIA_RECORDER_START, get());
+                }
+            };
+        }
+        return onStart;
+    }
+
     // On stopped event handler
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onStopped;
 
@@ -297,7 +334,6 @@ public final class JProMediaRecorder implements MediaRecorder {
     @Override
     public void start() {
         webAPI.executeScript("startRecording();");
-        setState(State.RECORDING);
     }
 
     @Override
