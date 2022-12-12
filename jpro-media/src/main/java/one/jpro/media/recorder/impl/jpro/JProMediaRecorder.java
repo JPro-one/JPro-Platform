@@ -44,7 +44,7 @@ public class JProMediaRecorder implements MediaRecorder {
                 "let preview = document.getElementById(\"" + videoId + "\");\n" +
                         "preview.height=" + cameraView.getHeight() + ";"));
 
-        webAPI.registerJavaFunction("onStop", result -> {
+        webAPI.registerJavaFunction("mediaRecorderOnStop", result -> {
             // Update ObjectURL value
             setObjectURL(new JSVariable(webAPI, result, "URL.revokeObjectURL(" + result + ")"));
 
@@ -56,7 +56,7 @@ public class JProMediaRecorder implements MediaRecorder {
                     new MediaRecorderEvent(JProMediaRecorder.this, MediaRecorderEvent.MEDIA_RECORDER_STOP));
         });
 
-        webAPI.registerJavaFunction("onDataavailable", result -> {
+        webAPI.registerJavaFunction("mediaRecorderOnDataavailable", result -> {
             System.out.println("MediaRecorder onDataavailable: " + result);
             // TODO: fire MEDIA_RECORDER_DATA_AVAILABLE event
         });

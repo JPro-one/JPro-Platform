@@ -13,7 +13,7 @@ enableCamera = async function(videoId, options) {
     // event : new recorded video blob available
     media_recorder.addEventListener('dataavailable', function(e) {
         blobs_recorded.push(e.data);
-        jpro.onDataavailable(e.timecode);
+        jpro.mediaRecorderOnDataavailable(e.timecode);
     });
 
     // event : recording stopped & all blobs sent
@@ -21,7 +21,7 @@ enableCamera = async function(videoId, options) {
         // create local object URL from the recorded video blobs
         let recordedBlob = new Blob(blobs_recorded, { type: "video/webm" });
         var videoUrl = URL.createObjectURL(recordedBlob);
-        jpro.onStop(videoUrl);
+        jpro.mediaRecorderOnStop(videoUrl);
     });
 }
 
