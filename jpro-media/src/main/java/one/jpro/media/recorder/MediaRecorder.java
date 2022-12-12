@@ -61,6 +61,12 @@ public interface MediaRecorder extends EventTarget {
 
     ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty();
 
+    EventHandler<MediaRecorderEvent> getOnResume();
+
+    void setOnResume(EventHandler<MediaRecorderEvent> value);
+
+    ObjectProperty<EventHandler<MediaRecorderEvent>> onResumeProperty();
+
     EventHandler<MediaRecorderEvent> getOnStopped();
 
     void setOnStopped(EventHandler<MediaRecorderEvent> value);

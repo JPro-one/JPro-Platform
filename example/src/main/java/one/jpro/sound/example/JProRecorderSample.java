@@ -24,7 +24,6 @@ public class JProRecorderSample extends JProApplication {
         var mediaRecorder = MediaRecorder.create(getWebAPI());
 
         var enableCamera = new Button("Enable Camera");
-        var startButton = new Button("Start Recording");
         var previewLabel = new Label("Camera View");
         previewLabel.setFont(Font.font("Roboto Bold", 24));
 
@@ -32,11 +31,14 @@ public class JProRecorderSample extends JProApplication {
         cameraView.setPrefSize(640.0, 480.0);
         cameraView.setStyle("-fx-background-color: black, white; -fx-background-insets: 0, 1;");
 
+        var startButton = new Button("Start Recording");
+        var pauseResumeButton = new Button("Pause Recording");
+        pauseResumeButton.setDisable(true);
         var stopButton = new Button("Stop Recording");
         stopButton.setDisable(true);
         var downloadButton = new Button("Download Button");
 
-        var hBox = new HBox(startButton, stopButton, downloadButton);
+        var hBox = new HBox(startButton, pauseResumeButton, stopButton, downloadButton);
         hBox.setAlignment(Pos.CENTER);
         hBox.setSpacing(12.0);
 
@@ -45,17 +47,30 @@ public class JProRecorderSample extends JProApplication {
         box.setMaxWidth(640.0);
         box.setSpacing(8.0);
 
+        // button events
         enableCamera.setOnAction(event -> mediaRecorder.enable());
         startButton.setOnAction(event -> mediaRecorder.start());
+        pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
         downloadButton.setOnAction(event -> mediaRecorder.download());
+
+        // media recorder events
         mediaRecorder.setOnStart(event -> {
             startButton.setDisable(true);
+            pauseResumeButton.setDisable(false);
             stopButton.setDisable(false);
         });
-        mediaRecorder.setOnPause(event -> System.out.println("MediaRecorder paused!"));
+        mediaRecorder.setOnPause(event -> {
+            pauseResumeButton.setText("Resume Recording");
+            pauseResumeButton.setOnAction(event2 -> mediaRecorder.resume());
+        });
+        mediaRecorder.setOnResume(event1 -> {
+            pauseResumeButton.setText("Pause Recording");
+            pauseResumeButton.setOnAction(event2 -> mediaRecorder.pause());
+        });
         mediaRecorder.setOnStopped(event -> {
             startButton.setDisable(false);
+            pauseResumeButton.setDisable(true);
             stopButton.setDisable(true);
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));

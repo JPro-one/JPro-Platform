@@ -69,6 +69,16 @@ public final class JProMediaRecorder implements MediaRecorder {
                             MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
         });
 
+        webAPI.registerJavaFunction("mediaRecorderOnResume", result -> {
+            // Set state to recording
+            setState(State.RECORDING);
+
+            // Fire start event
+            Event.fireEvent(JProMediaRecorder.this,
+                    new MediaRecorderEvent(JProMediaRecorder.this,
+                            MediaRecorderEvent.MEDIA_RECORDER_RESUME));
+        });
+
         webAPI.registerJavaFunction("mediaRecorderOnStop", result -> {
             // Update ObjectURL value
             setObjectURL(new JSVariable(webAPI, result, "URL.revokeObjectURL(" + result + ")"));
@@ -281,6 +291,33 @@ public final class JProMediaRecorder implements MediaRecorder {
         return onPause;
     }
 
+    // On resume event handler
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onResume;
+
+    @Override
+    public EventHandler<MediaRecorderEvent> getOnResume() {
+        return (onResume == null) ? null : onResume.get();
+    }
+
+    @Override
+    public void setOnResume(EventHandler<MediaRecorderEvent> value) {
+        onResumeProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<EventHandler<MediaRecorderEvent>> onResumeProperty() {
+        if (onResume == null) {
+            onResume = new SimpleObjectProperty<>(this, "onResume") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaRecorderEvent.MEDIA_RECORDER_RESUME, get());
+                }
+            };
+        }
+        return onResume;
+    }
+
     // On stopped event handler
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onStopped;
 
@@ -386,7 +423,6 @@ public final class JProMediaRecorder implements MediaRecorder {
     @Override
     public void resume() {
         webAPI.executeScript("resumeRecording();");
-        setState(State.RECORDING);
     }
 
     @Override
