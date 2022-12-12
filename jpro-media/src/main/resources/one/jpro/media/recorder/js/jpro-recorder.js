@@ -25,7 +25,7 @@ enableCamera = async function(videoId, options) {
     });
 
     media_recorder.onerror = (event) => {
-        jpro.mediaRecorderOnError(event.error);
+        jpro.mediaRecorderOnError(JSON.stringify({type: event.error.code, message: event.error.message}));
     }
 }
 

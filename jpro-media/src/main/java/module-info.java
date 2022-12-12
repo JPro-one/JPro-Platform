@@ -8,6 +8,7 @@ module one.jpro.media {
     requires javafx.media;
     requires jpro.webapi;
     requires org.json;
+    requires org.slf4j;
 
     exports one.jpro.media.recorder;
     exports one.jpro.media.recorder.event;

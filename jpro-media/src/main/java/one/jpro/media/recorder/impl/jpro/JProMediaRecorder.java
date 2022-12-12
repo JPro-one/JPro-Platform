@@ -9,8 +9,11 @@ import javafx.event.Event;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
 import one.jpro.media.recorder.MediaRecorder;
+import one.jpro.media.recorder.MediaRecorderException;
 import one.jpro.media.recorder.MediaRecorderOptions;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Media recorder interface implementation.
@@ -18,6 +21,8 @@ import one.jpro.media.recorder.event.MediaRecorderEvent;
  * @author Besmir Beqiri
  */
 public final class JProMediaRecorder implements MediaRecorder {
+
+    private final Logger log = LoggerFactory.getLogger(JProMediaRecorder.class);
 
     private static final String DEFAULT_MIME_TYPE = "video/webm";
 
@@ -64,6 +69,9 @@ public final class JProMediaRecorder implements MediaRecorder {
         });
 
         webAPI.registerJavaFunction("mediaRecorderOnError", result -> {
+            // Set error
+            setError(MediaRecorderException.fromJSON(result));
+
             // Fire error event
             Event.fireEvent(JProMediaRecorder.this,
                     new MediaRecorderEvent(JProMediaRecorder.this,
@@ -248,6 +256,35 @@ public final class JProMediaRecorder implements MediaRecorder {
             };
         }
         return onError;
+    }
+
+    // Error property
+    private ReadOnlyObjectWrapper<MediaRecorderException> error;
+
+    public MediaRecorderException getError() {
+        return (error == null) ? null : error.get();
+    }
+
+    private void setError(MediaRecorderException error) {
+        errorPropertyImpl().set(error);
+    }
+
+    public ReadOnlyObjectProperty<MediaRecorderException> errorProperty() {
+        return errorPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<MediaRecorderException> errorPropertyImpl() {
+        if (error == null) {
+            error = new ReadOnlyObjectWrapper<>(this, "error") {
+
+                @Override
+                protected void invalidated() {
+                    final MediaRecorderException exception = get();
+                    log.error(exception.toString(), exception);
+                }
+            };
+        }
+        return error;
     }
 
     // Recorder controller methods
