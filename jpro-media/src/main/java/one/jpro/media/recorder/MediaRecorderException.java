@@ -55,6 +55,14 @@ public class MediaRecorderException extends RuntimeException {
     }
 
     public static MediaRecorderException fromJSON(String source) {
+        if (source == null || source.length() <= 2) {
+            throw new IllegalArgumentException("Source string cannot be null or empty");
+        }
+
+        if (source.startsWith("\"") && source.endsWith("\"")) { // a string from JSON.stringify()
+            source = source.substring(1, source.length() - 1).replace("\\", "");
+        }
+
         JSONObject json = new JSONObject(source);
         final String code = json.getString("code");
         final String message = json.getString("message");
