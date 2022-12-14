@@ -1,7 +1,6 @@
 package one.jpro.media.recorder.impl.jpro;
 
 import com.jpro.webapi.HTMLView;
-import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -14,6 +13,7 @@ import one.jpro.media.recorder.MediaRecorderException;
 import one.jpro.media.recorder.MediaRecorderOptions;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
 import one.jpro.media.recorder.impl.BaseMediaRecorder;
+import org.json.JSONObject;
 
 /**
  * {@link MediaRecorder} implementation for the web.
@@ -78,8 +78,14 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
         });
 
         webAPI.registerJavaFunction("mediaRecorderOnStop", result -> {
+            JSONObject json = new JSONObject(result
+                    .substring(1, result.length() - 1)
+                    .replace("\\", ""));
+            final String objectUrl = json.getString("objectUrl");
+            final long fileSize = json.getLong("fileSize");
+
             // Update ObjectURL value
-            setObjectURL(new JSVariable(webAPI, result, "URL.revokeObjectURL(" + result + ")"));
+            setJSFile(webAPI.createJSFile(objectUrl, "RecordedVideo", fileSize));
 
             // Set state to inactive
             setState(State.INACTIVE);
@@ -130,31 +136,31 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
                 "MediaRecorder.isTypeSupported(\"" + mimeType + "\")"));
     }
 
-    private ReadOnlyObjectWrapper<JSVariable> objectURL;
+    private ReadOnlyObjectWrapper<WebAPI.JSFile> jsFile;
 
-    public JSVariable getObjectURL() {
-        return (objectURL == null) ? null : objectURL.get();
+    public WebAPI.JSFile getJsFile() {
+        return (jsFile == null) ? null : jsFile.get();
     }
 
-    private void setObjectURL(JSVariable value) {
+    private void setJSFile(WebAPI.JSFile value) {
         objectUrlPropertyImpl().set(value);
     }
 
-    public ReadOnlyObjectProperty<JSVariable> objectUrlProperty() {
+    public ReadOnlyObjectProperty<WebAPI.JSFile> jsFileProperty() {
         return objectUrlPropertyImpl().getReadOnlyProperty();
     }
 
-    private ReadOnlyObjectWrapper<JSVariable> objectUrlPropertyImpl() {
-        if (objectURL == null) {
-            objectURL = new ReadOnlyObjectWrapper<>(this, "objectUrl") {
+    private ReadOnlyObjectWrapper<WebAPI.JSFile> objectUrlPropertyImpl() {
+        if (jsFile == null) {
+            jsFile = new ReadOnlyObjectWrapper<>(this, "jsFile") {
 
                 @Override
                 protected void invalidated() {
-                    System.out.println("MediaRecorder ObjectURL: " + get().getName());
+                    System.out.println("MediaRecorder ObjectURL: " + get().getObjectURL().getName());
                 }
             };
         }
-        return objectURL;
+        return jsFile;
     }
 
     // mimeType property (read-only)
@@ -208,12 +214,11 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void download() {
-        if (getObjectURL() != null) {
-            System.out.println("Downloading ObjectUrl: " + getObjectURL().getName());
+        if (getJsFile() != null) {
             webAPI.executeScript(
                     "let download_link = document.createElement(\"a\");\n" +
                             "download_link.setAttribute(\"download\", \"RecordedVideo.webm\");\n" +
-                            "download_link.href = " + getObjectURL().getName() + ";\n" +
+                            "download_link.href = " + getJsFile().getObjectURL().getName() + ";\n" +
                             "download_link.click();");
         }
     }

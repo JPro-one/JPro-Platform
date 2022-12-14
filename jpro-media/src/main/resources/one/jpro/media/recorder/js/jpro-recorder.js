@@ -21,11 +21,19 @@ enableCamera = async function(videoId, options) {
         // create local object URL from the recorded video blobs
         let recordedBlob = new Blob(blobs_recorded, { type: "video/webm" });
         var videoUrl = URL.createObjectURL(recordedBlob);
-        jpro.mediaRecorderOnStop(videoUrl);
+        // pas object url and file size as json format
+        jpro.mediaRecorderOnStop(JSON.stringify({
+            objectUrl: videoUrl,
+            fileSize: recordedBlob.size
+        }));
     }
 
     media_recorder.onerror = (event) => {
-        jpro.mediaRecorderOnError(JSON.stringify({type: event.error.code, message: event.error.message}));
+        // pas error type and message as json format
+        jpro.mediaRecorderOnError(JSON.stringify({
+            type: event.error.code,
+            message: event.error.message
+        }));
     }
 
     media_recorder.onstart = (event) => jpro.mediaRecorderOnStart(media_recorder.state)
