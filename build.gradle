@@ -11,7 +11,7 @@ buildscript {
   }
 }
 
-allprojects {
+configure(subprojects.findAll {it.name != 'example'}) {
   repositories {
     jcenter()
     mavenCentral()
@@ -33,7 +33,8 @@ allprojects {
   javafx {
     version = "$JAVAFX_VERSION"
     configuration = "compileOnly"
-    modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
+    modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls',
+                'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web' ]
   }
 
   dependencies {

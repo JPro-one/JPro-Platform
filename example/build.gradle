@@ -1,11 +1,14 @@
-
 apply plugin: 'application'
+apply plugin: 'org.openjfx.javafxplugin'
 apply plugin: 'com.sandec.jpro'
 
-//mainClassName = 'one.jpro.sound.example.JProSoundSample'
-//mainClassName = 'one.jpro.sound.example.SessionManagerSample'
-//mainClassName = 'one.jpro.sound.example.HTMLScrollPaneSample'
-mainClassName = 'one.jpro.sound.example.JProRecorderSample'
+repositories {
+  jcenter()
+  mavenCentral()
+  maven {
+    url "https://sandec.jfrog.io/artifactory/repo"
+  }
+}
 
 dependencies {
   implementation project(":jpro-sound")
@@ -13,4 +16,25 @@ dependencies {
   implementation project(":htmlscrollpane")
   implementation project(":jpro-media")
   implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+
+  runtimeOnly "ch.qos.logback:logback-classic:1.4.5"
+}
+
+//mainClassName = 'one.jpro.sound.example.JProSoundSample'
+//mainClassName = 'one.jpro.sound.example.SessionManagerSample'
+//mainClassName = 'one.jpro.sound.example.HTMLScrollPaneSample'
+mainClassName = 'one.jpro.sound.example.MediaRecorderSample'
+
+javafx {
+  version = "$JAVAFX_VERSION"
+  modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls',
+              'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web' ]
+}
+
+application {
+  mainClass = "$mainClassName"
+//  moduleName = mainModule
+  applicationDefaultJvmArgs = [
+          "--add-exports", "javafx.base/com.sun.javafx.event=ALL-UNNAMED"
+  ]
 }

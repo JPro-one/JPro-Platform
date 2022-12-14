@@ -1,6 +1,9 @@
 package one.jpro.sound.example;
 
 import com.jpro.webapi.JProApplication;
+import com.jpro.webapi.WebAPI;
+import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,15 +16,17 @@ import javafx.stage.Stage;
 import one.jpro.media.recorder.MediaRecorder;
 
 /**
- * JPro media recorder sample.
+ * Media recorder sample.
  *
  * @author Besmir Beqiri
  */
-public class JProRecorderSample extends JProApplication {
+public class MediaRecorderSample extends Application {
+
+    private MediaRecorder mediaRecorder;
 
     @Override
-    public void start(Stage primaryStage) {
-        var mediaRecorder = MediaRecorder.create(getWebAPI());
+    public void start(Stage stage) {
+        var mediaRecorder = MediaRecorder.create(stage);
 
         var enableCamera = new Button("Enable Camera");
         var previewLabel = new Label("Camera View");
@@ -77,8 +82,17 @@ public class JProRecorderSample extends JProApplication {
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 
-        var scene = new Scene(new StackPane(box), 640, 480);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        var root = new StackPane(box);
+        root.setPadding(new Insets(16.0));
+        var scene = new Scene(root, 720, 640);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    /**
+     *  Application entry point.
+     */
+    public static void main(String[] args) {
+        launch(args);
     }
 }
