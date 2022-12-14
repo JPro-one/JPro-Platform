@@ -1,5 +1,6 @@
 dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation 'org.openpnp:opencv:4.5.5-1'
     api 'org.slf4j:slf4j-api:2.0.5'
     api 'org.json:json:20220924'
 }

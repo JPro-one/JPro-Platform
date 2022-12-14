@@ -1,14 +1,17 @@
 /**
- * Module descriptor.
+ * JPro Media module descriptor.
  *
  * @author Besmir Beqiri
  */
 module one.jpro.media {
     requires javafx.controls;
     requires javafx.media;
+    requires javafx.swing;
     requires jpro.webapi;
     requires org.json;
     requires org.slf4j;
+
+    requires opencv;
 
     exports one.jpro.media.recorder;
     exports one.jpro.media.recorder.event;
