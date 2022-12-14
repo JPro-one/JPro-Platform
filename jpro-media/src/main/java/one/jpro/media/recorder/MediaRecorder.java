@@ -1,13 +1,14 @@
 package one.jpro.media.recorder;
 
-import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
+import one.jpro.media.recorder.impl.javafx.JavaFXMediaRecorder;
 import one.jpro.media.recorder.impl.jpro.JProMediaRecorder;
 
 import java.util.Optional;
@@ -20,8 +21,31 @@ import java.util.Optional;
  */
 public interface MediaRecorder extends EventTarget {
 
-    static MediaRecorder create(WebAPI webAPI) {
-        return new JProMediaRecorder(webAPI);
+    /**
+     * Creates a media recorder (JavaFX/Desktop version).
+     *
+     * @return a {@link MediaRecorder} object.
+     */
+    static MediaRecorder create() {
+        return new JavaFXMediaRecorder();
+    }
+
+    /**
+     * Creates a media recorder with the given JPro WebAPI.
+     * If the application is running in a browser with JPro,
+     * then a web version of {@link MediaRecorder} is returned.
+     * If the application is not running inside the browser than
+     * a desktop version of the media recorder is returned.
+     *
+     * @param stage the application stage
+     * @return a {@link MediaRecorder} object.
+     */
+    static MediaRecorder create(Stage stage) {
+        if (WebAPI.isBrowser()) {
+            WebAPI webAPI = WebAPI.getWebAPI(stage);
+            return new JProMediaRecorder(webAPI);
+        }
+        return new JavaFXMediaRecorder();
     }
 
     /**
@@ -46,11 +70,7 @@ public interface MediaRecorder extends EventTarget {
         }
     }
 
-    HTMLView getCameraView();
-
-    String getMimeType();
-
-    ReadOnlyStringProperty mimeTypeProperty();
+    Region getCameraView();
 
     State getState();
 

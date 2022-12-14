@@ -8,6 +8,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.event.Event;
+import javafx.scene.layout.Region;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
 import one.jpro.media.recorder.MediaRecorderOptions;
@@ -109,7 +110,7 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
         });
     }
 
-    public HTMLView getCameraView() {
+    public Region getCameraView() {
         return cameraView;
     }
 
@@ -159,7 +160,6 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
     // mimeType property (read-only)
     private ReadOnlyStringWrapper mimeType;
 
-    @Override
     public String getMimeType() {
         return (mimeType == null) ? DEFAULT_MIME_TYPE : mimeType.get();
     }
@@ -168,7 +168,6 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
         mimeTypePropertyImpl().set(value);
     }
 
-    @Override
     public ReadOnlyStringProperty mimeTypeProperty() {
         return mimeTypePropertyImpl().getReadOnlyProperty();
     }
