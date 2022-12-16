@@ -22,15 +22,6 @@ import java.util.Optional;
 public interface MediaRecorder extends EventTarget {
 
     /**
-     * Creates a media recorder (JavaFX/Desktop version).
-     *
-     * @return a {@link MediaRecorder} object.
-     */
-    static MediaRecorder create() {
-        return new JavaFXMediaRecorder();
-    }
-
-    /**
      * Creates a media recorder with the given JPro WebAPI.
      * If the application is running in a browser with JPro,
      * then a web version of {@link MediaRecorder} is returned.
@@ -45,7 +36,7 @@ public interface MediaRecorder extends EventTarget {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new JProMediaRecorder(webAPI);
         }
-        return new JavaFXMediaRecorder();
+        return new JavaFXMediaRecorder(stage);
     }
 
     /**

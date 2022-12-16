@@ -1,7 +1,5 @@
 package one.jpro.sound.example;
 
-import com.jpro.webapi.JProApplication;
-import com.jpro.webapi.WebAPI;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -41,10 +39,10 @@ public class MediaRecorderSample extends Application {
         pauseResumeButton.setDisable(true);
         var stopButton = new Button("Stop Recording");
         stopButton.setDisable(true);
-        var downloadButton = new Button("Download Button");
-        downloadButton.setDisable(true);
+        var saveButton = new Button("Save As...");
+        saveButton.setDisable(true);
 
-        var hBox = new HBox(startButton, pauseResumeButton, stopButton, downloadButton);
+        var hBox = new HBox(startButton, pauseResumeButton, stopButton, saveButton);
         hBox.setAlignment(Pos.CENTER);
         hBox.setSpacing(12.0);
 
@@ -58,7 +56,7 @@ public class MediaRecorderSample extends Application {
         startButton.setOnAction(event -> mediaRecorder.start());
         pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
-        downloadButton.setOnAction(event -> mediaRecorder.download());
+        saveButton.setOnAction(event -> mediaRecorder.download());
 
         // media recorder events
         mediaRecorder.setOnStart(event -> {
@@ -78,7 +76,7 @@ public class MediaRecorderSample extends Application {
             startButton.setDisable(false);
             pauseResumeButton.setDisable(true);
             stopButton.setDisable(true);
-            downloadButton.setDisable(false);
+            saveButton.setDisable(false);
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 

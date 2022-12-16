@@ -11,7 +11,10 @@ module one.jpro.media {
     requires org.json;
     requires org.slf4j;
 
-    requires opencv;
+//    requires opencv;
+    requires org.bytedeco.javacv;
+    requires org.bytedeco.opencv;
+    requires org.bytedeco.ffmpeg;
 
     exports one.jpro.media.recorder;
     exports one.jpro.media.recorder.event;
