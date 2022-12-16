@@ -49,14 +49,33 @@ public interface MediaRecorder extends EventTarget {
     }
 
     /**
-     * MediaR recorder state.
+     * Media recorder state.
      */
     enum State {
 
+        /**
+         * Recording is not occurring — it has either not been started yet,
+         * or it has been started and then stopped.
+         */
         INACTIVE,
+
+        /**
+         * Recording has been started.
+         */
         RECORDING,
+
+        /**
+         * Recording has been started, then paused, but not yet stopped or resumed.
+         */
         PAUSED;
 
+        /**
+         * Parses a JavaScript string and if the content is equals to one of the states,
+         * then return it wrapped in {@link Optional} object.
+         *
+         * @param jsStr a javascript string
+         * @return an {@link Optional} object containing the {@link State} object.
+         */
         public static Optional<State> fromJS(String jsStr) {
             if (jsStr != null && !jsStr.isBlank()) {
                 var str = jsStr.replace("\"", "").trim();

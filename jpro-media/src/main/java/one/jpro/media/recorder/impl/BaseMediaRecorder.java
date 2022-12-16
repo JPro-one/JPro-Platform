@@ -22,7 +22,6 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaRecorder.class);
 
-
     // state property
     private ReadOnlyObjectWrapper<State> state;
 

@@ -13,7 +13,7 @@ import one.jpro.media.recorder.MediaRecorder;
 public class MediaRecorderEvent extends Event {
 
     /**
-     * Common supertype for all media stream event types.
+     * Common supertype for all media recorder's event types.
      */
     public static final EventType<MediaRecorderEvent> ANY = new EventType<>(Event.ANY, "MEDIA_RECORDER");
 
@@ -27,8 +27,6 @@ public class MediaRecorderEvent extends Event {
 
     /**
      * Fired when there are fatal errors that stop recording.
-     * The received event is based on the MediaRecorderErrorEvent interface, whose error property
-     * contains a DOMException that describes the actual error that occurred.
      */
     public static final EventType<MediaRecorderEvent> MEDIA_RECORDER_ERROR =
             new EventType<>(ANY, "MEDIA_RECORDER_ERROR");
@@ -37,10 +35,10 @@ public class MediaRecorderEvent extends Event {
      * Fired when media recording starts.
      */
     public static final EventType<MediaRecorderEvent> MEDIA_RECORDER_START =
-            new EventType<>(ANY, "MEDIA_RECORDER_PAUSED");
+            new EventType<>(ANY, "MEDIA_RECORDER_START");
 
     /**
-     * Fired when media recording ends, either when the MediaStream ends,
+     * Fired when media recording ends, either when the MediaRecorder ends,
      * or after the MediaRecorder.stop() method is called.
      */
     public static final EventType<MediaRecorderEvent> MEDIA_RECORDER_STOP =
@@ -58,6 +56,12 @@ public class MediaRecorderEvent extends Event {
     public static final EventType<MediaRecorderEvent> MEDIA_RECORDER_RESUME =
             new EventType<>(ANY, "MEDIA_RECORDER_RESUME");
 
+    /**
+     * Creates new instance of MediaRecorderEvent.
+     *
+     * @param source event source
+     * @param eventType event target
+     */
     public MediaRecorderEvent(final @NamedArg("source") MediaRecorder source,
                               final @NamedArg("eventType") EventType<? extends Event> eventType) {
         super(source, source, eventType);
