@@ -142,21 +142,22 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
                         """.formatted(mimeType)));
     }
 
+    // jsFile property (read-only)
     private ReadOnlyObjectWrapper<WebAPI.JSFile> jsFile;
 
-    public WebAPI.JSFile getJsFile() {
+    public WebAPI.JSFile getJSFile() {
         return (jsFile == null) ? null : jsFile.get();
     }
 
     private void setJSFile(WebAPI.JSFile value) {
-        objectUrlPropertyImpl().set(value);
+        jsFilePropertyImpl().set(value);
     }
 
     public ReadOnlyObjectProperty<WebAPI.JSFile> jsFileProperty() {
-        return objectUrlPropertyImpl().getReadOnlyProperty();
+        return jsFilePropertyImpl().getReadOnlyProperty();
     }
 
-    private ReadOnlyObjectWrapper<WebAPI.JSFile> objectUrlPropertyImpl() {
+    private ReadOnlyObjectWrapper<WebAPI.JSFile> jsFilePropertyImpl() {
         if (jsFile == null) {
             jsFile = new ReadOnlyObjectWrapper<>(this, "jsFile") {
 
@@ -222,13 +223,13 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void retrieve() {
-        if (getJsFile() != null) {
+        if (getJSFile() != null) {
             webAPI.executeScript("""
                     let download_link = document.createElement("a");
                     download_link.setAttribute("download", "RecordedVideo.webm");
                     download_link.href = %s;
                     download_link.click();
-                    """.formatted(getJsFile().getObjectURL().getName()));
+                    """.formatted(getJSFile().getObjectURL().getName()));
         }
     }
 }
