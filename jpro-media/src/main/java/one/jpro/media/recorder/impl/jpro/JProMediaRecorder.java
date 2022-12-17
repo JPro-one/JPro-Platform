@@ -27,7 +27,7 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
     private final WebAPI webAPI;
     private final HTMLView cameraView;
 
-    private final String videoId;
+    private final String videoRecorderId;
 
     /**
      * Creates a new MediaRecorder object.
@@ -36,16 +36,21 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
      */
     public JProMediaRecorder(WebAPI webAPI) {
         this.webAPI = webAPI;
-        webAPI.loadJSFile(getClass().getResource("/one/jpro/media/recorder/js/jpro-recorder.js"));
+        webAPI.loadJSFile(getClass().getResource("/one/jpro/media/recorder/jpro-recorder.js"));
 
-        videoId = webAPI.createUniqueJSName("video_recorder_");
-        cameraView = new HTMLView("<video id=\"" + videoId + "\" autoplay muted></video>");
-        cameraView.widthProperty().addListener(observable -> webAPI.executeScript(
-                "let preview = document.getElementById(\"" + videoId + "\");\n" +
-                        "preview.width=" + cameraView.getWidth() + ";"));
-        cameraView.heightProperty().addListener(observable -> webAPI.executeScript(
-                "let preview = document.getElementById(\"" + videoId + "\");\n" +
-                        "preview.height=" + cameraView.getHeight() + ";"));
+        videoRecorderId = webAPI.createUniqueJSName("video_recorder_");
+        cameraView = new HTMLView("""
+                <video id="%s" autoplay muted></video>
+                """.formatted(videoRecorderId));
+
+        cameraView.widthProperty().addListener(observable -> webAPI.executeScript("""
+                        let elem = document.getElementById("%s");
+                        elem.width = %s;
+                        """.formatted(videoRecorderId, cameraView.getWidth())));
+        cameraView.heightProperty().addListener(observable -> webAPI.executeScript("""
+                        let elem = document.getElementById("%s");
+                        elem.height = %s;
+                        """.formatted(videoRecorderId, cameraView.getHeight())));
 
         webAPI.registerJavaFunction("mediaRecorderOnStart", result -> {
             // Set state
@@ -132,8 +137,9 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
      * @throws Exception
      */
     public boolean isTypeSupported(String mimeType) throws Exception {
-        return Boolean.getBoolean(webAPI.executeScriptWithReturn(
-                "MediaRecorder.isTypeSupported(\"" + mimeType + "\")"));
+        return Boolean.getBoolean(webAPI.executeScriptWithReturn("""
+                        MediaRecorder.isTypeSupported("%s")
+                        """.formatted(mimeType)));
     }
 
     private ReadOnlyObjectWrapper<WebAPI.JSFile> jsFile;
@@ -189,7 +195,9 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
     @Override
     public void enable() {
         final var mediaRecorderOptions = new MediaRecorderOptions().mimeType(getMimeType());
-        webAPI.executeScript("enableCamera(\"" + videoId + "\"," + mediaRecorderOptions.toJSON() + ");");
+        webAPI.executeScript("""
+                        enableCamera("%s", %s);
+                        """.formatted(videoRecorderId, mediaRecorderOptions.toJSON()));
     }
 
     @Override
@@ -213,13 +221,14 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
     }
 
     @Override
-    public void download() {
+    public void retrieve() {
         if (getJsFile() != null) {
-            webAPI.executeScript(
-                    "let download_link = document.createElement(\"a\");\n" +
-                            "download_link.setAttribute(\"download\", \"RecordedVideo.webm\");\n" +
-                            "download_link.href = " + getJsFile().getObjectURL().getName() + ";\n" +
-                            "download_link.click();");
+            webAPI.executeScript("""
+                    let download_link = document.createElement("a");
+                    download_link.setAttribute("download", "RecordedVideo.webm");
+                    download_link.href = %s;
+                    download_link.click();
+                    """.formatted(getJsFile().getObjectURL().getName()));
         }
     }
 }
