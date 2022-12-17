@@ -150,5 +150,5 @@ public interface MediaRecorder extends EventTarget {
      */
     void stop();
 
-    void download();
+    void retrieve();
 }

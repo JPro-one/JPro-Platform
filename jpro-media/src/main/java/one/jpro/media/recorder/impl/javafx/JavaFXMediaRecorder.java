@@ -320,7 +320,7 @@ public final class JavaFXMediaRecorder extends BaseMediaRecorder {
     }
 
     @Override
-    public void download() {
+    public void retrieve() {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save As...");
         fileChooser.setInitialFileName(tempVideoFile.getFileName() + MP4_FILE_EXTENSION);
