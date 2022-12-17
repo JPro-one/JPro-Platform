@@ -130,12 +130,24 @@ public interface MediaRecorder extends EventTarget {
     // Recorder controller methods
     void enable();
 
+    /**
+     * Begins recording media.
+     */
     void start();
 
+    /**
+     * Pauses the recording of media.
+     */
     void pause();
 
+    /**
+     * Resumes recording of media after having been paused.
+     */
     void resume();
 
+    /**
+     * Stops the recording of media.
+     */
     void stop();
 
     void download();
