@@ -26,8 +26,8 @@ configure(subprojects.findAll {it.name != 'example'}) {
   apply plugin: 'org.openjfx.javafxplugin'
 
   compileJava {
-    sourceCompatibility = 11
-    targetCompatibility = 11
+    sourceCompatibility = 17
+    targetCompatibility = 17
   }
 
   javafx {
