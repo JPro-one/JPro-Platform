@@ -18,7 +18,7 @@ import org.json.JSONObject;
  *
  * @author Besmir Beqiri
  */
-public final class JProMediaRecorder extends BaseMediaRecorder {
+public final class WebMediaRecorder extends BaseMediaRecorder {
 
     private static final String DEFAULT_MIME_TYPE = "video/webm";
 
@@ -34,7 +34,7 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
      *
      * @param webAPI JPro WebAPI
      */
-    public JProMediaRecorder(WebAPI webAPI) {
+    public WebMediaRecorder(WebAPI webAPI) {
         this.webAPI = webAPI;
 
         final String recorderId = webAPI.createUniqueJSName("recorder_");
@@ -58,8 +58,8 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
             State.fromJS(result).ifPresent(this::setState);
 
             // Fire start event
-            Event.fireEvent(JProMediaRecorder.this,
-                    new MediaRecorderEvent(JProMediaRecorder.this,
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_START));
         });
 
@@ -68,8 +68,8 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
             State.fromJS(result).ifPresent(this::setState);
 
             // Fire pause event
-            Event.fireEvent(JProMediaRecorder.this,
-                    new MediaRecorderEvent(JProMediaRecorder.this,
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
         });
 
@@ -78,8 +78,8 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
             State.fromJS(result).ifPresent(this::setState);
 
             // Fire resume event
-            Event.fireEvent(JProMediaRecorder.this,
-                    new MediaRecorderEvent(JProMediaRecorder.this,
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_RESUME));
         });
 
@@ -97,14 +97,14 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
             setState(State.INACTIVE);
 
             // Fire stop event
-            Event.fireEvent(JProMediaRecorder.this,
-                    new MediaRecorderEvent(JProMediaRecorder.this, MediaRecorderEvent.MEDIA_RECORDER_STOP));
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this, MediaRecorderEvent.MEDIA_RECORDER_STOP));
         });
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_ondataavailable", result -> {
             // Fire data available event
-            Event.fireEvent(JProMediaRecorder.this,
-                    new MediaRecorderEvent(JProMediaRecorder.this,
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_DATA_AVAILABLE));
         });
 
@@ -116,8 +116,8 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
             setError(MediaRecorderException.fromJSON(result));
 
             // Fire error event
-            Event.fireEvent(JProMediaRecorder.this,
-                    new MediaRecorderEvent(JProMediaRecorder.this,
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_ERROR));
         });
     }
