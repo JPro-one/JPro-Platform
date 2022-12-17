@@ -28,6 +28,8 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
     private final HTMLView cameraView;
 
     private final String videoRecorderId;
+    private final String mediaRecorderRef;
+    private final String blobsRecordedRef;
 
     /**
      * Creates a new MediaRecorder object.
@@ -36,23 +38,24 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
      */
     public JProMediaRecorder(WebAPI webAPI) {
         this.webAPI = webAPI;
-        webAPI.loadJSFile(getClass().getResource("/one/jpro/media/recorder/jpro-recorder.js"));
 
-        videoRecorderId = webAPI.createUniqueJSName("video_recorder_");
+        final String recorderId = webAPI.createUniqueJSName("recorder_");
+        videoRecorderId = "video_" + recorderId;
+        mediaRecorderRef = "media_" + recorderId;
+        blobsRecordedRef = "blobs_" + recorderId;
+
         cameraView = new HTMLView("""
                 <video id="%s" autoplay muted></video>
                 """.formatted(videoRecorderId));
 
         cameraView.widthProperty().addListener(observable -> webAPI.executeScript("""
-                        let elem = document.getElementById("%s");
-                        elem.width = %s;
+                        document.getElementById("%s").width = %s;
                         """.formatted(videoRecorderId, cameraView.getWidth())));
         cameraView.heightProperty().addListener(observable -> webAPI.executeScript("""
-                        let elem = document.getElementById("%s");
-                        elem.height = %s;
+                        document.getElementById("%s").height = %s;
                         """.formatted(videoRecorderId, cameraView.getHeight())));
 
-        webAPI.registerJavaFunction("mediaRecorderOnStart", result -> {
+        webAPI.registerJavaFunction(mediaRecorderRef + "_onstart", result -> {
             // Set state
             State.fromJS(result).ifPresent(this::setState);
 
@@ -62,7 +65,7 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
                             MediaRecorderEvent.MEDIA_RECORDER_START));
         });
 
-        webAPI.registerJavaFunction("mediaRecorderOnPause", result -> {
+        webAPI.registerJavaFunction(mediaRecorderRef + "_onpause", result -> {
             // Set state
             State.fromJS(result).ifPresent(this::setState);
 
@@ -72,7 +75,7 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
                             MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
         });
 
-        webAPI.registerJavaFunction("mediaRecorderOnResume", result -> {
+        webAPI.registerJavaFunction(mediaRecorderRef + "_onresume", result -> {
             // Set state
             State.fromJS(result).ifPresent(this::setState);
 
@@ -82,7 +85,7 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
                             MediaRecorderEvent.MEDIA_RECORDER_RESUME));
         });
 
-        webAPI.registerJavaFunction("mediaRecorderOnStop", result -> {
+        webAPI.registerJavaFunction(mediaRecorderRef + "_onstop", result -> {
             JSONObject json = new JSONObject(result
                     .substring(1, result.length() - 1)
                     .replace("\\", ""));
@@ -100,14 +103,14 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
                     new MediaRecorderEvent(JProMediaRecorder.this, MediaRecorderEvent.MEDIA_RECORDER_STOP));
         });
 
-        webAPI.registerJavaFunction("mediaRecorderOnDataavailable", result -> {
+        webAPI.registerJavaFunction(mediaRecorderRef + "_ondataavailable", result -> {
             // Fire data available event
             Event.fireEvent(JProMediaRecorder.this,
                     new MediaRecorderEvent(JProMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_DATA_AVAILABLE));
         });
 
-        webAPI.registerJavaFunction("mediaRecorderOnError", result -> {
+        webAPI.registerJavaFunction(mediaRecorderRef + "_onerror", result -> {
             // Reset state to inactive
             setState(State.INACTIVE);
 
@@ -197,28 +200,83 @@ public final class JProMediaRecorder extends BaseMediaRecorder {
     public void enable() {
         final var mediaRecorderOptions = new MediaRecorderOptions().mimeType(getMimeType());
         webAPI.executeScript("""
-                        enableCamera("%s", %s);
-                        """.formatted(videoRecorderId, mediaRecorderOptions.toJSON()));
+                $blobsRecorded = []; // stream buffer
+                var elem = document.getElementById("$videoRecorderId");
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then((stream) => {
+                        elem.srcObject = stream;
+                        $mediaRecorder = new MediaRecorder(elem.srcObject, $videoRecorderOptions);
+                        
+                        // event : new recorded video blob available
+                        $mediaRecorder.addEventListener('dataavailable', function(e) {
+                            $blobsRecorded.push(e.data);
+                            jpro.$mediaRecorder_ondataavailable(e.timecode);
+                        });
+                        
+                        // event : recording stopped & all blobs sent
+                        $mediaRecorder.onstop = (event) => {
+                            // create local object URL from the recorded video blobs
+                            let recordedBlob = new Blob($blobsRecorded, { type: "video/webm" });
+                            let videoUrl = URL.createObjectURL(recordedBlob);
+                            // pas object url and file size as json format
+                            jpro.$mediaRecorder_onstop(JSON.stringify({
+                                objectUrl: videoUrl,
+                                fileSize: recordedBlob.size
+                            }));
+                        }
+                    
+                        $mediaRecorder.onerror = (event) => {
+                            // pas error type and message as json format
+                            jpro.$mediaRecorder_onerror(JSON.stringify({
+                                type: event.error.code,
+                                message: event.error.message
+                            }));
+                        }
+                                                                               
+                        $mediaRecorder.onstart = (event) => jpro.$mediaRecorder_onstart($mediaRecorder.state)
+                        $mediaRecorder.onpause = (event) => jpro.$mediaRecorder_onpause($mediaRecorder.state)
+                        $mediaRecorder.onresume = (event) => jpro.$mediaRecorder_onresume($mediaRecorder.state)
+                    });
+                """
+                .replace("$videoRecorderId", videoRecorderId)
+                .replace("$videoRecorderOptions", mediaRecorderOptions.toJSON().toString())
+                .replace("$blobsRecorded", blobsRecordedRef)
+                .replace("$mediaRecorder", mediaRecorderRef));
     }
 
     @Override
     public void start() {
-        webAPI.executeScript("startRecording();");
+        webAPI.executeScript("""
+                $blobsRecorded = []; // clear recorded buffer
+                $mediaRecorder.start(1000); // start recording with a timeslice of 1 second
+                """
+                .replace("$blobsRecorded", blobsRecordedRef)
+                .replace("$mediaRecorder", mediaRecorderRef));
     }
 
     @Override
     public void pause() {
-        webAPI.executeScript("pauseRecording();");
+        webAPI.executeScript("""
+                if ($mediaRecorder.state === "recording") {
+                    $mediaRecorder.pause();
+                }
+                """.replace("$mediaRecorder", mediaRecorderRef));
     }
 
     @Override
     public void resume() {
-        webAPI.executeScript("resumeRecording();");
+        webAPI.executeScript("""
+                if ($mediaRecorder.state === "paused") {
+                    $mediaRecorder.resume();
+                }
+                """.replace("$mediaRecorder", mediaRecorderRef));
     }
 
     @Override
     public void stop() {
-        webAPI.executeScript("stopRecording();");
+        webAPI.executeScript("""
+                $mediaRecorder.stop();
+                """.replace("$mediaRecorder", mediaRecorderRef));
     }
 
     @Override
