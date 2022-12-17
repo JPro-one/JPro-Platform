@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Besmir Beqiri
  */
-public abstract class BaseMediaRecorder implements MediaRecorder {
+abstract class BaseMediaRecorder implements MediaRecorder {
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaRecorder.class);
 
@@ -53,17 +53,17 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailable;
 
     @Override
-    public EventHandler<MediaRecorderEvent> getOnDataAvailable() {
+    public final EventHandler<MediaRecorderEvent> getOnDataAvailable() {
         return (onDataAvailable == null) ? null : onDataAvailable.get();
     }
 
     @Override
-    public void setOnDataAvailable(EventHandler<MediaRecorderEvent> value) {
+    public final void setOnDataAvailable(EventHandler<MediaRecorderEvent> value) {
         onDataAvailableProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailableProperty() {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailableProperty() {
         if (onDataAvailable == null) {
             onDataAvailable = new SimpleObjectProperty<>(this, "onDataAvailable") {
 
@@ -80,17 +80,17 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onStart;
 
     @Override
-    public EventHandler<MediaRecorderEvent> getOnStart() {
+    public final EventHandler<MediaRecorderEvent> getOnStart() {
         return (onStart == null) ? null : onStart.get();
     }
 
     @Override
-    public void setOnStart(EventHandler<MediaRecorderEvent> value) {
+    public final void setOnStart(EventHandler<MediaRecorderEvent> value) {
         onStartProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaRecorderEvent>> onStartProperty() {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onStartProperty() {
         if (onStart == null) {
             onStart = new SimpleObjectProperty<>(this, "onStart"){
 
@@ -107,17 +107,17 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onPause;
 
     @Override
-    public EventHandler<MediaRecorderEvent> getOnPause() {
+    public final EventHandler<MediaRecorderEvent> getOnPause() {
         return (onPause == null) ? null : onPause.get();
     }
 
     @Override
-    public void setOnPause(EventHandler<MediaRecorderEvent> value) {
+    public final void setOnPause(EventHandler<MediaRecorderEvent> value) {
         onPauseProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty() {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty() {
         if (onPause == null) {
             onPause = new SimpleObjectProperty<>(this, "onPause") {
 
@@ -134,17 +134,17 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onResume;
 
     @Override
-    public EventHandler<MediaRecorderEvent> getOnResume() {
+    public final EventHandler<MediaRecorderEvent> getOnResume() {
         return (onResume == null) ? null : onResume.get();
     }
 
     @Override
-    public void setOnResume(EventHandler<MediaRecorderEvent> value) {
+    public final void setOnResume(EventHandler<MediaRecorderEvent> value) {
         onResumeProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaRecorderEvent>> onResumeProperty() {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onResumeProperty() {
         if (onResume == null) {
             onResume = new SimpleObjectProperty<>(this, "onResume") {
 
@@ -161,17 +161,17 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onStopped;
 
     @Override
-    public EventHandler<MediaRecorderEvent> getOnStopped() {
+    public final EventHandler<MediaRecorderEvent> getOnStopped() {
         return (onStopped == null) ? null : onStopped.get();
     }
 
     @Override
-    public void setOnStopped(EventHandler<MediaRecorderEvent> value) {
+    public final void setOnStopped(EventHandler<MediaRecorderEvent> value) {
         onStoppedProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaRecorderEvent>> onStoppedProperty() {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onStoppedProperty() {
         if (onStopped == null) {
             onStopped = new SimpleObjectProperty<>(this, "onStopped") {
 
@@ -188,17 +188,17 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onError;
 
     @Override
-    public EventHandler<MediaRecorderEvent> getOnError() {
+    public final EventHandler<MediaRecorderEvent> getOnError() {
         return (onError == null) ? null : onError.get();
     }
 
     @Override
-    public void setOnError(EventHandler<MediaRecorderEvent> value) {
+    public final void setOnError(EventHandler<MediaRecorderEvent> value) {
         onErrorProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaRecorderEvent>> onErrorProperty() {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onErrorProperty() {
         if (onError == null) {
             onError = new SimpleObjectProperty<>(this, "onError") {
 
@@ -215,16 +215,16 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private ReadOnlyObjectWrapper<MediaRecorderException> error;
 
     @Override
-    public MediaRecorderException getError() {
+    public final MediaRecorderException getError() {
         return (error == null) ? null : error.get();
     }
 
-    protected void setError(MediaRecorderException error) {
+    final void setError(MediaRecorderException error) {
         errorPropertyImpl().set(error);
     }
 
     @Override
-    public ReadOnlyObjectProperty<MediaRecorderException> errorProperty() {
+    public final ReadOnlyObjectProperty<MediaRecorderException> errorProperty() {
         return errorPropertyImpl().getReadOnlyProperty();
     }
 
@@ -245,7 +245,7 @@ public abstract class BaseMediaRecorder implements MediaRecorder {
     private final EventHandlerManager eventHandlerManager = new EventHandlerManager(this);
 
     @Override
-    public EventDispatchChain buildEventDispatchChain(EventDispatchChain tail) {
+    public final EventDispatchChain buildEventDispatchChain(EventDispatchChain tail) {
         return tail.prepend(eventHandlerManager);
     }
 }

@@ -1,4 +1,4 @@
-package one.jpro.media.recorder.impl.javafx;
+package one.jpro.media.recorder.impl;
 
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -10,7 +10,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
-import one.jpro.media.recorder.impl.BaseMediaRecorder;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.*;
 import org.slf4j.Logger;

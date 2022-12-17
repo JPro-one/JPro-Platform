@@ -8,8 +8,8 @@ import javafx.event.EventTarget;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
-import one.jpro.media.recorder.impl.javafx.JavaFXMediaRecorder;
-import one.jpro.media.recorder.impl.jpro.JProMediaRecorder;
+import one.jpro.media.recorder.impl.JavaFXMediaRecorder;
+import one.jpro.media.recorder.impl.JProMediaRecorder;
 
 import java.util.Optional;
 

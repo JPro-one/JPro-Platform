@@ -1,4 +1,4 @@
-package one.jpro.media.recorder.impl.jpro;
+package one.jpro.media.recorder.impl;
 
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
@@ -10,9 +10,7 @@ import javafx.event.Event;
 import javafx.scene.layout.Region;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
-import one.jpro.media.recorder.MediaRecorderOptions;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
-import one.jpro.media.recorder.impl.BaseMediaRecorder;
 import org.json.JSONObject;
 
 /**
