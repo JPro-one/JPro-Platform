@@ -8,7 +8,7 @@ import javafx.event.EventTarget;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import one.jpro.media.recorder.event.MediaRecorderEvent;
-import one.jpro.media.recorder.impl.JavaFXMediaRecorder;
+import one.jpro.media.recorder.impl.FXMediaRecorder;
 import one.jpro.media.recorder.impl.WebMediaRecorder;
 
 import java.util.Optional;
@@ -36,7 +36,7 @@ public interface MediaRecorder extends EventTarget {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new WebMediaRecorder(webAPI);
         }
-        return new JavaFXMediaRecorder(stage);
+        return new FXMediaRecorder(stage);
     }
 
     /**

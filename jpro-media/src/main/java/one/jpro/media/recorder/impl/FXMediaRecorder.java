@@ -32,9 +32,9 @@ import java.util.concurrent.*;
  *
  * @author Besmir Beqiri
  */
-public final class JavaFXMediaRecorder extends BaseMediaRecorder {
+public final class FXMediaRecorder extends BaseMediaRecorder {
 
-    private final Logger log = LoggerFactory.getLogger(JavaFXMediaRecorder.class);
+    private final Logger log = LoggerFactory.getLogger(FXMediaRecorder.class);
 
     private final ThreadGroup scheduledThreadGroup = new ThreadGroup("Media Recorder thread pool");
     private int threadCounter;
@@ -76,7 +76,7 @@ public final class JavaFXMediaRecorder extends BaseMediaRecorder {
     private volatile boolean cameraEnabled = false;
     private volatile boolean recordingStarted = false;
 
-    public JavaFXMediaRecorder(Stage stage) {
+    public FXMediaRecorder(Stage stage) {
         this.stage = stage;
         // OpenCV webcam frame grabber
         webcamGrabber = new OpenCVFrameGrabber(WEBCAM_DEVICE_INDEX);
@@ -257,8 +257,8 @@ public final class JavaFXMediaRecorder extends BaseMediaRecorder {
             setState(State.RECORDING);
 
             // Fire start event
-            Event.fireEvent(JavaFXMediaRecorder.this,
-                    new MediaRecorderEvent(JavaFXMediaRecorder.this,
+            Event.fireEvent(FXMediaRecorder.this,
+                    new MediaRecorderEvent(FXMediaRecorder.this,
                             MediaRecorderEvent.MEDIA_RECORDER_START));
         } else {
             log.info("Please, enable the camera first!");
@@ -274,8 +274,8 @@ public final class JavaFXMediaRecorder extends BaseMediaRecorder {
         setState(State.PAUSED);
 
         // Fire start event
-        Event.fireEvent(JavaFXMediaRecorder.this,
-                new MediaRecorderEvent(JavaFXMediaRecorder.this,
+        Event.fireEvent(FXMediaRecorder.this,
+                new MediaRecorderEvent(FXMediaRecorder.this,
                         MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
     }
 
@@ -289,8 +289,8 @@ public final class JavaFXMediaRecorder extends BaseMediaRecorder {
         setState(State.RECORDING);
 
         // Fire start event
-        Event.fireEvent(JavaFXMediaRecorder.this,
-                new MediaRecorderEvent(JavaFXMediaRecorder.this,
+        Event.fireEvent(FXMediaRecorder.this,
+                new MediaRecorderEvent(FXMediaRecorder.this,
                         MediaRecorderEvent.MEDIA_RECORDER_RESUME));
     }
 
@@ -313,8 +313,8 @@ public final class JavaFXMediaRecorder extends BaseMediaRecorder {
         setState(State.INACTIVE);
 
         // Fire start event
-        Event.fireEvent(JavaFXMediaRecorder.this,
-                new MediaRecorderEvent(JavaFXMediaRecorder.this,
+        Event.fireEvent(FXMediaRecorder.this,
+                new MediaRecorderEvent(FXMediaRecorder.this,
                         MediaRecorderEvent.MEDIA_RECORDER_STOP));
     }
 
