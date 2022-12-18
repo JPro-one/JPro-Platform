@@ -20,10 +20,10 @@ dependencies {
   runtimeOnly "ch.qos.logback:logback-classic:1.4.5"
 }
 
-//mainClassName = 'one.jpro.sound.example.JProSoundSample'
-//mainClassName = 'one.jpro.sound.example.SessionManagerSample'
-//mainClassName = 'one.jpro.sound.example.HTMLScrollPaneSample'
-mainClassName = 'one.jpro.sound.example.MediaRecorderSample'
+//mainClassName = 'one.jpro.utils.example.JProSoundSample'
+//mainClassName = 'one.jpro.utils.example.SessionManagerSample'
+//mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
+mainClassName = 'one.jpro.utils.example.MediaRecorderSample'
 
 javafx {
   version = "$JAVAFX_VERSION"
@@ -33,8 +33,8 @@ javafx {
 
 application {
   mainClass = "$mainClassName"
-//  moduleName = mainModule
+  mainModule = moduleName
   applicationDefaultJvmArgs = [
-          "--add-exports", "javafx.base/com.sun.javafx.event=ALL-UNNAMED"
+          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"
   ]
 }

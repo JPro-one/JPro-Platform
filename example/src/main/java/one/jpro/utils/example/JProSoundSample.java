@@ -1,4 +1,4 @@
-package one.jpro.sound.example;
+package one.jpro.utils.example;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
