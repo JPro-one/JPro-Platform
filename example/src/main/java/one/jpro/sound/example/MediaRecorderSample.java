@@ -56,7 +56,7 @@ public class MediaRecorderSample extends Application {
         startButton.setOnAction(event -> mediaRecorder.start());
         pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
-        saveButton.setOnAction(event -> mediaRecorder.download());
+        saveButton.setOnAction(event -> mediaRecorder.retrieve());
 
         // media recorder events
         mediaRecorder.setOnStart(event -> {
