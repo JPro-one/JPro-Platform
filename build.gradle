@@ -7,7 +7,7 @@ buildscript {
   }
   dependencies {
     classpath 'org.openjfx:javafx-plugin:0.0.13'
-    classpath "com.sandec.jpro:jpro-plugin-gradle:$JPRO_VERSION"
+    classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
   }
 }
 
