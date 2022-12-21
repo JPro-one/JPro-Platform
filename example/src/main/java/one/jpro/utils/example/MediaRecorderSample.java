@@ -1,5 +1,6 @@
 package one.jpro.utils.example;
 
+import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -63,6 +64,7 @@ public class MediaRecorderSample extends Application {
             startButton.setDisable(true);
             pauseResumeButton.setDisable(false);
             stopButton.setDisable(false);
+            saveButton.setDisable(true);
         });
         mediaRecorder.setOnPause(event -> {
             pauseResumeButton.setText("Resume Recording");
@@ -83,6 +85,7 @@ public class MediaRecorderSample extends Application {
         var root = new StackPane(box);
         root.setPadding(new Insets(16.0));
         var scene = new Scene(root, 720, 640);
+        scene.getStylesheets().add(new PrimerLight().getUserAgentStylesheet());
         stage.setScene(scene);
         stage.show();
     }

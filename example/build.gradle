@@ -1,6 +1,6 @@
 apply plugin: 'application'
 apply plugin: 'org.openjfx.javafxplugin'
-apply plugin: 'com.sandec.jpro'
+apply plugin: 'jpro-gradle-plugin'
 
 repositories {
   jcenter()
@@ -17,13 +17,17 @@ dependencies {
   implementation project(":jpro-media")
   implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
 
+  implementation "org.bytedeco:javacv-platform:$javacvVersion"
+//  compileOnly "org.bytedeco:javacv-platform:$javacvVersion" // when running on JPro
+  implementation "io.github.mkpaz:atlantafx-base:1.1.0"
   runtimeOnly "ch.qos.logback:logback-classic:1.4.5"
 }
 
 //mainClassName = 'one.jpro.utils.example.JProSoundSample'
 //mainClassName = 'one.jpro.utils.example.SessionManagerSample'
 //mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
-mainClassName = 'one.jpro.utils.example.MediaRecorderSample'
+//mainClassName = 'one.jpro.utils.example.MediaRecorderSample'
+mainClassName = 'one.jpro.utils.example.MediaPlayerSample'
 
 javafx {
   version = "$JAVAFX_VERSION"
