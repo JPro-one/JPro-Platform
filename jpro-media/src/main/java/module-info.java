@@ -15,19 +15,8 @@ module one.jpro.media {
     requires org.bytedeco.opencv;
     requires org.bytedeco.ffmpeg;
 
-    requires org.bytedeco.opencv.windows.x86_64;
-    requires org.bytedeco.ffmpeg.windows.x86_64;
-    requires org.bytedeco.openblas.windows.x86_64;
-    requires org.bytedeco.opencv.linux.x86_64;
-    requires org.bytedeco.ffmpeg.linux.x86_64;
-    requires org.bytedeco.openblas.linux.x86_64;
-    requires org.bytedeco.opencv.macosx.x86_64;
-    requires org.bytedeco.ffmpeg.macosx.x86_64;
-    requires org.bytedeco.openblas.macosx.x86_64;
-    requires org.bytedeco.opencv.macosx.arm64;
-    requires org.bytedeco.ffmpeg.macosx.arm64;
-    requires org.bytedeco.openblas.macosx.arm64;
-
+    exports one.jpro.media.event;
+    exports one.jpro.media.player;
     exports one.jpro.media.recorder;
     exports one.jpro.media.recorder.event;
 }

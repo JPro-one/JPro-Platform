@@ -1,6 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
 dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    implementation 'org.bytedeco:javacv-platform:1.5.8'
+    compileOnly "org.bytedeco:javacv-platform:$javacvVersion"
     api 'org.slf4j:slf4j-api:2.0.5'
     api 'org.json:json:20220924'
 }
