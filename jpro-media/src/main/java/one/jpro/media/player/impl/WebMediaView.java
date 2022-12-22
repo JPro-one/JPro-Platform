@@ -45,7 +45,7 @@ public class WebMediaView extends MediaView {
                     MediaPlayer newMediaPlayer = getMediaPlayer();
                     if (newMediaPlayer instanceof WebMediaPlayer webMediaPlayer) {
                         HTMLView htmlView = new HTMLView("""
-                                <video id="%s" controls></video>
+                                <video id="%s"></video>
                                 """.formatted(webMediaPlayer.getMediaPlayerId()));
                         getChildren().setAll(htmlView);
                     }
@@ -55,6 +55,38 @@ public class WebMediaView extends MediaView {
         return mediaPlayer;
     }
 
+    // disable controls property
+    private BooleanProperty showControls;
+
+    public final boolean getShowControls() {
+        return showControls != null && showControls.get();
+    }
+
+    public final void setShowControls(boolean showControls) {
+        showControlsProperty().set(showControls);
+    }
+
+    public final BooleanProperty showControlsProperty() {
+        if (showControls == null) {
+            showControls = new SimpleBooleanProperty(this, "showControls") {
+                @Override
+                protected void invalidated() {
+                    if (webAPI != null && getMediaPlayer() instanceof WebMediaPlayer webMediaPlayer) {
+                        webAPI.executeScript("""
+                                    let elem = document.getElementById('$mediaPlayerId');
+                                    if ($showControls) {
+                                        elem.setAttribute("controls","controls")
+                                    } else if (elem.hasAttribute("controls")) {
+                                        elem.removeAttribute("controls")
+                                    }
+                                    """.replace("$mediaPlayerId", webMediaPlayer.getMediaPlayerId())
+                                .replace("$showControls", String.valueOf(get())));
+                    }
+                }
+            };
+        }
+        return showControls;
+    }
 
     public final DoubleProperty fitWidthProperty() {
         if (fitWidth == null) {
