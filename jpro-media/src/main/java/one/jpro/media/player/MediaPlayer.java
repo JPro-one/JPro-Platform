@@ -1,10 +1,7 @@
 package one.jpro.media.player;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.*;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.media.MediaPlayer.Status;
@@ -49,6 +46,12 @@ public interface MediaPlayer extends EventTarget {
         }
         return new FXMediaPlayer(source);
     }
+
+    boolean isMute();
+
+    void setMute(boolean value);
+
+    BooleanProperty muteProperty();
 
     Status getStatus();
 

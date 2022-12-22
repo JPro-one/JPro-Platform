@@ -229,6 +229,36 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         return volume;
     }
 
+    // muted property
+    private BooleanProperty muted;
+
+    @Override
+    public boolean isMute() {
+        return muted != null && muted.get();
+    }
+
+    @Override
+    public void setMute(boolean value) {
+        muteProperty().set(value);
+    }
+
+    @Override
+    public BooleanProperty muteProperty() {
+        if (muted == null) {
+            muted = new SimpleBooleanProperty(this, "muted") {
+                @Override
+                protected void invalidated() {
+                    webAPI.executeScript("""
+                            var elem = document.getElementById("$mediaPlayerId");
+                            elem.muted = $muted;
+                            """.replace("$mediaPlayerId", mediaPlayerId)
+                            .replace("$muted", String.valueOf(get())));
+                }
+            };
+        }
+        return muted;
+    }
+
     @Override
     public void play() {
         webAPI.executeScript("""

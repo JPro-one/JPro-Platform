@@ -1,9 +1,6 @@
 package one.jpro.media.player.impl;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.*;
 import javafx.event.Event;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -91,9 +88,11 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             log.error("Media player error: {}", mediaPlayer.getError(), mediaPlayer.getError());
         });
 
-        mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
-            log.debug("Current time: {}", newValue);
-        });
+        mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) ->
+                log.debug("Current time: {}", newValue));
+
+        mediaPlayer.volumeProperty().addListener((observable, oldValue, newValue) ->
+                log.debug("Volume: {}", newValue));
     }
 
     public MediaPlayer getMediaPlayer() {
@@ -155,6 +154,21 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
     @Override
     public DoubleProperty volumeProperty() {
         return mediaPlayer.volumeProperty();
+    }
+
+    @Override
+    public boolean isMute() {
+        return mediaPlayer.isMute();
+    }
+
+    @Override
+    public void setMute(boolean value) {
+        mediaPlayer.setMute(value);
+    }
+
+    @Override
+    public BooleanProperty muteProperty() {
+        return mediaPlayer.muteProperty();
     }
 
     @Override
