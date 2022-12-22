@@ -4,8 +4,8 @@ import com.jpro.webapi.WebAPI;
 import com.jpro.webapi.WebCallback;
 import javafx.beans.property.*;
 import javafx.event.Event;
-import javafx.util.Duration;
 import javafx.scene.media.MediaPlayer.Status;
+import javafx.util.Duration;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaPlayerException;
@@ -206,12 +206,14 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void setVolume(double value) {
-        webAPI.executeScript("""
-                var elem = document.getElementById("$mediaPlayerId");
-                elem.volume = %s;
-                """.formatted(value)
-                .replace("$mediaPlayerId", mediaPlayerId));
-
+        value = clamp(volume.get(), 0.0, 1.0);
+        if (getStatus() != Status.DISPOSED) {
+            webAPI.executeScript("""
+                    var elem = document.getElementById("$mediaPlayerId");
+                    elem.volume = %s;
+                    """.replace("$mediaPlayerId", mediaPlayerId)
+                    .formatted(value));
+        }
         volumeProperty().set(value);
     }
 
@@ -306,5 +308,15 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
                 .replace("java_fun", "jpro.$mediaPlayerId_$eventName")
                 .replace("$mediaPlayerId", mediaPlayerId)
                 .replace("$eventName", eventName));
+    }
+
+    /**
+     * Simple utility function which clamps the given value to be strictly
+     * between the min and max values.
+     */
+    private double clamp(double min, double value, double max) {
+        if (value < min) return min;
+        if (value > max) return max;
+        return value;
     }
 }
