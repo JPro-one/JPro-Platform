@@ -19,7 +19,7 @@ public class WebMediaView extends MediaView {
 
     private static final String DEFAULT_STYLE_CLASS = "media-view";
 
-    private WebAPI webAPI;
+    private final WebAPI webAPI;
 
     public WebMediaView(WebMediaPlayer webMediaPlayer) {
         this.webAPI = webMediaPlayer.getWebAPI();
@@ -103,14 +103,16 @@ public class WebMediaView extends MediaView {
                     if (webAPI != null && getMediaPlayer() instanceof WebMediaPlayer webMediaPlayer) {
                         if (preserveRatio) {
                             webAPI.executeScript("""
-                                    var video = document.getElementById('%s');
-                                    video.style.objectFit = 'contain';
-                                    """.formatted(webMediaPlayer.getMediaPlayerId()));
+                                    let elem = document.getElementById('$mediaPlayerId');
+                                    elem.style.objectFit = 'contain';
+                                    console.log('$mediaPlayerId => preserve ratio: true');
+                                    """.replace("$mediaPlayerId", webMediaPlayer.getMediaPlayerId()));
                         } else {
                             webAPI.executeScript("""
-                                    var video = document.getElementById('%s');
-                                    video.style.objectFit = 'fill';
-                                    """.formatted(webMediaPlayer.getMediaPlayerId()));
+                                    let elem = document.getElementById('$mediaPlayerId');
+                                    elem.style.objectFit = 'fill';
+                                    console.log('$mediaPlayerId => preserve ratio: false');
+                                    """.replace("$mediaPlayerId", webMediaPlayer.getMediaPlayerId()));
                         }
                         log.debug("preserve ratio: " + preserveRatio);
                     }
