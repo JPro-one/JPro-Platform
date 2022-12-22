@@ -201,7 +201,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public double getVolume() {
-        return (volume == null) ? 0.0 : volume.get();
+        return (volume == null) ? 1.0 : volume.get();
     }
 
     @Override
@@ -218,7 +218,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     @Override
     public DoubleProperty volumeProperty() {
         if (volume == null) {
-            volume = new SimpleDoubleProperty(this, "volume") {
+            volume = new SimpleDoubleProperty(this, "volume", 1.0) {
 
                 @Override
                 protected void invalidated() {
