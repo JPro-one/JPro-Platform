@@ -263,27 +263,33 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void play() {
-        webAPI.executeScript("""
+        if (getStatus() != Status.DISPOSED) {
+            webAPI.executeScript("""
                 let elem = document.getElementById("$mediaPlayerId");
                 elem.play();
                 """.replace("$mediaPlayerId", mediaPlayerId));
+        }
     }
 
     @Override
     public void pause() {
-        webAPI.executeScript("""
+        if (getStatus() != Status.DISPOSED) {
+            webAPI.executeScript("""
                 let elem = document.getElementById("$mediaPlayerId");
                 elem.pause();
                 """.replace("$mediaPlayerId", mediaPlayerId));
+        }
     }
 
     @Override
     public void stop() {
-        webAPI.executeScript("""
+        if (getStatus() != Status.DISPOSED) {
+            webAPI.executeScript("""
                 let elem = document.getElementById("$mediaPlayerId");
                 elem.pause();
                 elem.currentTime = 0;
                 """.replace("$mediaPlayerId", mediaPlayerId));
+        }
 
         setStatus(Status.STOPPED);
     }
