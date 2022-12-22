@@ -88,6 +88,7 @@ public class FXMediaView extends MediaView {
         return fitHeight;
     }
 
+    @Override
     public final BooleanProperty preserveRatioProperty() {
         if (preserveRatio == null) {
             preserveRatio = new SimpleBooleanProperty(this, "preserveRatio") {

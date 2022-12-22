@@ -38,14 +38,30 @@ public enum WebMediaError {
         this.description = description;
     }
 
+    /**
+     * The error code related to this error.
+     *
+     * @return the error code
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * The description of this error.
+     *
+     * @return the description
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Returns the media error from the given code.
+     *
+     * @param code the code
+     * @return an optional {@link WebMediaError} object
+     */
     public static Optional<WebMediaError> fromCode(int code) {
         return Arrays.stream(values()).filter(error -> error.getCode() == code).findFirst();
     }

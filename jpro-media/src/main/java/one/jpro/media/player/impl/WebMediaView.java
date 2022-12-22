@@ -88,6 +88,7 @@ public class WebMediaView extends MediaView {
         return showControls;
     }
 
+    @Override
     public final DoubleProperty fitWidthProperty() {
         if (fitWidth == null) {
             fitWidth = new SimpleDoubleProperty(this, "fitWidth") {
@@ -107,6 +108,7 @@ public class WebMediaView extends MediaView {
         return fitWidth;
     }
 
+    @Override
     public final DoubleProperty fitHeightProperty() {
         if (fitHeight == null) {
             fitHeight = new SimpleDoubleProperty(this, "fitHeight") {
@@ -125,6 +127,7 @@ public class WebMediaView extends MediaView {
         return fitHeight;
     }
 
+    @Override
     public final BooleanProperty preserveRatioProperty() {
         if (preserveRatio == null) {
             preserveRatio = new SimpleBooleanProperty(this, "preserveRatio", true) {
