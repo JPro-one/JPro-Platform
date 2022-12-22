@@ -9,7 +9,7 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import one.jpro.media.recorder.MediaRecorder;
-import one.jpro.media.recorder.event.MediaRecorderEvent;
+import one.jpro.media.event.MediaRecorderEvent;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.*;
 import org.slf4j.Logger;

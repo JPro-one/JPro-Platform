@@ -10,7 +10,7 @@ import javafx.event.Event;
 import javafx.scene.layout.Region;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
-import one.jpro.media.recorder.event.MediaRecorderEvent;
+import one.jpro.media.event.MediaRecorderEvent;
 import org.json.JSONObject;
 
 /**

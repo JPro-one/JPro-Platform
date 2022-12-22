@@ -1,4 +1,4 @@
-package one.jpro.media.recorder.event;
+package one.jpro.media.event;
 
 import javafx.beans.NamedArg;
 import javafx.event.Event;

@@ -9,7 +9,7 @@ import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
-import one.jpro.media.recorder.event.MediaRecorderEvent;
+import one.jpro.media.event.MediaRecorderEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
