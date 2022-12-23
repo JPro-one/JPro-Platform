@@ -32,6 +32,7 @@ public class MediaPlayerSample extends Application {
         // media player
         var mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
         var mediaView = MediaView.create(mediaPlayer);
+
         mediaView.setPreserveRatio(false);
         mediaView.setStyle("-fx-background-color: black, white; -fx-background-insets: 0, 1;");
 
@@ -61,7 +62,11 @@ public class MediaPlayerSample extends Application {
             }
         });
         stopButton.setOnAction(event -> mediaPlayer.stop());
+
+        // seeker
         seekSlider.setOnMouseReleased(mouseEvent ->
+                mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));
+        seekSlider.setOnMouseDragged(mouseEvent ->
                 mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));
         mediaPlayer.currentTimeProperty().addListener(observable -> {
             if (mediaPlayer.getDuration().greaterThan(Duration.ZERO)
