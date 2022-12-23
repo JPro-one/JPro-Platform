@@ -8,10 +8,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaView;
 
@@ -27,7 +30,7 @@ public class MediaPlayerSample extends Application {
     @Override
     public void start(Stage stage) {
         // media player
-        var mediaPlayer = MediaPlayer.create(stage, MEDIA_SOURCE);
+        var mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
         var mediaView = MediaView.create(mediaPlayer);
         mediaView.setPreserveRatio(false);
         mediaView.setStyle("-fx-background-color: black, white; -fx-background-insets: 0, 1;");
@@ -89,7 +92,7 @@ public class MediaPlayerSample extends Application {
             seekSlider.setMax(mediaPlayer.getDuration().toSeconds());
             mediaPlayer.setVolume(mediaPlayer.getVolume() * 100.0);
         });
-        mediaPlayer.setOnPlay(event -> playPauseButton.setText("Pause"));
+        mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
         mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
         mediaPlayer.setOnStopped(event -> playPauseButton.setText("Play"));
         mediaPlayer.setOnError(event -> System.out.println("Error: " + mediaPlayer.getError()));
