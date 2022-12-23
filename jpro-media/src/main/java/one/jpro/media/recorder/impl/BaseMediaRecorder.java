@@ -7,9 +7,10 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
+import one.jpro.media.MediaSource;
+import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
-import one.jpro.media.event.MediaRecorderEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,30 @@ import org.slf4j.LoggerFactory;
 abstract class BaseMediaRecorder implements MediaRecorder {
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaRecorder.class);
+
+    // media source property (read-only)
+    ReadOnlyObjectWrapper<MediaSource> mediaSource;
+
+    @Override
+    public MediaSource getMediaSource() {
+        return (mediaSource == null) ? null : mediaSource.get();
+    }
+
+    void setMediaSource(MediaSource value) {
+        mediaResourcePropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
+        return mediaResourcePropertyImpl().getReadOnlyProperty();
+    }
+
+    ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl() {
+        if (mediaSource == null) {
+            mediaSource = new ReadOnlyObjectWrapper<>(this, "mediaSource");
+        }
+        return mediaSource;
+    }
 
     // state property
     private ReadOnlyObjectWrapper<State> state;

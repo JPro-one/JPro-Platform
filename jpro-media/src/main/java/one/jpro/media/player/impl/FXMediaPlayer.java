@@ -1,11 +1,15 @@
 package one.jpro.media.player.impl;
 
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.event.Event;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.util.Duration;
+import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.MediaPlayerException;
 import org.slf4j.Logger;
@@ -22,9 +26,9 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
 
     private final MediaPlayer mediaPlayer;
 
-    public FXMediaPlayer(String source) {
-        setSource(source);
-        final Media media = new Media(source);
+    public FXMediaPlayer(MediaSource mediaSource) {
+        setMediaSource(mediaSource);
+        final Media media = new Media(mediaSource.source());
         mediaPlayer = new MediaPlayer(media);
 
         mediaPlayer.setOnReady(() -> {
@@ -88,39 +92,22 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             log.error("Media player error: {}", mediaPlayer.getError(), mediaPlayer.getError());
         });
 
-        mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) ->
-                log.debug("Current time: {}", newValue));
+        mediaPlayer.currentTimeProperty().addListener(observable ->
+                log.debug("Current time: {}", mediaPlayer.getCurrentTime()));
 
-        mediaPlayer.volumeProperty().addListener((observable, oldValue, newValue) ->
-                log.debug("Volume: {}", newValue));
+        mediaPlayer.volumeProperty().addListener(observable ->
+                log.debug("Volume: {}", mediaPlayer.getVolume()));
     }
 
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
     }
 
-    // source property
-    private ReadOnlyStringWrapper source;
-
-    @Override
-    public String getSource() {
-        return source == null ? null : source.get();
-    }
-
-    private void setSource(String value) {
-        sourcePropertyImpl().set(value);
-    }
-
-    @Override
-    public ReadOnlyStringProperty sourceProperty() {
-        return sourcePropertyImpl().getReadOnlyProperty();
-    }
-
-    private ReadOnlyStringWrapper sourcePropertyImpl() {
-        if (source == null) {
-            source = new ReadOnlyStringWrapper(this, "source");
+    ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl() {
+        if (mediaSource == null) {
+            mediaSource = new ReadOnlyObjectWrapper<>(this, "source");
         }
-        return source;
+        return mediaSource;
     }
 
     // current time property

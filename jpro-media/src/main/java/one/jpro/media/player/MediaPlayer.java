@@ -1,12 +1,16 @@
 package one.jpro.media.player;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.impl.FXMediaPlayer;
 import one.jpro.media.player.impl.WebMediaPlayer;
@@ -21,11 +25,11 @@ public interface MediaPlayer extends EventTarget {
     /**
      * Creates a media player (JavaFX/Desktop version).
      *
-     * @param source the media source uri
+     * @param mediaSource the media source
      * @return a {@link MediaPlayer} object.
      */
-    static MediaPlayer create(String source) {
-        return new FXMediaPlayer(source);
+    static MediaPlayer create(MediaSource mediaSource) {
+        return new FXMediaPlayer(mediaSource);
     }
 
     /**
@@ -36,15 +40,18 @@ public interface MediaPlayer extends EventTarget {
      * a desktop version of the media player is returned.
      *
      * @param stage the application stage
-     * @param source the media source uri
+     * @param mediaSource the media source
      * @return a {@link MediaPlayer} object.
      */
-    static MediaPlayer create(Stage stage, String source) {
+    static MediaPlayer create(Stage stage, MediaSource mediaSource) {
         if (WebAPI.isBrowser()) {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
-            return new WebMediaPlayer(webAPI, source);
+            return new WebMediaPlayer(webAPI, mediaSource);
         }
-        return new FXMediaPlayer(source);
+        if (mediaSource.isLocal()) {
+            return new FXMediaPlayer(mediaSource);
+        }
+        throw new IllegalArgumentException("Incorrect media source provided!");
     }
 
     /**
@@ -83,9 +90,9 @@ public interface MediaPlayer extends EventTarget {
      */
     ReadOnlyObjectProperty<Status> statusProperty();
 
-    String getSource();
+    MediaSource getMediaSource();
 
-    ReadOnlyStringProperty sourceProperty();
+    ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
     Duration getDuration();
 

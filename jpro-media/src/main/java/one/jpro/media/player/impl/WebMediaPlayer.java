@@ -6,6 +6,7 @@ import javafx.beans.property.*;
 import javafx.event.Event;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.util.Duration;
+import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaPlayerException;
@@ -26,10 +27,10 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     private final WebAPI webAPI;
     private final String mediaPlayerId;
 
-    public WebMediaPlayer(WebAPI webAPI, String source) {
+    public WebMediaPlayer(WebAPI webAPI, MediaSource mediaSource) {
         this.webAPI = Objects.requireNonNull(webAPI, "WebAPI cannot be null.");
         mediaPlayerId = webAPI.createUniqueJSName("media_player_");
-        setSource(Objects.requireNonNull(source, "Media source cannot be null."));
+        setMediaSource(Objects.requireNonNull(mediaSource, "Media source cannot be null."));
 
         // check if the media can be played
         handleWebEvent("canplay", """
@@ -126,37 +127,22 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         return mediaPlayerId;
     }
 
-    // source property
-    private ReadOnlyStringWrapper source;
-
     @Override
-    public String getSource() {
-        return source == null ? null : source.get();
-    }
-
-    private void setSource(String value) {
-        sourcePropertyImpl().set(value);
-    }
-
-    @Override
-    public ReadOnlyStringProperty sourceProperty() {
-        return sourcePropertyImpl().getReadOnlyProperty();
-    }
-
-    private ReadOnlyStringWrapper sourcePropertyImpl() {
-        if (source == null) {
-            source = new ReadOnlyStringWrapper(this, "source") {
+    ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl() {
+        if (mediaSource == null) {
+            mediaSource = new ReadOnlyObjectWrapper<>(this, "source") {
                 @Override
                 protected void invalidated() {
                     webAPI.executeScript("""
                             var elem = document.getElementById("$mediaPlayerId");
                             elem.src = "$source";
                             """.replace("$mediaPlayerId", mediaPlayerId)
-                            .replace("$source", get()));
+                            .replace("$source", get().source())
+                            .replace("\"\"", "\""));
                 }
             };
         }
-        return source;
+        return mediaSource;
     }
 
     // ready state property

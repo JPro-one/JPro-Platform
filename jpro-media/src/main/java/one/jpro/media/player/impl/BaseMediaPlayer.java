@@ -1,11 +1,15 @@
 package one.jpro.media.player.impl;
 
 import com.sun.javafx.event.EventHandlerManager;
-import javafx.beans.property.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.util.Duration;
+import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaPlayerException;
@@ -20,6 +24,25 @@ import org.slf4j.LoggerFactory;
 abstract class BaseMediaPlayer implements MediaPlayer {
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaPlayer.class);
+
+    // source property
+    ReadOnlyObjectWrapper<MediaSource> mediaSource;
+
+    @Override
+    public MediaSource getMediaSource() {
+        return mediaSource == null ? null : mediaSource.get();
+    }
+
+    void setMediaSource(MediaSource value) {
+        mediaResourcePropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
+        return mediaResourcePropertyImpl().getReadOnlyProperty();
+    }
+
+    abstract ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl();
 
     // status property
     private ReadOnlyObjectWrapper<Status> status;
