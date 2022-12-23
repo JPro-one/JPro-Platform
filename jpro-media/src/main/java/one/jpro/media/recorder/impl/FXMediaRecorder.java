@@ -254,8 +254,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             startRecordingTime = 0; // reset start recording time
             recordingStarted = true;
 
-            // Set state
-            setState(State.RECORDING);
+            // Set status to recording
+            setStatus(Status.RECORDING);
 
             // Fire start event
             Event.fireEvent(FXMediaRecorder.this,
@@ -271,8 +271,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         // disable recording
         recordingStarted = false;
 
-        // Set state
-        setState(State.PAUSED);
+        // Set status to paused
+        setStatus(Status.PAUSED);
 
         // Fire start event
         Event.fireEvent(FXMediaRecorder.this,
@@ -286,8 +286,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         startRecordingTime = 0; // reset start recording time
         recordingStarted = true;
 
-        // Set state
-        setState(State.RECORDING);
+        // Set status to recording
+        setStatus(Status.RECORDING);
 
         // Fire start event
         Event.fireEvent(FXMediaRecorder.this,
@@ -300,8 +300,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         stopRecording();
         setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
 
-        // Set state
-        setState(State.INACTIVE);
+        // Set status to inactive
+        setStatus(Status.INACTIVE);
 
         // Fire start event
         Event.fireEvent(FXMediaRecorder.this,

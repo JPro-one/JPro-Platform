@@ -47,31 +47,31 @@ abstract class BaseMediaRecorder implements MediaRecorder {
         return mediaSource;
     }
 
-    // state property
-    private ReadOnlyObjectWrapper<State> state;
+    // status property
+    private ReadOnlyObjectWrapper<Status> status;
 
     @Override
-    public State getState() {
-        return (state == null) ? State.INACTIVE : state.get();
+    public Status getStatus() {
+        return (status == null) ? Status.INACTIVE : status.get();
     }
 
-    protected void setState(State value) {
-        statePropertyImpl().set(value);
+    protected void setStatus(Status value) {
+        statusPropertyImpl().set(value);
     }
 
     /**
-     * The current state of the MediaRecorder object (inactive, recording, or paused.)
+     * The current status of the MediaRecorder object (inactive, recording, or paused.)
      */
     @Override
-    public ReadOnlyObjectProperty<State> stateProperty() {
-        return statePropertyImpl().getReadOnlyProperty();
+    public ReadOnlyObjectProperty<Status> statusProperty() {
+        return statusPropertyImpl().getReadOnlyProperty();
     }
 
-    private ReadOnlyObjectWrapper<State> statePropertyImpl() {
-        if (state == null) {
-            state = new ReadOnlyObjectWrapper<>(this, "state", State.INACTIVE);
+    private ReadOnlyObjectWrapper<Status> statusPropertyImpl() {
+        if (status == null) {
+            status = new ReadOnlyObjectWrapper<>(this, "status", Status.INACTIVE);
         }
-        return state;
+        return status;
     }
 
     // On data available event handler

@@ -54,8 +54,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
                         """.formatted(videoRecorderId, cameraView.getHeight())));
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_onstart", result -> {
-            // Set state
-            State.fromJS(result).ifPresent(this::setState);
+            // Set status
+            Status.fromJS(result).ifPresent(this::setStatus);
 
             // Fire start event
             Event.fireEvent(WebMediaRecorder.this,
@@ -64,8 +64,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         });
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_onpause", result -> {
-            // Set state
-            State.fromJS(result).ifPresent(this::setState);
+            // Set status
+            Status.fromJS(result).ifPresent(this::setStatus);
 
             // Fire pause event
             Event.fireEvent(WebMediaRecorder.this,
@@ -74,8 +74,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         });
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_onresume", result -> {
-            // Set state
-            State.fromJS(result).ifPresent(this::setState);
+            // Set status
+            Status.fromJS(result).ifPresent(this::setStatus);
 
             // Fire resume event
             Event.fireEvent(WebMediaRecorder.this,
@@ -93,8 +93,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
             // Update ObjectURL value;
             setMediaSource(new MediaSource(webAPI.createJSFile(objectUrl, "RecordedVideo", fileSize)));
 
-            // Set state to inactive
-            setState(State.INACTIVE);
+            // Set status to inactive
+            setStatus(Status.INACTIVE);
 
             // Fire stop event
             Event.fireEvent(WebMediaRecorder.this,
@@ -109,8 +109,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         });
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_onerror", result -> {
-            // Reset state to inactive
-            setState(State.INACTIVE);
+            // Reset status to inactive
+            setStatus(Status.INACTIVE);
 
             // Set error
             setError(MediaRecorderException.fromJSON(result));

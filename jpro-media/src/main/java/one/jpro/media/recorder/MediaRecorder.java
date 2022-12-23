@@ -40,9 +40,9 @@ public interface MediaRecorder extends EventTarget {
     }
 
     /**
-     * Media recorder state.
+     * Media recorder status.
      */
-    enum State {
+    enum Status {
 
         /**
          * Recording is not occurring — it has either not been started yet,
@@ -65,12 +65,12 @@ public interface MediaRecorder extends EventTarget {
          * then return it wrapped in {@link Optional} object.
          *
          * @param jsStr a javascript string
-         * @return an {@link Optional} object containing the {@link State} object.
+         * @return an {@link Optional} object containing the {@link Status} object.
          */
-        public static Optional<State> fromJS(String jsStr) {
+        public static Optional<Status> fromJS(String jsStr) {
             if (jsStr != null && !jsStr.isBlank()) {
                 var str = jsStr.replace("\"", "").trim();
-                for (State s : values()) {
+                for (Status s : values()) {
                     if (s.name().equalsIgnoreCase(str)) {
                         return Optional.of(s);
                     }
@@ -86,9 +86,9 @@ public interface MediaRecorder extends EventTarget {
 
     ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
-    State getState();
+    Status getStatus();
 
-    ReadOnlyObjectProperty<State> stateProperty();
+    ReadOnlyObjectProperty<Status> statusProperty();
 
 
     EventHandler<MediaRecorderEvent> getOnDataAvailable();
