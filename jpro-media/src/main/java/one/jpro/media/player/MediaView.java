@@ -1,8 +1,10 @@
 package one.jpro.media.player;
 
+import com.jpro.webapi.WebAPI;
 import javafx.beans.property.*;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import one.jpro.media.player.impl.FXMediaPlayer;
 import one.jpro.media.player.impl.FXMediaView;
 import one.jpro.media.player.impl.WebMediaPlayer;
@@ -14,6 +16,14 @@ import one.jpro.media.player.impl.WebMediaView;
  * @author Besmir Beqiri
  */
 public abstract class MediaView extends Region {
+
+    public static MediaView create(Stage stage) {
+        if (WebAPI.isBrowser()) {
+            final WebAPI webAPI = WebAPI.getWebAPI(stage);
+            return new WebMediaView(webAPI);
+        }
+        return new FXMediaView();
+    }
 
     public static MediaView create(MediaPlayer mediaPlayer) {
         if (mediaPlayer instanceof FXMediaPlayer fxMediaPlayer) {

@@ -22,11 +22,19 @@ public class FXMediaView extends MediaView {
 
     private javafx.scene.media.MediaView fxMediaView;
 
+    public FXMediaView() {
+        initialize();
+    }
+
     public FXMediaView(FXMediaPlayer mediaPlayer) {
+        this();
+        setMediaPlayer(mediaPlayer);
+    }
+
+    private void initialize() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
-        setMediaPlayer(mediaPlayer);
-
+        // bind listeners
         minWidthProperty().bind(fitWidthProperty());
         minHeightProperty().bind(fitHeightProperty());
         prefWidthProperty().bind(fitWidthProperty());
@@ -46,6 +54,8 @@ public class FXMediaView extends MediaView {
                     if (newMediaPlayer instanceof FXMediaPlayer fxMediaPlayer) {
                         fxMediaView = new javafx.scene.media.MediaView(fxMediaPlayer.getMediaPlayer());
                         fxMediaView.setPreserveRatio(isPreserveRatio());
+                        fxMediaView.setFitWidth(getFitWidth());
+                        fxMediaView.setFitHeight(getFitHeight());
                         getChildren().setAll(fxMediaView);
                     }
                 }

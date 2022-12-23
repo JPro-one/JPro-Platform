@@ -3,6 +3,9 @@ package one.jpro.media.player.impl;
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.*;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
+import javafx.scene.Node;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaView;
 import org.slf4j.Logger;
@@ -21,12 +24,21 @@ public class WebMediaView extends MediaView {
 
     private final WebAPI webAPI;
 
+    public WebMediaView(WebAPI webAPI) {
+        this.webAPI = webAPI;
+        initialize();
+    }
+
     public WebMediaView(WebMediaPlayer webMediaPlayer) {
         this.webAPI = webMediaPlayer.getWebAPI();
+        initialize();
+        setMediaPlayer(webMediaPlayer);
+    }
+
+    private void initialize() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
-        setMediaPlayer(webMediaPlayer);
-
+        // bind listeners
         minWidthProperty().bind(fitWidthProperty());
         minHeightProperty().bind(fitHeightProperty());
         prefWidthProperty().bind(fitWidthProperty());
@@ -155,5 +167,13 @@ public class WebMediaView extends MediaView {
             };
         }
         return preserveRatio;
+    }
+
+    @Override
+    protected void layoutChildren() {
+        for (Node child : getManagedChildren()) {
+            layoutInArea(child, 0.0, 0.0, getFitWidth(), getFitHeight(),
+                    0.0, HPos.CENTER, VPos.CENTER);
+        }
     }
 }
