@@ -92,7 +92,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
         // Stop and release native resources on exit
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            stop();
+            stopRecording();
             release();
         }));
     }
@@ -297,19 +297,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void stop() {
-        // disable recording
-        recordingStarted = false;
-
-        // Release video writer
-        try {
-            if (recorder != null) {
-                recorder.stop();
-                recorder.close();
-            }
-        } catch (FrameRecorder.Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
-
+        stopRecording();
         setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
 
         // Set state
@@ -321,7 +309,24 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                         MediaRecorderEvent.MEDIA_RECORDER_STOP));
     }
 
+    private void stopRecording() {
+        if (recordingStarted) {
+            recordingStarted = false;
+
+            // Release video recorder
+            try {
+                if (recorder != null) {
+                    recorder.stop();
+                    recorder.close();
+                }
+            } catch (FrameRecorder.Exception ex) {
+                log.error(ex.getMessage(), ex);
+            }
+        }
+    }
+
     @Override
+    @Deprecated
     public void retrieve() {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save As...");
