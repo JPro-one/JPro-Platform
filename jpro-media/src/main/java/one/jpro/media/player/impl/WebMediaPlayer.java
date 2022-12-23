@@ -100,6 +100,21 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
                             MediaPlayerEvent.MEDIA_PLAYER_STALLED));
         });
 
+        // handle ended event
+        handleWebEvent("ended", """
+                    console.log("$mediaPlayerId => ended...");
+                    java_fun(elem.ended);
+                """, ended -> {
+            if (Boolean.parseBoolean(ended)) {
+                stop();
+
+                // Fire end of media event
+                Event.fireEvent(WebMediaPlayer.this,
+                        new MediaPlayerEvent(WebMediaPlayer.this,
+                                MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
+            }
+        });
+
         // handle error event
         handleWebEvent("error", """
                     console.log("$mediaPlayerId => error occurred with code: " + elem.error.code);
@@ -251,9 +266,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     public void play() {
         if (getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                let elem = document.getElementById("$mediaPlayerId");
-                elem.play();
-                """.replace("$mediaPlayerId", mediaPlayerId));
+                    let elem = document.getElementById("$mediaPlayerId");
+                    elem.play();
+                    """.replace("$mediaPlayerId", mediaPlayerId));
         }
     }
 
@@ -261,9 +276,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     public void pause() {
         if (getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                let elem = document.getElementById("$mediaPlayerId");
-                elem.pause();
-                """.replace("$mediaPlayerId", mediaPlayerId));
+                    let elem = document.getElementById("$mediaPlayerId");
+                    elem.pause();
+                    """.replace("$mediaPlayerId", mediaPlayerId));
         }
     }
 
@@ -271,10 +286,10 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     public void stop() {
         if (getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                let elem = document.getElementById("$mediaPlayerId");
-                elem.pause();
-                elem.currentTime = 0;
-                """.replace("$mediaPlayerId", mediaPlayerId));
+                    let elem = document.getElementById("$mediaPlayerId");
+                    elem.pause();
+                    elem.currentTime = 0;
+                    """.replace("$mediaPlayerId", mediaPlayerId));
         }
 
         setStatus(Status.STOPPED);
@@ -296,7 +311,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
                 elem.on$eventName = (event) => {
                      $eventHandler
                 };
-                """.replace("$eventHandler", eventHandler)
+                """
+                .replace("$eventHandler", eventHandler)
                 .replace("java_fun", "jpro.$mediaPlayerId_$eventName")
                 .replace("$mediaPlayerId", mediaPlayerId)
                 .replace("$eventName", eventName));

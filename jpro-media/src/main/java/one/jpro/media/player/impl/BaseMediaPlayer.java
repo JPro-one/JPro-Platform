@@ -270,6 +270,33 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         return onStopped;
     }
 
+    // On end of media event handler
+    private ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMedia;
+
+    @Override
+    public EventHandler<MediaPlayerEvent> getOnEndOfMedia() {
+        return (onEndOfMedia == null) ? null : onEndOfMedia.get();
+    }
+
+    @Override
+    public void setOnEndOfMedia(EventHandler<MediaPlayerEvent> value) {
+        onEndOfMediaProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMediaProperty() {
+        if (onEndOfMedia == null) {
+            onEndOfMedia = new SimpleObjectProperty<>(this, "onEndOfMedia") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA, get());
+                }
+            };
+        }
+        return onEndOfMedia;
+    }
+
     // On error event handler
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onError;
 

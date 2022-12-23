@@ -86,7 +86,7 @@ public interface MediaPlayer extends EventTarget {
     Status getStatus();
 
     /**
-     * The current state of the MediaPlayer.
+     * The current status of the MediaPlayer.
      */
     ReadOnlyObjectProperty<Status> statusProperty();
 
@@ -216,6 +216,12 @@ public interface MediaPlayer extends EventTarget {
      * Event handler invoked when the status changes to <code>STALLED</code>.
      */
     ObjectProperty<EventHandler<MediaPlayerEvent>> onStalledProperty();
+
+    EventHandler<MediaPlayerEvent> getOnEndOfMedia();
+
+    void setOnEndOfMedia(EventHandler<MediaPlayerEvent> value);
+
+    ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMediaProperty();
 
     /**
      * Retrieves the event handler for errors.

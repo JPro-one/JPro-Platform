@@ -79,6 +79,18 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             log.info("Media player stopped!");
         });
 
+        mediaPlayer.setOnEndOfMedia(() -> {
+            mediaPlayer.seek(Duration.ZERO);
+            mediaPlayer.stop();
+
+            // Fire end of media event
+            Event.fireEvent(FXMediaPlayer.this,
+                    new MediaPlayerEvent(FXMediaPlayer.this,
+                            MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
+
+            log.info("Media playback has ended!");
+        });
+
         mediaPlayer.setOnError(() -> {
             // set error status
             setStatus(Status.HALTED);

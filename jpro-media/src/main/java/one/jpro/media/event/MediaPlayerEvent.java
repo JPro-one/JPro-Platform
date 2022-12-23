@@ -49,6 +49,12 @@ public class MediaPlayerEvent extends Event {
             new EventType<>(ANY, "MEDIA_PLAYER_STOP");
 
     /**
+     * Fired when media playback has ended.
+     */
+    public static final EventType<MediaPlayerEvent> MEDIA_PLAYER_END_OF_MEDIA =
+            new EventType<>(ANY, "MEDIA_PLAYER_END_OF_MEDIA");
+
+    /**
      * The stalled event occurs when the media player is trying
      * to get media data, but data is not available.
      */
