@@ -34,15 +34,15 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     }
 
     void setMediaSource(MediaSource value) {
-        mediaResourcePropertyImpl().set(value);
+        mediaSourcePropertyImpl().set(value);
     }
 
     @Override
     public ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
-        return mediaResourcePropertyImpl().getReadOnlyProperty();
+        return mediaSourcePropertyImpl().getReadOnlyProperty();
     }
 
-    abstract ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl();
+    abstract ReadOnlyObjectWrapper<MediaSource> mediaSourcePropertyImpl();
 
     // status property
     private ReadOnlyObjectWrapper<Status> status;

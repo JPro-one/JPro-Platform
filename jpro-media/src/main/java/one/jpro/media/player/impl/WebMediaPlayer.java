@@ -27,40 +27,42 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     private final WebAPI webAPI;
     private final String mediaPlayerId;
 
+    private boolean playerReady = false;
+
     public WebMediaPlayer(WebAPI webAPI, MediaSource mediaSource) {
         this.webAPI = Objects.requireNonNull(webAPI, "WebAPI cannot be null.");
         mediaPlayerId = webAPI.createUniqueJSName("media_player_");
         setMediaSource(Objects.requireNonNull(mediaSource, "Media source cannot be null."));
 
         // check if the media can be played
-        handleWebEvent("canplay", """
+        handleWebEvent("loadeddata", """
                     console.log("$mediaPlayerId => ready state: " + elem.readyState);
                     java_fun(elem.readyState);
-                """, str -> WebReadyState.fromCode(Integer.parseInt(str)).ifPresent(this::setReadyState));
+                """, readyState -> WebReadyState.fromCode(Integer.parseInt(readyState)).ifPresent(this::setReadyState));
 
         // handle current time change
         handleWebEvent("timeupdate", """
                 console.log("$mediaPlayerId => current time: " + elem.currentTime);
                 java_fun(elem.currentTime);
-                """, str -> setCurrentTime(Duration.seconds(Double.parseDouble(str))));
+                """, currentTime -> setCurrentTime(Duration.seconds(Double.parseDouble(currentTime))));
 
         // handle duration change
         handleWebEvent("durationchange", """
                 console.log("$mediaPlayerId => media duration: " + elem.duration + " seconds");
                 java_fun(elem.duration);
-                """, str -> setDuration(Duration.seconds(Double.parseDouble(str))));
+                """, duration -> setDuration(Duration.seconds(Double.parseDouble(duration))));
 
         // handle volume change
         handleWebEvent("volumechange", """
                 console.log("$mediaPlayerId => volume change: " + elem.volume);
                 java_fun(elem.volume);
-                """, str -> volumeProperty().set(Double.parseDouble(str)));
+                """, volume -> volumeProperty().set(Double.parseDouble(volume)));
 
         // handle play event
         handleWebEvent("play", """
                     console.log("$mediaPlayerId => playing...");
                     java_fun(elem.currentTime);
-                """, str -> {
+                """, currentTime -> {
             // Set status to playing
             setStatus(Status.PLAYING);
 
@@ -74,8 +76,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         handleWebEvent("pause", """
                     console.log("$mediaPlayerId => paused...");
                     java_fun(elem.paused);
-                """, str -> {
-            if (Boolean.parseBoolean(str)) {
+                """, paused -> {
+            if (Boolean.parseBoolean(paused)) {
                 // Set status to paused
                 setStatus(Status.PAUSED);
 
@@ -90,7 +92,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         handleWebEvent("stalled", """
                     console.log("$mediaPlayerId => stalled...");
                     java_fun(elem.readyState);
-                """, str -> {
+                """, readyState -> {
+            log.debug("Media player stalled: {}", readyState);
+
             // Set status to stalled
             setStatus(Status.STALLED);
 
@@ -119,9 +123,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         handleWebEvent("error", """
                     console.log("$mediaPlayerId => error occurred with code: " + elem.error.code);
                     java_fun(elem.error.code);
-                """, str -> {
+                """, errorCode -> {
             // Set error
-            WebMediaError.fromCode(Integer.parseInt(str)).ifPresent(webErrorCode ->
+            WebMediaError.fromCode(Integer.parseInt(errorCode)).ifPresent(webErrorCode ->
                     setError(new MediaPlayerException(webErrorCode.getDescription())));
 
             // Set status to halted
@@ -143,17 +147,19 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     }
 
     @Override
-    ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl() {
+    ReadOnlyObjectWrapper<MediaSource> mediaSourcePropertyImpl() {
         if (mediaSource == null) {
             mediaSource = new ReadOnlyObjectWrapper<>(this, "source") {
                 @Override
                 protected void invalidated() {
-                    webAPI.executeScript("""
-                            var elem = document.getElementById("$mediaPlayerId");
-                            elem.src = "$source";
-                            """.replace("$mediaPlayerId", mediaPlayerId)
-                            .replace("$source", get().source())
-                            .replace("\"\"", "\""));
+                    if (getStatus() != Status.DISPOSED) {
+                        webAPI.executeScript("""
+                                var elem = document.getElementById("$mediaPlayerId");
+                                elem.src = "$source";
+                                """.replace("$mediaPlayerId", mediaPlayerId)
+                                .replace("$source", get().source())
+                                .replace("\"\"", "\""));
+                    }
                 }
             };
         }
@@ -181,7 +187,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
                 @Override
                 protected void invalidated() {
-                    if (get() == WebReadyState.HAVE_ENOUGH_DATA) {
+                    if (get().getCode() >= WebReadyState.HAVE_METADATA.getCode()) {
+                        playerReady = true;
+
                         // Set state to ready
                         setStatus(Status.READY);
 
@@ -207,7 +215,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void setVolume(double value) {
-        value = clamp(volume.get(), 0.0, 1.0);
+        value = clamp(value, 0.0, 1.0);
         if (getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
                     var elem = document.getElementById("$mediaPlayerId");
@@ -251,11 +259,13 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
             muted = new SimpleBooleanProperty(this, "muted") {
                 @Override
                 protected void invalidated() {
-                    webAPI.executeScript("""
-                            var elem = document.getElementById("$mediaPlayerId");
-                            elem.muted = $muted;
-                            """.replace("$mediaPlayerId", mediaPlayerId)
-                            .replace("$muted", String.valueOf(get())));
+                    if (getStatus() != Status.DISPOSED) {
+                        webAPI.executeScript("""
+                                var elem = document.getElementById("$mediaPlayerId");
+                                elem.muted = $muted;
+                                """.replace("$mediaPlayerId", mediaPlayerId)
+                                .replace("$muted", String.valueOf(get())));
+                    }
                 }
             };
         }
@@ -264,7 +274,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void play() {
-        if (getStatus() != Status.DISPOSED) {
+        if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
                     let elem = document.getElementById("$mediaPlayerId");
                     elem.play();
@@ -274,7 +284,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void pause() {
-        if (getStatus() != Status.DISPOSED) {
+        if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
                     let elem = document.getElementById("$mediaPlayerId");
                     elem.pause();
@@ -284,7 +294,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void stop() {
-        if (getStatus() != Status.DISPOSED) {
+        if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
                     let elem = document.getElementById("$mediaPlayerId");
                     elem.pause();
@@ -297,11 +307,17 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void seek(Duration seekTime) {
-        webAPI.executeScript("""
-                let elem = document.getElementById("$mediaPlayerId");
-                elem.currentTime=%s;
-                """.formatted(seekTime.toSeconds())
-                .replace("$mediaPlayerId", mediaPlayerId));
+        if (getStatus() == Status.DISPOSED) {
+            return;
+        }
+
+        if (playerReady && seekTime != null && !seekTime.isUnknown()) {
+            webAPI.executeScript("""
+                    let elem = document.getElementById("$mediaPlayerId");
+                    elem.currentTime=%s;
+                    """.formatted(seekTime.toSeconds())
+                    .replace("$mediaPlayerId", mediaPlayerId));
+        }
     }
 
     private void handleWebEvent(String eventName, String eventHandler, WebCallback webCallback) {
