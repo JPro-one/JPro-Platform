@@ -15,8 +15,7 @@ import one.jpro.media.recorder.impl.WebMediaRecorder;
 import java.util.Optional;
 
 /**
- * The MediaRecorder interface of the MediaStream Recording API
- * provides functionality to easily record media.
+ * The MediaRecorder provides functionality to easily record media.
  *
  * @author Besmir Beqiri
  */
@@ -24,7 +23,7 @@ public interface MediaRecorder extends EventTarget {
 
     /**
      * Creates a media recorder. If the application is running in a
-     * browser with JPro, then a web version of {@link MediaRecorder}
+     * browser via JPro server, then a web version of {@link MediaRecorder}
      * is returned. If the application is not running inside the browser
      * than a desktop/mobile version of the media recorder is returned.
      *
@@ -80,16 +79,33 @@ public interface MediaRecorder extends EventTarget {
         }
     }
 
+    /**
+     * Retrieve the camera view during the recording.
+     *
+     * @return a {@link Region}
+     */
     Region getCameraView();
 
+    /**
+     * Retrieves the current media source.
+     *
+     * @return {@link MediaSource} object
+     */
     MediaSource getMediaSource();
 
+    /**
+     * The current media source property.
+     */
     ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
+    /**
+     * Retrieves the current recorder status.
+     *
+     * @return the recorder status
+     */
     Status getStatus();
 
     ReadOnlyObjectProperty<Status> statusProperty();
-
 
     EventHandler<MediaRecorderEvent> getOnDataAvailable();
 
@@ -97,41 +113,134 @@ public interface MediaRecorder extends EventTarget {
 
     ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailableProperty();
 
+    /**
+     * Retrieves the event handler when the recording has started
+     * and status is set to {@link MediaRecorder.Status#RECORDING}.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaRecorderEvent> getOnStart();
 
+    /**
+     * Sets the event handler when the recording has started
+     * and status is set to {@link MediaRecorder.Status#RECORDING}.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnStart(EventHandler<MediaRecorderEvent> value);
 
+    /**
+     * Event handler invoked when the recording started.
+     */
     ObjectProperty<EventHandler<MediaRecorderEvent>> onStartProperty();
 
+    /**
+     * Retrieves the event handler when the recording has paused
+     * and status is set to {@link MediaRecorder.Status#PAUSED}.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaRecorderEvent> getOnPause();
 
+    /**
+     * Sets the event handler when the media recorder has paused
+     * and status is set to {@link MediaRecorder.Status#PAUSED}.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnPause(EventHandler<MediaRecorderEvent> value);
 
+    /**
+     * Event handler invoked when the recorder has paused,
+     * and status is set to {@link MediaRecorder.Status#PAUSED}.
+     */
     ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty();
 
+    /**
+     * Retrieves the event handler when recording has resumed
+     * and status changes to {@link MediaRecorder.Status#RECORDING}
+     * after previously was set to {@link MediaRecorder.Status#PAUSED}.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaRecorderEvent> getOnResume();
 
+    /**
+     * Sets the event handler when recording has resumed
+     * and status changes to {@link MediaRecorder.Status#RECORDING}
+     * after previously was set to {@link MediaRecorder.Status#PAUSED}.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnResume(EventHandler<MediaRecorderEvent> value);
 
+    /**
+     * Event handler invoked when recording has resumed and
+     * the status changes to {@link MediaRecorder.Status#RECORDING}
+     * after previously was set to {@link MediaRecorder.Status#PAUSED}.
+     */
     ObjectProperty<EventHandler<MediaRecorderEvent>> onResumeProperty();
 
+    /**
+     * Retrieves the event handler when recording is stopped
+     * and status changes to {@link MediaRecorder.Status#INACTIVE}.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaRecorderEvent> getOnStopped();
 
+    /**
+     * Sets the event handler when recording is stopped
+     * and status changes to {@link MediaRecorder.Status#INACTIVE}.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnStopped(EventHandler<MediaRecorderEvent> value);
 
+    /**
+     * Event handler invoked when recording stopped and the
+     * status changes to {@link MediaRecorder.Status#INACTIVE}.
+     */
     ObjectProperty<EventHandler<MediaRecorderEvent>> onStoppedProperty();
 
+    /**
+     * Retrieves the event handler for errors.
+     *
+     * @return the event handler.
+     */
     EventHandler<MediaRecorderEvent> getOnError();
 
+    /**
+     * Sets the event handler to be called when an error occurs.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnError(EventHandler<MediaRecorderEvent> value);
 
+    /**
+     * Event handler invoked when an error occurs.
+     */
     ObjectProperty<EventHandler<MediaRecorderEvent>> onErrorProperty();
 
+    /**
+     * Retrieve the value of the {@link #errorProperty error}
+     * property or <code>null</code> if there is no error.
+     *
+     * @return a {@link MediaRecorderException} or <code>null</code>.
+     */
     MediaRecorderException getError();
 
+    /**
+     * Observable property set to a {@link MediaRecorderException} if an error occurs.
+     */
     ReadOnlyObjectProperty<MediaRecorderException> errorProperty();
 
     // Recorder controller methods
+    /**
+     * Enable camera stream from the device. If this process is successful,
+     * then use the {@link MediaRecorder#getCameraView()}
+     * method to retrieve the camera view and show it.
+     */
     void enable();
 
     /**
@@ -154,5 +263,6 @@ public interface MediaRecorder extends EventTarget {
      */
     void stop();
 
+    @Deprecated
     void retrieve();
 }

@@ -16,14 +16,15 @@ import one.jpro.media.player.impl.FXMediaPlayer;
 import one.jpro.media.player.impl.WebMediaPlayer;
 
 /**
- * Media player interface.
+ * The MediaPlayer provides functionality to easily play media,
+ * both on desktop/mobile and web platforms.
  *
  * @author Besmir Beqiri
  */
 public interface MediaPlayer extends EventTarget {
 
     /**
-     * Creates a media player (JavaFX/Desktop version).
+     * Creates a media player for desktop/mobile only.
      *
      * @param mediaSource the media source
      * @return a {@link MediaPlayer} object.
@@ -33,11 +34,10 @@ public interface MediaPlayer extends EventTarget {
     }
 
     /**
-     * Creates a media player with the given JPro WebAPI.
-     * If the application is running in a browser with JPro,
-     * then a web version of {@link MediaPlayer} is returned.
-     * If the application is not running inside the browser than
-     * a desktop version of the media player is returned.
+     * Creates a media player. If the application is running in a
+     * browser via JPro server, then a web version of media player
+     * is returned. If the application is not running inside the
+     * browser than a desktop version of the media player is returned.
      *
      * @param stage the application stage
      * @param mediaSource the media source
@@ -90,15 +90,28 @@ public interface MediaPlayer extends EventTarget {
      */
     ReadOnlyObjectProperty<Status> statusProperty();
 
+    /**
+     * Retrieves the current media source.
+     *
+     * @return {@link MediaSource} object
+     */
     MediaSource getMediaSource();
 
+    /**
+     * The current media source property.
+     */
     ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
+    /**
+     * Gets the duration for the given media source. If the duration cannot be
+     * obtained when this method is invoked, a {@link Duration#UNKNOWN} value will be returned.
+     */
     Duration getDuration();
 
     /**
      * The total duration of play time if allowed to play until finished.
-     * If the Media duration is UNKNOWN, then this will likewise be UNKNOWN.
+     * If the Media duration is {@link Duration#UNKNOWN},
+     * then this will likewise be {@link Duration#UNKNOWN}.
      *
      * @return the duration of the media
      */
@@ -131,7 +144,7 @@ public interface MediaPlayer extends EventTarget {
 
     /**
      * The current media playback time. This property is read-only: use
-     * {@link #seek(javafx.util.Duration)} to change playback to a different
+     * {@link #seek(Duration)} to change playback to a different
      * stream position.
      *
      * @return the current playback time
@@ -147,6 +160,7 @@ public interface MediaPlayer extends EventTarget {
 
     /**
      * Sets the {@link Status#READY} event handler.
+     *
      * @param value the event handler or <code>null</code>.
      */
     void setOnReady(EventHandler<MediaPlayerEvent> value);
@@ -164,12 +178,14 @@ public interface MediaPlayer extends EventTarget {
 
     /**
      * Retrieves the {@link Status#PAUSED} event handler.
+     *
      * @return the event handler or <code>null</code>.
      */
     EventHandler<MediaPlayerEvent> getOnPause();
 
     /**
      * Sets the {@link Status#PAUSED} event handler.
+     *
      * @param value the event handler or <code>null</code>.
      */
     void setOnPause(EventHandler<MediaPlayerEvent> value);
@@ -243,8 +259,8 @@ public interface MediaPlayer extends EventTarget {
     ObjectProperty<EventHandler<MediaPlayerEvent>> onErrorProperty();
 
     /**
-     * Retrieve the value of the {@link #errorProperty error} property or <code>null</code>
-     * if there is no error.
+     * Retrieve the value of the {@link #errorProperty error}
+     * property or <code>null</code> if there is no error.
      *
      * @return a {@link MediaPlayerException} or <code>null</code>.
      */

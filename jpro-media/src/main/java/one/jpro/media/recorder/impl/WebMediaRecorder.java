@@ -268,6 +268,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
     }
 
     @Override
+    @Deprecated
     public void retrieve() {
         final var mediaSource = getMediaSource();
         if (!mediaSource.isLocal()) {
