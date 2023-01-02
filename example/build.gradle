@@ -27,7 +27,8 @@ dependencies {
 //mainClassName = 'one.jpro.utils.example.SessionManagerSample'
 //mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
 //mainClassName = 'one.jpro.utils.example.MediaRecorderSample'
-mainClassName = 'one.jpro.utils.example.MediaPlayerSample'
+//mainClassName = 'one.jpro.utils.example.MediaPlayerSample'
+mainClassName = 'one.jpro.utils.example.MediaRecorderAndPlayerSample'
 
 javafx {
   version = "$JAVAFX_VERSION"

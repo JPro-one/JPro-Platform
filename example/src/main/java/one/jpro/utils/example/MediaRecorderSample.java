@@ -2,62 +2,67 @@ package one.jpro.utils.example;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import one.jpro.media.recorder.MediaRecorder;
+import one.jpro.media.util.MediaUtil;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
 
 /**
- * Media recorder sample.
+ * Media recorder example.
  *
  * @author Besmir Beqiri
  */
 public class MediaRecorderSample extends Application {
 
-    private MediaRecorder mediaRecorder;
-
     @Override
     public void start(Stage stage) {
-        var mediaRecorder = MediaRecorder.create(stage);
+        stage.setTitle("JPro Camera Recorder");
 
-        var enableCamera = new Button("Enable Camera");
-        var previewLabel = new Label("Camera View");
-        previewLabel.setFont(Font.font("Roboto Bold", 24));
-
-        var cameraView = mediaRecorder.getCameraView();
-        cameraView.setPrefSize(640.0, 480.0);
-        cameraView.setStyle("-fx-background-color: black, white; -fx-background-insets: 0, 1;");
-
-        var startButton = new Button("Start Recording");
-        var pauseResumeButton = new Button("Pause Recording");
+        var enableCamButton = new Button("Enable Cam");
+        var startButton = new Button("Start");
+        startButton.setDisable(true);
+        var pauseResumeButton = new Button("Pause");
         pauseResumeButton.setDisable(true);
-        var stopButton = new Button("Stop Recording");
+        var stopButton = new Button("Stop");
         stopButton.setDisable(true);
         var saveButton = new Button("Save As...");
         saveButton.setDisable(true);
 
-        var hBox = new HBox(startButton, pauseResumeButton, stopButton, saveButton);
-        hBox.setAlignment(Pos.CENTER);
-        hBox.setSpacing(12.0);
+        var previewPane = new StackPane(enableCamButton);
+        previewPane.getStyleClass().add("preview-pane");
 
-        var box = new VBox(enableCamera, previewLabel, cameraView, hBox);
-        box.setAlignment(Pos.CENTER);
-        box.setMaxWidth(640.0);
-        box.setSpacing(8.0);
+        var mediaRecorder = MediaRecorder.create(stage);
+        var cameraView = mediaRecorder.getCameraView();
+
+        var controlsPane = new FlowPane(startButton, pauseResumeButton, stopButton, saveButton);
+        controlsPane.getStyleClass().add("controls-pane");
 
         // button events
-        enableCamera.setOnAction(event -> mediaRecorder.enable());
+        enableCamButton.setOnAction(event -> {
+            mediaRecorder.enable();
+            startButton.setDisable(false);
+            previewPane.getChildren().setAll(cameraView);
+        });
         startButton.setOnAction(event -> mediaRecorder.start());
         pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
-        saveButton.setOnAction(event -> mediaRecorder.retrieve());
+        saveButton.setOnAction(event -> {
+            try {
+                MediaUtil.retrieve(stage, mediaRecorder.getMediaSource());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
 
         // media recorder events
         mediaRecorder.setOnStart(event -> {
@@ -82,10 +87,14 @@ public class MediaRecorderSample extends Application {
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 
-        var root = new StackPane(box);
-        root.setPadding(new Insets(16.0));
-        var scene = new Scene(root, 720, 640);
-        scene.getStylesheets().add(new PrimerLight().getUserAgentStylesheet());
+        var rootPane = new VBox(previewPane, controlsPane);
+        rootPane.getStyleClass().add("root-pane");
+        VBox.setVgrow(previewPane, Priority.ALWAYS);
+        var scene = new Scene(rootPane, 760, 540, Color.BLACK);
+        scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());
+        Optional.ofNullable(getClass().getResource("css/media_sample.css"))
+                .map(URL::toExternalForm)
+                .ifPresent(cssResource -> scene.getStylesheets().add(cssResource));
         stage.setScene(scene);
         stage.show();
     }

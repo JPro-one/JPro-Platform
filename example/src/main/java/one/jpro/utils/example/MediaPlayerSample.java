@@ -8,9 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -18,8 +16,11 @@ import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaView;
 
+import java.net.URL;
+import java.util.Optional;
+
 /**
- * Media player sample.
+ * Media player example.
  *
  * @author Besmir Beqiri
  */
@@ -29,42 +30,38 @@ public class MediaPlayerSample extends Application {
 
     @Override
     public void start(Stage stage) {
+        stage.setTitle("JPro Media Player");
+
         // media player
         var mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
         var mediaView = MediaView.create(mediaPlayer);
 
-        mediaView.setPreserveRatio(false);
-        mediaView.setStyle("-fx-background-color: black, white; -fx-background-insets: 0, 1;");
-
         // controls
         var playPauseButton = new Button("Play");
-        playPauseButton.setPrefWidth(80.0);
         playPauseButton.setDisable(true);
         var stopButton = new Button("Stop");
-        stopButton.setPrefWidth(80.0);
         stopButton.setDisable(true);
         var seekSlider = new Slider();
-        seekSlider.setPrefWidth(420.0);
+        seekSlider.getStyleClass().add("seek-slider");
         var preserveRatioCheckBox = new CheckBox("Preserve Ratio");
         preserveRatioCheckBox.setSelected(mediaView.isPreserveRatio());
         var muteCheckBox = new CheckBox("Mute");
         var volumeSlider = new Slider(0, 100, mediaPlayer.getVolume() * 100.0);
-        volumeSlider.setPrefWidth(120.0);
+        volumeSlider.getStyleClass().add("volume-slider");
 
         // events
         playPauseButton.setOnAction(event -> {
-            if (mediaPlayer.getStatus() == Status.PLAYING) {
-                mediaPlayer.pause();
-            } else if (mediaPlayer.getStatus() == Status.READY ||
+            if (mediaPlayer.getStatus() == Status.READY ||
                     mediaPlayer.getStatus() == Status.PAUSED ||
                     mediaPlayer.getStatus() == Status.STOPPED) {
                 mediaPlayer.play();
+            } else {
+                mediaPlayer.pause();
             }
         });
         stopButton.setOnAction(event -> mediaPlayer.stop());
 
-        // seeker
-        seekSlider.setOnMouseReleased(mouseEvent ->
+        seekSlider.setOnMousePressed(mouseEvent ->
                 mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));
         seekSlider.setOnMouseDragged(mouseEvent ->
                 mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));
@@ -79,14 +76,16 @@ public class MediaPlayerSample extends Application {
 
         preserveRatioCheckBox.setOnAction(event ->
                 mediaView.setPreserveRatio(preserveRatioCheckBox.isSelected()));
+
         muteCheckBox.setOnAction(event -> {
             mediaPlayer.setMute(muteCheckBox.isSelected());
             volumeSlider.setDisable(muteCheckBox.isSelected());
         });
+
         volumeSlider.valueProperty().addListener(observable ->
                 mediaPlayer.setVolume(volumeSlider.getValue() / 100.0));
         mediaPlayer.volumeProperty().addListener(observable -> {
-            if (!volumeSlider.isValueChanging() && !volumeSlider.isPressed()) {
+            if (!volumeSlider.isValueChanging()) {
                 volumeSlider.setValue(mediaPlayer.getVolume() * 100.0);
             }
         });
@@ -95,7 +94,7 @@ public class MediaPlayerSample extends Application {
             playPauseButton.setDisable(false);
             stopButton.setDisable(false);
             seekSlider.setMax(mediaPlayer.getDuration().toSeconds());
-            mediaPlayer.setVolume(mediaPlayer.getVolume() * 100.0);
+            volumeSlider.setValue(mediaPlayer.getVolume() * 100.0);
         });
         mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
         mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
@@ -105,22 +104,18 @@ public class MediaPlayerSample extends Application {
         // interface
         var controlsPane = new FlowPane(playPauseButton, stopButton, seekSlider,
                 preserveRatioCheckBox, muteCheckBox, volumeSlider);
-        controlsPane.setAlignment(Pos.CENTER);
-        controlsPane.setHgap(8.0);
-        controlsPane.setVgap(8.0);
-        controlsPane.setPadding(new Insets(8.0));
-        controlsPane.maxWidthProperty().bind(mediaView.fitWidthProperty());
-        var vbox = new VBox(mediaView, controlsPane);
-        mediaView.fitWidthProperty().bind(vbox.widthProperty());
-        mediaView.fitHeightProperty().bind(vbox.heightProperty().subtract(controlsPane.heightProperty()));
-        vbox.setSpacing(8.0);
-        var root = new AnchorPane(vbox);
-        AnchorPane.setTopAnchor(vbox, 16.0);
-        AnchorPane.setRightAnchor(vbox, 16.0);
-        AnchorPane.setBottomAnchor(vbox, 16.0);
-        AnchorPane.setLeftAnchor(vbox, 16.0);
-        var scene = new Scene(root, 1100, 720);
+        controlsPane.getStyleClass().add("controls-pane");
+        var rootPane = new VBox(mediaView, controlsPane);
+        rootPane.getStyleClass().add("root-pane");
+        mediaView.fitWidthProperty().bind(rootPane.widthProperty());
+        mediaView.fitHeightProperty().bind(rootPane.heightProperty()
+                .subtract(controlsPane.heightProperty()));
+
+        var scene = new Scene(rootPane, 1140, 640);
         scene.getStylesheets().add(new PrimerLight().getUserAgentStylesheet());
+        Optional.ofNullable(getClass().getResource("css/media_sample.css"))
+                .map(URL::toExternalForm)
+                .ifPresent(cssResource -> scene.getStylesheets().add(cssResource));
         stage.setScene(scene);
         stage.show();
     }

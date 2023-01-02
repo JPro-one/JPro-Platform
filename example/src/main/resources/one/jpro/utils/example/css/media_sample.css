@@ -1,0 +1,37 @@
+.root-pane {
+    -fx-alignment: center;
+    /*-fx-spacing: 8;*/
+    /*-fx-padding: 8;*/
+}
+
+.preview-pane {
+    -fx-background-color: black, white;
+    -fx-background-insets: 0, 1;
+    /*-fx-pref-width: 640;*/
+    /*-fx-pref-height: 480;*/
+}
+
+.media-view {
+    -fx-background-color: black;
+}
+
+.controls-pane {
+    -fx-alignment: center;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-padding: 8;
+}
+
+.controls-pane > .button {
+    -fx-pref-width: 100;
+}
+
+.controls-pane > .seek-slider {
+    -fx-min-width: 520;
+    -fx-pref-width: 520;
+}
+
+.controls-pane > .volume-slider {
+    -fx-min-width: 120;
+    -fx-pref-width: 120;
+}
