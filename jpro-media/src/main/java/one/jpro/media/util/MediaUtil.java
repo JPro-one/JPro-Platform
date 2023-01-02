@@ -42,7 +42,7 @@ public final class MediaUtil {
         } else {
             final FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save As...");
-            fileChooser.setInitialFileName(mediaSource.source());
+            fileChooser.setInitialFileName(Path.of(mediaSource.source()).getFileName().toString());
             // Show save dialog
             final File saveToFile = fileChooser.showSaveDialog(stage);
             if (saveToFile != null) {
