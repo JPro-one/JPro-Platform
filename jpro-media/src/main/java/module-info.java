@@ -19,4 +19,5 @@ module one.jpro.media {
     exports one.jpro.media.event;
     exports one.jpro.media.player;
     exports one.jpro.media.recorder;
+    exports one.jpro.media.util;
 }

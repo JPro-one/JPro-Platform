@@ -266,21 +266,4 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
                 $mediaRecorder.stop();
                 """.replace("$mediaRecorder", mediaRecorderRef));
     }
-
-    @Override
-    @Deprecated
-    public void retrieve() {
-        final var mediaSource = getMediaSource();
-        if (!mediaSource.isLocal()) {
-            final WebAPI.JSFile jsFile = mediaSource.jsFile();
-            if (jsFile != null) {
-                webAPI.executeScript("""
-                    let download_link = document.createElement("a");
-                    download_link.setAttribute("download", "RecordedVideo.webm");
-                    download_link.href = %s;
-                    download_link.click();
-                    """.formatted(jsFile.getObjectURL().getName()));
-            }
-        }
-    }
 }

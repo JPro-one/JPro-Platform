@@ -35,7 +35,7 @@ public interface MediaRecorder extends EventTarget {
             final WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new WebMediaRecorder(webAPI);
         }
-        return new FXMediaRecorder(stage);
+        return new FXMediaRecorder();
     }
 
     /**
@@ -262,7 +262,4 @@ public interface MediaRecorder extends EventTarget {
      * Stops the recording of media.
      */
     void stop();
-
-    @Deprecated
-    void retrieve();
 }

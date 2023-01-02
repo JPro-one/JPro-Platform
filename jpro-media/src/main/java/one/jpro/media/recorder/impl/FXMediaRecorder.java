@@ -6,8 +6,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
@@ -17,14 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sound.sampled.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
@@ -53,8 +49,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private ExecutorService videoExecutorService;
     private ScheduledExecutorService audioExecutorService;
 
-    private final Stage stage;
-
     // Video resources
     private final OpenCVFrameGrabber webcamGrabber;
     private final JavaFXFrameConverter frameConverter;
@@ -77,8 +71,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private volatile boolean cameraEnabled = false;
     private volatile boolean recordingStarted = false;
 
-    public FXMediaRecorder(Stage stage) {
-        this.stage = stage;
+    public FXMediaRecorder() {
         // OpenCV webcam frame grabber
         webcamGrabber = new OpenCVFrameGrabber(WEBCAM_DEVICE_INDEX);
         // Frame to JavaFX image converter
@@ -320,23 +313,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     recorder.close();
                 }
             } catch (FrameRecorder.Exception ex) {
-                log.error(ex.getMessage(), ex);
-            }
-        }
-    }
-
-    @Override
-    @Deprecated
-    public void retrieve() {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save As...");
-        fileChooser.setInitialFileName(tempVideoFile.getFileName() + MP4_FILE_EXTENSION);
-        // Show save dialog
-        final File saveToFile = fileChooser.showSaveDialog(stage);
-        if (saveToFile != null) {
-            try {
-                Files.copy(tempVideoFile, saveToFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException ex) {
                 log.error(ex.getMessage(), ex);
             }
         }
