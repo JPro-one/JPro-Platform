@@ -101,7 +101,7 @@ public class FXMediaView extends MediaView {
     @Override
     public final BooleanProperty preserveRatioProperty() {
         if (preserveRatio == null) {
-            preserveRatio = new SimpleBooleanProperty(this, "preserveRatio") {
+            preserveRatio = new SimpleBooleanProperty(this, "preserveRatio", true) {
 
                 @Override
                 protected void invalidated() {

@@ -52,7 +52,7 @@ public abstract class MediaView extends Region {
     protected BooleanProperty preserveRatio;
 
     public final boolean isPreserveRatio() {
-        return preserveRatio != null && preserveRatio.get();
+        return preserveRatio == null || preserveRatio.get();
     }
 
     public final void setPreserveRatio(boolean value) {
