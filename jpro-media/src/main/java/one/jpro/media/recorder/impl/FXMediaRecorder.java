@@ -305,7 +305,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     @Override
     public void stop() {
         stopRecording();
-        setMediaSource(new MediaSource(tempVideoFile.toUri().getPath()));
+        setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
         tempVideoFiles.add(tempVideoFile); // add to the deletion list
 
         // Set status to inactive
