@@ -21,7 +21,9 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -66,6 +68,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     // Storage resources
     private FFmpegFrameRecorder recorder;
     private Path tempVideoFile;
+    private final List<Path> tempVideoFiles;
     private long startRecordingTime = 0;
 
     private volatile boolean cameraEnabled = false;
@@ -78,15 +81,26 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         frameConverter = new JavaFXFrameConverter();
         // Use ImageView to show camera grabbed frames
         frameView = new ImageView();
-//        frameView.setPreserveRatio(true);
         cameraView = new Pane(frameView);
         frameView.fitWidthProperty().bind(cameraView.widthProperty());
         frameView.fitHeightProperty().bind(cameraView.heightProperty());
+
+        // Create a list holder for temporary files
+        tempVideoFiles = new ArrayList<>();
 
         // Stop and release native resources on exit
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             stopRecording();
             release();
+
+            // delete temporary video files
+            tempVideoFiles.forEach(path -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+            });
         }));
     }
 
@@ -292,6 +306,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     public void stop() {
         stopRecording();
         setMediaSource(new MediaSource(tempVideoFile.toUri().getPath()));
+        tempVideoFiles.add(tempVideoFile); // add to the deletion list
 
         // Set status to inactive
         setStatus(Status.INACTIVE);
