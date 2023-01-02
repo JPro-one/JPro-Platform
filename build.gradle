@@ -49,6 +49,13 @@ allprojects {
   }
 }
 
+configure([project("jpro-sessions")]) {
+  dependencies {
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+  }
+}
+
 configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {
@@ -59,6 +66,10 @@ configure([project("tree-showing"), project("jpro-sound"), project("jpro-session
         artifactId project.name
         version JFX_UTILS_VERSION
       }
+    }
+    java {
+      withSourcesJar()
+      withJavadocJar()
     }
     repositories {
       maven {
