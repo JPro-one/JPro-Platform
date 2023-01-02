@@ -291,7 +291,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     @Override
     public void stop() {
         stopRecording();
-        setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
+        setMediaSource(new MediaSource(tempVideoFile.toUri().getPath()));
 
         // Set status to inactive
         setStatus(Status.INACTIVE);
@@ -327,7 +327,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
             // Check for AV drift
             if (videoTimeStamp > recorder.getTimestamp()) {
-                log.info("AV drift correction: {} : {} -> {}",
+                log.debug("AV drift correction: {} : {} -> {}",
                         videoTimeStamp, recorder.getTimestamp(), (videoTimeStamp - recorder.getTimestamp()));
 
                 // Tell the recorder to write this frame at this timestamp
@@ -338,7 +338,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.record(frame);
             }
         } catch (FFmpegFrameRecorder.Exception ex) {
-            log.info(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 
