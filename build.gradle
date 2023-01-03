@@ -11,16 +11,16 @@ buildscript {
   }
 }
 
-configure(subprojects.findAll {it.name != 'example'}) {
+allprojects {
+  apply plugin: 'java'
   repositories {
-    jcenter()
     mavenCentral()
     maven {
       url "https://sandec.jfrog.io/artifactory/repo"
     }
   }
-
-  apply plugin: 'java'
+}
+configure(subprojects.findAll {it.name != 'example'}) {
   apply plugin: 'java-library'
   apply plugin: 'org.openjfx.javafxplugin'
 
