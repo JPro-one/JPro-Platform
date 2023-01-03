@@ -32,8 +32,8 @@ configure(subprojects.findAll {it.name != 'example'}) {
   javafx {
     version = "$JAVAFX_VERSION"
     configurations = ["compileOnly", "testImplementation"]
-    modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls',
-                'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web' ]
+    modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml',
+                'javafx.media', 'javafx.swing','javafx.web' ]
   }
 
   dependencies {
