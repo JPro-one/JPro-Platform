@@ -8,7 +8,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.util.MediaUtil;
@@ -90,7 +89,7 @@ public class MediaRecorderSample extends Application {
         var rootPane = new VBox(previewPane, controlsPane);
         rootPane.getStyleClass().add("root-pane");
         VBox.setVgrow(previewPane, Priority.ALWAYS);
-        var scene = new Scene(rootPane, 760, 540, Color.BLACK);
+        var scene = new Scene(rootPane, 760, 540);
         scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());
         Optional.ofNullable(getClass().getResource("css/media_sample.css"))
                 .map(URL::toExternalForm)

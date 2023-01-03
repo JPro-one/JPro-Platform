@@ -1,14 +1,11 @@
 .root-pane {
     -fx-alignment: center;
-    /*-fx-spacing: 8;*/
-    /*-fx-padding: 8;*/
 }
 
 .preview-pane {
     -fx-background-color: black, white;
     -fx-background-insets: 0, 1;
-    /*-fx-pref-width: 640;*/
-    /*-fx-pref-height: 480;*/
+    -fx-max-height: infinity;
 }
 
 .media-view {
@@ -24,14 +21,4 @@
 
 .controls-pane > .button {
     -fx-pref-width: 100;
-}
-
-.controls-pane > .seek-slider {
-    -fx-min-width: 520;
-    -fx-pref-width: 520;
-}
-
-.controls-pane > .volume-slider {
-    -fx-min-width: 120;
-    -fx-pref-width: 120;
 }

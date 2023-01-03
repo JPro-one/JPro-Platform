@@ -42,12 +42,11 @@ public class MediaPlayerSample extends Application {
         var stopButton = new Button("Stop");
         stopButton.setDisable(true);
         var seekSlider = new Slider();
-        seekSlider.getStyleClass().add("seek-slider");
+        seekSlider.setPrefWidth(480);
         var preserveRatioCheckBox = new CheckBox("Preserve Ratio");
         preserveRatioCheckBox.setSelected(mediaView.isPreserveRatio());
         var muteCheckBox = new CheckBox("Mute");
         var volumeSlider = new Slider(0, 100, mediaPlayer.getVolume() * 100.0);
-        volumeSlider.getStyleClass().add("volume-slider");
 
         // events
         playPauseButton.setOnAction(event -> {
