@@ -1,0 +1,24 @@
+.root-pane {
+    -fx-alignment: center;
+}
+
+.preview-pane {
+    -fx-background-color: black, white;
+    -fx-background-insets: 0, 1;
+    -fx-max-height: infinity;
+}
+
+.media-view {
+    -fx-background-color: black;
+}
+
+.controls-pane {
+    -fx-alignment: center;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-padding: 8;
+}
+
+.controls-pane > .button {
+    -fx-pref-width: 100;
+}

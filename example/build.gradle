@@ -1,14 +1,45 @@
-
 apply plugin: 'application'
-apply plugin: 'com.sandec.jpro'
+apply plugin: 'org.openjfx.javafxplugin'
+apply plugin: 'jpro-gradle-plugin'
 
-mainClassName = 'one.jpro.sound.example.JProSoundSample'
-mainClassName = 'one.jpro.sound.example.SessionManagerSample'
-mainClassName = 'one.jpro.sound.example.HTMLScrollPaneSample'
+repositories {
+  jcenter()
+  mavenCentral()
+  maven {
+    url "https://sandec.jfrog.io/artifactory/repo"
+  }
+}
 
 dependencies {
   implementation project(":jpro-sound")
   implementation project(":jpro-sessions")
   implementation project(":htmlscrollpane")
+  implementation project(":jpro-media")
   implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+
+  implementation "org.bytedeco:javacv-platform:$javacvVersion"
+//  compileOnly "org.bytedeco:javacv-platform:$javacvVersion" // when running on JPro
+  implementation "io.github.mkpaz:atlantafx-base:1.1.0"
+  runtimeOnly "ch.qos.logback:logback-classic:1.4.5"
+}
+
+//mainClassName = 'one.jpro.utils.example.JProSoundSample'
+//mainClassName = 'one.jpro.utils.example.SessionManagerSample'
+//mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
+//mainClassName = 'one.jpro.utils.example.MediaRecorderSample'
+//mainClassName = 'one.jpro.utils.example.MediaPlayerSample'
+mainClassName = 'one.jpro.utils.example.MediaRecorderAndPlayerSample'
+
+javafx {
+  version = "$JAVAFX_VERSION"
+  modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls',
+              'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web' ]
+}
+
+application {
+  mainClass = "$mainClassName"
+  mainModule = moduleName
+  applicationDefaultJvmArgs = [
+          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"
+  ]
 }

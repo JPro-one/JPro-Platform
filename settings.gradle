@@ -1,5 +1,6 @@
 include "tree-showing"
 include "jpro-sound"
+include "jpro-media"
 include "jpro-sessions"
 include "htmlscrollpane"
 include "freeze-detector"

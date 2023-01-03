@@ -7,11 +7,11 @@ buildscript {
   }
   dependencies {
     classpath 'org.openjfx:javafx-plugin:0.0.14-SNAPSHOT-FORK'
-    classpath "com.sandec.jpro:jpro-plugin-gradle:$JPRO_VERSION"
+    classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
   }
 }
 
-allprojects {
+configure(subprojects.findAll {it.name != 'example'}) {
   repositories {
     jcenter()
     mavenCentral()
@@ -19,15 +19,14 @@ allprojects {
       url "https://sandec.jfrog.io/artifactory/repo"
     }
   }
-  
 
   apply plugin: 'java'
   apply plugin: 'java-library'
   apply plugin: 'org.openjfx.javafxplugin'
 
   compileJava {
-    sourceCompatibility = 11
-    targetCompatibility = 11
+    sourceCompatibility = 17
+    targetCompatibility = 17
   }
 
   javafx {
@@ -55,7 +54,6 @@ configure([project("jpro-sessions")]) {
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
   }
 }
-
 configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {

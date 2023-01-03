@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    compileOnly "org.bytedeco:javacv-platform:$javacvVersion"
+    api 'org.slf4j:slf4j-api:2.0.5'
+    api 'org.json:json:20220924'
+}
+
+compileJava {
+    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"]
+}

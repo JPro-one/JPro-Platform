@@ -1,4 +1,4 @@
-package one.jpro.sound.example;
+package one.jpro.utils.example;
 
 import com.jpro.webapi.WebAPI;
 import javafx.application.Application;
