@@ -99,7 +99,9 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     MediaSource getMediaSource();
 
     /**
-     * The current media source property.
+     * The media source for the current player. It holds the information
+     * on where it resource is located and accessed either via a string
+     * form URI locally, or via {@link WebAPI.JSFile} remotely.
      */
     ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
@@ -171,10 +173,23 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      */
     ObjectProperty<EventHandler<MediaPlayerEvent>> onReadyProperty();
 
+    /**
+     * Retrieves the {@link Status#PLAYING} event handler.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaPlayerEvent> getOnPlaying();
 
+    /**
+     * Sets the {@link Status#PLAYING} event handler.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnPlaying(EventHandler<MediaPlayerEvent> value);
 
+    /**
+     * Event handler invoked when the status changes to <code>PLAYING</code>.
+     */
     ObjectProperty<EventHandler<MediaPlayerEvent>> onPlayingProperty();
 
     /**
@@ -234,10 +249,23 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      */
     ObjectProperty<EventHandler<MediaPlayerEvent>> onStalledProperty();
 
+    /**
+     * Retrievers the event handler invoked when the end of media is reached naturally.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaPlayerEvent> getOnEndOfMedia();
 
+    /**
+     * Sets the event handler invoked when the end of media is reached naturally.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnEndOfMedia(EventHandler<MediaPlayerEvent> value);
 
+    /**
+     * Event handler invoked when the end of media is reached naturally.
+     */
     ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMediaProperty();
 
     /**

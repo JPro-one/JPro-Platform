@@ -8,6 +8,7 @@ import javafx.event.EventTarget;
 import javafx.stage.Stage;
 import one.jpro.media.MediaEngine;
 import one.jpro.media.MediaSource;
+import one.jpro.media.MediaView;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.impl.FXMediaRecorder;
 import one.jpro.media.recorder.impl.WebMediaRecorder;
@@ -87,7 +88,7 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
     MediaSource getMediaSource();
 
     /**
-     * The current media source property.
+     * The current media source for this recorder.
      */
     ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
@@ -98,12 +99,31 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
      */
     Status getStatus();
 
+    /**
+     * Recorder status hold the internal state for this recorder.
+     */
     ReadOnlyObjectProperty<Status> statusProperty();
 
+    /**
+     * Retrieves the event handler when the recording has started
+     * and media data is delivered to the application.
+     *
+     * @return the event handler or <code>null</code>.
+     */
     EventHandler<MediaRecorderEvent> getOnDataAvailable();
 
+    /**
+     * Sets the event handler when the recording has started
+     * and media data is delivered to the application.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
     void setOnDataAvailable(EventHandler<MediaRecorderEvent> value);
 
+    /**
+     * Event handler invoked when this recorder delivers media data
+     * to the application for its use.
+     */
     ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailableProperty();
 
     /**
@@ -231,8 +251,8 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
     // Recorder controller methods
     /**
      * Enable camera stream from the device. If this process is successful,
-     * then use the {@link MediaRecorder#getCameraView()}
-     * method to retrieve the camera view and show it.
+     * then use the {@link MediaView#create(MediaRecorder)}
+     * method to create the camera view and show it.
      */
     void enable();
 

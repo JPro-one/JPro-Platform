@@ -60,7 +60,8 @@ public abstract class MediaView extends Region {
         } else if (mediaPlayer instanceof WebMediaPlayer webMediaPlayer) {
             return new WebMediaPlayerView(webMediaPlayer);
         } else {
-            throw new IllegalArgumentException("Unsupported MediaPlayer implementation: " + mediaPlayer.getClass().getName());
+            throw new IllegalArgumentException("Unsupported MediaPlayer implementation: " +
+                    mediaPlayer.getClass().getName());
         }
     }
 
@@ -79,21 +80,38 @@ public abstract class MediaView extends Region {
         } else if (mediaRecorder instanceof WebMediaRecorder webMediaRecorder) {
             return new WebMediaRecorderView(webMediaRecorder);
         } else {
-            throw new IllegalArgumentException("Unsupported MediaRecorder implementation: " + mediaRecorder.getClass().getName());
+            throw new IllegalArgumentException("Unsupported MediaRecorder implementation: " +
+                    mediaRecorder.getClass().getName());
         }
     }
 
     // media player property
     protected ObjectProperty<MediaEngine> mediaEngine;
 
+    /**
+     * Return the current media engine.
+     *
+     * @return the current media engine
+     */
     public final MediaEngine getMediaEngine() {
         return mediaEngine == null ? null : mediaEngine.get();
     }
 
+    /**
+     * Sets the current media engine, like a {@link MediaPlayer} or a {@link MediaRecorder}.
+     *
+     * @param value a {@link MediaEngine} implementation object, like
+     *      a {@link MediaPlayer} or {@link MediaRecorder}
+     */
     public final void setMediaEngine(MediaEngine value) {
         mediaEngineProperty().set(value);
     }
 
+    /**
+     * Attach the media engine that could be a {@link MediaPlayer} or {@link MediaRecorder}.
+     * A specific {@link MediaView} is created for the given media engine, depending
+     * on whenever the application is running on desktop/mobile or web via the JPro server.
+     */
     public abstract ObjectProperty<MediaEngine> mediaEngineProperty();
 
     // preserve ratio property
