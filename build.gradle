@@ -55,7 +55,7 @@ configure([project("jpro-sessions")]) {
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
   }
 }
-configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
+configure([project("tree-showing"), project("jpro-media"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {
     publications {
