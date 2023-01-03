@@ -1,70 +1,71 @@
-package one.jpro.media.player.impl;
+package one.jpro.media.recorder.impl;
 
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.*;
-import javafx.geometry.HPos;
-import javafx.geometry.VPos;
-import javafx.scene.Node;
-import one.jpro.media.player.MediaPlayer;
-import one.jpro.media.player.MediaView;
+import one.jpro.media.MediaEngine;
+import one.jpro.media.MediaView;
+import one.jpro.media.recorder.MediaRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A that provides a view of Media being played by a {@link MediaPlayer}.
+ * {@link MediaView} implementation for a web {@link MediaRecorder}.
  *
  * @author Besmir Beqiri
  */
-public class WebMediaView extends MediaView {
+public class WebMediaRecorderView extends MediaView {
 
-    private final Logger log = LoggerFactory.getLogger(WebMediaView.class);
-
-    private static final String DEFAULT_STYLE_CLASS = "media-view";
+    private final Logger log = LoggerFactory.getLogger(WebMediaRecorderView.class);
 
     private final WebAPI webAPI;
 
-    public WebMediaView(WebAPI webAPI) {
+    public WebMediaRecorderView(WebAPI webAPI) {
         this.webAPI = webAPI;
         initialize();
     }
 
-    public WebMediaView(WebMediaPlayer webMediaPlayer) {
-        this.webAPI = webMediaPlayer.getWebAPI();
+    public WebMediaRecorderView(WebMediaRecorder webMediaRecorder) {
+        this.webAPI = webMediaRecorder.getWebAPI();
         initialize();
-        setMediaPlayer(webMediaPlayer);
+        setMediaEngine(webMediaRecorder);
     }
 
     private void initialize() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
-        // bind listeners
-        minWidthProperty().bind(fitWidthProperty());
-        minHeightProperty().bind(fitHeightProperty());
-        prefWidthProperty().bind(fitWidthProperty());
-        prefHeightProperty().bind(fitHeightProperty());
-        maxWidthProperty().bind(fitWidthProperty());
-        maxHeightProperty().bind(fitHeightProperty());
+        sceneProperty().addListener(observable -> {
+            if (getScene() != null && webAPI != null && getMediaEngine() instanceof WebMediaRecorder webMediaRecorder) {
+                webAPI.executeScript("""
+                                let elem = document.getElementById("%s");
+                                elem.width = "%s";
+                                """.formatted(webMediaRecorder.getVideoRecorderId(), getFitWidth()));
+                webAPI.executeScript("""
+                                let elem = document.getElementById("%s");
+                                elem.height = "%s";
+                                """.formatted(webMediaRecorder.getVideoRecorderId(), getFitHeight()));
+            }
+        });
     }
 
     @Override
-    public final ObjectProperty<MediaPlayer> mediaPlayerProperty() {
-        if (mediaPlayer == null) {
-            mediaPlayer = new SimpleObjectProperty<>(this, "mediaPlayer") {
+    public final ObjectProperty<MediaEngine> mediaEngineProperty() {
+        if (mediaEngine == null) {
+            mediaEngine = new SimpleObjectProperty<>(this, "mediaEngine") {
 
                 @Override
                 protected void invalidated() {
-                    final MediaPlayer mediaPlayer = getMediaPlayer();
-                    if (mediaPlayer instanceof WebMediaPlayer webMediaPlayer) {
-                        HTMLView htmlView = new HTMLView("""
-                                <video id="%s" width="%spx" height="%spx"></video>
-                                """.formatted(webMediaPlayer.getMediaPlayerId(), getFitWidth(), getFitHeight()));
-                        getChildren().setAll(htmlView);
+                    final MediaEngine mediaPlayer = getMediaEngine();
+                    if (mediaPlayer instanceof WebMediaRecorder webMediaRecorder) {
+                        HTMLView cameraView = new HTMLView("""
+                                <video id="%s" width="%s" height="%s" autoplay muted></video>
+                                """.formatted(webMediaRecorder.getVideoRecorderId(), getFitWidth(), getFitHeight()));
+                        getChildren().setAll(cameraView);
                     }
                 }
             };
         }
-        return mediaPlayer;
+        return mediaEngine;
     }
 
     // disable controls property
@@ -83,15 +84,15 @@ public class WebMediaView extends MediaView {
             showControls = new SimpleBooleanProperty(this, "showControls") {
                 @Override
                 protected void invalidated() {
-                    if (webAPI != null && getMediaPlayer() instanceof WebMediaPlayer webMediaPlayer) {
+                    if (webAPI != null && getMediaEngine() instanceof WebMediaRecorder webMediaRecorder) {
                         webAPI.executeScript("""
-                                    let elem = document.getElementById('$mediaPlayerId');
+                                    let elem = document.getElementById('$mediaRecorderId');
                                     if ($showControls) {
                                         elem.setAttribute("controls","controls")
                                     } else if (elem.hasAttribute("controls")) {
                                         elem.removeAttribute("controls")
                                     }
-                                    """.replace("$mediaPlayerId", webMediaPlayer.getMediaPlayerId())
+                                    """.replace("$mediaRecorderId", webMediaRecorder.getVideoRecorderId())
                                 .replace("$showControls", String.valueOf(get())));
                     }
                 }
@@ -107,11 +108,13 @@ public class WebMediaView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    if (webAPI != null && getMediaPlayer() instanceof WebMediaPlayer webMediaPlayer) {
+                    if (webAPI != null && getMediaEngine() instanceof WebMediaRecorder webMediaRecorder) {
                         webAPI.executeScript("""
                                 let elem = document.getElementById("%s");
-                                elem.style.width = "%spx";
-                                """.formatted(webMediaPlayer.getMediaPlayerId(), getFitWidth()));
+                                if (elem != null) {
+                                    elem.width = "%s";
+                                }
+                                """.formatted(webMediaRecorder.getVideoRecorderId(), getFitWidth()));
                         log.debug("video width: " + getFitWidth());
                     }
                 }
@@ -126,11 +129,13 @@ public class WebMediaView extends MediaView {
             fitHeight = new SimpleDoubleProperty(this, "fitHeight") {
                 @Override
                 protected void invalidated() {
-                    if (webAPI != null && getMediaPlayer() instanceof WebMediaPlayer webMediaPlayer) {
+                    if (webAPI != null && getMediaEngine() instanceof WebMediaRecorder webMediaRecorder) {
                         webAPI.executeScript("""
                                 let elem = document.getElementById("%s");
-                                elem.style.height = "%spx";
-                                """.formatted(webMediaPlayer.getMediaPlayerId(), getFitHeight()));
+                                if (elem != null) {
+                                    elem.height = "%s";
+                                }
+                                """.formatted(webMediaRecorder.getVideoRecorderId(), getFitHeight()));
                         log.debug("video height: " + get());
                     }
                 }
@@ -147,19 +152,19 @@ public class WebMediaView extends MediaView {
                 @Override
                 protected void invalidated() {
                     final boolean preserveRatio = get();
-                    if (webAPI != null && getMediaPlayer() instanceof WebMediaPlayer webMediaPlayer) {
+                    if (webAPI != null && getMediaEngine() instanceof WebMediaRecorder webMediaRecorder) {
                         if (preserveRatio) {
                             webAPI.executeScript("""
-                                    let elem = document.getElementById('$mediaPlayerId');
+                                    let elem = document.getElementById('$mediaRecorderId');
                                     elem.style.objectFit = 'contain';
                                     console.log('$mediaPlayerId => preserve ratio: true');
-                                    """.replace("$mediaPlayerId", webMediaPlayer.getMediaPlayerId()));
+                                    """.replace("$mediaRecorderId", webMediaRecorder.getVideoRecorderId()));
                         } else {
                             webAPI.executeScript("""
-                                    let elem = document.getElementById('$mediaPlayerId');
+                                    let elem = document.getElementById('$mediaRecorderId');
                                     elem.style.objectFit = 'fill';
                                     console.log('$mediaPlayerId => preserve ratio: false');
-                                    """.replace("$mediaPlayerId", webMediaPlayer.getMediaPlayerId()));
+                                    """.replace("$mediaRecorderId", webMediaRecorder.getVideoRecorderId()));
                         }
                         log.debug("preserve ratio: " + preserveRatio);
                     }
@@ -167,13 +172,5 @@ public class WebMediaView extends MediaView {
             };
         }
         return preserveRatio;
-    }
-
-    @Override
-    protected void layoutChildren() {
-        for (Node child : getManagedChildren()) {
-            layoutInArea(child, 0.0, 0.0, getFitWidth(), getFitHeight(),
-                    0.0, HPos.CENTER, VPos.CENTER);
-        }
     }
 }

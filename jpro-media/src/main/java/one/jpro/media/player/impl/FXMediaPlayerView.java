@@ -1,57 +1,41 @@
 package one.jpro.media.player.impl;
 
 import javafx.beans.property.*;
-import javafx.geometry.HPos;
-import javafx.geometry.VPos;
-import javafx.scene.Node;
+import one.jpro.media.MediaEngine;
+import one.jpro.media.MediaView;
 import one.jpro.media.player.MediaPlayer;
-import one.jpro.media.player.MediaView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link MediaView} implementation for desktop/mobile.
+ * {@link MediaView} implementation for a desktop/mobile {@link MediaPlayer}.
  *
  * @author Besmir Beqiri
  */
-public class FXMediaView extends MediaView {
+public class FXMediaPlayerView extends MediaView {
 
-    private final Logger log = LoggerFactory.getLogger(FXMediaView.class);
-
-    private static final String DEFAULT_STYLE_CLASS = "media-view";
+    private final Logger log = LoggerFactory.getLogger(FXMediaPlayerView.class);
 
     private javafx.scene.media.MediaView fxMediaView;
 
-    public FXMediaView() {
-        initialize();
-    }
-
-    public FXMediaView(FXMediaPlayer mediaPlayer) {
-        this();
-        setMediaPlayer(mediaPlayer);
-    }
-
-    private void initialize() {
+    public FXMediaPlayerView() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
+    }
 
-        // bind listeners
-        minWidthProperty().bind(fitWidthProperty());
-        minHeightProperty().bind(fitHeightProperty());
-        prefWidthProperty().bind(fitWidthProperty());
-        prefHeightProperty().bind(fitHeightProperty());
-        maxWidthProperty().bind(fitWidthProperty());
-        maxHeightProperty().bind(fitHeightProperty());
+    public FXMediaPlayerView(FXMediaPlayer mediaPlayer) {
+        this();
+        setMediaEngine(mediaPlayer);
     }
 
     @Override
-    public ObjectProperty<MediaPlayer> mediaPlayerProperty() {
-        if (mediaPlayer == null) {
-            mediaPlayer = new SimpleObjectProperty<>(this, "mediaPlayer") {
+    public ObjectProperty<MediaEngine> mediaEngineProperty() {
+        if (mediaEngine == null) {
+            mediaEngine = new SimpleObjectProperty<>(this, "mediaEngine") {
 
                 @Override
                 protected void invalidated() {
-                    MediaPlayer newMediaPlayer = getMediaPlayer();
-                    if (newMediaPlayer instanceof FXMediaPlayer fxMediaPlayer) {
+                    final MediaEngine mediaPlayer = getMediaEngine();
+                    if (mediaPlayer instanceof FXMediaPlayer fxMediaPlayer) {
                         fxMediaView = new javafx.scene.media.MediaView(fxMediaPlayer.getMediaPlayer());
                         fxMediaView.setPreserveRatio(isPreserveRatio());
                         fxMediaView.setFitWidth(getFitWidth());
@@ -61,7 +45,7 @@ public class FXMediaView extends MediaView {
                 }
             };
         }
-        return mediaPlayer;
+        return mediaEngine;
     }
 
     @Override
@@ -112,13 +96,5 @@ public class FXMediaView extends MediaView {
             };
         }
         return preserveRatio;
-    }
-
-    @Override
-    protected void layoutChildren() {
-        for (Node child : getManagedChildren()) {
-            layoutInArea(child, 0.0, 0.0, getFitWidth(), getFitHeight(),
-                    0.0, HPos.CENTER, VPos.CENTER);
-        }
     }
 }

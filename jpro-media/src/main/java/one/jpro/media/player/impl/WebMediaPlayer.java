@@ -144,7 +144,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         });
     }
 
-    public WebAPI getWebAPI() {
+    WebAPI getWebAPI() {
         return webAPI;
     }
 

@@ -5,8 +5,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import one.jpro.media.MediaEngine;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.impl.FXMediaRecorder;
@@ -19,7 +19,7 @@ import java.util.Optional;
  *
  * @author Besmir Beqiri
  */
-public interface MediaRecorder extends EventTarget {
+public interface MediaRecorder extends MediaEngine, EventTarget {
 
     /**
      * Creates a media recorder. If the application is running in a
@@ -78,13 +78,6 @@ public interface MediaRecorder extends EventTarget {
             return Optional.empty();
         }
     }
-
-    /**
-     * Retrieve the camera view during the recording.
-     *
-     * @return a {@link Region}
-     */
-    Region getCameraView();
 
     /**
      * Retrieves the current media source.

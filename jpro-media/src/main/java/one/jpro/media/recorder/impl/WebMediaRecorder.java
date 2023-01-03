@@ -1,12 +1,10 @@
 package one.jpro.media.recorder.impl;
 
-import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.event.Event;
-import javafx.scene.layout.Region;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
@@ -23,7 +21,6 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
     private static final String DEFAULT_MIME_TYPE = "video/webm";
 
     private final WebAPI webAPI;
-    private final HTMLView cameraView;
 
     private final String videoRecorderId;
     private final String mediaRecorderRef;
@@ -41,17 +38,6 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         videoRecorderId = "video_" + recorderId;
         mediaRecorderRef = "media_" + recorderId;
         blobsRecordedRef = "blobs_" + recorderId;
-
-        cameraView = new HTMLView("""
-                <video id="%s" autoplay muted></video>
-                """.formatted(videoRecorderId));
-
-        cameraView.widthProperty().addListener(observable -> webAPI.executeScript("""
-                        document.getElementById("%s").width = %s;
-                        """.formatted(videoRecorderId, cameraView.getWidth())));
-        cameraView.heightProperty().addListener(observable -> webAPI.executeScript("""
-                        document.getElementById("%s").height = %s;
-                        """.formatted(videoRecorderId, cameraView.getHeight())));
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_onstart", result -> {
             // Set status
@@ -122,8 +108,12 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         });
     }
 
-    public Region getCameraView() {
-        return cameraView;
+    WebAPI getWebAPI() {
+        return webAPI;
+    }
+
+    public String getVideoRecorderId() {
+        return videoRecorderId;
     }
 
     /**

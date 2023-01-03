@@ -4,8 +4,6 @@ import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
@@ -55,7 +53,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private final OpenCVFrameGrabber webcamGrabber;
     private final JavaFXFrameConverter frameConverter;
     private final ImageView frameView;
-    private final Pane cameraView;
 
     // Audio resources
     private static final int DEFAULT_AUDIO_SAMPLE_RATE = 44100; // 44.1 KHz
@@ -81,9 +78,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         frameConverter = new JavaFXFrameConverter();
         // Use ImageView to show camera grabbed frames
         frameView = new ImageView();
-        cameraView = new Pane(frameView);
-        frameView.fitWidthProperty().bind(cameraView.widthProperty());
-        frameView.fitHeightProperty().bind(cameraView.heightProperty());
 
         // Create a list holder for temporary files
         tempVideoFiles = new ArrayList<>();
@@ -104,8 +98,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         }));
     }
 
-    public Region getCameraView() {
-        return cameraView;
+    ImageView getCameraView() {
+        return frameView;
     }
 
     @Override

@@ -10,6 +10,7 @@ import javafx.event.EventTarget;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.media.MediaEngine;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.impl.FXMediaPlayer;
@@ -21,7 +22,7 @@ import one.jpro.media.player.impl.WebMediaPlayer;
  *
  * @author Besmir Beqiri
  */
-public interface MediaPlayer extends EventTarget {
+public interface MediaPlayer extends MediaEngine, EventTarget {
 
     /**
      * Creates a media player for desktop/mobile only.
