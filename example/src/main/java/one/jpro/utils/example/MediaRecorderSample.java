@@ -9,6 +9,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import one.jpro.media.MediaView;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.util.MediaUtil;
 
@@ -41,7 +42,7 @@ public class MediaRecorderSample extends Application {
         previewPane.getStyleClass().add("preview-pane");
 
         var mediaRecorder = MediaRecorder.create(stage);
-        var cameraView = mediaRecorder.getCameraView();
+        var cameraView = MediaView.create(mediaRecorder);
 
         var controlsPane = new FlowPane(startButton, pauseResumeButton, stopButton, saveButton);
         controlsPane.getStyleClass().add("controls-pane");
@@ -71,11 +72,11 @@ public class MediaRecorderSample extends Application {
             saveButton.setDisable(true);
         });
         mediaRecorder.setOnPause(event -> {
-            pauseResumeButton.setText("Resume Recording");
+            pauseResumeButton.setText("Resume");
             pauseResumeButton.setOnAction(event2 -> mediaRecorder.resume());
         });
         mediaRecorder.setOnResume(event1 -> {
-            pauseResumeButton.setText("Pause Recording");
+            pauseResumeButton.setText("Pause");
             pauseResumeButton.setOnAction(event2 -> mediaRecorder.pause());
         });
         mediaRecorder.setOnStopped(event -> {
@@ -88,6 +89,10 @@ public class MediaRecorderSample extends Application {
 
         var rootPane = new VBox(previewPane, controlsPane);
         rootPane.getStyleClass().add("root-pane");
+        cameraView.fitWidthProperty().bind(rootPane.widthProperty());
+        cameraView.fitHeightProperty().bind(rootPane.heightProperty()
+                .subtract(controlsPane.heightProperty()));
+
         VBox.setVgrow(previewPane, Priority.ALWAYS);
         var scene = new Scene(rootPane, 760, 540);
         scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());

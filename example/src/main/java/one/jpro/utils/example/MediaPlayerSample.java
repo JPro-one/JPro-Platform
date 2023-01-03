@@ -2,8 +2,6 @@ package one.jpro.utils.example;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -14,7 +12,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
-import one.jpro.media.player.MediaView;
+import one.jpro.media.MediaView;
 
 import java.net.URL;
 import java.util.Optional;

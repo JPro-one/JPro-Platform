@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
-import one.jpro.media.player.MediaView;
+import one.jpro.media.MediaView;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.util.MediaUtil;
 
@@ -31,7 +31,7 @@ public class MediaRecorderAndPlayerSample extends Application {
 
     private StackPane previewPane;
     private MediaView mediaView;
-    private Region cameraView;
+    private MediaView cameraView;
     private Button enableCamButton;
     private Button recordButton;
     private Button pauseResumeButton;
@@ -60,6 +60,9 @@ public class MediaRecorderAndPlayerSample extends Application {
 
         var rootPane = new VBox(previewPane, controlsPane);
         rootPane.getStyleClass().add("root-pane");
+        cameraView.fitWidthProperty().bind(rootPane.widthProperty());
+        cameraView.fitHeightProperty().bind(rootPane.heightProperty()
+                .subtract(controlsPane.heightProperty()));
         VBox.setVgrow(previewPane, Priority.ALWAYS);
 
         var scene = new Scene(rootPane, 760, 540);
@@ -97,10 +100,9 @@ public class MediaRecorderAndPlayerSample extends Application {
         return controlsPane;
     }
 
-    private Region createCameraView(Stage stage) {
+    private MediaView createCameraView(Stage stage) {
         var mediaRecorder = MediaRecorder.create(stage);
-        var cameraView = mediaRecorder.getCameraView();
-        cameraView.setPrefSize(MEDIA_VIEW_WIDTH, MEDIA_VIEW_HEIGHT);
+        var cameraView = MediaView.create(mediaRecorder);
 
         // button events
         enableCamButton.setOnAction(event -> {
@@ -122,6 +124,11 @@ public class MediaRecorderAndPlayerSample extends Application {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+        });
+
+        preserveRatioCheckBox.setOnAction(event -> {
+            mediaView.setPreserveRatio(preserveRatioCheckBox.isSelected());
+            cameraView.setPreserveRatio(preserveRatioCheckBox.isSelected());
         });
 
         // media recorder events
@@ -153,7 +160,7 @@ public class MediaRecorderAndPlayerSample extends Application {
 
     private MediaPlayer loadMedia(Stage stage, MediaSource mediaSource) {
         var mediaPlayer = MediaPlayer.create(stage, mediaSource);
-        mediaView.setMediaPlayer(mediaPlayer);
+        mediaView.setMediaEngine(mediaPlayer);
         previewPane.getChildren().setAll(mediaView);
 
         // events
@@ -187,8 +194,6 @@ public class MediaRecorderAndPlayerSample extends Application {
             }
         });
 
-        preserveRatioCheckBox.setOnAction(event ->
-                mediaView.setPreserveRatio(preserveRatioCheckBox.isSelected()));
         muteCheckBox.setOnAction(event -> {
             mediaPlayer.setMute(muteCheckBox.isSelected());
             volumeSlider.setDisable(muteCheckBox.isSelected());
