@@ -50,7 +50,13 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         handleWebEvent("durationchange", """
                 console.log("$mediaPlayerId => media duration: " + elem.duration + " seconds");
                 java_fun(elem.duration);
-                """, duration -> setDuration(Duration.seconds(Double.parseDouble(duration))));
+                """, duration -> {
+            if (duration != null && !duration.contains("null")) {
+                setDuration(Duration.seconds(Double.parseDouble(duration)));
+            } else {
+                setDuration(Duration.UNKNOWN);
+            }
+        });
 
         // handle volume change
         handleWebEvent("volumechange", """
