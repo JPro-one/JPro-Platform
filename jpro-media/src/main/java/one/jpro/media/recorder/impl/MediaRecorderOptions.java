@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import java.util.Optional;
 
 /**
- * Media recorder options.
+ * Media recorder options for the {@link WebMediaRecorder}.
  *
  * @author Besmir Beqiri
  */
@@ -15,6 +15,12 @@ public class MediaRecorderOptions {
     private Number audioBitsPerSecond;
     private Number videoBitsPerSecond;
     private Number bitsPerSecond;
+
+    /**
+     * Returns a MIME type specifying the format for the resulting media.
+     *
+     * @return a string form of the MIME type
+     */
     public String getMimeType() {
         return mimeType;
     }
@@ -30,6 +36,12 @@ public class MediaRecorderOptions {
         this.mimeType = mimeType;
         return this;
     }
+
+    /**
+     * Returns the audio bitrate of the media.
+     *
+     * @return the audio bitrate per second
+     */
     public Number getAudioBitsPerSecond() {
         return audioBitsPerSecond;
     }
@@ -42,6 +54,11 @@ public class MediaRecorderOptions {
         return this;
     }
 
+    /**
+     * Returns the audio bitrate of the media.
+     *
+     * @return the audio bitrate per second
+     */
     public Number getVideoBitsPerSecond() {
         return videoBitsPerSecond;
     }
@@ -70,6 +87,11 @@ public class MediaRecorderOptions {
         return this;
     }
 
+    /**
+     * Return the JSON representation for this object.
+     *
+     * @return a json object
+     */
     public JSONObject toJSON() {
         final JSONObject json = new JSONObject();
         Optional.ofNullable(getMimeType())

@@ -3,6 +3,7 @@ package one.jpro.media;
 import com.jpro.webapi.WebAPI;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
+import one.jpro.media.recorder.MediaRecorder;
 
 import java.net.URI;
 import java.util.Objects;
@@ -15,7 +16,14 @@ import java.util.Objects;
  * <p>The same <code>MediaSource</code> object may be shared among multiple
  * <code>MediaPlayer</code> or <code>MediaRecorder</code> objects.
  *
+ * @param source string form of a media source URI
+ * @param isLocal <code>true</code> if this media source is local when running
+ *                on a desktop/mobile or as a local resource to JPro server,
+ *                otherwise <code>false</code> when inside the client's browser
+ * @param jsFile the non-local media source located inside the client's browser
+ *
  * @see MediaPlayer
+ * @see MediaRecorder
  * @see MediaException
  *
  * @author Besmir Beqiri
