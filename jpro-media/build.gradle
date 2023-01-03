@@ -12,3 +12,15 @@ dependencies {
 compileJava {
     options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"]
 }
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        version = true
+        author = true
+        addMultilineStringsOption("-add-exports").setValue([
+                "javafx.base/com.sun.javafx.event=one.jpro.media"
+        ])
+        addStringOption('Xdoclint:none', '-quiet')
+    }
+}
