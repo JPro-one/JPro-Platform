@@ -45,7 +45,7 @@ public class SessionManager {
 
     public ObservableMap<String,String> getSession(WebAPI webAPI) {
         String cookieValue = webAPI.getCookies().get(cookieName);
-        if(!isValidCookie(cookieValue)) {
+        if(cookieValue == null || !isValidCookie(cookieValue)) {
             cookieValue = null;
         } else {
             File sessionDirectory = new File(baseDirectory, cookieValue);

@@ -6,7 +6,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'org.openjfx:javafx-plugin:0.0.13'
+    classpath 'org.openjfx:javafx-plugin:0.0.14-SNAPSHOT-FORK'
     classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
   }
 }
@@ -31,9 +31,8 @@ configure(subprojects.findAll {it.name != 'example'}) {
 
   javafx {
     version = "$JAVAFX_VERSION"
-    configuration = "compileOnly"
-    modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls',
-                'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web' ]
+    configurations = ["compileOnly", "testImplementation"]
+    modules = [ 'javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
   }
 
   dependencies {
@@ -49,7 +48,13 @@ configure(subprojects.findAll {it.name != 'example'}) {
   }
 }
 
-configure([project("tree-showing"), project("jpro-media"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
+configure([project("jpro-sessions")]) {
+  dependencies {
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+  }
+}
+configure([project("tree-showing"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {
     publications {
@@ -59,6 +64,10 @@ configure([project("tree-showing"), project("jpro-media"), project("jpro-session
         artifactId project.name
         version JFX_UTILS_VERSION
       }
+    }
+    java {
+      withSourcesJar()
+      withJavadocJar()
     }
     repositories {
       maven {

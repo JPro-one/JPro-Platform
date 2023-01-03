@@ -20,7 +20,7 @@ Maven
 <dependency>
   <groupId>one.jpro.jproutils</groupId>
   <artifactId>jpro-sessions</artifactId>
-  <version>0.2.1</version>
+   <version>0.2.2</version>
 </dependency>
 ```
 ### Usage
@@ -55,17 +55,17 @@ Maven
 <dependency>
   <groupId>one.jpro.jproutils</groupId>
   <artifactId>tree-showing</artifactId>
-  <version>0.2.1</version>
+  <version>0.2.2</version>
 </dependency>
 ```
 
 #### Gradle
 ```
 dependencies {
-    implementation 'one.jpro.jproutils:tree-showing:0.2.1'
+    implementation 'one.jpro.jproutils:tree-showing:0.2.2'
 }
 ```
-The module name is `one.jpro.jfxutils.tree-showing`
+The module name is `jpro.utils.treeshowing`
 
 #### Typical Usage:
 ```
