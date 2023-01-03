@@ -2,14 +2,6 @@ apply plugin: 'application'
 apply plugin: 'org.openjfx.javafxplugin'
 apply plugin: 'jpro-gradle-plugin'
 
-repositories {
-  jcenter()
-  mavenCentral()
-  maven {
-    url "https://sandec.jfrog.io/artifactory/repo"
-  }
-}
-
 dependencies {
   implementation project(":jpro-sound")
   implementation project(":jpro-sessions")
