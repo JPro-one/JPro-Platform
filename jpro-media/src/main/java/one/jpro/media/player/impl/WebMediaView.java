@@ -54,11 +54,11 @@ public class WebMediaView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    MediaPlayer newMediaPlayer = getMediaPlayer();
-                    if (newMediaPlayer instanceof WebMediaPlayer webMediaPlayer) {
+                    final MediaPlayer mediaPlayer = getMediaPlayer();
+                    if (mediaPlayer instanceof WebMediaPlayer webMediaPlayer) {
                         HTMLView htmlView = new HTMLView("""
-                                <video id="%s"></video>
-                                """.formatted(webMediaPlayer.getMediaPlayerId()));
+                                <video id="%s" width="%spx" height="%spx"></video>
+                                """.formatted(webMediaPlayer.getMediaPlayerId(), getFitWidth(), getFitHeight()));
                         getChildren().setAll(htmlView);
                     }
                 }
