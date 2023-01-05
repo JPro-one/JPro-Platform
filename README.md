@@ -39,7 +39,22 @@ Notes:
  * The SessionManager needs a name, which is used to identify the application.
  Different applications should use different names.
 
+## Media
+#### Maven
+```
+<dependency>
+  <groupId>one.jpro.jproutils</groupId>
+  <artifactId>jpro-media</artifactId>
+  <version>0.2.3-SNAPSHOT</version>
+</dependency>
+```
 
+#### Gradle
+```
+dependencies {
+    implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
+}
+```
 
 ## TreeShowing
 #### Motivation
@@ -50,7 +65,7 @@ Internally in JavaFX, the property "treeShowing" is used, to check whether a Nod
 But as an end-user, this property is not accessible in their application.
 With this project, we want to make the property available to the common JavaFX Developer - allowing them to write bug-free and leak-free applications.
 
-Maven
+#### Maven
 ```
 <dependency>
   <groupId>one.jpro.jproutils</groupId>
