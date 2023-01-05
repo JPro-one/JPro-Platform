@@ -34,13 +34,21 @@ public class FreezeDetector {
                 long now = System.currentTimeMillis();
                 long timeGone = now - lastUpdate;
                 try {
-                    Thread.sleep(duration.toMillis() - timeGone);
+                    long toSleep = duration.toMillis() - timeGone;
+                    if(toSleep > 0) {
+                        Thread.sleep(toSleep);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 if(System.currentTimeMillis() - lastUpdate > duration.toMillis()) {
                     callback.accept(fxthread);
                     lastUpdate = System.currentTimeMillis();
+                    try {
+                        Thread.sleep(duration.toMillis());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }, "FX-Freeze-Detector-Thread").start();
