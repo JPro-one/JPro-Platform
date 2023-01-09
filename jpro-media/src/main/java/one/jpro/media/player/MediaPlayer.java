@@ -1,10 +1,7 @@
 package one.jpro.media.player;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.*;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.media.MediaPlayer.Status;
@@ -12,13 +9,45 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaEngine;
 import one.jpro.media.MediaSource;
+import one.jpro.media.MediaView;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.impl.FXMediaPlayer;
 import one.jpro.media.player.impl.WebMediaPlayer;
 
 /**
- * The MediaPlayer provides functionality to easily play media,
- * both on desktop/mobile and web platforms.
+ * The MediaPlayer provides functionality to easily play media, both on
+ * desktop/mobile and web platforms.
+ * <p>
+ * This class provides the controls for playing media.
+ * It is used in combination with the {@link MediaSource} and {@link MediaView}
+ * classes to display and control media playback. <code>MediaPlayer</code> does
+ * not contain any visual elements so must be used in combination with the
+ * {@link MediaView} class to view any video track which may be present.
+ *
+ * <p><code>MediaPlayer</code> provides the {@link #play()}, {@link #pause()},
+ * {@link #stop()} and {@link #seek(javafx.util.Duration) seek()} controls
+ * as playback functionalities. It also provides the {@link #muteProperty mute}
+ * and {@link #volumeProperty volume} properties which control audio playback
+ * characteristics. Use the {@link #statusProperty status} property to
+ * determine the current status of the <code>MediaPlayer</code> and
+ * {@link #currentTimeProperty currentTime} property to determine the current
+ * time position of the media.
+ *
+ * <p>All operations of a <code>MediaPlayer</code> are inherently asynchronous.
+ * When the given <code>MediaSource</code> is loaded, use the {@link #setOnReady(EventHandler)}
+ * to get notified when the <code>MediaPlayer</code> is ready to play. Other
+ * event handlers like {@link #setOnPlaying(EventHandler)}, {@link #setOnPause(EventHandler)},
+ * {@link #setOnStopped(EventHandler)}, {@link #setOnEndOfMedia(EventHandler)} and
+ * {@link #setOnStalled(EventHandler)} can be used to get notified of the
+ * corresponding events.
+ *
+ * <p>The same <code>MediaPlayer</code> object may be shared among multiple
+ * <code>MediaView</code>s. This will not affect the player itself. In
+ * particular, the property settings of the view will not have any effect on
+ * media playback.</p>
+ *
+ * @see MediaSource
+ * @see MediaView
  *
  * @author Besmir Beqiri
  */
@@ -90,20 +119,6 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      * The current status of the MediaPlayer.
      */
     ReadOnlyObjectProperty<Status> statusProperty();
-
-    /**
-     * Retrieves the current media source.
-     *
-     * @return {@link MediaSource} object
-     */
-    MediaSource getMediaSource();
-
-    /**
-     * The media source for the current player. It holds the information
-     * on where it resource is located and accessed either via a string
-     * form URI locally, or via {@link WebAPI.JSFile} remotely.
-     */
-    ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
 
     /**
      * Gets the duration for the given media source. If the duration cannot be
