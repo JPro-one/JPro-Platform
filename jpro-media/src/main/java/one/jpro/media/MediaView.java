@@ -1,7 +1,9 @@
 package one.jpro.media;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -21,6 +23,65 @@ import one.jpro.media.recorder.impl.WebMediaRecorderView;
 /**
  * Provides a view of {@link MediaSource} being played by a {@link MediaPlayer}
  * or being recorded by a {@link MediaRecorder}.
+ *
+ * <p>The following code snippet provides a simple example of how to display a video:</p>
+ *
+ * <pre>{@code
+ * public void start(Stage stage) {
+ *     // Get the media source as an application argument.
+ *     String source = getParameters().getRaw().get(0);
+ *     MediaSource mediaSource = new MediaSource(source);
+ *
+ *     // Create the player and set to play automatically.
+ *     MediaPlayer mediaPlayer = MediaPlayer.create(stage, mediaSource);
+ *     mediaPlayer.setAutoPlay(true);
+ *
+ *     // Create the view.
+ *     MediaView mediaView = MediaView.create(mediaPlayer);
+ *
+ *     // Create the Scene and add the view.
+ *     Scene scene = new Scene(mediaView, 640, 480);
+ *     stage.setScene(scene);
+ *
+ *     // Name and display the Stage.
+ *     stage.setTitle("Hello JPro Media Player");
+ *     stage.show();
+ * }
+ * }</pre>
+ *
+ * <p>The next code snippet provides a simple example of how to display the video
+ * from the camera while recording:</p>
+ *
+ * <pre>{@code
+ * public void start(Stage stage) {
+ *     // Create the camera recorder.
+ *     MediaRecorder mediaRecorder = MediaRecorder.create(stage);
+ *
+ *     // Create the enable camera button and add it to a pane.
+ *     Button enableCamButton = new Button("Enable Camera");
+ *     StackPane previewPane = new StackPane(enableCamButton);
+ *
+ *     // Create the camera view.
+ *     MediaView cameraView = MediaView.create(mediaRecorder);
+ *
+ *     // Set an event handler to enable the camera recording.
+ *     enableCamButton.setOnAction(event -> {
+ *          mediaRecorder.enable();
+ *          previewPane.getChildren().setAll(cameraView);
+ *     });
+ *
+ *     // Create the Scene and add the preview pane.
+ *     Scene scene = new Scene(previewPane, 640, 480);
+ *     stage.setScene(scene);
+ *
+ *     // Name and display the Stage.
+ *     stage.setTitle("Hello JPro Media Player");
+ *     stage.show();
+ * }
+ * }</pre>
+ *
+ * @see MediaPlayer
+ * @see MediaRecorder
  *
  * @author Besmir Beqiri
  */
@@ -101,7 +162,7 @@ public abstract class MediaView extends Region {
      * Sets the current media engine, like a {@link MediaPlayer} or a {@link MediaRecorder}.
      *
      * @param value a {@link MediaEngine} implementation object, like
-     *      a {@link MediaPlayer} or {@link MediaRecorder}
+     *              a {@link MediaPlayer} or {@link MediaRecorder}
      */
     public final void setMediaEngine(MediaEngine value) {
         mediaEngineProperty().set(value);
