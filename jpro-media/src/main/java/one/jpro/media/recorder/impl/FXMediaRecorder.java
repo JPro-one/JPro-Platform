@@ -114,6 +114,16 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 // start the audio capture
                 enableAudioCapture();
 
+                Platform.runLater(() -> {
+                    // Set status to ready
+                    setStatus(Status.READY);
+
+                    // Fire ready event
+                    Event.fireEvent(FXMediaRecorder.this,
+                            new MediaRecorderEvent(FXMediaRecorder.this,
+                                    MediaRecorderEvent.MEDIA_RECORDER_READY));
+                });
+
                 while (cameraEnabled) {
                     // effectively grab and process a single frame
                     final Frame frame = webcamGrabber.grab();

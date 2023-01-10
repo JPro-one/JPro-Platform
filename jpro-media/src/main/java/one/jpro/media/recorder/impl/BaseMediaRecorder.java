@@ -74,6 +74,32 @@ abstract class BaseMediaRecorder implements MediaRecorder {
         return status;
     }
 
+    // On ready event handler
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onReady;
+
+    @Override
+    public final EventHandler<MediaRecorderEvent> getOnReady() {
+        return onReady == null ? null : onReady.get();
+    }
+
+    @Override
+    public final void setOnReady(EventHandler<MediaRecorderEvent> value) {
+        onReadyProperty().set(value);
+    }
+
+    @Override
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onReadyProperty() {
+        if (onReady == null) {
+            onReady = new SimpleObjectProperty<>(this, "onReady") {
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaRecorderEvent.MEDIA_RECORDER_READY, get());
+                }
+            };
+        }
+        return onReady;
+    }
+
     // On data available event handler
     private ObjectProperty<EventHandler<MediaRecorderEvent>> onDataAvailable;
 
@@ -117,7 +143,7 @@ abstract class BaseMediaRecorder implements MediaRecorder {
     @Override
     public final ObjectProperty<EventHandler<MediaRecorderEvent>> onStartProperty() {
         if (onStart == null) {
-            onStart = new SimpleObjectProperty<>(this, "onStart"){
+            onStart = new SimpleObjectProperty<>(this, "onStart") {
 
                 @Override
                 protected void invalidated() {

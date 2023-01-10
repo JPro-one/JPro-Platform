@@ -68,10 +68,9 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
     enum Status {
 
         /**
-         * Recording is not occurring — it has either not been started yet,
-         * or it has been started and then stopped.
+         * The media recorder is ready to record.
          */
-        INACTIVE,
+        READY,
 
         /**
          * Recording has been started.
@@ -81,7 +80,13 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
         /**
          * Recording has been started, then paused, but not yet stopped or resumed.
          */
-        PAUSED;
+        PAUSED,
+
+        /**
+         * Recording is not occurring — it has either not been started yet,
+         * or it has been started and then stopped.
+         */
+        INACTIVE;
 
         /**
          * Parses a JavaScript string and if the content is equals to one of the states,
@@ -126,6 +131,25 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
      * Recorder status hold the internal state for this recorder.
      */
     ReadOnlyObjectProperty<Status> statusProperty();
+
+    /**
+     * Retrieves the {@link MediaRecorder.Status#READY} event handler.
+     *
+     * @return the event handler or <code>null</code>.
+     */
+    EventHandler<MediaRecorderEvent> getOnReady();
+
+    /**
+     * Sets the {@link MediaRecorder.Status#READY} event handler.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
+    void setOnReady(EventHandler<MediaRecorderEvent> value);
+
+    /**
+     * Event handler invoked when the status changes to <code>READY</code>.
+     */
+    ObjectProperty<EventHandler<MediaRecorderEvent>> onReadyProperty();
 
     /**
      * Retrieves the event handler when the recording has started

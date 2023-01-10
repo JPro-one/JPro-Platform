@@ -59,7 +59,7 @@ public class FXMediaRecorderView extends MediaView {
                     if (fxFrameView != null) {
                         fxFrameView.setFitWidth(get());
                     }
-                    log.debug("video width: " + getFitWidth());
+                    log.debug("video width: {}", getFitWidth());
                 }
             };
         }
@@ -76,7 +76,7 @@ public class FXMediaRecorderView extends MediaView {
                     if (fxFrameView != null) {
                         fxFrameView.setFitHeight(get());
                     }
-                    log.debug("video height: " + getFitHeight());
+                    log.debug("video height: {}", getFitHeight());
                 }
             };
         }
@@ -93,7 +93,7 @@ public class FXMediaRecorderView extends MediaView {
                     if (fxFrameView != null) {
                         fxFrameView.setPreserveRatio(get());
                     }
-                    log.debug("preserve ratio: " + isPreserveRatio());
+                    log.debug("preserve ratio: {}", isPreserveRatio());
                 }
             };
         }
