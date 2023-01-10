@@ -52,7 +52,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         return (status == null) ? Status.UNKNOWN : status.get();
     }
 
-    protected void setStatus(Status value) {
+    void setStatus(Status value) {
         statusPropertyImpl().set(value);
     }
 
@@ -64,7 +64,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         return statusPropertyImpl().getReadOnlyProperty();
     }
 
-    protected ReadOnlyObjectWrapper<Status> statusPropertyImpl() {
+    private ReadOnlyObjectWrapper<Status> statusPropertyImpl() {
         if (status == null) {
             status = new ReadOnlyObjectWrapper<>(this, "status", Status.UNKNOWN) {
                 @Override
@@ -136,7 +136,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         return duration;
     }
 
-    // On ready event
+    // On ready event handler
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onReady;
 
     @Override
@@ -166,17 +166,17 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onPlaying;
 
     @Override
-    public EventHandler<MediaPlayerEvent> getOnPlaying() {
+    public final EventHandler<MediaPlayerEvent> getOnPlaying() {
         return (onPlaying == null) ? null : onPlaying.get();
     }
 
     @Override
-    public void setOnPlaying(EventHandler<MediaPlayerEvent> value) {
+    public final void setOnPlaying(EventHandler<MediaPlayerEvent> value) {
         onPlayingProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaPlayerEvent>> onPlayingProperty() {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onPlayingProperty() {
         if (onPlaying == null) {
             onPlaying = new SimpleObjectProperty<>(this, "onPlaying"){
 
@@ -193,17 +193,17 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onPause;
 
     @Override
-    public EventHandler<MediaPlayerEvent> getOnPause() {
+    public final EventHandler<MediaPlayerEvent> getOnPause() {
         return (onPause == null) ? null : onPause.get();
     }
 
     @Override
-    public void setOnPause(EventHandler<MediaPlayerEvent> value) {
+    public final void setOnPause(EventHandler<MediaPlayerEvent> value) {
         onPauseProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaPlayerEvent>> onPauseProperty() {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onPauseProperty() {
         if (onPause == null) {
             onPause = new SimpleObjectProperty<>(this, "onPause") {
 
@@ -220,17 +220,17 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onStalled;
 
     @Override
-    public EventHandler<MediaPlayerEvent> getOnStalled() {
+    public final EventHandler<MediaPlayerEvent> getOnStalled() {
         return (onStalled == null) ? null : onStalled.get();
     }
 
     @Override
-    public void setOnStalled(EventHandler<MediaPlayerEvent> value) {
+    public final void setOnStalled(EventHandler<MediaPlayerEvent> value) {
         onStalledProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaPlayerEvent>> onStalledProperty() {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onStalledProperty() {
         if (onStalled == null) {
             onStalled = new SimpleObjectProperty<>(this, "onStalled") {
 
@@ -247,17 +247,17 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onStopped;
 
     @Override
-    public EventHandler<MediaPlayerEvent> getOnStopped() {
+    public final EventHandler<MediaPlayerEvent> getOnStopped() {
         return (onStopped == null) ? null : onStopped.get();
     }
 
     @Override
-    public void setOnStopped(EventHandler<MediaPlayerEvent> value) {
+    public final void setOnStopped(EventHandler<MediaPlayerEvent> value) {
         onStoppedProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaPlayerEvent>> onStoppedProperty() {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onStoppedProperty() {
         if (onStopped == null) {
             onStopped = new SimpleObjectProperty<>(this, "onStopped") {
 
@@ -274,17 +274,17 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMedia;
 
     @Override
-    public EventHandler<MediaPlayerEvent> getOnEndOfMedia() {
+    public final EventHandler<MediaPlayerEvent> getOnEndOfMedia() {
         return (onEndOfMedia == null) ? null : onEndOfMedia.get();
     }
 
     @Override
-    public void setOnEndOfMedia(EventHandler<MediaPlayerEvent> value) {
+    public final void setOnEndOfMedia(EventHandler<MediaPlayerEvent> value) {
         onEndOfMediaProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMediaProperty() {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMediaProperty() {
         if (onEndOfMedia == null) {
             onEndOfMedia = new SimpleObjectProperty<>(this, "onEndOfMedia") {
 
@@ -301,17 +301,17 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ObjectProperty<EventHandler<MediaPlayerEvent>> onError;
 
     @Override
-    public EventHandler<MediaPlayerEvent> getOnError() {
+    public final EventHandler<MediaPlayerEvent> getOnError() {
         return (onError == null) ? null : onError.get();
     }
 
     @Override
-    public void setOnError(EventHandler<MediaPlayerEvent> value) {
+    public final void setOnError(EventHandler<MediaPlayerEvent> value) {
         onErrorProperty().set(value);
     }
 
     @Override
-    public ObjectProperty<EventHandler<MediaPlayerEvent>> onErrorProperty() {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onErrorProperty() {
         if (onError == null) {
             onError = new SimpleObjectProperty<>(this, "onError") {
 
@@ -328,16 +328,16 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     private ReadOnlyObjectWrapper<MediaPlayerException> error;
 
     @Override
-    public MediaPlayerException getError() {
+    public final MediaPlayerException getError() {
         return (error == null) ? null : error.get();
     }
 
-    protected void setError(MediaPlayerException error) {
+    final void setError(MediaPlayerException error) {
         errorPropertyImpl().set(error);
     }
 
     @Override
-    public ReadOnlyObjectProperty<MediaPlayerException> errorProperty() {
+    public final ReadOnlyObjectProperty<MediaPlayerException> errorProperty() {
         return errorPropertyImpl().getReadOnlyProperty();
     }
 
