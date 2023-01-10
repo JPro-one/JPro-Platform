@@ -48,11 +48,7 @@ public class MediaRecorderSample extends Application {
         controlsPane.getStyleClass().add("controls-pane");
 
         // button events
-        enableCamButton.setOnAction(event -> {
-            mediaRecorder.enable();
-            startButton.setDisable(false);
-            previewPane.getChildren().setAll(cameraView);
-        });
+        enableCamButton.setOnAction(event -> mediaRecorder.enable());
         startButton.setOnAction(event -> mediaRecorder.start());
         pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
@@ -65,6 +61,10 @@ public class MediaRecorderSample extends Application {
         });
 
         // media recorder events
+        mediaRecorder.setOnReady(event -> {
+            startButton.setDisable(false);
+            previewPane.getChildren().setAll(cameraView);
+        });
         mediaRecorder.setOnStart(event -> {
             startButton.setDisable(true);
             pauseResumeButton.setDisable(false);
