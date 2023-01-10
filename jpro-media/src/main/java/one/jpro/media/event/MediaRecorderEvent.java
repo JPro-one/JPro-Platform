@@ -18,6 +18,12 @@ public class MediaRecorderEvent extends Event {
     public static final EventType<MediaRecorderEvent> ANY = new EventType<>(Event.ANY, "MEDIA_RECORDER");
 
     /**
+     * This event occurs when the media recorder is ready to record.
+     */
+    public static final EventType<MediaRecorderEvent> MEDIA_RECORDER_READY =
+            new EventType<>(ANY, "MEDIA_RECORDER_READY");
+
+    /**
      * Fires periodically each time timeslice milliseconds of media have been recorded (or when the entire media
      * has been recorded, if timeslice wasn't specified). The event, of type BlobEvent, contains the recorded
      * media in its data property.

@@ -39,6 +39,16 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         mediaRecorderRef = "media_" + recorderId;
         blobsRecordedRef = "blobs_" + recorderId;
 
+        webAPI.registerJavaFunction(mediaRecorderRef + "_ready", result -> {
+            // Set status to ready
+            setStatus(Status.READY);
+
+            // Fire ready event
+            Event.fireEvent(WebMediaRecorder.this,
+                    new MediaRecorderEvent(WebMediaRecorder.this,
+                            MediaRecorderEvent.MEDIA_RECORDER_READY));
+        });
+
         webAPI.registerJavaFunction(mediaRecorderRef + "_onstart", result -> {
             // Set status
             Status.fromJS(result).ifPresent(this::setStatus);
@@ -184,6 +194,9 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
                     .then((stream) => {
                         elem.srcObject = stream;
                         $mediaRecorder = new MediaRecorder(elem.srcObject, $videoRecorderOptions);
+                        
+                        // recorder is ready
+                        jpro.$mediaRecorder_ready();
                         
                         // event : new recorded video blob available
                         $mediaRecorder.addEventListener('dataavailable', function(e) {
