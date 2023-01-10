@@ -16,7 +16,30 @@ import one.jpro.media.recorder.impl.WebMediaRecorder;
 import java.util.Optional;
 
 /**
- * The MediaRecorder provides functionality to easily record media.
+ * The MediaRecorder provides functionality to easily record media, both on
+ * desktop/mobile and web platforms.
+ * <p>
+ * This class provides the controls for recording media.
+ * <code>MediaRecorder</code> does not contain any visual elements so must
+ * be used in combination with the {@link MediaView} class to view the video
+ * stream from the camera device. After the recording is complete, use then
+ * the {@link MediaSource} class to retrieve the recorded media.
+ *
+ * <p><code>MediaRecorder</code> provides the {@link #start()}, {@link #pause()},
+ * {@link #resume()}, {@link #stop()} controls as recording functionalities.
+ * Use {@link #enable()} to request access to the camera device and enable
+ * the recording controls.
+ *
+ * <p>All operations of a <code>MediaRecorder</code> are inherently asynchronous.
+ * Use the {@link #setOnReady(EventHandler)} to get notified when the
+ * <code>MediaRecorder</code> is ready to record. Other event handlers like
+ * {@link #setOnStart(EventHandler)}, {@link #setOnPause(EventHandler)},
+ * {@link #setOnResume(EventHandler)}, {@link #setOnStopped(EventHandler)} and
+ * {@link #setOnDataAvailable(EventHandler)} can be used to get notified of the
+ * corresponding events.
+ *
+ * @see MediaSource
+ * @see MediaView
  *
  * @author Besmir Beqiri
  */
