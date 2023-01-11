@@ -5,6 +5,9 @@ import com.jpro.webapi.WebAPI;
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.*;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
+import javafx.scene.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,6 +151,26 @@ public abstract class WebMediaView extends MediaView {
         return preserveRatio;
     }
 
+    @Override
+    protected void layoutChildren() {
+        for (Node child : getManagedChildren()) {
+            if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
+                if (getFitWidth() <= 0) {
+                    webAPI.executeScript("""
+                    %s.width = "%s";
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getWidth()));
+                }
+                if (getFitHeight() <= 0) {
+                    webAPI.executeScript("""
+                    %s.height = "%s";
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getHeight()));
+                }
+            }
+            layoutInArea(child, 0.0, 0.0, getWidth(), getHeight(),
+                    0.0, HPos.CENTER, VPos.CENTER);
+        }
+    }
+
     private final InvalidationListener updateViewContainerListener = observable -> updateViewContainer();
     private final WeakInvalidationListener weakUpdateViewContainerListener =
             new WeakInvalidationListener(updateViewContainerListener);
@@ -165,8 +188,7 @@ public abstract class WebMediaView extends MediaView {
                     """.formatted(mediaContainerId, webMediaEngine.getVideoElement().getName()));
             webAPI.executeScript("""
                     %s.width = "%s";
-                    """
-                    .formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
             webAPI.executeScript("""
                     %s.height = "%s";
                     """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
