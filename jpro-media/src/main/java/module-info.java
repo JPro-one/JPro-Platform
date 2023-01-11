@@ -1,5 +1,18 @@
+import one.jpro.media.MediaSource;
+import one.jpro.media.MediaView;
+import one.jpro.media.player.MediaPlayer;
+import one.jpro.media.recorder.MediaRecorder;
+
 /**
- * JPro Media module descriptor.
+ * Defines APIs for playback and recording of video and audio content.
+ * <p>
+ * The APIs are much similar to the JavaFX APIs, but besides
+ * being used in JavaFX applications running on desktop/mobile devices,
+ * they can also be used in web applications running via JPro server,
+ * without changing a single line of code.
+ * <p>
+ * The principal classes are {@link MediaSource}, {@link MediaView},
+ * {@link MediaPlayer} and {@link MediaRecorder}.
  *
  * @author Besmir Beqiri
  */
