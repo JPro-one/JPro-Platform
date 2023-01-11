@@ -42,7 +42,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     abstract ReadOnlyObjectWrapper<MediaSource> mediaSourcePropertyImpl();
 
     // autoplay property
-    private BooleanProperty autoPlay;
+    BooleanProperty autoPlay;
 
     @Override
     public void setAutoPlay(boolean value) {
@@ -55,12 +55,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     }
 
     @Override
-    public BooleanProperty autoPlayProperty() {
-        if (autoPlay == null) {
-            autoPlay = new SimpleBooleanProperty(this, "autoPlay");
-        }
-        return autoPlay;
-    }
+    public abstract BooleanProperty autoPlayProperty();
 
     // status property
     private ReadOnlyObjectWrapper<Status> status;

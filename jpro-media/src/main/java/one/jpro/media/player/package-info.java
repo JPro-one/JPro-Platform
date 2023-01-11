@@ -25,7 +25,7 @@
  *         {@link one.jpro.media.player.MediaPlayer#setAutoPlay MediaPlayer.setAutoPlay(true)}
  *         may be used to request that playing start as soon as possible. In web applications,
  *         the <code>MediaPlayer</code> may not start playing automatically when the web page
- *         is shown for the first time due to autoplay blocking mechanism of the browsers.</li>
+ *         is shown for the first time due to autoplay blocking policy of the browsers.</li>
  *         </li>
  *     <li><code>MediaPlayer</code> has several operational states defined by
  *         {@link javafx.scene.media.MediaPlayer.Status}.

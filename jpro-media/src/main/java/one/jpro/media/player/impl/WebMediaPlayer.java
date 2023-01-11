@@ -62,17 +62,6 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             }
         });
 
-//        // check if the media can be played
-//        handleWebEvent("canplay", """
-//                    console.log("$mediaPlayerId => can play: " + elem.readyState);
-//                    java_fun(elem.readyState);
-//                """, readyState -> {
-//            // Autoplay if required
-//            if (isAutoPlay()) {
-//                play();
-//            }
-//        });
-
         // handle volume change
         handleWebEvent("volumechange", """
                 console.log("$mediaPlayerId => volume change: " + elem.volume);
@@ -184,6 +173,24 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             };
         }
         return mediaSource;
+    }
+
+    @Override
+    public BooleanProperty autoPlayProperty() {
+        if (autoPlay == null) {
+            autoPlay = new SimpleBooleanProperty(this, "autoPlay") {
+                @Override
+                protected void invalidated() {
+                    if (getStatus() != Status.DISPOSED) {
+                        webAPI.executeScript("""
+                                %s.autoplay = $autoplay;
+                                """.formatted(playerVideoElement.getName())
+                                .replace("$autoplay", String.valueOf(get())));
+                    }
+                }
+            };
+        }
+        return autoPlay;
     }
 
     // ready state property
