@@ -18,6 +18,6 @@ jobs:
       - name: compile
         run: |
           export DISPLAY=:99.0 && /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16;
-          ./gradlew tree-showing:test jpro-sound:test jpro-sessions:test freeze-detector:test
+          ./gradlew test
           ./gradlew example:jar
           ./gradlew javadoc
