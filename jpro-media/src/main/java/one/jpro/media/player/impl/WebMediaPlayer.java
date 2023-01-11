@@ -1,5 +1,6 @@
 package one.jpro.media.player.impl;
 
+import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
 import com.jpro.webapi.WebCallback;
 import javafx.beans.property.*;
@@ -7,6 +8,7 @@ import javafx.event.Event;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
+import one.jpro.media.WebMediaEngine;
 import one.jpro.media.event.MediaPlayerEvent;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.player.MediaPlayerException;
@@ -20,18 +22,20 @@ import java.util.Objects;
  *
  * @author Besmir Beqiri
  */
-public final class WebMediaPlayer extends BaseMediaPlayer {
+public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEngine {
 
     private final Logger log = LoggerFactory.getLogger(WebMediaPlayer.class);
 
     private final WebAPI webAPI;
     private final String mediaPlayerId;
+    private final JSVariable playerVideoElement;
 
     private boolean playerReady = false;
 
     public WebMediaPlayer(WebAPI webAPI, MediaSource mediaSource) {
         this.webAPI = Objects.requireNonNull(webAPI, "WebAPI cannot be null.");
         mediaPlayerId = webAPI.createUniqueJSName("media_player_");
+        playerVideoElement = createPlayerVideoElement("video_elem_" + mediaPlayerId);
         setMediaSource(Objects.requireNonNull(mediaSource, "Media source cannot be null."));
 
         // check if the media can be played
@@ -144,12 +148,12 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         });
     }
 
-    WebAPI getWebAPI() {
+    public WebAPI getWebAPI() {
         return webAPI;
     }
 
-    public String getMediaPlayerId() {
-        return mediaPlayerId;
+    public JSVariable getVideoElement() {
+        return playerVideoElement;
     }
 
     @Override
@@ -160,9 +164,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
                 protected void invalidated() {
                     if (getStatus() != Status.DISPOSED) {
                         webAPI.executeScript("""
-                                var elem = document.getElementById("$mediaPlayerId");
-                                elem.src = "$source";
-                                """.replace("$mediaPlayerId", mediaPlayerId)
+                                %s.src = "$source";
+                                """.formatted(playerVideoElement.getName())
                                 .replace("$source", get().source())
                                 .replace("\"\"", "\""));
                     }
@@ -204,7 +207,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
                                 new MediaPlayerEvent(WebMediaPlayer.this,
                                         MediaPlayerEvent.MEDIA_PLAYER_READY));
                     }
-                    log.info("Ready state changed: {}", get());
+                    log.debug("Ready state changed: {}", get());
                 }
             };
         }
@@ -224,10 +227,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         value = clamp(value, 0.0, 1.0);
         if (getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                    var elem = document.getElementById("$mediaPlayerId");
-                    elem.volume = %s;
-                    """.replace("$mediaPlayerId", mediaPlayerId)
-                    .formatted(value));
+                    %s.volume = %s;
+                    """.formatted(playerVideoElement.getName(), value));
         }
         volumeProperty().set(value);
     }
@@ -239,7 +240,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
                 @Override
                 protected void invalidated() {
-                    log.info("Volume changed: {}", get());
+                    log.debug("Volume changed: {}", get());
                 }
             };
         }
@@ -267,9 +268,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
                 protected void invalidated() {
                     if (getStatus() != Status.DISPOSED) {
                         webAPI.executeScript("""
-                                var elem = document.getElementById("$mediaPlayerId");
-                                elem.muted = $muted;
-                                """.replace("$mediaPlayerId", mediaPlayerId)
+                                %s.muted = $muted;
+                                """.formatted(playerVideoElement.getName())
                                 .replace("$muted", String.valueOf(get())));
                     }
                 }
@@ -282,9 +282,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     public void play() {
         if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                    let elem = document.getElementById("$mediaPlayerId");
-                    elem.play();
-                    """.replace("$mediaPlayerId", mediaPlayerId));
+                    %s.play();
+                    """.formatted(playerVideoElement.getName()));
         }
     }
 
@@ -292,9 +291,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     public void pause() {
         if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                    let elem = document.getElementById("$mediaPlayerId");
-                    elem.pause();
-                    """.replace("$mediaPlayerId", mediaPlayerId));
+                    %s.pause();
+                    """.formatted(playerVideoElement.getName()));
         }
     }
 
@@ -302,10 +300,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
     public void stop() {
         if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                    let elem = document.getElementById("$mediaPlayerId");
-                    elem.pause();
-                    elem.currentTime = 0;
-                    """.replace("$mediaPlayerId", mediaPlayerId));
+                    $playerVideoElem.pause();
+                    $playerVideoElem.currentTime = 0;
+                    """.replace("$playerVideoElem", playerVideoElement.getName()));
         }
 
         setStatus(Status.STOPPED);
@@ -319,21 +316,20 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
 
         if (playerReady && seekTime != null && !seekTime.isUnknown()) {
             webAPI.executeScript("""
-                    let elem = document.getElementById("$mediaPlayerId");
-                    elem.currentTime=%s;
-                    """.formatted(seekTime.toSeconds())
-                    .replace("$mediaPlayerId", mediaPlayerId));
+                    %s.currentTime=%s;
+                    """.formatted(playerVideoElement.getName(), seekTime.toSeconds()));
         }
     }
 
     private void handleWebEvent(String eventName, String eventHandler, WebCallback webCallback) {
         webAPI.registerJavaFunction(mediaPlayerId + "_" + eventName, webCallback);
         webAPI.executeScript("""
-                let elem = document.getElementById("$mediaPlayerId");
+                let elem = $playerVideoElem;
                 elem.on$eventName = (event) => {
                      $eventHandler
                 };
                 """
+                .replace("$playerVideoElem", playerVideoElement.getName())
                 .replace("$eventHandler", eventHandler)
                 .replace("java_fun", "jpro.$mediaPlayerId_$eventName")
                 .replace("$mediaPlayerId", mediaPlayerId)
@@ -348,5 +344,15 @@ public final class WebMediaPlayer extends BaseMediaPlayer {
         if (value < min) return min;
         if (value > max) return max;
         return value;
+    }
+
+    private JSVariable createPlayerVideoElement(String videoElement) {
+        webAPI.executeScript("""
+                $playerVideoElem = document.createElement("video");
+                $playerVideoElem.controls = false;
+                $playerVideoElem.setAttribute("webkit-playsinline", 'webkit-playsinline');
+                $playerVideoElem.setAttribute("playsinline", 'playsinline');
+                """.replace("$playerVideoElem", videoElement));
+        return new JSVariable(webAPI, videoElement);
     }
 }

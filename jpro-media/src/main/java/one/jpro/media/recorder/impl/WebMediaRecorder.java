@@ -1,30 +1,35 @@
 package one.jpro.media.recorder.impl;
 
+import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.event.Event;
 import one.jpro.media.MediaSource;
+import one.jpro.media.WebMediaEngine;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
 import org.json.JSONObject;
+
+import java.util.Objects;
 
 /**
  * {@link MediaRecorder} implementation for the web.
  *
  * @author Besmir Beqiri
  */
-public final class WebMediaRecorder extends BaseMediaRecorder {
+public final class WebMediaRecorder extends BaseMediaRecorder implements WebMediaEngine {
 
     private static final String DEFAULT_MIME_TYPE = "video/webm";
 
     private final WebAPI webAPI;
 
-    private final String videoRecorderId;
     private final String mediaRecorderRef;
     private final String blobsRecordedRef;
+
+    private final JSVariable recorderVideoElement;
 
     /**
      * Creates a new MediaRecorder object.
@@ -32,12 +37,12 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
      * @param webAPI JPro WebAPI
      */
     public WebMediaRecorder(WebAPI webAPI) {
-        this.webAPI = webAPI;
+        this.webAPI = Objects.requireNonNull(webAPI, "WebAPI must not be null.");
 
         final String recorderId = webAPI.createUniqueJSName("recorder_");
-        videoRecorderId = "video_" + recorderId;
         mediaRecorderRef = "media_" + recorderId;
         blobsRecordedRef = "blobs_" + recorderId;
+        recorderVideoElement = createRecorderVideoElement("video_elem_" + recorderId);
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_ready", result -> {
             // Set status to ready
@@ -118,12 +123,14 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         });
     }
 
-    WebAPI getWebAPI() {
+    @Override
+    public WebAPI getWebAPI() {
         return webAPI;
     }
 
-    public String getVideoRecorderId() {
-        return videoRecorderId;
+    @Override
+    public JSVariable getVideoElement() {
+        return recorderVideoElement;
     }
 
     /**
@@ -139,8 +146,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
      */
     public boolean isTypeSupported(String mimeType) throws Exception {
         return Boolean.getBoolean(webAPI.executeScriptWithReturn("""
-                        MediaRecorder.isTypeSupported("%s")
-                        """.formatted(mimeType)));
+                MediaRecorder.isTypeSupported("%s")
+                """.formatted(mimeType)));
     }
 
     @Override
@@ -189,11 +196,10 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         final var mediaRecorderOptions = new MediaRecorderOptions().mimeType(getMimeType());
         webAPI.executeScript("""
                 $blobsRecorded = []; // stream buffer
-                var elem = document.getElementById("$videoRecorderId");
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                     .then((stream) => {
-                        elem.srcObject = stream;
-                        $mediaRecorder = new MediaRecorder(elem.srcObject, $videoRecorderOptions);
+                        $recorderVideoElem.srcObject = stream;
+                        $mediaRecorder = new MediaRecorder($recorderVideoElem.srcObject, $videoRecorderOptions);
                         
                         // recorder is ready
                         jpro.$mediaRecorder_ready();
@@ -229,7 +235,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
                         $mediaRecorder.onresume = (event) => jpro.$mediaRecorder_onresume($mediaRecorder.state)
                     });
                 """
-                .replace("$videoRecorderId", videoRecorderId)
+                .replace("$recorderVideoElem", recorderVideoElement.getName())
                 .replace("$videoRecorderOptions", mediaRecorderOptions.toJSON().toString())
                 .replace("$blobsRecorded", blobsRecordedRef)
                 .replace("$mediaRecorder", mediaRecorderRef));
@@ -268,5 +274,17 @@ public final class WebMediaRecorder extends BaseMediaRecorder {
         webAPI.executeScript("""
                 $mediaRecorder.stop();
                 """.replace("$mediaRecorder", mediaRecorderRef));
+    }
+
+    private JSVariable createRecorderVideoElement(String recorderVideoElem) {
+        webAPI.executeScript("""
+                $recorderVideoElem = document.createElement("video");
+                $recorderVideoElem.controls = false;
+                $recorderVideoElem.autoplay = true;
+                $recorderVideoElem.muted = true;
+                $recorderVideoElem.setAttribute("webkit-playsinline", 'webkit-playsinline');
+                $recorderVideoElem.setAttribute("playsinline", 'playsinline');
+                """.replace("$recorderVideoElem", recorderVideoElem));
+        return new JSVariable(webAPI, recorderVideoElem);
     }
 }
