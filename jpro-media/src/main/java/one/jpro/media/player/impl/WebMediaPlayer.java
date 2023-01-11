@@ -38,7 +38,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         playerVideoElement = createPlayerVideoElement("video_elem_" + mediaPlayerId);
         setMediaSource(Objects.requireNonNull(mediaSource, "Media source cannot be null."));
 
-        // check if the media can be played
+        // check if the media data is loaded
         handleWebEvent("loadeddata", """
                     console.log("$mediaPlayerId => ready state: " + elem.readyState);
                     java_fun(elem.readyState);
@@ -61,6 +61,17 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 setDuration(Duration.UNKNOWN);
             }
         });
+
+//        // check if the media can be played
+//        handleWebEvent("canplay", """
+//                    console.log("$mediaPlayerId => can play: " + elem.readyState);
+//                    java_fun(elem.readyState);
+//                """, readyState -> {
+//            // Autoplay if required
+//            if (isAutoPlay()) {
+//                play();
+//            }
+//        });
 
         // handle volume change
         handleWebEvent("volumechange", """
@@ -350,6 +361,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         webAPI.executeScript("""
                 $playerVideoElem = document.createElement("video");
                 $playerVideoElem.controls = false;
+                $playerVideoElem.muted = false;
                 $playerVideoElem.setAttribute("webkit-playsinline", 'webkit-playsinline');
                 $playerVideoElem.setAttribute("playsinline", 'playsinline');
                 """.replace("$playerVideoElem", videoElement));

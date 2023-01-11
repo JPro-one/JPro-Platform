@@ -1,10 +1,7 @@
 package one.jpro.media.player.impl;
 
 import com.sun.javafx.event.EventHandlerManager;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
 import javafx.scene.media.MediaPlayer.Status;
@@ -29,20 +26,41 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     ReadOnlyObjectWrapper<MediaSource> mediaSource;
 
     @Override
-    public MediaSource getMediaSource() {
+    public final MediaSource getMediaSource() {
         return mediaSource == null ? null : mediaSource.get();
     }
 
-    void setMediaSource(MediaSource value) {
+    final void setMediaSource(MediaSource value) {
         mediaSourcePropertyImpl().set(value);
     }
 
     @Override
-    public ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
+    public final ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
         return mediaSourcePropertyImpl().getReadOnlyProperty();
     }
 
     abstract ReadOnlyObjectWrapper<MediaSource> mediaSourcePropertyImpl();
+
+    // autoplay property
+    private BooleanProperty autoPlay;
+
+    @Override
+    public void setAutoPlay(boolean value) {
+        autoPlayProperty().set(value);
+    }
+
+    @Override
+    public boolean isAutoPlay() {
+        return autoPlay != null && autoPlay.get();
+    }
+
+    @Override
+    public BooleanProperty autoPlayProperty() {
+        if (autoPlay == null) {
+            autoPlay = new SimpleBooleanProperty(this, "autoPlay");
+        }
+        return autoPlay;
+    }
 
     // status property
     private ReadOnlyObjectWrapper<Status> status;
