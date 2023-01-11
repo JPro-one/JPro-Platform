@@ -227,7 +227,8 @@ public abstract class MediaView extends Region {
 
     /**
      * Determines the width of the bounding box within which the source media is
-     * resized as necessary to fit.
+     * resized as necessary to fit. If <code>value &le; 0</code>, than the width
+     * of the bounding box will match the width of the parent container node.
      * <p>
      * See {@link #preserveRatioProperty preserveRatio} for information on interaction
      * between media views <code>fitWidth</code>, <code>fitHeight</code> and
@@ -259,7 +260,8 @@ public abstract class MediaView extends Region {
 
     /**
      * Determines the height of the bounding box within which the source media is
-     * resized as necessary to fit.
+     * resized as necessary to fit. If <code>value &le; 0</code>, than the height
+     * of the bounding box will match the height of the parent container node.
      * <p>
      * See {@link #preserveRatioProperty preserveRatio} for information on interaction
      * between media views <code>fitWidth</code>, <code>fitHeight</code> and
