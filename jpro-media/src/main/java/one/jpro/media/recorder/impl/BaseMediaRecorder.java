@@ -27,16 +27,16 @@ abstract class BaseMediaRecorder implements MediaRecorder {
     ReadOnlyObjectWrapper<MediaSource> mediaSource;
 
     @Override
-    public MediaSource getMediaSource() {
+    public final MediaSource getMediaSource() {
         return (mediaSource == null) ? null : mediaSource.get();
     }
 
-    void setMediaSource(MediaSource value) {
+    final void setMediaSource(MediaSource value) {
         mediaResourcePropertyImpl().set(value);
     }
 
     @Override
-    public ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
+    public final ReadOnlyObjectProperty<MediaSource> mediaSourceProperty() {
         return mediaResourcePropertyImpl().getReadOnlyProperty();
     }
 
@@ -51,11 +51,11 @@ abstract class BaseMediaRecorder implements MediaRecorder {
     private ReadOnlyObjectWrapper<Status> status;
 
     @Override
-    public Status getStatus() {
+    public final Status getStatus() {
         return (status == null) ? Status.INACTIVE : status.get();
     }
 
-    protected void setStatus(Status value) {
+    final void setStatus(Status value) {
         statusPropertyImpl().set(value);
     }
 
@@ -63,7 +63,7 @@ abstract class BaseMediaRecorder implements MediaRecorder {
      * The current status of the MediaRecorder object (inactive, recording, or paused.)
      */
     @Override
-    public ReadOnlyObjectProperty<Status> statusProperty() {
+    public final ReadOnlyObjectProperty<Status> statusProperty() {
         return statusPropertyImpl().getReadOnlyProperty();
     }
 
