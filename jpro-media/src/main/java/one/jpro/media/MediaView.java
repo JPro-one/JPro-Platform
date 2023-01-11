@@ -269,18 +269,16 @@ public abstract class MediaView extends Region {
     public abstract DoubleProperty fitHeightProperty();
 
     @Override
-    protected double computePrefWidth(double height) {
-        return getFitWidth();
-    }
-
-    @Override
-    protected double computePrefHeight(double width) {
-        return getFitHeight();
-    }
-
-    @Override
     protected void layoutChildren() {
         for (Node child : getManagedChildren()) {
+            if (child instanceof javafx.scene.media.MediaView fxMediaView) {
+                if (getFitWidth() <= 0) {
+                    fxMediaView.setFitWidth(getWidth());
+                }
+                if (getFitHeight() <= 0) {
+                    fxMediaView.setFitHeight(getHeight());
+                }
+            }
             layoutInArea(child, 0.0, 0.0, getWidth(), getHeight(),
                     0.0, HPos.CENTER, VPos.CENTER);
         }
