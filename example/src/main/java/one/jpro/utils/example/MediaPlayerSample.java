@@ -104,9 +104,7 @@ public class MediaPlayerSample extends Application {
         controlsPane.getStyleClass().add("controls-pane");
         var rootPane = new VBox(mediaView, controlsPane);
         rootPane.getStyleClass().add("root-pane");
-        mediaView.fitWidthProperty().bind(rootPane.widthProperty());
-        mediaView.fitHeightProperty().bind(rootPane.heightProperty()
-                .subtract(controlsPane.heightProperty()));
+        VBox.setVgrow(mediaView, Priority.ALWAYS);
 
         var scene = new Scene(rootPane, 1140, 640);
         scene.getStylesheets().add(new PrimerLight().getUserAgentStylesheet());
