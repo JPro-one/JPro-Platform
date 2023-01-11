@@ -17,8 +17,10 @@
  * These steps are illustrated by the sample code in the {@link one.jpro.media.MediaView} class documentation.
  * Some things which should be noted are:
  * <ul>
- *     <li>One <code>MediaSource</code> object may be shared among multiple <code>MediaRecorder</code>s.
- *     <li>One <code>MediaRecorder</code> may be shared among multiple <code>MediaView</code>s.
+ *     <li>The <code>MediaRecorder</code> will create the <code>MediaSource</code> object after
+ *         the recording has started via {@link one.jpro.media.recorder.MediaRecorder#start()}
+ *         and later stopped by calling {@link one.jpro.media.recorder.MediaRecorder#stop()}.
+ *     <li>Only one <code>MediaView</code> can be created for a <code>MediaRecorder</code> object.
  *     <li>Media may be recorded directly by a <code>MediaRecorder</code>
  *         without creating a <code>MediaView</code> although a view is required for display.</li>
  *     <li>Enable camera recording on a device by calling {@link one.jpro.media.recorder.MediaRecorder#enable()}.

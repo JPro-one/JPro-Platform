@@ -16,12 +16,17 @@
  * Some things which should be noted are:
  * <ul>
  *     <li>One <code>MediaSource</code> object may be shared among multiple <code>MediaPlayer</code>s.
- *     <li>One <code>MediaPlayer</code> may be shared among multiple <code>MediaView</code>s.
+ *     <li>Currently, one <code>MediaPlayer</code> may be shared among multiple <code>MediaView</code>s
+ *         only in desktop/mobile application. In web application, each <code>MediaView</code> must have its own
+ *         <code>MediaPlayer</code> object.</li>
  *     <li>Media may be played directly by a <code>MediaPlayer</code>
  *         without creating a <code>MediaView</code> although a view is required for display.</li>
  *     <li>Instead of {@link one.jpro.media.player.MediaPlayer#play()},
  *         {@link one.jpro.media.player.MediaPlayer#setAutoPlay MediaPlayer.setAutoPlay(true)}
- *         may be used to request that playing start as soon as possible.</li>
+ *         may be used to request that playing start as soon as possible. In web applications,
+ *         the <code>MediaPlayer</code> may not start playing automatically when the web page
+ *         is shown for the first time due to autoplay blocking mechanism of the browsers.</li>
+ *         </li>
  *     <li><code>MediaPlayer</code> has several operational states defined by
  *         {@link javafx.scene.media.MediaPlayer.Status}.
  * </ul>
