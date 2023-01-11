@@ -85,6 +85,41 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     }
 
     /**
+     * Sets the {@link #autoPlayProperty autoPlay} property value.
+     * @param value whether to enable auto-playback
+     */
+    void setAutoPlay(boolean value);
+
+    /**
+     * Retrieves the {@link #autoPlayProperty autoPlay} property value.
+     * @return the value.
+     */
+    boolean isAutoPlay();
+
+    /**
+     * Whether playing should start as soon as possible. For a new player this
+     * will occur once the player has reached the READY state. The default
+     * value is <code>false</code>.
+     *
+     * @see javafx.scene.media.MediaPlayer.Status
+     */
+    BooleanProperty autoPlayProperty();
+
+    /**
+     * Retrieves the current media source.
+     *
+     * @return {@link MediaSource} object
+     */
+    MediaSource getMediaSource();
+
+    /**
+     * The media source for the current player. It holds the information
+     * on where it resource is located and accessed either via a string
+     * form URI locally, or via {@link WebAPI.JSFile} remotely.
+     */
+    ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
+
+    /**
      * Retrieves the muteProperty value.
      *
      * @return the mute setting

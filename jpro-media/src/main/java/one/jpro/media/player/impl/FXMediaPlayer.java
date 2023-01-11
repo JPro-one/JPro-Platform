@@ -122,20 +122,37 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
         return mediaSource;
     }
 
-    // current time property
+    @Override
+    public boolean isAutoPlay() {
+        return mediaPlayer.isAutoPlay();
+    }
+
+    @Override
+    public void setAutoPlay(boolean autoPlay) {
+        mediaPlayer.setAutoPlay(autoPlay);
+    }
+
+    @Override
+    public BooleanProperty autoPlayProperty() {
+        return mediaPlayer.autoPlayProperty();
+    }
+
+    @Override
     public Duration getCurrentTime() {
         return mediaPlayer.getCurrentTime();
     }
 
+    @Override
     public ReadOnlyObjectProperty<Duration> currentTimeProperty() {
         return mediaPlayer.currentTimeProperty();
     }
 
-    // duration property
+    @Override
     public Duration getDuration() {
         return mediaPlayer.getTotalDuration();
     }
 
+    @Override
     public ReadOnlyObjectProperty<Duration> durationProperty() {
         return mediaPlayer.totalDurationProperty();
     }
