@@ -30,23 +30,23 @@ public class MediaPlayerSample extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Media Player");
 
-        // media player
-        var mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
-        var mediaView = MediaView.create(mediaPlayer);
+        // Media player
+        MediaPlayer mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
+        MediaView mediaView = MediaView.create(mediaPlayer);
 
-        // controls
-        var playPauseButton = new Button("Play");
+        // Controls
+        Button playPauseButton = new Button("Play");
         playPauseButton.setDisable(true);
-        var stopButton = new Button("Stop");
+        Button stopButton = new Button("Stop");
         stopButton.setDisable(true);
-        var seekSlider = new Slider();
+        Slider seekSlider = new Slider();
         seekSlider.setPrefWidth(480);
-        var preserveRatioCheckBox = new CheckBox("Preserve Ratio");
+        CheckBox preserveRatioCheckBox = new CheckBox("Preserve Ratio");
         preserveRatioCheckBox.setSelected(mediaView.isPreserveRatio());
-        var muteCheckBox = new CheckBox("Mute");
-        var volumeSlider = new Slider(0, 100, mediaPlayer.getVolume() * 100.0);
+        CheckBox muteCheckBox = new CheckBox("Mute");
+        Slider volumeSlider = new Slider(0, 100, mediaPlayer.getVolume() * 100.0);
 
-        // events
+        // Control events
         playPauseButton.setOnAction(event -> {
             if (mediaPlayer.getStatus() == Status.READY ||
                     mediaPlayer.getStatus() == Status.PAUSED ||
@@ -87,6 +87,7 @@ public class MediaPlayerSample extends Application {
             }
         });
 
+        // Player event handlers
         mediaPlayer.setOnReady(event -> {
             playPauseButton.setDisable(false);
             stopButton.setDisable(false);
@@ -96,17 +97,17 @@ public class MediaPlayerSample extends Application {
         mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
         mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
         mediaPlayer.setOnStopped(event -> playPauseButton.setText("Play"));
-        mediaPlayer.setOnError(event -> System.out.println("Error: " + mediaPlayer.getError()));
+        mediaPlayer.setOnError(event -> mediaPlayer.getError().printStackTrace());
 
-        // interface
-        var controlsPane = new FlowPane(playPauseButton, stopButton, seekSlider,
+        // User interface
+        FlowPane controlsPane = new FlowPane(playPauseButton, stopButton, seekSlider,
                 preserveRatioCheckBox, muteCheckBox, volumeSlider);
         controlsPane.getStyleClass().add("controls-pane");
-        var rootPane = new VBox(mediaView, controlsPane);
+        VBox rootPane = new VBox(mediaView, controlsPane);
         rootPane.getStyleClass().add("root-pane");
         VBox.setVgrow(mediaView, Priority.ALWAYS);
 
-        var scene = new Scene(rootPane, 1140, 640);
+        Scene scene = new Scene(rootPane, 1140, 640);
         scene.getStylesheets().add(new PrimerLight().getUserAgentStylesheet());
         Optional.ofNullable(getClass().getResource("css/media_sample.css"))
                 .map(URL::toExternalForm)

@@ -28,26 +28,28 @@ public class MediaRecorderSample extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder");
 
-        var enableCamButton = new Button("Enable Cam");
-        var startButton = new Button("Start");
+        // Controls
+        Button enableCamButton = new Button("Enable Cam");
+        Button startButton = new Button("Start");
         startButton.setDisable(true);
-        var pauseResumeButton = new Button("Pause");
+        Button pauseResumeButton = new Button("Pause");
         pauseResumeButton.setDisable(true);
-        var stopButton = new Button("Stop");
+        Button stopButton = new Button("Stop");
         stopButton.setDisable(true);
-        var saveButton = new Button("Save As...");
+        Button saveButton = new Button("Save As...");
         saveButton.setDisable(true);
 
-        var previewPane = new StackPane(enableCamButton);
+        StackPane previewPane = new StackPane(enableCamButton);
         previewPane.getStyleClass().add("preview-pane");
 
-        var mediaRecorder = MediaRecorder.create(stage);
-        var cameraView = MediaView.create(mediaRecorder);
+        // Create media recorder and media view
+        MediaRecorder mediaRecorder = MediaRecorder.create(stage);
+        MediaView cameraView = MediaView.create(mediaRecorder);
 
-        var controlsPane = new FlowPane(startButton, pauseResumeButton, stopButton, saveButton);
+        FlowPane controlsPane = new FlowPane(startButton, pauseResumeButton, stopButton, saveButton);
         controlsPane.getStyleClass().add("controls-pane");
 
-        // button events
+        // Control events
         enableCamButton.setOnAction(event -> mediaRecorder.enable());
         startButton.setOnAction(event -> mediaRecorder.start());
         pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
@@ -60,7 +62,7 @@ public class MediaRecorderSample extends Application {
             }
         });
 
-        // media recorder events
+        // Event handlers
         mediaRecorder.setOnReady(event -> {
             startButton.setDisable(false);
             previewPane.getChildren().setAll(cameraView);
@@ -87,14 +89,15 @@ public class MediaRecorderSample extends Application {
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 
-        var rootPane = new VBox(previewPane, controlsPane);
+        // User interface
+        VBox rootPane = new VBox(previewPane, controlsPane);
         rootPane.getStyleClass().add("root-pane");
+        VBox.setVgrow(previewPane, Priority.ALWAYS);
         cameraView.fitWidthProperty().bind(rootPane.widthProperty());
         cameraView.fitHeightProperty().bind(rootPane.heightProperty()
                 .subtract(controlsPane.heightProperty()));
 
-        VBox.setVgrow(previewPane, Priority.ALWAYS);
-        var scene = new Scene(rootPane, 760, 540);
+        Scene scene = new Scene(rootPane, 760, 540);
         scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());
         Optional.ofNullable(getClass().getResource("css/media_sample.css"))
                 .map(URL::toExternalForm)
