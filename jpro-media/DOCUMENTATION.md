@@ -164,6 +164,9 @@ class JProMediaApplication extends Application {
 
         VBox rootPane = new VBox(previewPane, controlsPane);
         VBox.setVgrow(previewPane, Priority.ALWAYS);
+        cameraView.fitWidthProperty().bind(rootPane.widthProperty());
+        cameraView.fitHeightProperty().bind(rootPane.heightProperty()
+                .subtract(controlsPane.heightProperty()));
 
         Scene scene = new Scene(rootPane, 760, 540);
         stage.setScene(scene);
