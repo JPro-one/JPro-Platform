@@ -183,7 +183,10 @@ public class MediaRecorderAndPlayerSample extends Application {
                 seekSlider.setMax(duration.toSeconds());
             }
         });
+
         seekSlider.setOnMousePressed(mouseEvent ->
+                mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));
+        seekSlider.setOnMouseDragged(mouseEvent ->
                 mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));
         mediaPlayer.currentTimeProperty().addListener(observable -> {
             if (mediaPlayer.getDuration().greaterThan(Duration.ZERO)
