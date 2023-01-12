@@ -14,14 +14,26 @@ Building cross-platform applications with JPro Media is as easy as using the
 ## Supported Platforms
 - Web (via [JPro](https://www.jpro.one))
 - Desktop (Windows, Linux, MacOS)
+- Android (The `MediaRecorder` still is under final testing)
+- iOS (The `MediaRecorder` still is under final testing)
 
 ## Getting Started
-To get started with JPro Media, you need to add the following configuration to your project.
+To get started with JPro Media, we need to add the following configuration to your project.
 ### Gradle
 By using the JPro Gradle plugin, we just need to add the `jpro-media` dependency to the `build.gradle` file: 
 ```groovy
 dependencies {
     implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
+}
+```
+and also provide the following `jvm argument` inside the `run` task:
+```groovy
+run {
+    doFirst {
+        jvmArgs = [
+                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.media'
+        ]
+    }
 }
 ```
 ### Maven
@@ -35,15 +47,30 @@ By using the JPro Maven plugin, we just need to add the `jpro-media` dependency 
     </dependency>
 </dependencies>
 ```
+and also provide the following configuration `option` inside the `javafx-maven-plugin`:
+```xml
+<plugin>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-maven-plugin</artifactId>
+    <version>0.0.8</version>
+    <configuration>
+        <mainClass>one.jpro.example/one.jpro.example.App</mainClass>
+        <options>
+            <option>--add-exports</option>
+            <option>javafx.base/com.sun.javafx.event=one.jpro.media</option>
+        </options>
+    </configuration>
+</plugin>
+```
 
 ### Similarities and differences to JavaFX Media
- - The `MediaSource` class is very similar to the `Media` class from the JavaFX Media API.
- - A `MediaPlayer` instance can be created by calling `MediaPlayer#create(Stage, MediaSource)`,
-    while in JavaFX Media you would use `new MediaPlayer(Media)`.
- - The `MediaView` class is very similar to the `MediaView` class from the JavaFX Media API.
-   It can be created by calling `MediaView#create(Stage, MediaPlayer)`, while in JavaFX Media you 
-   would use `new MediaView(MediaPlayer)`.
-   - The `MediaRecorder` can be created by calling `MediaRecorder#create(Stage)`,
+- The `MediaSource` class is very similar to the `Media` class from the JavaFX Media API.
+- A `MediaPlayer` instance can be created by calling `MediaPlayer#create(Stage, MediaSource)`,
+   while in JavaFX Media we would use `new MediaPlayer(Media)`.
+- The `MediaView` class is very similar to the `MediaView` class from the JavaFX Media API.
+  It can be created by calling `MediaView#create(Stage, MediaPlayer)`, while in JavaFX Media we 
+  would use `new MediaView(MediaPlayer)`.
+- The `MediaRecorder` can be created by calling `MediaRecorder#create(Stage)`,
    while in JavaFX Media doesn't provide a recorder.
 
 ## Usage
@@ -60,6 +87,10 @@ class JProMediaApplication extends Application {
         // Get the media source as an application argument.
         String source = getParameters().getRaw().get(0);
         MediaSource mediaSource = new MediaSource(source);
+
+        // Create the media player and the media view.
+        MediaPlayer mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
+        MediaView mediaView = MediaView.create(mediaPlayer);
 
         // Media controls
         Button playPauseButton = new Button("Play");
@@ -114,6 +145,11 @@ class JProMediaApplication extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder");
 
+        // Create the media recorder and the media view.
+        MediaRecorder mediaRecorder = MediaRecorder.create(stage);
+        MediaView cameraView = MediaView.create(mediaRecorder);
+
+        // Controls
         Button enableCamButton = new Button("Enable Cam");
         Button startButton = new Button("Start");
         startButton.setDisable(true);
@@ -124,16 +160,13 @@ class JProMediaApplication extends Application {
 
         StackPane previewPane = new StackPane(enableCamButton);
 
-        MediaRecorder mediaRecorder = MediaRecorder.create(stage);
-        MediaView cameraView = MediaView.create(mediaRecorder);
-
         FlowPane controlsPane = new FlowPane(startButton, stopButton, saveButton);
         controlsPane.setAlignment(Pos.CENTER);
         controlsPane.setHgap(8);
         controlsPane.setVgap(8);
         controlsPane.setPadding(new Insets(8));
 
-        // Button events
+        // Control events
         enableCamButton.setOnAction(event -> mediaRecorder.enable());
         startButton.setOnAction(event -> mediaRecorder.start());
         stopButton.setOnAction(event -> mediaRecorder.stop());
@@ -145,7 +178,7 @@ class JProMediaApplication extends Application {
             }
         });
 
-        // Media recorder events
+        // Event handlers
         mediaRecorder.setOnReady(event -> {
             startButton.setDisable(false);
             previewPane.getChildren().setAll(cameraView);
@@ -174,3 +207,5 @@ class JProMediaApplication extends Application {
     }
 }
 ```
+### More examples
+For more examples, please take a look at the [JPro Media Examples]().
