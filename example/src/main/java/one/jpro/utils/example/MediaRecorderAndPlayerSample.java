@@ -13,6 +13,7 @@ import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.MediaView;
 import one.jpro.media.recorder.MediaRecorder;
+import javafx.scene.media.MediaPlayer.Status;
 import one.jpro.media.util.MediaUtil;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class MediaRecorderAndPlayerSample extends Application {
     private Button enableCamButton;
     private Button recordButton;
     private Button pauseResumeButton;
-    private Button playPauseButton;
+    private Button playButton;
     private Button stopButton;
     private Slider seekSlider;
     private CheckBox preserveRatioCheckBox;
@@ -78,22 +79,21 @@ public class MediaRecorderAndPlayerSample extends Application {
         enableCamButton = new Button("Enable Camera");
         recordButton = new Button("Record");
         recordButton.setDisable(true);
+        playButton = new Button("Play");
+        playButton.setDisable(true);
         pauseResumeButton = new Button("Pause");
         pauseResumeButton.setDisable(true);
-        saveButton = new Button("Save As...");
-        saveButton.setDisable(true);
-
-        playPauseButton = new Button("Play");
-        playPauseButton.setDisable(true);
         stopButton = new Button("Stop");
         stopButton.setDisable(true);
+        saveButton = new Button("Save As...");
+        saveButton.setDisable(true);
         seekSlider = new Slider();
         seekSlider.setDisable(true);
         preserveRatioCheckBox = new CheckBox("Preserve Ratio");
         muteCheckBox = new CheckBox("Mute");
         volumeSlider = new Slider(0, 100, 100);
 
-        var controlsPane = new FlowPane(recordButton, playPauseButton, pauseResumeButton, stopButton,
+        var controlsPane = new FlowPane(recordButton, playButton, pauseResumeButton, stopButton,
                 saveButton, seekSlider, preserveRatioCheckBox, muteCheckBox, volumeSlider);
         seekSlider.prefWidthProperty().bind(controlsPane.widthProperty().subtract(32));
         controlsPane.getStyleClass().add("controls-pane");
@@ -107,7 +107,6 @@ public class MediaRecorderAndPlayerSample extends Application {
         // button events
         enableCamButton.setOnAction(event -> {
             mediaRecorder.enable();
-            recordButton.setDisable(false);
             previewPane.getChildren().setAll(cameraView);
         });
         recordButton.setOnAction(event -> {
@@ -132,6 +131,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         });
 
         // media recorder events
+        mediaRecorder.setOnReady(event -> recordButton.setDisable(false));
         mediaRecorder.setOnStart(event -> {
             recordButton.setDisable(true);
             pauseResumeButton.setDisable(false);
@@ -164,13 +164,11 @@ public class MediaRecorderAndPlayerSample extends Application {
         previewPane.getChildren().setAll(mediaView);
 
         // events
-        playPauseButton.setOnAction(event -> {
-            if (mediaPlayer.getStatus() == javafx.scene.media.MediaPlayer.Status.READY ||
-                    mediaPlayer.getStatus() == javafx.scene.media.MediaPlayer.Status.PAUSED ||
-                    mediaPlayer.getStatus() == javafx.scene.media.MediaPlayer.Status.STOPPED) {
+        playButton.setOnAction(event -> {
+            if (mediaPlayer.getStatus() == Status.READY ||
+                    mediaPlayer.getStatus() == Status.PAUSED ||
+                    mediaPlayer.getStatus() == Status.STOPPED) {
                 mediaPlayer.play();
-            } else {
-                mediaPlayer.pause();
             }
         });
         stopButton.setOnAction(event -> mediaPlayer.stop());
@@ -210,7 +208,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         });
 
         mediaPlayer.setOnReady(event -> {
-            playPauseButton.setDisable(false);
+            playButton.setDisable(false);
             stopButton.setDisable(false);
             final var duration = mediaPlayer.getDuration();
             if (duration.isUnknown()) {
@@ -221,9 +219,20 @@ public class MediaRecorderAndPlayerSample extends Application {
             }
             mediaPlayer.setVolume(volumeSlider.getValue() / 100.0);
         });
-        mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
-        mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
-        mediaPlayer.setOnStopped(event -> playPauseButton.setText("Play"));
+        mediaPlayer.setOnPlaying(event -> {
+            playButton.setDisable(true);
+            pauseResumeButton.setDisable(false);
+            pauseResumeButton.setText("Pause");
+            pauseResumeButton.setOnAction(event2 -> mediaPlayer.pause());
+        });
+        mediaPlayer.setOnPause(event -> {
+            playButton.setDisable(false);
+            pauseResumeButton.setDisable(true);
+        });
+        mediaPlayer.setOnStopped(event -> {
+            playButton.setDisable(false);
+            pauseResumeButton.setDisable(true);
+        });
         mediaPlayer.setOnError(event -> System.out.println("Error: " + mediaPlayer.getError()));
 
         return mediaPlayer;
