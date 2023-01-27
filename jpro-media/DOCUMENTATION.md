@@ -24,6 +24,11 @@ By using the JPro Gradle plugin, we just need to add the `jpro-media` dependency
 ```groovy
 dependencies {
     implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
+    implementation "org.bytedeco:javacv-platform:1.5.8"
+    
+    // use compileOnly configuration when running/deploying with JPro, 
+    // since the platform related libraries are no more needed
+    // compileOnly "org.bytedeco:javacv-platform:1.5.8"
 }
 ```
 and also provide the following `jvm argument` inside the `run` task:
@@ -50,6 +55,14 @@ By using the JPro Maven plugin, we just need to add the `jpro-media` dependency 
         <groupId>one.jpro.jproutils</groupId>
         <artifactId>jpro-media</artifactId>
         <version>0.2.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>org.bytedeco</groupId>
+        <artifactId>javacv-platform</artifactId>
+        <version>1.5.8</version>
+<!--        use compile scope when running/deploying with JPro,-->
+<!--        since the platform related libraries are no more needed-->
+<!--        <scope>compile</scope>-->
     </dependency>
 </dependencies>
 ```
