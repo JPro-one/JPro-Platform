@@ -79,6 +79,21 @@ For the playback functionality, the JPro Media API is very similar to the JavaFX
 The main difference is that the `Media` class is replaced by the `MediaSource` class.
 The following example shows how to play a video file:
 ```java
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import one.jpro.media.MediaSource;
+import one.jpro.media.MediaView;
+import one.jpro.media.player.MediaPlayer;
+
+import static javafx.scene.media.MediaPlayer.Status;
+
 class JProMediaApplication extends Application {
     
     public void start(Stage stage) {
@@ -89,7 +104,7 @@ class JProMediaApplication extends Application {
         MediaSource mediaSource = new MediaSource(source);
 
         // Create the media player and the media view.
-        MediaPlayer mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
+        MediaPlayer mediaPlayer = MediaPlayer.create(stage, mediaSource);
         MediaView mediaView = MediaView.create(mediaPlayer);
 
         // Media controls
