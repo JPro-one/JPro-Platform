@@ -100,7 +100,7 @@ import one.jpro.media.player.MediaPlayer;
 
 import static javafx.scene.media.MediaPlayer.Status;
 
-class JProMediaApplication extends Application {
+public class JProMediaApplication extends Application {
     
     public void start(Stage stage) {
         stage.setTitle("JPro Media Player");
@@ -161,7 +161,22 @@ class JProMediaApplication extends Application {
 The JPro Media also provides a MediaRecorder API for recording the audio and video stream from a camera device.
 The following example shows how to record from the default camera device:
 ```java
-class JProMediaApplication extends Application {
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import one.jpro.media.MediaView;
+import one.jpro.media.recorder.MediaRecorder;
+import one.jpro.media.util.MediaUtil;
+import java.io.IOException;
+
+public class JProMediaApplication extends Application {
     
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder");
