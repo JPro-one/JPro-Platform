@@ -36,6 +36,12 @@ run {
     }
 }
 ```
+or as an application default `jvm argument`:
+```groovy
+applicationDefaultJvmArgs = [
+        "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"
+]
+```
 ### Maven
 By using the JPro Maven plugin, we just need to add the `jpro-media` dependency to the `pom.xml` file.
 ```xml
