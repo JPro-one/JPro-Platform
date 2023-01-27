@@ -174,8 +174,8 @@ public class JProMediaApplication extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Media Player");
 
-        // Get the media source as an application argument.
-        String source = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+        // Provide a media source
+        String source = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
         MediaSource mediaSource = new MediaSource(source);
 
         // Create the media player and the media view.
@@ -313,4 +313,4 @@ public class JProMediaApplication extends Application {
 }
 ```
 ### More examples
-For more examples, please take a look at the [JPro Media Examples]().
+For more examples, please take a look at the [JPro Media Examples](https://github.com/JPro-one/jpro-utils/tree/master/example/src/main/java/one/jpro/utils/example).
