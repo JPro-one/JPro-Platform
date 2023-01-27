@@ -69,6 +69,75 @@ and also provide the following configuration `option` inside the `javafx-maven-p
 </plugin>
 ```
 
+### Platform specific modules configuration
+When we run the application on the desktop/device, the following modules are required and must be added the module 
+descriptor (module-info.java) depending on the operating system and architecture currently in use.
+
+***It is important to note here that when we run/deploy the application as a web application via the JPro server,
+these modules are not required and no further configuration is needed.***
+* Apple Silicon Macs
+```java
+module com.example.app {
+    
+    requires org.bytedeco.opencv.macosx.arm64;
+    requires org.bytedeco.ffmpeg.macosx.arm64;
+    requires org.bytedeco.openblas.macosx.arm64;
+    
+}
+```
+* Intel-based Macs
+```java
+module com.example.app {
+    
+    requires org.bytedeco.opencv.macosx.x86_64;
+    requires org.bytedeco.ffmpeg.macosx.x86_64;
+    requires org.bytedeco.openblas.macosx.x86_64;
+    
+}
+```
+* Windows 64-bit
+```java
+module com.example.app {
+
+    requires org.bytedeco.opencv.windows.x86_64;
+    requires org.bytedeco.ffmpeg.windows.x86_64;
+    requires org.bytedeco.openblas.windows.x86_64;
+    
+}
+```
+* Windows 32-bit
+```java
+module com.example.app {
+
+    requires org.bytedeco.opencv.windows.x86;
+    requires org.bytedeco.ffmpeg.windows.x86;
+    requires org.bytedeco.openblas.windows.x86;
+    
+}
+```
+* Linux 64-bit
+```java
+module com.example.app {
+
+    requires org.bytedeco.opencv.linux.x86_64;
+    requires org.bytedeco.ffmpeg.linux.x86_64;
+    requires org.bytedeco.openblas.linux.x86_64;
+    
+}
+```
+* Linux 32-bit
+```java
+module com.example.app {
+
+    requires org.bytedeco.opencv.linux.x86;
+    requires org.bytedeco.ffmpeg.linux.x86;
+    requires org.bytedeco.openblas.linux.x86;
+    
+}
+```
+*Please note that other operating systems and architectures are also supported like `linux.arm64`, `linux.armhf`, `android.arm`, 
+`android.arm64`, `android.x86`, `android.x86_64`, `ios.arm64` and `ios.x86_64`, but are still under final testing.*
+
 ### Similarities and differences to JavaFX Media
 - The `MediaSource` class is very similar to the `Media` class from the JavaFX Media API.
 - A `MediaPlayer` instance can be created by calling `MediaPlayer#create(Stage, MediaSource)`,
