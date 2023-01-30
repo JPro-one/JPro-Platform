@@ -13,7 +13,10 @@ Building cross-platform applications with JPro Media is as easy as using the
 
 ## Supported Platforms
 - Web (via [JPro](https://www.jpro.one))
-- Desktop (Windows, Linux, MacOS)
+- Desktop 
+  - Windows
+  - Linux
+  - macOS (version 11.7 and later)
 - Android (The `MediaRecorder` still is under final testing)
 - iOS (The `MediaRecorder` still is under final testing)
 
