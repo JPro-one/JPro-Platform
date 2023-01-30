@@ -23,4 +23,5 @@ module one.jpro.utils.example {
     requires org.bytedeco.openblas.macosx.arm64;
 
     exports one.jpro.utils.example;
+    exports one.jpro.media.example;
 }
