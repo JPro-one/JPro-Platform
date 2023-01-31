@@ -1,4 +1,4 @@
-package one.jpro.media.example;
+package one.jpro.example.media;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -17,6 +17,7 @@ import static javafx.scene.media.MediaPlayer.Status;
 
 /**
  * Simple media player application using JPro-Media library.
+ * This is the example shown on the documentation.
  *
  * @author Besmir Beqiri
  */

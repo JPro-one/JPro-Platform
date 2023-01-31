@@ -18,11 +18,11 @@ dependencies {
 //mainClassName = 'one.jpro.utils.example.SessionManagerSample'
 //mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
 
-mainClassName = 'one.jpro.media.example.MediaPlayerSample'
-//mainClassName = 'one.jpro.media.example.MediaRecorderSample'
-//mainClassName = 'one.jpro.media.example.MediaRecorderAndPlayerSample'
-//mainClassName = 'one.jpro.media.example.simple.JProPlayerApplication'
-//mainClassName = 'one.jpro.media.example.simple.JProRecorderApplication'
+mainClassName = 'one.jpro.example.media.MediaPlayerSample'
+//mainClassName = 'one.jpro.example.media.MediaRecorderSample'
+//mainClassName = 'one.jpro.example.media.MediaRecorderAndPlayerSample'
+//mainClassName = 'one.jpro.example.media.MediaPlayerApplication'
+//mainClassName = 'one.jpro.example.media.MediaRecorderApplication'
 
 javafx {
     version = "$JAVAFX_VERSION"

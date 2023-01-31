@@ -1,4 +1,4 @@
-package one.jpro.media.example;
+package one.jpro.example.media;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
