@@ -40,7 +40,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_READY));
 
-            log.info("Media player ready!");
+            log.debug("Media player ready!");
         });
 
         mediaPlayer.setOnPlaying(() -> {
@@ -52,7 +52,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_PLAY));
 
-            log.info("Media player playing!");
+            log.debug("Media player playing!");
         });
 
         mediaPlayer.setOnPaused(() -> {
@@ -64,7 +64,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_PAUSE));
 
-            log.info("Media player paused!");
+            log.debug("Media player paused!");
         });
 
         mediaPlayer.setOnStopped(() -> {
@@ -76,7 +76,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_STOP));
 
-            log.info("Media player stopped!");
+            log.debug("Media player stopped!");
         });
 
         mediaPlayer.setOnEndOfMedia(() -> {
@@ -88,7 +88,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
 
-            log.info("Media playback has ended!");
+            log.debug("Media playback has ended!");
         });
 
         mediaPlayer.setOnError(() -> {

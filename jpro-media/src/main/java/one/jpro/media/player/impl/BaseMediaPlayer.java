@@ -112,7 +112,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
                 @Override
                 protected void invalidated() {
-                    log.info("Current time updated: {} s", get().toSeconds());
+                    log.debug("Current time updated: {} s", get().toSeconds());
                 }
             };
         }
@@ -142,7 +142,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
                 @Override
                 protected void invalidated() {
-                    log.info("Duration updated: {} s", get().toSeconds());
+                    log.debug("Duration updated: {} s", get().toSeconds());
                 }
             };
         }
