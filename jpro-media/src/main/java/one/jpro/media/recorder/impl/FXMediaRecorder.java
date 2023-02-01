@@ -324,18 +324,17 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     }
 
     private void stopRecording() {
-        if (recordingStarted) {
-            recordingStarted = false;
+        // Stop recording
+        recordingStarted = false;
 
-            // Release video recorder
-            try {
-                if (recorder != null) {
-                    recorder.stop();
-                    recorder.close();
-                }
-            } catch (FrameRecorder.Exception ex) {
-                log.error(ex.getMessage(), ex);
+        // Release video recorder resources
+        try {
+            if (recorder != null) {
+                recorder.stop();
+                recorder.close();
             }
+        } catch (FrameRecorder.Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
 
