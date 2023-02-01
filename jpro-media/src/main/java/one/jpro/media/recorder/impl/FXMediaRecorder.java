@@ -346,7 +346,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
             // Check for AV drift
             if (videoTimeStamp > recorder.getTimestamp()) {
-                log.debug("AV drift correction: {} : {} -> {}",
+                log.trace("AV drift correction: {} : {} -> {}",
                         videoTimeStamp, recorder.getTimestamp(), (videoTimeStamp - recorder.getTimestamp()));
 
                 // Tell the recorder to write this frame at this timestamp
