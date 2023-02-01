@@ -243,12 +243,20 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
 
     @Override
     public void start() {
-        webAPI.executeScript("""
-                $blobsRecorded = []; // clear recorded buffer
-                $mediaRecorder.start(1000); // start recording with a timeslice of 1 second
-                """
-                .replace("$blobsRecorded", blobsRecordedRef)
-                .replace("$mediaRecorder", mediaRecorderRef));
+        if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
+            webAPI.executeScript("""
+                    $blobsRecorded = []; // clear recorded buffer
+                    $mediaRecorder.start(1000); // start recording with a timeslice of 1 second
+                    """
+                    .replace("$blobsRecorded", blobsRecordedRef)
+                    .replace("$mediaRecorder", mediaRecorderRef));
+        } else if (getStatus().equals(Status.PAUSED)) {
+            webAPI.executeScript("""
+                    if ($mediaRecorder.state === "paused") {
+                        $mediaRecorder.resume();
+                    }
+                    """.replace("$mediaRecorder", mediaRecorderRef));
+        }
     }
 
     @Override
@@ -256,15 +264,6 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
         webAPI.executeScript("""
                 if ($mediaRecorder.state === "recording") {
                     $mediaRecorder.pause();
-                }
-                """.replace("$mediaRecorder", mediaRecorderRef));
-    }
-
-    @Override
-    public void resume() {
-        webAPI.executeScript("""
-                if ($mediaRecorder.state === "paused") {
-                    $mediaRecorder.resume();
                 }
                 """.replace("$mediaRecorder", mediaRecorderRef));
     }

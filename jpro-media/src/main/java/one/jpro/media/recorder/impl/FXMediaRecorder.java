@@ -234,47 +234,64 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void start() {
-        if (cameraEnabled) {
-            tempVideoFile = createTempFilename("video_", MP4_FILE_EXTENSION);
+        if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
+            // Start the recording if the camera is enabled
+            if (cameraEnabled) {
+                tempVideoFile = createTempFilename("video_", MP4_FILE_EXTENSION);
 
-            recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
-                    webcamGrabber.getImageWidth(), webcamGrabber.getImageHeight());
-            recorder.setInterleaved(true);
-            recorder.setVideoOption("tune", "zerolatency");
-            recorder.setVideoOption("preset", "ultrafast");
-            recorder.setVideoOption("crf", "28");
-            recorder.setVideoBitrate(2000000); // 2000 kb/s, reasonable ok for 720
-            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-            recorder.setFormat("mp4");
-            recorder.setFrameRate(webcamGrabber.getFrameRate());
-            recorder.setGopSize((int) (webcamGrabber.getFrameRate() * 2));
-            recorder.setAudioOption("crf", "0"); // no variable bitrate audio
-            recorder.setAudioQuality(0); // highest quality
-            recorder.setAudioBitrate(192000); // 192 Kbps
-            recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-            recorder.setSampleRate(getAudioSampleRate());
-            recorder.setAudioChannels(getAudioChannels());
+                recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
+                        webcamGrabber.getImageWidth(), webcamGrabber.getImageHeight());
+                recorder.setInterleaved(true);
+                recorder.setVideoOption("tune", "zerolatency");
+                recorder.setVideoOption("preset", "ultrafast");
+                recorder.setVideoOption("crf", "28");
+                recorder.setVideoBitrate(2000000); // 2000 kb/s, reasonable ok for 720
+                recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+                recorder.setFormat("mp4");
+                recorder.setFrameRate(webcamGrabber.getFrameRate());
+                recorder.setGopSize((int) (webcamGrabber.getFrameRate() * 2));
+                recorder.setAudioOption("crf", "0"); // no variable bitrate audio
+                recorder.setAudioQuality(0); // highest quality
+                recorder.setAudioBitrate(192000); // 192 Kbps
+                recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+                recorder.setSampleRate(getAudioSampleRate());
+                recorder.setAudioChannels(getAudioChannels());
 
-            try {
-                recorder.start();
-            } catch (FFmpegFrameRecorder.Exception ex) {
-                log.error(ex.getMessage(), ex);
+                try {
+                    recorder.start();
+                } catch (FFmpegFrameRecorder.Exception ex) {
+                    log.error(ex.getMessage(), ex);
+                }
+
+                // enable recording
+                startRecordingTime = 0; // reset start recording time
+                recordingStarted = true;
+
+                // Set status to recording
+                setStatus(Status.RECORDING);
+
+                // Fire start event
+                Event.fireEvent(FXMediaRecorder.this,
+                        new MediaRecorderEvent(FXMediaRecorder.this,
+                                MediaRecorderEvent.MEDIA_RECORDER_START));
+            } else {
+                log.info("Please, enable the camera first!");
             }
+        } else
+            // If recording is paused, then resume it
+            if (getStatus().equals(Status.PAUSED)) {
+                // enable recording
+                startRecordingTime = 0; // reset start recording time
+                recordingStarted = true;
 
-            // enable recording
-            startRecordingTime = 0; // reset start recording time
-            recordingStarted = true;
+                // Set status to recording
+                setStatus(Status.RECORDING);
 
-            // Set status to recording
-            setStatus(Status.RECORDING);
-
-            // Fire start event
-            Event.fireEvent(FXMediaRecorder.this,
-                    new MediaRecorderEvent(FXMediaRecorder.this,
-                            MediaRecorderEvent.MEDIA_RECORDER_START));
-        } else {
-            log.info("Please, enable the camera first!");
-        }
+                // Fire start event
+                Event.fireEvent(FXMediaRecorder.this,
+                        new MediaRecorderEvent(FXMediaRecorder.this,
+                                MediaRecorderEvent.MEDIA_RECORDER_RESUME));
+            }
     }
 
     @Override
@@ -289,21 +306,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         Event.fireEvent(FXMediaRecorder.this,
                 new MediaRecorderEvent(FXMediaRecorder.this,
                         MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
-    }
-
-    @Override
-    public void resume() {
-        // enable recording
-        startRecordingTime = 0; // reset start recording time
-        recordingStarted = true;
-
-        // Set status to recording
-        setStatus(Status.RECORDING);
-
-        // Fire start event
-        Event.fireEvent(FXMediaRecorder.this,
-                new MediaRecorderEvent(FXMediaRecorder.this,
-                        MediaRecorderEvent.MEDIA_RECORDER_RESUME));
     }
 
     @Override

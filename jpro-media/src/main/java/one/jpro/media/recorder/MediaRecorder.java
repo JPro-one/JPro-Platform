@@ -26,7 +26,7 @@ import java.util.Optional;
  * the {@link MediaSource} class to retrieve the recorded media.
  *
  * <p><code>MediaRecorder</code> provides the {@link #start()}, {@link #pause()},
- * {@link #resume()}, {@link #stop()} controls as recording functionalities.
+ * and {@link #stop()} controls as recording functionalities.
  * Use {@link #enable()} to request access to the camera device and enable
  * the recording controls.
  *
@@ -68,6 +68,12 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
     enum Status {
 
         /**
+         * Recording is not occurring — it has either not been started yet,
+         * or it has been started and then stopped.
+         */
+        INACTIVE,
+
+        /**
          * The media recorder is ready to record.
          */
         READY,
@@ -80,13 +86,7 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
         /**
          * Recording has been started, then paused, but not yet stopped or resumed.
          */
-        PAUSED,
-
-        /**
-         * Recording is not occurring — it has either not been started yet,
-         * or it has been started and then stopped.
-         */
-        INACTIVE;
+        PAUSED;
 
         /**
          * Parses a JavaScript string and if the content is equals to one of the states,
@@ -304,7 +304,7 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
     void enable();
 
     /**
-     * Begins recording media.
+     * Begins recording media or resumes recording of media after having been paused..
      */
     void start();
 
@@ -312,11 +312,6 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
      * Pauses the recording of media.
      */
     void pause();
-
-    /**
-     * Resumes recording of media after having been paused.
-     */
-    void resume();
 
     /**
      * Stops the recording of media.

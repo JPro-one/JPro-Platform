@@ -25,7 +25,9 @@
  *         without creating a <code>MediaView</code> although a view is required for display.</li>
  *     <li>Enable camera recording on a device by calling {@link one.jpro.media.recorder.MediaRecorder#enable()}.
  *         This is required to acquire the permission to access the camera on the device</li>
- *     <li><code>MediaPlayer</code> has few operational states defined by
+ *     <li>If <code>MediaRecorder</code> has been paused, the recording can be resumed by calling
+ *         {@link one.jpro.media.recorder.MediaRecorder#start()}.
+ *     <li><code>MediaRecorder</code> has few operational states defined by
  *         {@link one.jpro.media.recorder.MediaRecorder.Status}.
  * </ul>
  *
