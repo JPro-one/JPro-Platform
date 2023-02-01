@@ -32,8 +32,8 @@ public class MediaRecorderSample extends Application {
         Button enableCamButton = new Button("Enable Cam");
         Button startButton = new Button("Start");
         startButton.setDisable(true);
-        Button pauseResumeButton = new Button("Pause");
-        pauseResumeButton.setDisable(true);
+        Button pauseButton = new Button("Pause");
+        pauseButton.setDisable(true);
         Button stopButton = new Button("Stop");
         stopButton.setDisable(true);
         Button saveButton = new Button("Save As...");
@@ -46,13 +46,13 @@ public class MediaRecorderSample extends Application {
         MediaRecorder mediaRecorder = MediaRecorder.create(stage);
         MediaView cameraView = MediaView.create(mediaRecorder);
 
-        FlowPane controlsPane = new FlowPane(startButton, pauseResumeButton, stopButton, saveButton);
+        FlowPane controlsPane = new FlowPane(startButton, pauseButton, stopButton, saveButton);
         controlsPane.getStyleClass().add("controls-pane");
 
         // Control events
         enableCamButton.setOnAction(event -> mediaRecorder.enable());
         startButton.setOnAction(event -> mediaRecorder.start());
-        pauseResumeButton.setOnAction(event -> mediaRecorder.pause());
+        pauseButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
         saveButton.setOnAction(event -> {
             try {
@@ -69,21 +69,21 @@ public class MediaRecorderSample extends Application {
         });
         mediaRecorder.setOnStart(event -> {
             startButton.setDisable(true);
-            pauseResumeButton.setDisable(false);
+            pauseButton.setDisable(false);
             stopButton.setDisable(false);
             saveButton.setDisable(true);
         });
         mediaRecorder.setOnPause(event -> {
-            pauseResumeButton.setText("Resume");
-            pauseResumeButton.setOnAction(event2 -> mediaRecorder.resume());
+            startButton.setDisable(false);
+            pauseButton.setDisable(true);
         });
-        mediaRecorder.setOnResume(event1 -> {
-            pauseResumeButton.setText("Pause");
-            pauseResumeButton.setOnAction(event2 -> mediaRecorder.pause());
+        mediaRecorder.setOnResume(event -> {
+            startButton.setDisable(true);
+            pauseButton.setDisable(false);
         });
         mediaRecorder.setOnStopped(event -> {
             startButton.setDisable(false);
-            pauseResumeButton.setDisable(true);
+            pauseButton.setDisable(true);
             stopButton.setDisable(true);
             saveButton.setDisable(false);
         });

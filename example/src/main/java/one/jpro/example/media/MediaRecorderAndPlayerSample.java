@@ -35,7 +35,7 @@ public class MediaRecorderAndPlayerSample extends Application {
     private MediaView cameraView;
     private Button enableCamButton;
     private Button recordButton;
-    private Button pauseResumeButton;
+    private Button pauseButton;
     private Button playButton;
     private Button stopButton;
     private Slider seekSlider;
@@ -81,8 +81,8 @@ public class MediaRecorderAndPlayerSample extends Application {
         recordButton.setDisable(true);
         playButton = new Button("Play");
         playButton.setDisable(true);
-        pauseResumeButton = new Button("Pause");
-        pauseResumeButton.setDisable(true);
+        pauseButton = new Button("Pause");
+        pauseButton.setDisable(true);
         stopButton = new Button("Stop");
         stopButton.setDisable(true);
         saveButton = new Button("Save As...");
@@ -93,7 +93,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         muteCheckBox = new CheckBox("Mute");
         volumeSlider = new Slider(0, 100, 100);
 
-        var controlsPane = new FlowPane(recordButton, playButton, pauseResumeButton, stopButton,
+        var controlsPane = new FlowPane(recordButton, playButton, pauseButton, stopButton,
                 saveButton, seekSlider, preserveRatioCheckBox, muteCheckBox, volumeSlider);
         seekSlider.prefWidthProperty().bind(controlsPane.widthProperty().subtract(32));
         controlsPane.getStyleClass().add("controls-pane");
@@ -114,7 +114,7 @@ public class MediaRecorderAndPlayerSample extends Application {
                 previewPane.getChildren().setAll(cameraView);
             }
             mediaRecorder.start();
-            pauseResumeButton.setOnAction(event2 -> mediaRecorder.pause());
+            pauseButton.setOnAction(event2 -> mediaRecorder.pause());
             stopButton.setOnAction(event2-> mediaRecorder.stop());
         });
         saveButton.setOnAction(event -> {
@@ -134,21 +134,21 @@ public class MediaRecorderAndPlayerSample extends Application {
         mediaRecorder.setOnReady(event -> recordButton.setDisable(false));
         mediaRecorder.setOnStart(event -> {
             recordButton.setDisable(true);
-            pauseResumeButton.setDisable(false);
+            pauseButton.setDisable(false);
             stopButton.setDisable(false);
             saveButton.setDisable(true);
         });
         mediaRecorder.setOnPause(event -> {
-            pauseResumeButton.setText("Resume");
-            pauseResumeButton.setOnAction(event2 -> mediaRecorder.resume());
+            recordButton.setDisable(false);
+            pauseButton.setDisable(true);
         });
-        mediaRecorder.setOnResume(event1 -> {
-            pauseResumeButton.setText("Pause");
-            pauseResumeButton.setOnAction(event2 -> mediaRecorder.pause());
+        mediaRecorder.setOnResume(event -> {
+            recordButton.setDisable(true);
+            pauseButton.setDisable(false);
         });
         mediaRecorder.setOnStopped(event -> {
             recordButton.setDisable(false);
-            pauseResumeButton.setDisable(true);
+            pauseButton.setDisable(true);
             stopButton.setDisable(true);
             saveButton.setDisable(false);
             loadMedia(stage, mediaRecorder.getMediaSource());
@@ -221,17 +221,15 @@ public class MediaRecorderAndPlayerSample extends Application {
         });
         mediaPlayer.setOnPlaying(event -> {
             playButton.setDisable(true);
-            pauseResumeButton.setDisable(false);
-            pauseResumeButton.setText("Pause");
-            pauseResumeButton.setOnAction(event2 -> mediaPlayer.pause());
+            pauseButton.setDisable(false);
         });
         mediaPlayer.setOnPause(event -> {
             playButton.setDisable(false);
-            pauseResumeButton.setDisable(true);
+            pauseButton.setDisable(true);
         });
         mediaPlayer.setOnStopped(event -> {
             playButton.setDisable(false);
-            pauseResumeButton.setDisable(true);
+            pauseButton.setDisable(true);
         });
         mediaPlayer.setOnError(event -> System.out.println("Error: " + mediaPlayer.getError()));
 
