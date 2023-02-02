@@ -14,6 +14,17 @@ public class MediaRecorderException extends RuntimeException {
     private final String code;
 
     /**
+     * Create an {@link MediaRecorderException} with the given message and cause.
+     *
+     * @param message the error message
+     * @param cause a {@link Throwable} object
+     */
+    public MediaRecorderException(String message, Throwable cause) {
+        super(message, cause);
+        this.code = "0";
+    }
+
+    /**
      * Create an {@link MediaRecorderException} with the given error type and message.
      *
      * @param code the error code

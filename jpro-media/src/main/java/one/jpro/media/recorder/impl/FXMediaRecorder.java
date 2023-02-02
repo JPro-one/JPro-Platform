@@ -7,6 +7,7 @@ import javafx.scene.image.ImageView;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
+import one.jpro.media.recorder.MediaRecorderException;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.*;
 import org.slf4j.Logger;
@@ -133,10 +134,10 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     }
                 }
             } catch (FrameGrabber.Exception ex) {
-                log.error(ex.getMessage(), ex);
+                setError("Exception during the enabling of video camera stream.", ex);
                 release();
             } catch (LineUnavailableException lue) {
-                log.error(lue.getMessage(), lue);
+                setError("Exception on creating audio input line from the microphone.", lue);
                 if (micLine != null) {
                     micLine.close();
                 }
@@ -192,7 +193,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     try {
                         recorder.recordSamples(audioSampleRate, audioNumChannels, samplesBuff);
                     } catch (FFmpegFrameRecorder.Exception ex) {
-                        log.error(ex.getMessage(), ex);
+                        setError("Exception on recording the audio samples.", ex);
                     }
                 }
             };
@@ -256,7 +257,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 try {
                     recorder.start();
                 } catch (FFmpegFrameRecorder.Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    setError("Exception on starting the audio/video recorder.", ex);
                 }
 
                 // Enable recording
@@ -327,7 +328,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.close();
             }
         } catch (FrameRecorder.Exception ex) {
-            log.error(ex.getMessage(), ex);
+            setError("Exception on stopping the audio/video recorder", ex);
         }
     }
 
@@ -351,7 +352,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.record(frame);
             }
         } catch (FFmpegFrameRecorder.Exception ex) {
-            log.error(ex.getMessage(), ex);
+            setError("Exception during video frame recording.", ex);
         }
     }
 
@@ -374,7 +375,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 //noinspection ResultOfMethodCallIgnored
                 videoExecutorService.awaitTermination(10, TimeUnit.MILLISECONDS);
             } catch (FrameGrabber.Exception | InterruptedException ex) {
-                log.error("Exception in stopping the video frame capture service, trying to release the camera now... ", ex);
+                setError("Exception in stopping the video frame capture service.", ex);
             }
         }
 
@@ -391,8 +392,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 //noinspection ResultOfMethodCallIgnored
                 audioExecutorService.awaitTermination(10, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
-                // log any exception
-                log.error("Exception in stopping the frame capture, trying to release the camera now... ", ex);
+                setError("Exception in stopping the audio frame capture service.", ex);
             }
         }
     }
@@ -462,5 +462,10 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             }
         }
         return tempFile;
+    }
+
+    private void setError(String message, Exception ex) {
+        setError(new MediaRecorderException(message, ex));
+        log.error(message, ex);
     }
 }
