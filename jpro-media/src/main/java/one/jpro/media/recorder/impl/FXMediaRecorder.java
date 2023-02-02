@@ -13,16 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sound.sampled.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 /**
  * {@link MediaRecorder} implementation for the desktop.
@@ -32,6 +32,9 @@ import java.util.concurrent.*;
 public final class FXMediaRecorder extends BaseMediaRecorder {
 
     private final Logger log = LoggerFactory.getLogger(FXMediaRecorder.class);
+
+    private static final Path RECORDING_PATH = Path.of(System.getProperty("user.home"),
+            ".jpro", "video", "capture");
 
     private final ThreadGroup scheduledThreadGroup = new ThreadGroup("Media Recorder thread pool");
     private int threadCounter;
@@ -65,7 +68,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     // Storage resources
     private FFmpegFrameRecorder recorder;
     private Path tempVideoFile;
-    private final List<Path> tempVideoFiles;
 
     private volatile boolean recordingStarted = false;
 
@@ -77,22 +79,19 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         // Use ImageView to show camera grabbed frames
         frameView = new ImageView();
 
-        // Create a list holder for temporary files
-        tempVideoFiles = new ArrayList<>();
-
         // Stop and release native resources on exit
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             stopRecording();
             release();
 
             // delete temporary video files
-            tempVideoFiles.forEach(path -> {
-                try {
-                    Files.delete(path);
-                } catch (IOException ex) {
-                    log.error(ex.getMessage(), ex);
-                }
-            });
+            try (Stream<Path> pathStream = Files.walk(RECORDING_PATH)) {
+                pathStream.sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException ex) {
+                log.error(ex.getMessage(), ex);
+            }
         }));
     }
 
@@ -307,7 +306,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     public void stop() {
         stopRecording();
         setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
-        tempVideoFiles.add(tempVideoFile); // add to the deletion list
 
         // Set status to inactive
         setStatus(Status.INACTIVE);
@@ -454,8 +452,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             filename += postfix;
         }
 
-        final Path tempFile = Path.of(System.getProperty("user.home"),
-                ".jpro", "video", "capture", filename);
+        final Path tempFile = RECORDING_PATH.resolve(filename);
         final Path parentDir = tempFile.getParent();
         if (Files.notExists(parentDir)) {
             try {
