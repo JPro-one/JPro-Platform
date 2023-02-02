@@ -66,9 +66,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private FFmpegFrameRecorder recorder;
     private Path tempVideoFile;
     private final List<Path> tempVideoFiles;
-    private long startRecordingTime = 0;
 
-    private volatile boolean cameraEnabled = false;
     private volatile boolean recordingStarted = false;
 
     public FXMediaRecorder() {
@@ -109,7 +107,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             try {
                 // start the video capture
                 webcamGrabber.start();
-                cameraEnabled = true;
+                recorderReady = true;
 
                 // start the audio capture
                 enableAudioCapture();
@@ -124,7 +122,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                                     MediaRecorderEvent.MEDIA_RECORDER_READY));
                 });
 
-                while (cameraEnabled) {
+                while (recorderReady) {
                     // effectively grab and process a single frame
                     final Frame frame = webcamGrabber.grab();
                     // convert and show the frame
@@ -235,7 +233,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     public void start() {
         if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
             // Start the recording if the camera is enabled
-            if (cameraEnabled) {
+            if (recorderReady) {
                 tempVideoFile = createTempFilename("video_", MP4_FILE_EXTENSION);
 
                 recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
@@ -262,8 +260,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     log.error(ex.getMessage(), ex);
                 }
 
-                // enable recording
-                startRecordingTime = 0; // reset start recording time
+                // Enable recording
                 recordingStarted = true;
 
                 // Set status to recording
@@ -280,7 +277,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             // If recording is paused, then resume it
             if (getStatus().equals(Status.PAUSED)) {
                 // enable recording
-                startRecordingTime = 0; // reset start recording time
                 recordingStarted = true;
 
                 // Set status to recording
@@ -295,7 +291,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void pause() {
-        // disable recording
+        // Disable recording
         recordingStarted = false;
 
         // Set status to paused
@@ -367,7 +363,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     public void release() {
         // release video resources
         if (videoExecutorService != null && !videoExecutorService.isShutdown()) {
-            cameraEnabled = false;
+            recorderReady = false;
 
             try {
                 // release video grabber

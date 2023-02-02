@@ -1,12 +1,14 @@
 package one.jpro.media.recorder.impl;
 
 import com.sun.javafx.event.EventHandlerManager;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
+import javafx.util.Duration;
 import one.jpro.media.MediaSource;
 import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
@@ -14,12 +16,22 @@ import one.jpro.media.recorder.MediaRecorderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Base class for {@link MediaRecorder} implementations.
  *
  * @author Besmir Beqiri
  */
 abstract class BaseMediaRecorder implements MediaRecorder {
+
+    private RecorderTimerTask recorderTimerTask;
+    volatile boolean recorderReady;
+    volatile boolean isUpdateDurationEnabled;
+    long startRecordingTime = 0;
+    private double pauseDurationTime = 0;
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaRecorder.class);
 
@@ -69,9 +81,63 @@ abstract class BaseMediaRecorder implements MediaRecorder {
 
     private ReadOnlyObjectWrapper<Status> statusPropertyImpl() {
         if (status == null) {
-            status = new ReadOnlyObjectWrapper<>(this, "status", Status.INACTIVE);
+            status = new ReadOnlyObjectWrapper<>(this, "status", Status.INACTIVE) {
+
+                @Override
+                protected void invalidated() {
+                    switch (get()) {
+                        case READY -> {
+                            startRecordingTime = 0;
+                            pauseDurationTime = 0;
+                        }
+                        case RECORDING -> {
+                            startRecordingTime = 0;
+                            createRecorderTimer();
+                        }
+                        case PAUSED -> {
+                            isUpdateDurationEnabled = false;
+                            pauseDurationTime += System.currentTimeMillis() - startRecordingTime;
+                        }
+                        case INACTIVE -> {
+                            startRecordingTime = 0;
+                            pauseDurationTime = 0;
+                            destroyerRecorderTimer();
+                        }
+                    }
+                }
+            };
         }
         return status;
+    }
+
+    // duration property
+    private ReadOnlyObjectWrapper<Duration> duration;
+
+    @Override
+    public Duration getDuration() {
+        return (duration == null) ? Duration.ZERO : duration.get();
+    }
+
+    void setDuration(Duration value) {
+        durationPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> durationProperty() {
+        return durationPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<Duration> durationPropertyImpl() {
+        if (duration == null) {
+            duration = new ReadOnlyObjectWrapper<>(this, "duration", Duration.ZERO) {
+
+                @Override
+                protected void invalidated() {
+                    log.trace("Recording duration: {} s", get().toSeconds());
+                }
+            };
+        }
+        return duration;
     }
 
     // On ready event handler
@@ -298,5 +364,80 @@ abstract class BaseMediaRecorder implements MediaRecorder {
     @Override
     public final EventDispatchChain buildEventDispatchChain(EventDispatchChain tail) {
         return tail.prepend(eventHandlerManager);
+    }
+
+    void createRecorderTimer() {
+        synchronized (RecorderTimerTask.timerLock) {
+            if (recorderTimerTask == null) {
+                recorderTimerTask = new RecorderTimerTask(this);
+                recorderTimerTask.start();
+            }
+            isUpdateDurationEnabled = true;
+        }
+    }
+
+    void destroyerRecorderTimer() {
+        synchronized (RecorderTimerTask.timerLock) {
+            if (recorderTimerTask != null) {
+                isUpdateDurationEnabled = false;
+                recorderTimerTask.stop();
+                recorderTimerTask = null;
+            }
+        }
+    }
+
+    /**
+     * Called periodically to update the current duration of the recording.
+     */
+    void updateDuration() {
+        if (recorderReady && isUpdateDurationEnabled) {
+            if (startRecordingTime == 0) startRecordingTime = System.currentTimeMillis();
+            long recordingTime = System.currentTimeMillis() - startRecordingTime;
+            if (recordingTime >= 0) {
+                setDuration(Duration.millis(pauseDurationTime + recordingTime));
+            }
+        }
+    }
+
+    static class RecorderTimerTask extends TimerTask {
+        
+        static final Object timerLock = new Object();
+        
+        private Timer recoderTimer;
+        private final WeakReference<BaseMediaRecorder> recorderRef;
+
+        RecorderTimerTask(BaseMediaRecorder recorder) {
+            recorderRef = new WeakReference<>(recorder);
+        }
+
+        void start() {
+            if (recoderTimer == null) {
+                recoderTimer = new Timer("RecorderTimerTask", true);
+                recoderTimer.scheduleAtFixedRate(this, 0, 100 /* period in ms */);
+            }
+        }
+
+        void stop() {
+            if (recoderTimer != null) {
+                recoderTimer.cancel();
+                recoderTimer = null;
+            }
+        }
+
+        @Override
+        public void run() {
+            synchronized (timerLock) {
+                BaseMediaRecorder recorder = recorderRef.get();
+                if (recorder != null) {
+                    Platform.runLater(() -> {
+                        synchronized (timerLock) {
+                            recorder.updateDuration();
+                        }
+                    });
+                } else {
+                    cancel();
+                }
+            }
+        }
     }
 }

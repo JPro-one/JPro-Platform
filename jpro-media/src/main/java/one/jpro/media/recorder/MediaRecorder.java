@@ -6,6 +6,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import one.jpro.media.MediaEngine;
 import one.jpro.media.MediaSource;
 import one.jpro.media.MediaView;
@@ -131,6 +132,20 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
      * Recorder status hold the internal state for this recorder.
      */
     ReadOnlyObjectProperty<Status> statusProperty();
+
+    /**
+     * Gets the current duration for the recording since it started.
+     */
+    Duration getDuration();
+
+    /**
+     * The current duration of the recording since it started.
+     * The value will be reset to {@link Duration#ZERO} when
+     * the recording is stopped.
+     *
+     * @return the duration of the media
+     */
+    ReadOnlyObjectProperty<Duration> durationProperty();
 
     /**
      * Retrieves the {@link MediaRecorder.Status#READY} event handler.

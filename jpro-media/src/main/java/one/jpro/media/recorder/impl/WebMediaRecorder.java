@@ -45,6 +45,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
         recorderVideoElement = createRecorderVideoElement("video_elem_" + recorderId);
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_ready", result -> {
+            recorderReady = true;
+
             // Set status to ready
             setStatus(Status.READY);
 
@@ -243,36 +245,42 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
 
     @Override
     public void start() {
-        if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
-            webAPI.executeScript("""
+        if (recorderReady) {
+            if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
+                webAPI.executeScript("""
                     $blobsRecorded = []; // clear recorded buffer
                     $mediaRecorder.start(1000); // start recording with a timeslice of 1 second
                     """
-                    .replace("$blobsRecorded", blobsRecordedRef)
-                    .replace("$mediaRecorder", mediaRecorderRef));
-        } else if (getStatus().equals(Status.PAUSED)) {
-            webAPI.executeScript("""
+                        .replace("$blobsRecorded", blobsRecordedRef)
+                        .replace("$mediaRecorder", mediaRecorderRef));
+            } else if (getStatus().equals(Status.PAUSED)) {
+                webAPI.executeScript("""
                     if ($mediaRecorder.state === "paused") {
                         $mediaRecorder.resume();
                     }
                     """.replace("$mediaRecorder", mediaRecorderRef));
+            }
         }
     }
 
     @Override
     public void pause() {
-        webAPI.executeScript("""
+        if (recorderReady) {
+            webAPI.executeScript("""
                 if ($mediaRecorder.state === "recording") {
                     $mediaRecorder.pause();
                 }
                 """.replace("$mediaRecorder", mediaRecorderRef));
+        }
     }
 
     @Override
     public void stop() {
-        webAPI.executeScript("""
+        if (recorderReady) {
+            webAPI.executeScript("""
                 $mediaRecorder.stop();
                 """.replace("$mediaRecorder", mediaRecorderRef));
+        }
     }
 
     private JSVariable createRecorderVideoElement(String recorderVideoElem) {
