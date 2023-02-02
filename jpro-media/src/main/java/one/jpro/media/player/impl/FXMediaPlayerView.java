@@ -58,7 +58,7 @@ public class FXMediaPlayerView extends MediaView {
                     if (fxMediaView != null) {
                         fxMediaView.setFitWidth(get());
                     }
-                    log.debug("video width: " + getFitWidth());
+                    log.trace("video width: " + getFitWidth());
                 }
             };
         }
@@ -75,7 +75,7 @@ public class FXMediaPlayerView extends MediaView {
                     if (fxMediaView != null) {
                         fxMediaView.setFitHeight(get());
                     }
-                    log.debug("video height: " + getFitHeight());
+                    log.trace("video height: " + getFitHeight());
                 }
             };
         }

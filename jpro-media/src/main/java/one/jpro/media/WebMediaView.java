@@ -94,7 +94,7 @@ public abstract class WebMediaView extends MediaView {
                         webAPI.executeScript("""
                                 %s.width = "%s";
                                 """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
-                        log.debug("video width: " + getFitWidth());
+                        log.trace("video width: " + getFitWidth());
                     }
                 }
             };
@@ -112,7 +112,7 @@ public abstract class WebMediaView extends MediaView {
                         webAPI.executeScript("""
                                 %s.height = "%s";
                                 """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
-                        log.debug("video height: " + get());
+                        log.trace("video height: " + get());
                     }
                 }
             };
@@ -138,7 +138,7 @@ public abstract class WebMediaView extends MediaView {
                                     %s.style.objectFit = 'fill';
                                     """.formatted(webMediaEngine.getVideoElement().getName()));
                         }
-                        log.debug("preserve ratio: " + preserveRatio);
+                        log.trace("preserve ratio: " + preserveRatio);
                     }
                 }
             };

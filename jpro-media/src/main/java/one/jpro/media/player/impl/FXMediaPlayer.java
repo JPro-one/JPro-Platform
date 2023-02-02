@@ -39,8 +39,6 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             Event.fireEvent(FXMediaPlayer.this,
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_READY));
-
-            log.debug("Media player ready!");
         });
 
         mediaPlayer.setOnPlaying(() -> {
@@ -51,8 +49,6 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             Event.fireEvent(FXMediaPlayer.this,
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_PLAY));
-
-            log.debug("Media player playing!");
         });
 
         mediaPlayer.setOnPaused(() -> {
@@ -63,8 +59,6 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             Event.fireEvent(FXMediaPlayer.this,
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_PAUSE));
-
-            log.debug("Media player paused!");
         });
 
         mediaPlayer.setOnStopped(() -> {
@@ -75,8 +69,6 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             Event.fireEvent(FXMediaPlayer.this,
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_STOP));
-
-            log.debug("Media player stopped!");
         });
 
         mediaPlayer.setOnEndOfMedia(() -> {
@@ -87,8 +79,6 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             Event.fireEvent(FXMediaPlayer.this,
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
-
-            log.debug("Media playback has ended!");
         });
 
         mediaPlayer.setOnError(() -> {
@@ -105,10 +95,10 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
         });
 
         mediaPlayer.currentTimeProperty().addListener(observable ->
-                log.debug("Current time: {}", mediaPlayer.getCurrentTime()));
+                log.trace("Current time: {}", mediaPlayer.getCurrentTime()));
 
         mediaPlayer.volumeProperty().addListener(observable ->
-                log.debug("Volume: {}", mediaPlayer.getVolume()));
+                log.trace("Volume: {}", mediaPlayer.getVolume()));
     }
 
     public MediaPlayer getMediaPlayer() {

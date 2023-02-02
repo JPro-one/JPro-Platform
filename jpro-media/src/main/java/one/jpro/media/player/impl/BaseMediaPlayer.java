@@ -82,7 +82,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             status = new ReadOnlyObjectWrapper<>(this, "status", Status.UNKNOWN) {
                 @Override
                 protected void invalidated() {
-                    log.debug("Status changed to: {}", get());
+                    log.trace("Status changed to: {}", get());
                 }
             };
         }
@@ -112,7 +112,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
                 @Override
                 protected void invalidated() {
-                    log.debug("Current time updated: {} s", get().toSeconds());
+                    log.trace("Current time updated: {} s", get().toSeconds());
                 }
             };
         }
@@ -142,7 +142,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
                 @Override
                 protected void invalidated() {
-                    log.debug("Duration updated: {} s", get().toSeconds());
+                    log.trace("Media duration: {} s", get().toSeconds());
                 }
             };
         }
