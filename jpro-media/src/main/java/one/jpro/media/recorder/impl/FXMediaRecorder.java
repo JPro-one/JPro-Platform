@@ -187,7 +187,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     ByteBuffer.wrap(audioBytes).order(byteOrder).asShortBuffer().get(samples);
                     ShortBuffer samplesBuff = ShortBuffer.wrap(samples, 0, nSamplesRead);
 
-//                    log.debug("Record audio samples: {}", nSamplesRead);
+//                    log.trace("Record audio samples: {}", nSamplesRead);
 
                     // recorder audio data
                     try {

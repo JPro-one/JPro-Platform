@@ -103,7 +103,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                     console.log("$mediaPlayerId => stalled...");
                     java_fun(elem.readyState);
                 """, readyState -> {
-            log.debug("Media player stalled: {}", readyState);
+            log.trace("Media player stalled: {}", readyState);
 
             // Set status to stalled
             setStatus(Status.STALLED);
@@ -225,7 +225,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                                 new MediaPlayerEvent(WebMediaPlayer.this,
                                         MediaPlayerEvent.MEDIA_PLAYER_READY));
                     }
-                    log.debug("Ready state changed: {}", get());
+                    log.trace("Ready state changed: {}", get());
                 }
             };
         }
@@ -258,7 +258,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
 
                 @Override
                 protected void invalidated() {
-                    log.debug("Volume changed: {}", get());
+                    log.trace("Volume changed: {}", get());
                 }
             };
         }
