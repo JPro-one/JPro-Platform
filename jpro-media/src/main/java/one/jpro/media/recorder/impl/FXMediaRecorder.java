@@ -225,8 +225,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     }
 
     private void showLineInfoFormats(final Line.Info lineInfo) {
-        if (lineInfo instanceof DataLine.Info) {
-            final DataLine.Info dataLineInfo = (DataLine.Info) lineInfo;
+        if (lineInfo instanceof final DataLine.Info dataLineInfo) {
             System.out.println("Supported Audio Formats:");
             Arrays.stream(dataLineInfo.getFormats()).forEach(format -> System.out.println("    " + format));
         }
