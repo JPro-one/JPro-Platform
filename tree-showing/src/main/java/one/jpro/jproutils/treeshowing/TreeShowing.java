@@ -42,7 +42,10 @@ public class TreeShowing {
                 updateValue.run();
             };
 
-            ChangeListener<Window> updateWindowListener = (p, o, changedWindow) -> {
+            ChangeListener<Window> updateWindowListener = (p, o, ignore) -> {
+                Scene scene = node.getScene();
+                Window changedWindow = scene == null ? null : scene.getWindow();
+
                 if(window != null) {
                     window.showingProperty().removeListener(updateVisibleListener);
                 }
@@ -55,7 +58,8 @@ public class TreeShowing {
                 }
             };
 
-            ChangeListener<Scene> updateSceneListener = (p, o, changedScene) -> {
+            ChangeListener<Scene> updateSceneListener = (p, o, ignore) -> {
+                Scene changedScene = node.getScene();
                 if(scene != null) {
                     scene.windowProperty().removeListener(updateWindowListener);
                 }
