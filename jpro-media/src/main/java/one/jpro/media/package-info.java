@@ -7,8 +7,7 @@
  *
  * <p>
  * <h4>Supported Protocols</h4>
- * <table border="1">
- * <caption>Supported Protocols Table</caption>
+ * <table style="width: 100%; border: 1px solid;">
  * <tr><th scope="col">Protocol</th><th scope="col">Description</th><th scope="col">Reference</th></tr>
  * <tr>
  *     <th scope="row">FILE</th>
