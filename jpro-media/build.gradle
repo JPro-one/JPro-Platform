@@ -24,3 +24,19 @@ javadoc {
         addStringOption('Xdoclint:none', '-quiet')
     }
 }
+
+def docArtifact = artifacts.add('archives', new File("$projectDir", 'DOCUMENTATION.md')) {
+    type 'mddoc'
+    classifier "DOCUMENTATION"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "one.jpro.jproutils"
+            artifactId project.name
+            version JFX_UTILS_VERSION
+            artifact docArtifact
+        }
+    }
+}
