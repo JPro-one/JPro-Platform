@@ -54,16 +54,6 @@ import one.jpro.media.player.impl.WebMediaPlayer;
 public interface MediaPlayer extends MediaEngine, EventTarget {
 
     /**
-     * Creates a media player for desktop/mobile only.
-     *
-     * @param mediaSource the media source
-     * @return a {@link MediaPlayer} object.
-     */
-    static MediaPlayer create(MediaSource mediaSource) {
-        return new FXMediaPlayer(mediaSource);
-    }
-
-    /**
      * Creates a media player. If the application is running in a
      * browser via JPro server, then a web version of media player
      * is returned. If the application is not running inside the
