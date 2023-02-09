@@ -1,3 +1,7 @@
+plugins {
+    id 'org.bytedeco.gradle-javacpp-platform' version "$javacppVersion"
+}
+
 apply plugin: 'org.openjfx.javafxplugin'
 apply plugin: 'jpro-gradle-plugin'
 
