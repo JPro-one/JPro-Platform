@@ -56,7 +56,7 @@ public class MediaRecorderSample extends Application {
         stopButton.setOnAction(event -> mediaRecorder.stop());
         saveButton.setOnAction(event -> {
             try {
-                MediaUtil.retrieve(stage, mediaRecorder.getMediaSource());
+                MediaUtil.retrieve(stage, mediaRecorder.getMediaSource(), "RecordedVideo");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
