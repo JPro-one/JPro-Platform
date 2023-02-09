@@ -23,8 +23,19 @@ Building cross-platform applications with JPro Media is as easy as using the
 ## Getting Started
 To get started with JPro Media, we need to add the following configuration to your project.
 ### Gradle
-By using the JPro Gradle plugin, we just need to add the `jpro-media` dependency to the `build.gradle` file: 
+1. In `plugin` section, we need to add the `org.bytedeco.gradle-javacpp-platform` plugin in order to select from 
+existing artifacts the ones corresponding to the current platform or to the specified platforms. For more
+information go to the following [link](https://github.com/bytedeco/gradle-javacpp#the-platform-plugin).
+2. Add `jpro-media` and `javacv-platform` dependencies. 
+
+*NOTE: When deploying with JPro server, `compileOnly` configuration 
+must be used instead of `implementation` in order to prevent the inclusion of platform specific artifacts inside 
+the `release` file. Even the `jproRun` task is faster since these files are not needed at `runtime`.*
 ```groovy
+plugins {
+    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.8"
+}
+
 dependencies {
     implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
     implementation "org.bytedeco:javacv-platform:1.5.8"
@@ -34,7 +45,7 @@ dependencies {
     // compileOnly "org.bytedeco:javacv-platform:1.5.8"
 }
 ```
-and also provide the following `jvm argument` inside the `run` task:
+3. Provide the following `jvm argument` inside the `run` task:
 ```groovy
 run {
     doFirst {
@@ -51,7 +62,11 @@ applicationDefaultJvmArgs = [
 ]
 ```
 ### Maven
-By using the JPro Maven plugin, we just need to add the `jpro-media` dependency to the `pom.xml` file.
+1. Add `jpro-media` and `javacv-platform` dependencies to the `pom.xml` file. 
+
+*NOTE: When deploying with JPro server, 
+`compile` scope must be used in order to prevent the inclusion of platform specific artifacts inside
+the `release` zipped file. Even the `jpro:run` task is faster since these files are not needed at `runtime`.*
 ```xml
 <dependencies>
     <dependency>
@@ -69,14 +84,14 @@ By using the JPro Maven plugin, we just need to add the `jpro-media` dependency 
     </dependency>
 </dependencies>
 ```
-and also provide the following configuration `option` inside the `javafx-maven-plugin`:
+2. Provide the following configuration `option` inside the `javafx-maven-plugin`:
 ```xml
 <plugin>
     <groupId>org.openjfx</groupId>
     <artifactId>javafx-maven-plugin</artifactId>
     <version>0.0.8</version>
     <configuration>
-        <mainClass>one.jpro.example/one.jpro.example.App</mainClass>
+        <mainClass>one.jpro.example.App</mainClass>
         <options>
             <option>--add-exports</option>
             <option>javafx.base/com.sun.javafx.event=one.jpro.media</option>
