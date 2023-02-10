@@ -86,12 +86,14 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             release();
 
             // delete temporary video files
-            try (Stream<Path> pathStream = Files.walk(RECORDING_PATH)) {
-                pathStream.sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException ex) {
-                log.error(ex.getMessage(), ex);
+            if (Files.exists(RECORDING_PATH)) {
+                try (Stream<Path> pathStream = Files.walk(RECORDING_PATH)) {
+                    pathStream.sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                } catch (IOException ex) {
+                    log.error(ex.getMessage(), ex);
+                }
             }
         }));
     }
