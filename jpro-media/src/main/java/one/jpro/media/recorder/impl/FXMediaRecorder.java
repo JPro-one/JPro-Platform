@@ -60,7 +60,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     // Audio resources
     private static final int DEFAULT_AUDIO_SAMPLE_RATE = 44100; // 44.1 KHz
-    private static final int DEFAULT_AUDIO_CHANNELS = 0; // no audio
+    private static final int DEFAULT_AUDIO_CHANNELS = 0; // no audioHz
+    private static final int DEFAULT_AUDIO_FRAME_SIZE = 1; // 1 byte
     private AudioFormat audioFormat;
     private TargetDataLine micLine;
     private int audioSampleRate;
@@ -244,7 +245,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.setVideoOption("tune", "zerolatency");
                 recorder.setVideoOption("preset", "ultrafast");
                 recorder.setVideoOption("crf", "28");
-                recorder.setVideoBitrate(2000000); // 2000 kb/s, reasonable ok for 720
+                recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
                 recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                 recorder.setFormat("mp4");
                 recorder.setFrameRate(webcamGrabber.getFrameRate());
