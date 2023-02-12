@@ -233,7 +233,6 @@ public abstract class MediaView extends Region {
      * See {@link #preserveRatioProperty preserveRatio} for information on interaction
      * between media views <code>fitWidth</code>, <code>fitHeight</code> and
      * <code>preserveRatio</code> attributes.
-     * </p>
      */
     public abstract DoubleProperty fitWidthProperty();
 
