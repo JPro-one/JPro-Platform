@@ -252,7 +252,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.setGopSize((int) (webcamGrabber.getFrameRate() * 2));
                 recorder.setAudioOption("crf", "0"); // no variable bitrate audio
                 recorder.setAudioQuality(0); // highest quality
-                recorder.setAudioBitrate(192000); // 192 Kbps
+                recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
                 recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
                 recorder.setSampleRate(getAudioSampleRate());
                 recorder.setAudioChannels(getAudioChannels());
@@ -425,6 +425,20 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
         final int audioChannels = audioFormat.getChannels();
         return (audioChannels == AudioSystem.NOT_SPECIFIED) ? DEFAULT_AUDIO_CHANNELS : audioChannels;
+    }
+
+    /**
+     * Obtains the frame size in bytes. For compressed formats, the return value is
+     * the frame size of the uncompressed audio data. {@code AudioSystem.NOT_SPECIFIED}
+     * is returned when the frame size is not defined for this audio format.
+     *
+     * @return the number of bytes per frame, or {@code AudioSystem.NOT_SPECIFIED}
+     */
+    private int getFrameSize() {
+        if (audioFormat == null) return DEFAULT_AUDIO_FRAME_SIZE;
+
+        final int frameSize = audioFormat.getFrameSize();
+        return (frameSize == AudioSystem.NOT_SPECIFIED) ? DEFAULT_AUDIO_FRAME_SIZE : frameSize;
     }
 
     /**
