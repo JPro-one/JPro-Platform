@@ -246,7 +246,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.setVideoOption("preset", "ultrafast");
                 recorder.setVideoOption("crf", "28");
                 recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
-                recorder.setVideoCodec(avcodec.AV_CODEC_ID_HEVC);
+                recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                 recorder.setFormat("mp4");
                 recorder.setFrameRate(webcamGrabber.getFrameRate());
                 recorder.setGopSize((int) (webcamGrabber.getFrameRate() * 2));
