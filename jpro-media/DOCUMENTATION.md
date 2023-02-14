@@ -130,9 +130,10 @@ module com.example.app {
 ```java
 module com.example.app {
 
-    requires org.bytedeco.opencv.windows.x86_64;
     requires org.bytedeco.ffmpeg.windows.x86_64;
+    requires org.bytedeco.opencv.windows.x86_64;
     requires org.bytedeco.openblas.windows.x86_64;
+    requires org.bytedeco.videoinput.windows.x86_64;
     
 }
 ```
@@ -140,9 +141,10 @@ module com.example.app {
 ```java
 module com.example.app {
 
-    requires org.bytedeco.opencv.windows.x86;
     requires org.bytedeco.ffmpeg.windows.x86;
+    requires org.bytedeco.opencv.windows.x86;
     requires org.bytedeco.openblas.windows.x86;
+    requires org.bytedeco.videoinput.windows.x86;
     
 }
 ```
