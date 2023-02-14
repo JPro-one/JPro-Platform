@@ -21,7 +21,8 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -109,7 +110,9 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void enable() {
-        if (!recorderReady) {
+        if (recorderReady) {
+            log.info("Media recorder is already enabled.");
+        } else {
             log.debug("Enabling media recorder...");
             // Camera frame grabber runnable
             final Runnable frameGrabber = () -> {
@@ -166,8 +169,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
             videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
             videoExecutorService.execute(frameGrabber);
-        } else {
-            log.info("Media recorder is already enabled.");
         }
     }
 
