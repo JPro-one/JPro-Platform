@@ -48,6 +48,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     };
 
     private static final int WEBCAM_DEVICE_INDEX = 0;
+    private static final int FRAME_RATE = 30;
     private static final String MP4_FILE_EXTENSION = ".mp4";
 
     private ExecutorService videoExecutorService;
@@ -70,6 +71,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     // Storage resources
     private FFmpegFrameRecorder recorder;
     private Path tempVideoFile;
+
+    private double frameRate;
 
     private volatile boolean recordingStarted = false;
 
@@ -111,6 +114,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             try {
                 // start the video capture
                 webcamGrabber.start();
+                frameRate = (webcamGrabber.getFrameRate() < FRAME_RATE) ? FRAME_RATE : webcamGrabber.getFrameRate();
                 printCaptureDeviceDescription();
             } catch (FrameGrabber.Exception ex) {
                 setError("Exception during the enabling of video camera stream.", ex);
@@ -212,7 +216,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 }
             };
 
-            final long period = (long) (1000.0 / webcamGrabber.getFrameRate());
+            final long period = (long) (1000.0 / frameRate);
             audioExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
             audioExecutorService.scheduleAtFixedRate(audioSampleGrabber, 0, period, TimeUnit.MILLISECONDS);
         }
@@ -248,7 +252,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         System.out.println("Capture Device Info:");
         System.out.println("    Image Width: " + webcamGrabber.getImageWidth());
         System.out.println("    Image Height: " + webcamGrabber.getImageHeight());
-        System.out.println("    Frame Rate: " + webcamGrabber.getFrameRate());
+        System.out.println("    Frame Rate: " + frameRate);
     }
 
     private void printSupportedAudioFormats(final Line.Info lineInfo) {
@@ -274,8 +278,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
                 recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                 recorder.setFormat("mp4");
-                recorder.setFrameRate(webcamGrabber.getFrameRate());
-                recorder.setGopSize((int) (webcamGrabber.getFrameRate() * 2));
+                recorder.setFrameRate(frameRate);
+                recorder.setGopSize((int) (frameRate * 2));
                 recorder.setAudioOption("crf", "0"); // no variable bitrate audio
                 recorder.setAudioQuality(0); // highest quality
                 recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
