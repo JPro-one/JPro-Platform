@@ -372,10 +372,16 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
      * Stop the acquisition from the camera and microphone and release all the resources.
      */
     public void release() {
-        // release video resources
-        if (videoExecutorService != null && !videoExecutorService.isShutdown()) {
-            recorderReady = false;
+        recorderReady = false;
+        releaseVideoResources();
+        releaseAudioResources();
+    }
 
+    /**
+     * Release the video resources.
+     */
+    private void releaseVideoResources() {
+        if (videoExecutorService != null && !videoExecutorService.isShutdown()) {
             try {
                 // release video grabber
                 if (webcamGrabber != null) {
@@ -385,13 +391,17 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 // stop the video recoding service
                 videoExecutorService.shutdown();
                 //noinspection ResultOfMethodCallIgnored
-                videoExecutorService.awaitTermination(10, TimeUnit.MILLISECONDS);
+                videoExecutorService.awaitTermination(100, TimeUnit.MILLISECONDS);
             } catch (FrameGrabber.Exception | InterruptedException ex) {
                 setError("Exception in stopping the video frame capture service.", ex);
             }
         }
+    }
 
-        // release audio resources
+    /**
+     * Release the audio resources.
+     */
+    private void releaseAudioResources() {
         if (audioExecutorService != null && !audioExecutorService.isShutdown()) {
             try {
                 // release audio grabber
@@ -402,7 +412,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 // stop the audio recording service
                 audioExecutorService.shutdown();
                 //noinspection ResultOfMethodCallIgnored
-                audioExecutorService.awaitTermination(10, TimeUnit.MILLISECONDS);
+                audioExecutorService.awaitTermination(100, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 setError("Exception in stopping the audio frame capture service.", ex);
             }
