@@ -226,7 +226,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 for (Line.Info lineInfo : lineInfos) {
                     System.out.println("Mic Line Name: " + info.getName()); // The audio device name
                     System.out.println("Mic Line Description: " + info.getDescription()); // The type of audio device
-                    showLineInfoFormats(lineInfo);
+                    printSupportedAudioFormats(lineInfo);
                 }
                 return info;
             }
@@ -234,7 +234,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         return null;
     }
 
-    private void showLineInfoFormats(final Line.Info lineInfo) {
+    private void printSupportedAudioFormats(final Line.Info lineInfo) {
         if (lineInfo instanceof final DataLine.Info dataLineInfo) {
             System.out.println("Supported Audio Formats:");
             Arrays.stream(dataLineInfo.getFormats()).forEach(format -> System.out.println("    " + format));
