@@ -109,61 +109,66 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void enable() {
-        // Camera frame grabber runnable
-        final Runnable frameGrabber = () -> {
-            try {
-                // start the video capture
-                webcamGrabber.start();
-                frameRate = (webcamGrabber.getFrameRate() < FRAME_RATE) ? FRAME_RATE : webcamGrabber.getFrameRate();
-                printCaptureDeviceDescription();
-            } catch (FrameGrabber.Exception ex) {
-                setError("Exception during the enabling of video camera stream.", ex);
-                release();
-            }
-
-            try {
-                // start the audio capture
-                enableAudioCapture();
-            } catch (LineUnavailableException ex) {
-                setError("Exception on creating audio input line from the microphone.", ex);
-                if (micLine != null) {
-                    micLine.close();
+        if (!recorderReady) {
+            log.debug("Enabling media recorder...");
+            // Camera frame grabber runnable
+            final Runnable frameGrabber = () -> {
+                try {
+                    // start the video capture
+                    webcamGrabber.start();
+                    frameRate = (webcamGrabber.getFrameRate() < FRAME_RATE) ? FRAME_RATE : webcamGrabber.getFrameRate();
+                    printCaptureDeviceDescription();
+                } catch (FrameGrabber.Exception ex) {
+                    setError("Exception during the enabling of video camera stream.", ex);
+                    release();
                 }
-            }
 
-            // Set recorder ready
-            recorderReady = true;
-            Platform.runLater(() -> {
-                // Set status to ready
-                setStatus(Status.READY);
-
-                // Fire ready event
-                Event.fireEvent(FXMediaRecorder.this,
-                        new MediaRecorderEvent(FXMediaRecorder.this,
-                                MediaRecorderEvent.MEDIA_RECORDER_READY));
-            });
-
-            try {
-                while (recorderReady) {
-                    // effectively grab a single frame
-                    final Frame frame = webcamGrabber.grab();
-                    if (frame != null) {
-                        // convert and show the frame
-                        updateCameraView(frameView, frameConverter.convert(frame));
-                        if (recordingStarted) {
-                            // write the webcam frame if recording started
-                            writeVideoFrame(frame);
-                        }
+                try {
+                    // start the audio capture
+                    enableAudioCapture();
+                } catch (LineUnavailableException ex) {
+                    setError("Exception on creating audio input line from the microphone.", ex);
+                    if (micLine != null) {
+                        micLine.close();
                     }
                 }
-            } catch (FrameGrabber.Exception ex) {
-                setError("Exception during camera stream frame grabbing.", ex);
-                release();
-            }
-        };
 
-        videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
-        videoExecutorService.execute(frameGrabber);
+                // Set recorder ready
+                recorderReady = true;
+                Platform.runLater(() -> {
+                    // Set status to ready
+                    setStatus(Status.READY);
+
+                    // Fire ready event
+                    Event.fireEvent(FXMediaRecorder.this,
+                            new MediaRecorderEvent(FXMediaRecorder.this,
+                                    MediaRecorderEvent.MEDIA_RECORDER_READY));
+                });
+
+                try {
+                    while (recorderReady) {
+                        // effectively grab a single frame
+                        final Frame frame = webcamGrabber.grab();
+                        if (frame != null) {
+                            // convert and show the frame
+                            updateCameraView(frameView, frameConverter.convert(frame));
+                            if (recordingStarted) {
+                                // write the webcam frame if recording started
+                                writeVideoFrame(frame);
+                            }
+                        }
+                    }
+                } catch (FrameGrabber.Exception ex) {
+                    setError("Exception during camera stream frame grabbing.", ex);
+                    release();
+                }
+            };
+
+            videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
+            videoExecutorService.execute(frameGrabber);
+        } else {
+            log.info("Media recorder is already enabled.");
+        }
     }
 
     private void enableAudioCapture() throws LineUnavailableException {
