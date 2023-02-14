@@ -111,6 +111,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             try {
                 // start the video capture
                 webcamGrabber.start();
+                printCaptureDeviceDescription();
             } catch (FrameGrabber.Exception ex) {
                 setError("Exception during the enabling of video camera stream.", ex);
                 release();
@@ -233,6 +234,21 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             }
         }
         return null;
+    }
+
+    private void printCaptureDeviceDescription() {
+        if (isOsWindows()) {
+            try {
+                System.out.println("Capture devices: "
+                        + Arrays.toString(VideoInputFrameGrabber.getDeviceDescriptions()));
+            } catch (FrameGrabber.Exception ex) {
+                log.error(ex.getMessage(), ex);
+            }
+        }
+        System.out.println("Capture Device Info:");
+        System.out.println("    Image Width: " + webcamGrabber.getImageWidth());
+        System.out.println("    Image Height: " + webcamGrabber.getImageHeight());
+        System.out.println("    Frame Rate: " + webcamGrabber.getFrameRate());
     }
 
     private void printSupportedAudioFormats(final Line.Info lineInfo) {
