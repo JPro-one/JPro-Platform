@@ -110,21 +110,34 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             try {
                 // start the video capture
                 webcamGrabber.start();
-                recorderReady = true;
+            } catch (FrameGrabber.Exception ex) {
+                setError("Exception during the enabling of video camera stream.", ex);
+                release();
+            }
 
+            try {
                 // start the audio capture
                 enableAudioCapture();
+            } catch (LineUnavailableException ex) {
+                setError("Exception on creating audio input line from the microphone.", ex);
+                if (micLine != null) {
+                    micLine.close();
+                }
+            }
 
-                Platform.runLater(() -> {
-                    // Set status to ready
-                    setStatus(Status.READY);
+            // Set recorder ready
+            recorderReady = true;
+            Platform.runLater(() -> {
+                // Set status to ready
+                setStatus(Status.READY);
 
-                    // Fire ready event
-                    Event.fireEvent(FXMediaRecorder.this,
-                            new MediaRecorderEvent(FXMediaRecorder.this,
-                                    MediaRecorderEvent.MEDIA_RECORDER_READY));
-                });
+                // Fire ready event
+                Event.fireEvent(FXMediaRecorder.this,
+                        new MediaRecorderEvent(FXMediaRecorder.this,
+                                MediaRecorderEvent.MEDIA_RECORDER_READY));
+            });
 
+            try {
                 while (recorderReady) {
                     // effectively grab and process a single frame
                     final Frame frame = webcamGrabber.grab();
@@ -137,13 +150,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     }
                 }
             } catch (FrameGrabber.Exception ex) {
-                setError("Exception during the enabling of video camera stream.", ex);
+                setError("Exception during camera stream frame grabbing.", ex);
                 release();
-            } catch (LineUnavailableException lue) {
-                setError("Exception on creating audio input line from the microphone.", lue);
-                if (micLine != null) {
-                    micLine.close();
-                }
             }
         };
 
