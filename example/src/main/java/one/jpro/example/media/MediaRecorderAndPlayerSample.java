@@ -27,9 +27,6 @@ import java.util.Optional;
  */
 public class MediaRecorderAndPlayerSample extends Application {
 
-    public static final double MEDIA_VIEW_WIDTH = 640.0;
-    public static final double MEDIA_VIEW_HEIGHT = 480.0;
-
     private StackPane previewPane;
     private MediaView mediaView;
     private MediaView cameraView;
