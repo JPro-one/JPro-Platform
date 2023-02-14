@@ -50,17 +50,20 @@ public final class MediaUtil {
             }
         } else {
             final FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save As...");
-            final String initialFileName = getExtension(Path.of(mediaSource.source()).getFileName().toString())
-                    .map(ext -> fileName + "." + ext)
-                    .orElseGet(() -> Path.of(mediaSource.source()).getFileName().toString());
-            fileChooser.setInitialFileName(initialFileName);
-            // Show save dialog
-            final File saveToFile = fileChooser.showSaveDialog(stage);
-            if (saveToFile != null) {
-                Files.copy(Path.of(URI.create(mediaSource.source()).getPath()), saveToFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-                return new MediaSource(saveToFile.toURI().toString());
+            fileChooser.setTitle("Save media file...");
+            final Optional<File> optionalFile = mediaSource.file();
+            if (optionalFile.isPresent()) {
+                final File mediaFile = optionalFile.get();
+                final String initialFileName = getExtension(mediaFile.getName())
+                        .map(ext -> fileName + "." + ext)
+                        .orElseGet(() -> mediaFile.toPath().getFileName().toString());
+                fileChooser.setInitialFileName(initialFileName);
+                // Show save dialog
+                final File saveToFile = fileChooser.showSaveDialog(stage);
+                if (saveToFile != null) {
+                    Files.copy(mediaFile.toPath(), saveToFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    return new MediaSource(saveToFile.toURI().toString());
+                }
             }
         }
 

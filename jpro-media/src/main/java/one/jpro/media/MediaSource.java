@@ -5,8 +5,10 @@ import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import one.jpro.media.recorder.MediaRecorder;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * The <code>MediaSource</code> class represents a media resource.
@@ -50,5 +52,18 @@ public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) 
      */
     public MediaSource(WebAPI.JSFile jsFile) {
         this(jsFile.getObjectURL().getName(), false, jsFile);
+    }
+
+    /**
+     * Returns the local file representing this media source.
+     * To be used only when running on a desktop/device.
+     *
+     * @return the file object or <code>null</code> if this media source is not local.
+     */
+    public Optional<File> file() {
+        if (isLocal) {
+            return Optional.of(new File(URI.create(source)));
+        }
+        return Optional.empty();
     }
 }
