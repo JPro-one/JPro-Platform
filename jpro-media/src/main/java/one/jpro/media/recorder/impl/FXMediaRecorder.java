@@ -139,14 +139,15 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
             try {
                 while (recorderReady) {
-                    // effectively grab and process a single frame
+                    // effectively grab a single frame
                     final Frame frame = webcamGrabber.grab();
-                    // convert and show the frame
-                    updateCameraView(frameView, frameConverter.convert(frame));
-
-                    if (recordingStarted) {
-                        // write the webcam frame
-                        writeVideoFrame(frame);
+                    if (frame != null) {
+                        // convert and show the frame
+                        updateCameraView(frameView, frameConverter.convert(frame));
+                        if (recordingStarted) {
+                            // write the webcam frame if recording started
+                            writeVideoFrame(frame);
+                        }
                     }
                 }
             } catch (FrameGrabber.Exception ex) {
