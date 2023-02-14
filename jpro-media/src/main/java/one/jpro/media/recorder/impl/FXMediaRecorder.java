@@ -54,7 +54,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private ScheduledExecutorService audioExecutorService;
 
     // Video resources
-    private final OpenCVFrameGrabber webcamGrabber;
+    private final FrameGrabber webcamGrabber;
     private final JavaFXFrameConverter frameConverter;
     private final ImageView frameView;
 
@@ -74,8 +74,9 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private volatile boolean recordingStarted = false;
 
     public FXMediaRecorder() {
-        // OpenCV webcam frame grabber
-        webcamGrabber = new OpenCVFrameGrabber(WEBCAM_DEVICE_INDEX);
+        // Initialize webcam frame grabber
+        webcamGrabber = (isOsWindows()) ? new VideoInputFrameGrabber(WEBCAM_DEVICE_INDEX)
+                : new OpenCVFrameGrabber(WEBCAM_DEVICE_INDEX);
         // Frame to JavaFX image converter
         frameConverter = new JavaFXFrameConverter();
         // Use ImageView to show camera grabbed frames
@@ -498,6 +499,10 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             }
         }
         return tempFile;
+    }
+
+    private boolean isOsWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
     }
 
     private void setError(String message, Exception ex) {
