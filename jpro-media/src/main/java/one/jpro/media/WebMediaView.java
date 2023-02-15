@@ -8,6 +8,7 @@ import javafx.beans.property.*;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import one.jpro.media.recorder.impl.WebMediaRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,6 +182,11 @@ public abstract class WebMediaView extends MediaView {
                     // add new element
                     elem.appendChild(%s);
                     """.formatted(mediaContainerId, webMediaEngine.getVideoElement().getName()));
+            if (webMediaEngine instanceof WebMediaRecorder) {
+                webAPI.executeScript("""
+                    %s.play();
+                    """.formatted(webMediaEngine.getVideoElement().getName()));
+            }
             webAPI.executeScript("""
                     %s.width = "%s";
                     """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
