@@ -26,13 +26,13 @@ public final class MediaUtil {
      * @param stage application primary stage
      * @param mediaSource the media source
      * @param fileName the file name without extension
-     * @return a {@link MediaSource} object referring the new resource if the application runs on a desktop/device.
+     * @return an optional {@link MediaSource} object referring the new resource if the application runs on a desktop/device.
      * When the application runs on the web (via JPro), it returns the same media source as the one provided as an
      * input parameter. Otherwise, if an error occurs, <code>null</code> is returned.
      * is returned
      * @throws IOException if an I/O error occurs
      */
-    public static MediaSource retrieve(Stage stage, MediaSource mediaSource, String fileName) throws IOException {
+    public static Optional<MediaSource> retrieve(Stage stage, MediaSource mediaSource, String fileName) throws IOException {
         if (WebAPI.isBrowser()) {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             if (!mediaSource.isLocal()) {
@@ -46,7 +46,7 @@ public final class MediaUtil {
                     """.formatted(jsFile.getObjectURL().getName())
                             .replace("$fileName.webm", fileName));
                 }
-                return mediaSource;
+                return Optional.of(mediaSource);
             }
         } else {
             final FileChooser fileChooser = new FileChooser();
@@ -62,12 +62,12 @@ public final class MediaUtil {
                 final File saveToFile = fileChooser.showSaveDialog(stage);
                 if (saveToFile != null) {
                     Files.copy(mediaFile.toPath(), saveToFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    return new MediaSource(saveToFile.toURI().toString());
+                    return Optional.of(new MediaSource(saveToFile.toURI().toString()));
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**
