@@ -9,6 +9,7 @@ import one.jpro.media.event.MediaRecorderEvent;
 import one.jpro.media.recorder.MediaRecorder;
 import one.jpro.media.recorder.MediaRecorderException;
 import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,9 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private volatile boolean recordingStarted = false;
 
     public FXMediaRecorder() {
+        // Set native log level to error
+        avutil.av_log_set_level(avutil.AV_LOG_ERROR);
+
         // Initialize webcam frame grabber
         webcamGrabber = (isOsWindows()) ? new VideoInputFrameGrabber(WEBCAM_DEVICE_INDEX)
                 : new OpenCVFrameGrabber(WEBCAM_DEVICE_INDEX);
