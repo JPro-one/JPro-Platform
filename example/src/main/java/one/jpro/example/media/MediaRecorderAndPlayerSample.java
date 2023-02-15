@@ -88,7 +88,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         seekSlider.setDisable(true);
         preserveRatioCheckBox = new CheckBox("Preserve Ratio");
         muteCheckBox = new CheckBox("Mute");
-        volumeSlider = new Slider(0, 100, 100);
+        volumeSlider = new Slider(0, 1, 1);
 
         var controlsPane = new FlowPane(recordButton, playButton, pauseButton, stopButton,
                 saveButton, seekSlider, preserveRatioCheckBox, muteCheckBox, volumeSlider);
@@ -156,7 +156,9 @@ public class MediaRecorderAndPlayerSample extends Application {
     }
 
     private MediaPlayer loadMedia(Stage stage, MediaSource mediaSource) {
-        var mediaPlayer = MediaPlayer.create(stage, mediaSource);
+        final var mediaPlayer = MediaPlayer.create(stage, mediaSource);
+        mediaPlayer.setMute(muteCheckBox.isSelected());
+        mediaPlayer.setVolume(volumeSlider.getValue());
         mediaView.setMediaEngine(mediaPlayer);
         previewPane.getChildren().setAll(mediaView);
 
@@ -197,10 +199,10 @@ public class MediaRecorderAndPlayerSample extends Application {
             volumeSlider.setDisable(muteCheckBox.isSelected());
         });
         volumeSlider.valueProperty().addListener(observable ->
-                mediaPlayer.setVolume(volumeSlider.getValue() / 100.0));
+                mediaPlayer.setVolume(volumeSlider.getValue()));
         mediaPlayer.volumeProperty().addListener(observable -> {
             if (!volumeSlider.isValueChanging() && !volumeSlider.isPressed()) {
-                volumeSlider.setValue(mediaPlayer.getVolume() * 100.0);
+                volumeSlider.setValue(mediaPlayer.getVolume());
             }
         });
 
@@ -214,7 +216,7 @@ public class MediaRecorderAndPlayerSample extends Application {
                 seekSlider.setDisable(false);
                 seekSlider.setMax(duration.toSeconds());
             }
-            mediaPlayer.setVolume(volumeSlider.getValue() / 100.0);
+            mediaPlayer.setVolume(volumeSlider.getValue());
         });
         mediaPlayer.setOnPlaying(event -> {
             playButton.setDisable(true);
