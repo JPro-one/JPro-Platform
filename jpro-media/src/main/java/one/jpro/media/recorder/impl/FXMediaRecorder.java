@@ -282,17 +282,19 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
                         webcamGrabber.getImageWidth(), webcamGrabber.getImageHeight());
                 recorder.setInterleaved(true);
-                recorder.setVideoOption("tune", "zerolatency");
-                recorder.setVideoOption("preset", "ultrafast");
-                recorder.setVideoOption("crf", "28");
-                recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
+                recorder.setVideoOption("tune", "zerolatency"); // low latency for webcam streaming
+                recorder.setVideoOption("preset", "ultrafast"); // ultrafast preset for the encoder
+                recorder.setVideoOption("crf", "28");           // video quality
+//                recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
+                recorder.setVideoBitrate(2 * 1024 * 1024);      // 2 Mbps for 720p
                 recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                 recorder.setFormat("mp4");
                 recorder.setFrameRate(frameRate);
                 recorder.setGopSize((int) (frameRate * 2));
                 recorder.setAudioOption("crf", "0"); // no variable bitrate audio
                 recorder.setAudioQuality(0); // highest quality
-                recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
+//                recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
+                recorder.setAudioBitrate(192000);               // 192 kbps
                 recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
                 recorder.setSampleRate(getAudioSampleRate());
                 recorder.setAudioChannels(getAudioChannels());
@@ -367,7 +369,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         // Release video recorder resources
         try {
             if (recorder != null) {
-                recorder.stop();
+//                recorder.stop();
                 recorder.close();
             }
         } catch (FrameRecorder.Exception ex) {
