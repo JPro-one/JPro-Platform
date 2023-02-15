@@ -37,7 +37,7 @@ public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) 
     }
 
     /**
-     * Construct a media resource for the given URI string.
+     * Construct a media source for the given URI string.
      *
      * @param source a URI string
      */
@@ -46,12 +46,21 @@ public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) 
     }
 
     /**
-     * Construct a media resource for the given {@link WebAPI.JSFile} object.
+     * Construct a media source for the given {@link WebAPI.JSFile} object.
      *
      * @param jsFile a JS file retrieved from the client's browser.
      */
     public MediaSource(WebAPI.JSFile jsFile) {
         this(jsFile.getObjectURL().getName(), false, jsFile);
+    }
+
+    /**
+     * Construct a media source for the given {@link File} object.
+     *
+     * @param file a local file
+     */
+    public MediaSource(File file) {
+        this(file.toURI().toString());
     }
 
     /**
