@@ -110,6 +110,7 @@ public class MediaRecorderAndPlayerSample extends Application {
             if (!previewPane.getChildren().contains(cameraView)) {
                 previewPane.getChildren().setAll(cameraView);
             }
+            playButton.setDisable(true);
             mediaRecorder.start();
             pauseButton.setOnAction(event2 -> mediaRecorder.pause());
             stopButton.setOnAction(event2-> mediaRecorder.stop());
@@ -169,6 +170,8 @@ public class MediaRecorderAndPlayerSample extends Application {
                     mediaPlayer.getStatus() == Status.STOPPED) {
                 mediaPlayer.play();
             }
+            pauseButton.setOnAction(event2 -> mediaPlayer.pause());
+            stopButton.setOnAction(event2-> mediaPlayer.stop());
         });
         stopButton.setOnAction(event -> mediaPlayer.stop());
         mediaPlayer.durationProperty().addListener((observable) -> {
