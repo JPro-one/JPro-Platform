@@ -328,11 +328,31 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
 
     @Override
     public void seek(Duration seekTime) {
-        if (getStatus() == Status.DISPOSED) {
-            return;
-        }
+        if (seekTime == null) {
+            setError(new MediaPlayerException("Seek time is null."));
+        } else if (playerReady) {
+            if (getStatus() == Status.DISPOSED) {
+                return;
+            }
+            // Check if seek time is unknown
+            if (seekTime.isUnknown()) {
+                setError(new MediaPlayerException("Seek time is unknown."));
+                return;
+            }
 
-        if (playerReady && seekTime != null && !seekTime.isUnknown()) {
+            // Check if seek time is negative
+            if (seekTime.lessThan(Duration.ZERO)) {
+                setError(new MediaPlayerException("Seek time is negative. The value will be clamp to zero."));
+                seekTime = Duration.ZERO;
+            }
+
+            // Check if seek time is greater than duration
+            final Duration duration = getDuration();
+            if (duration != null && (!duration.isUnknown() || !duration.isIndefinite()) && seekTime.greaterThan(duration)) {
+                setError(new MediaPlayerException("Seek time is greater than duration."));
+                return;
+            }
+
             webAPI.executeScript("""
                     %s.currentTime=%s;
                     """.formatted(playerVideoElement.getName(), seekTime.toSeconds()));

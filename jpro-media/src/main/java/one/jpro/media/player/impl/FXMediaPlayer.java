@@ -203,6 +203,29 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
 
     @Override
     public void seek(Duration seekTime) {
-        mediaPlayer.seek(seekTime);
+        if (seekTime == null) {
+            setError(new MediaPlayerException("Seek time is null."));
+        } else {
+            // Check if seek time is unknown
+            if (seekTime.isUnknown()) {
+                setError(new MediaPlayerException("Seek time is unknown."));
+                return;
+            }
+
+            // Check if seek time is negative
+            if (seekTime.lessThan(Duration.ZERO)) {
+                setError(new MediaPlayerException("Seek time is negative. The value will be clamp to zero."));
+                seekTime = Duration.ZERO;
+            }
+
+            // Check if seek time is greater than duration
+            final Duration duration = getDuration();
+            if (duration != null && (!duration.isUnknown() || !duration.isIndefinite()) && seekTime.greaterThan(duration)) {
+                setError(new MediaPlayerException("Seek time is greater than duration."));
+                return;
+            }
+
+            mediaPlayer.seek(seekTime);
+        }
     }
 }
