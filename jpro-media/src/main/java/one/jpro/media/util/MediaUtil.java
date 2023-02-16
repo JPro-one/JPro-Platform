@@ -64,6 +64,7 @@ public final class MediaUtil {
                     Files.copy(mediaFile.toPath(), saveToFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     return Optional.of(new MediaSource(saveToFile.toURI().toString()));
                 }
+                return Optional.of(mediaSource);
             }
         }
 
