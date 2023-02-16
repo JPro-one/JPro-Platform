@@ -29,8 +29,8 @@ public class FreezeDetector {
             }
         }.start();
 
-        new Thread(() -> {
-            while(true) {
+        var t = new Thread(() -> {
+            while(true && fxthread.getState() != Thread.State.TERMINATED) {
                 long now = System.currentTimeMillis();
                 long timeGone = now - lastUpdate;
                 try {
@@ -51,7 +51,9 @@ public class FreezeDetector {
                     }
                 }
             }
-        }, "FX-Freeze-Detector-Thread").start();
+        }, "FX-Freeze-Detector-Thread");
+        //t.setDaemon(true);
+        t.start();
     }
 
     public FreezeDetector(Duration duration) {
