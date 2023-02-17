@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 /**
@@ -39,28 +40,14 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private static final Path RECORDING_PATH = Path.of(System.getProperty("user.home"),
             ".jpro", "video", "capture");
 
-    private final ThreadGroup scheduledThreadGroup = new ThreadGroup("Media Recorder thread pool");
-    private int threadCounter;
-    private final ThreadFactory threadFactory = run -> {
-        final Thread thread = new Thread(scheduledThreadGroup, run);
-        thread.setName("Media Recorder Thread " + threadCounter++);
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.setDaemon(true);
-        return thread;
-    };
-
+    // Video resources
     private static final int WEBCAM_DEVICE_INDEX = 0;
     private static final int FRAME_RATE = 30;
     private static final String MP4_FILE_EXTENSION = ".mp4";
-
-    private final ExecutorService videoExecutorService;
-    private final ScheduledExecutorService audioExecutorService;
-    private final ExecutorService startRecordingExecutorService;
-
-    // Video resources
     private final FrameGrabber webcamGrabber;
     private final JavaFXFrameConverter frameConverter;
     private final ImageView frameView;
+    private double frameRate;
 
     // Audio resources
     private static final int DEFAULT_AUDIO_SAMPLE_RATE = 44100; // 44.1 KHz
@@ -75,14 +62,31 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private FFmpegFrameRecorder recorder;
     private Path tempVideoFile;
 
-    private double frameRate;
-
+    // Recording state
     private volatile boolean recordingStarted = false;
+    private volatile boolean recordingStopped = false;
+
+    // Concurrency and locking resources
+    private final ThreadGroup scheduledThreadGroup = new ThreadGroup("Media Recorder thread pool");
+    private int threadCounter;
+    private final ExecutorService videoExecutorService;
+    private final ScheduledExecutorService audioExecutorService;
+    private final ExecutorService startRecordingExecutorService;
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
+    private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
 
     public FXMediaRecorder() {
         // Set native log level to error
         avutil.av_log_set_level(avutil.AV_LOG_ERROR);
 
+        final ThreadFactory threadFactory = run -> {
+            final Thread thread = new Thread(scheduledThreadGroup, run);
+            thread.setName("Media Recorder Thread " + threadCounter++);
+            thread.setPriority(Thread.MIN_PRIORITY);
+            thread.setDaemon(true);
+            return thread;
+        };
         videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
         audioExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
         startRecordingExecutorService = Executors.newSingleThreadExecutor(threadFactory);
@@ -160,14 +164,20 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 try {
                     while (recorderReady) {
                         // effectively grab a single frame
-                        final Frame frame = webcamGrabber.grab();
-                        if (frame != null) {
+                        final Frame frame;
+                        readLock.lock();
+                        try {
+                            frame = webcamGrabber.grab();
+                        } finally {
+                            readLock.unlock();
+                        }
+
+                        if (recordingStarted && frame != null) {
                             // convert and show the frame
                             updateCameraView(frameView, frameConverter.convert(frame));
-                            if (recordingStarted) {
-                                // write the webcam frame if recording started
-                                writeVideoFrame(frame);
-                            }
+
+                            // write the webcam frame if recording started
+                            writeVideoFrame(frame);
                         }
                     }
                 } catch (FrameGrabber.Exception ex) {
@@ -222,10 +232,15 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 //                    log.trace("Record audio samples: {}", nSamplesRead);
 
                     // recorder audio data
-                    try {
-                        recorder.recordSamples(audioSampleRate, audioNumChannels, samplesBuff);
-                    } catch (FFmpegFrameRecorder.Exception ex) {
-                        setError("Exception on recording the audio samples.", ex);
+                    if (!recordingStopped && recorder != null) {
+                        writeLock.lock();
+                        try {
+                            recorder.recordSamples(audioSampleRate, audioNumChannels, samplesBuff);
+                        } catch (FFmpegFrameRecorder.Exception ex) {
+                            setError("Exception on recording the audio samples.", ex);
+                        } finally {
+                            writeLock.unlock();
+                        }
                     }
                 }
             };
@@ -306,6 +321,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     try {
                         // Enable recording
                         recorder.start();
+                        recordingStopped = false;
                         recordingStarted = true;
 
                         Platform.runLater(() -> {
@@ -373,25 +389,31 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private void stopRecording() {
         // Stop recording
         recordingStarted = false;
+        recordingStopped = true;
 
         // Release video recorder resources
-        try {
-            if (recorder != null) {
-//                recorder.stop();
-                recorder.close();
+        if (recorder != null) {
+            writeLock.lock();
+            try {
+                recorder.close(); // This call stops the recorder and releases all resources used by it.
+            } catch (FrameRecorder.Exception ex) {
+                setError("Exception on stopping the audio/video recorder", ex);
+            } finally {
+                writeLock.unlock();
             }
-        } catch (FrameRecorder.Exception ex) {
-            setError("Exception on stopping the audio/video recorder", ex);
         }
     }
 
     private void writeVideoFrame(Frame frame) {
-        try {
-            if (recorder != null) {
+        if (recorder != null && !recordingStopped) {
+            writeLock.lock();
+            try {
                 recorder.record(frame);
+            } catch (FFmpegFrameRecorder.Exception ex) {
+                setError("Exception during video frame recording.", ex);
+            } finally {
+                writeLock.unlock();
             }
-        } catch (FFmpegFrameRecorder.Exception ex) {
-            setError("Exception during video frame recording.", ex);
         }
     }
 
