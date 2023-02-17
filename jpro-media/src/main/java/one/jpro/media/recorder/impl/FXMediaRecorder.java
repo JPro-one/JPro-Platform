@@ -53,8 +53,9 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private static final int FRAME_RATE = 30;
     private static final String MP4_FILE_EXTENSION = ".mp4";
 
-    private ExecutorService videoExecutorService;
-    private ScheduledExecutorService audioExecutorService;
+    private final ExecutorService videoExecutorService;
+    private final ScheduledExecutorService audioExecutorService;
+    private final ExecutorService startRecordingExecutorService;
 
     // Video resources
     private final FrameGrabber webcamGrabber;
@@ -81,6 +82,10 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     public FXMediaRecorder() {
         // Set native log level to error
         avutil.av_log_set_level(avutil.AV_LOG_ERROR);
+
+        videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
+        audioExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        startRecordingExecutorService = Executors.newSingleThreadExecutor(threadFactory);
 
         // Initialize webcam frame grabber
         webcamGrabber = (isOsWindows()) ? new VideoInputFrameGrabber(WEBCAM_DEVICE_INDEX)
@@ -171,7 +176,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 }
             };
 
-            videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
             videoExecutorService.execute(frameGrabber);
         }
     }
@@ -227,7 +231,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             };
 
             final long period = (long) (1000.0 / frameRate);
-            audioExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
             audioExecutorService.scheduleAtFixedRate(audioSampleGrabber, 0, period, TimeUnit.MILLISECONDS);
         }
     }
@@ -275,52 +278,56 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     @Override
     public void start() {
         if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
-            // Start the recording if the camera is enabled
-            if (recorderReady) {
-                tempVideoFile = createTempFilename("video_", MP4_FILE_EXTENSION);
+            final Runnable startRecordingRunnable = () -> {
+                // Start the recording if the camera is enabled
+                if (recorderReady) {
+                    tempVideoFile = createTempFilename("video_", MP4_FILE_EXTENSION);
 
-                recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
-                        webcamGrabber.getImageWidth(), webcamGrabber.getImageHeight());
-                recorder.setInterleaved(true);
-                recorder.setVideoOption("tune", "zerolatency"); // low latency for webcam streaming
-                recorder.setVideoOption("preset", "ultrafast"); // ultrafast preset for the encoder
-                recorder.setVideoOption("crf", "28");           // video quality
+                    recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
+                            webcamGrabber.getImageWidth(), webcamGrabber.getImageHeight());
+                    recorder.setInterleaved(true);
+                    recorder.setVideoOption("tune", "zerolatency"); // low latency for webcam streaming
+                    recorder.setVideoOption("preset", "ultrafast"); // low cpu usage for the encoder
+                    recorder.setVideoOption("crf", "28");           // video quality
 //                recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
-                recorder.setVideoBitrate(2 * 1024 * 1024);      // 2 Mbps for 720p
-                recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-                recorder.setFormat("mp4");
-                recorder.setFrameRate(frameRate);
-                recorder.setGopSize((int) (frameRate * 2));
-                recorder.setAudioOption("crf", "0"); // no variable bitrate audio
-                recorder.setAudioQuality(0); // highest quality
+                    recorder.setVideoBitrate(8 * 1024 * 1024);      // 8 Mbps for 1080p
+                    recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+                    recorder.setFormat("mp4");
+                    recorder.setFrameRate(frameRate);
+                    recorder.setGopSize((int) (frameRate * 2));
+                    recorder.setAudioOption("crf", "0"); // no variable bitrate audio
+                    recorder.setAudioQuality(0); // highest quality
 //                recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
-                recorder.setAudioBitrate(192000);               // 192 kbps
-                recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-                recorder.setSampleRate(getAudioSampleRate());
-                recorder.setAudioChannels(getAudioChannels());
+                    recorder.setAudioBitrate(192000);               // 192 kbps
+                    recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+                    recorder.setSampleRate(getAudioSampleRate());
+                    recorder.setAudioChannels(getAudioChannels());
 
-                try {
-                    recorder.start();
-                } catch (FFmpegFrameRecorder.Exception ex) {
-                    setError("Exception on starting the audio/video recorder.", ex);
+                    try {
+                        // Enable recording
+                        recorder.start();
+                        recordingStarted = true;
+
+                        Platform.runLater(() -> {
+                            // Set status to recording
+                            setStatus(Status.RECORDING);
+
+                            // Fire start event
+                            Event.fireEvent(FXMediaRecorder.this,
+                                    new MediaRecorderEvent(FXMediaRecorder.this,
+                                            MediaRecorderEvent.MEDIA_RECORDER_START));
+                        });
+                    } catch (FFmpegFrameRecorder.Exception ex) {
+                        setError("Exception on starting the audio/video recorder.", ex);
+                    }
+                } else {
+                    log.info("Please, enable the camera first!");
                 }
+            };
 
-                // Enable recording
-                recordingStarted = true;
-
-                // Set status to recording
-                setStatus(Status.RECORDING);
-
-                // Fire start event
-                Event.fireEvent(FXMediaRecorder.this,
-                        new MediaRecorderEvent(FXMediaRecorder.this,
-                                MediaRecorderEvent.MEDIA_RECORDER_START));
-            } else {
-                log.info("Please, enable the camera first!");
-            }
-        } else
-            // If recording is paused, then resume it
-            if (getStatus().equals(Status.PAUSED)) {
+            startRecordingExecutorService.execute(startRecordingRunnable);
+        } else if (getStatus().equals(Status.PAUSED)) {
+            if (recorderReady) {
                 // enable recording
                 recordingStarted = true;
 
@@ -332,6 +339,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                         new MediaRecorderEvent(FXMediaRecorder.this,
                                 MediaRecorderEvent.MEDIA_RECORDER_RESUME));
             }
+        }
     }
 
     @Override
@@ -379,20 +387,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     private void writeVideoFrame(Frame frame) {
         try {
-            if (startRecordingTime == 0) startRecordingTime = System.currentTimeMillis();
-
-            // Create timestamp for this frame
-            final long videoTimeStamp = 1000 * (System.currentTimeMillis() - startRecordingTime);
-
-            // Check for AV drift
-            if (videoTimeStamp > recorder.getTimestamp()) {
-                log.trace("AV drift correction: {} : {} -> {}",
-                        videoTimeStamp, recorder.getTimestamp(), (videoTimeStamp - recorder.getTimestamp()));
-
-                // Tell the recorder to write this frame at this timestamp
-                recorder.setTimestamp(videoTimeStamp);
-            }
-
             if (recorder != null) {
                 recorder.record(frame);
             }
@@ -538,7 +532,11 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     }
 
     private void setError(String message, Exception ex) {
-        setError(new MediaRecorderException(message, ex));
+        if (Platform.isFxApplicationThread()) {
+            setError(new MediaRecorderException(message, ex));
+        } else {
+            Platform.runLater(() -> setError(new MediaRecorderException(message, ex)));
+        }
         log.error(message, ex);
     }
 }
