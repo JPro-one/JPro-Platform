@@ -220,7 +220,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
 
             // Check if seek time is greater than duration
             final Duration duration = getDuration();
-            if (duration != null && (!duration.isUnknown() || !duration.isIndefinite()) && seekTime.greaterThan(duration)) {
+            if (duration != null && seekTime.greaterThan(duration)) {
                 setError(new MediaPlayerException("Seek time is greater than duration."));
                 return;
             }
