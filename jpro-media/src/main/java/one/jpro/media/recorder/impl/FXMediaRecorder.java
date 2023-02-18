@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +40,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     private static final Path RECORDING_PATH = Path.of(System.getProperty("user.home"),
             ".jpro", "video", "capture");
+    private static final String DIVIDER_LINE =
+            CharBuffer.allocate(80).toString().replace( '\0', '*' );
 
     // Video resources
     private static final int WEBCAM_DEVICE_INDEX = 0;
@@ -251,43 +254,23 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     }
 
     private Mixer.Info getDefaultMicDevice() {
-        Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
+        final Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         for (Mixer.Info info : mixerInfos) {
-            Mixer m = AudioSystem.getMixer(info);
-            Line.Info[] lineInfos = m.getTargetLineInfo();
+            final Mixer mixer = AudioSystem.getMixer(info);
+            final Line.Info[] lineInfos = mixer.getTargetLineInfo();
             // Only prints out info is it is a Microphone
             if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
+                log.debug(DIVIDER_LINE);
                 for (Line.Info lineInfo : lineInfos) {
-                    System.out.println("Mic Line Name: " + info.getName()); // The audio device name
-                    System.out.println("Mic Line Description: " + info.getDescription()); // The type of audio device
+                    log.debug("Mic Line Name: " + info.getName()); // The audio device name
+                    log.debug("Mic Line Description: " + info.getDescription()); // The type of audio device
                     printSupportedAudioFormats(lineInfo);
                 }
+                log.debug(DIVIDER_LINE);
                 return info;
             }
         }
         return null;
-    }
-
-    private void printCaptureDeviceDescription() {
-        if (isOsWindows()) {
-            try {
-                System.out.println("Capture devices: "
-                        + Arrays.toString(VideoInputFrameGrabber.getDeviceDescriptions()));
-            } catch (FrameGrabber.Exception ex) {
-                log.error(ex.getMessage(), ex);
-            }
-        }
-        System.out.println("Capture Device Info:");
-        System.out.println("    Image Width: " + webcamGrabber.getImageWidth());
-        System.out.println("    Image Height: " + webcamGrabber.getImageHeight());
-        System.out.println("    Frame Rate: " + frameRate);
-    }
-
-    private void printSupportedAudioFormats(final Line.Info lineInfo) {
-        if (lineInfo instanceof final DataLine.Info dataLineInfo) {
-            System.out.println("Supported Audio Formats:");
-            Arrays.stream(dataLineInfo.getFormats()).forEach(format -> System.out.println("    " + format));
-        }
     }
 
     @Override
@@ -567,5 +550,35 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             Platform.runLater(() -> setError(new MediaRecorderException(message, ex)));
         }
         log.error(message, ex);
+    }
+
+    /**
+     * Print to terminal the capture device description.
+     */
+    private void printCaptureDeviceDescription() {
+        log.debug(DIVIDER_LINE);
+        if (isOsWindows()) {
+            try {
+                log.debug("Capture devices: " + Arrays.toString(VideoInputFrameGrabber.getDeviceDescriptions()));
+            } catch (FrameGrabber.Exception ex) {
+                log.error(ex.getMessage(), ex);
+            }
+        }
+        log.debug("Capture Device Info:");
+        log.debug("Image Width: " + webcamGrabber.getImageWidth());
+        log.debug("Image Height: " + webcamGrabber.getImageHeight());
+        log.debug("Frame Rate: " + frameRate);
+    }
+
+    /**
+     * Print to terminal the supported audio formats.
+     *
+     * @param lineInfo the line info
+     */
+    private void printSupportedAudioFormats(final Line.Info lineInfo) {
+        if (lineInfo instanceof final DataLine.Info dataLineInfo) {
+            log.debug("Supported Audio Formats:");
+            Arrays.stream(dataLineInfo.getFormats()).forEach(format -> log.debug("{}", format));
+        }
     }
 }
