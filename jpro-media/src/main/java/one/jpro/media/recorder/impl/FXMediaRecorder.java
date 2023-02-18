@@ -71,7 +71,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     private int threadCounter;
     private final ExecutorService videoExecutorService;
     private final ScheduledExecutorService audioExecutorService;
-    private final ExecutorService startRecordingExecutorService;
+    private final ExecutorService startStopRecordingExecutorService;
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
     private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
@@ -89,7 +89,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         };
         videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
         audioExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
-        startRecordingExecutorService = Executors.newSingleThreadExecutor(threadFactory);
+        startStopRecordingExecutorService = Executors.newSingleThreadExecutor(threadFactory);
 
         // Initialize webcam frame grabber
         webcamGrabber = (isOsWindows()) ? new VideoInputFrameGrabber(WEBCAM_DEVICE_INDEX)
@@ -172,7 +172,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                             readLock.unlock();
                         }
 
-                        if (recordingStarted && frame != null) {
+                        if (frame != null) {
                             // convert and show the frame
                             updateCameraView(frameView, frameConverter.convert(frame));
 
@@ -341,7 +341,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 }
             };
 
-            startRecordingExecutorService.execute(startRecordingRunnable);
+            startStopRecordingExecutorService.execute(startRecordingRunnable);
         } else if (getStatus().equals(Status.PAUSED)) {
             if (recorderReady) {
                 // enable recording
@@ -374,16 +374,23 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
 
     @Override
     public void stop() {
-        stopRecording();
-        setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
+        final Runnable startRecordingRunnable = () -> {
+            stopRecording();
 
-        // Set status to inactive
-        setStatus(Status.INACTIVE);
+            Platform.runLater(() -> {
+                // Set the media source
+                setMediaSource(new MediaSource(tempVideoFile.toUri().toString()));
 
-        // Fire start event
-        Event.fireEvent(FXMediaRecorder.this,
-                new MediaRecorderEvent(FXMediaRecorder.this,
-                        MediaRecorderEvent.MEDIA_RECORDER_STOP));
+                // Set status to inactive
+                setStatus(Status.INACTIVE);
+
+                // Fire start event
+                Event.fireEvent(FXMediaRecorder.this,
+                        new MediaRecorderEvent(FXMediaRecorder.this,
+                                MediaRecorderEvent.MEDIA_RECORDER_STOP));
+            });
+        };
+        startStopRecordingExecutorService.execute(startRecordingRunnable);
     }
 
     private void stopRecording() {
