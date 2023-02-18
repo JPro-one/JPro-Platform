@@ -164,6 +164,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                                     MediaRecorderEvent.MEDIA_RECORDER_READY));
                 });
 
+                // Start the camera frame grabbing, showing and recording task
                 try {
                     while (recorderReady) {
                         // effectively grab a single frame
@@ -193,6 +194,29 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         }
     }
 
+    /**
+     * Records a video frame.
+     *
+     * @param frame the frame to record
+     */
+    private void writeVideoFrame(Frame frame) {
+        if (!recordingStopped && recorder != null) {
+            writeLock.lock();
+            try {
+                recorder.record(frame);
+            } catch (FFmpegFrameRecorder.Exception ex) {
+                setError("Exception during video frame recording.", ex);
+            } finally {
+                writeLock.unlock();
+            }
+        }
+    }
+
+    /**
+     * Records an audio data.
+     *
+     * @throws LineUnavailableException if the mic line is unavailable
+     */
     private void enableAudioCapture() throws LineUnavailableException {
         final Mixer.Info micDevice = getDefaultMicDevice();
         if (micDevice != null) {
@@ -253,6 +277,11 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         }
     }
 
+    /**
+     * Retries the list of available audio input devices and returns the default microphone device.
+     *
+     * @return the default microphone device
+     */
     private Mixer.Info getDefaultMicDevice() {
         final Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         for (Mixer.Info info : mixerInfos) {
@@ -287,15 +316,15 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     recorder.setVideoOption("tune", "zerolatency"); // low latency for webcam streaming
                     recorder.setVideoOption("preset", "ultrafast"); // low cpu usage for the encoder
                     recorder.setVideoOption("crf", "28");           // video quality
-//                recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
+//                    recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
                     recorder.setVideoBitrate(8 * 1024 * 1024);      // 8 Mbps for 1080p
                     recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                     recorder.setFormat("mp4");
                     recorder.setFrameRate(frameRate);
                     recorder.setGopSize((int) (frameRate * 2));
-                    recorder.setAudioOption("crf", "0"); // no variable bitrate audio
-                    recorder.setAudioQuality(0); // highest quality
-//                recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
+                    recorder.setAudioOption("crf", "0");            // no variable bitrate audio
+                    recorder.setAudioQuality(0);                    // highest quality
+//                    recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
                     recorder.setAudioBitrate(192000);               // 192 kbps
                     recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
                     recorder.setSampleRate(getAudioSampleRate());
@@ -376,6 +405,9 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         startStopRecordingExecutorService.execute(startRecordingRunnable);
     }
 
+    /**
+     * Stop the recording and closes the file.
+     */
     private void stopRecording() {
         // Stop recording
         recordingStarted = false;
@@ -388,19 +420,6 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 recorder.close(); // This call stops the recorder and releases all resources used by it.
             } catch (FrameRecorder.Exception ex) {
                 setError("Exception on stopping the audio/video recorder", ex);
-            } finally {
-                writeLock.unlock();
-            }
-        }
-    }
-
-    private void writeVideoFrame(Frame frame) {
-        if (recorder != null && !recordingStopped) {
-            writeLock.lock();
-            try {
-                recorder.record(frame);
-            } catch (FFmpegFrameRecorder.Exception ex) {
-                setError("Exception during video frame recording.", ex);
             } finally {
                 writeLock.unlock();
             }
@@ -539,10 +558,22 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         return tempFile;
     }
 
+    /**
+     * Check if the OS is Windows.
+     *
+     * @return true if the OS is Windows, false otherwise
+     */
     private boolean isOsWindows() {
         return System.getProperty("os.name").toLowerCase().contains("win");
     }
 
+    /**
+     * Set the error message and exception.
+     * This method makes sure that {@link #errorProperty()} is updated in the JavaFX Application Thread.
+     *
+     * @param message the error message
+     * @param ex      the exception
+     */
     private void setError(String message, Exception ex) {
         if (Platform.isFxApplicationThread()) {
             setError(new MediaRecorderException(message, ex));
