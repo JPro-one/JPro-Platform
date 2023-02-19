@@ -25,6 +25,7 @@ module one.jpro.utils.example {
     requires org.bytedeco.ffmpeg.macosx.arm64;
     requires org.bytedeco.opencv.macosx.arm64;
     requires org.bytedeco.openblas.macosx.arm64;
+    requires jpro.routing.core;
 
     exports one.jpro.utils.example;
     exports one.jpro.example.media;
