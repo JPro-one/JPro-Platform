@@ -15,7 +15,6 @@ import javafx.util.Duration;
 import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.MediaView;
-import one.jpro.media.player.impl.FXMediaPlayerView;
 import java.net.URL;
 import java.util.Optional;
 
