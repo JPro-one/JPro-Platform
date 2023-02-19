@@ -16,13 +16,18 @@ dependencies {
 //    compileOnly "org.bytedeco:javacv-platform:$javacvVersion" // when running on JPro
     implementation "io.github.mkpaz:atlantafx-base:1.2.0"
     runtimeOnly "ch.qos.logback:logback-classic:1.4.5"
+
+    implementation "com.sandec.jpro:jpro-routing-core:$JPRO_ROUTING_VERSION"
+    implementation "com.sandec.jpro:jpro-routing-dev:$JPRO_ROUTING_VERSION"
 }
+
+mainClassName = 'one.jpro.utils.example.Main'
 
 //mainClassName = 'one.jpro.utils.example.JProSoundSample'
 //mainClassName = 'one.jpro.utils.example.SessionManagerSample'
 //mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
 
-mainClassName = 'one.jpro.example.media.MediaPlayerSample'
+//mainClassName = 'one.jpro.example.media.MediaPlayerSample'
 //mainClassName = 'one.jpro.example.media.MediaRecorderSample'
 //mainClassName = 'one.jpro.example.media.MediaRecorderAndPlayerSample'
 //mainClassName = 'one.jpro.example.media.MediaPlayerApplication'

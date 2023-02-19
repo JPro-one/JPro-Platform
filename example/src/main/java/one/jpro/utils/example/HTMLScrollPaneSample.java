@@ -1,6 +1,7 @@
 package one.jpro.utils.example;
 
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import one.jpro.jproutils.htmlscrollpane.HTMLScrollPaneSkin;
@@ -9,6 +10,12 @@ public class HTMLScrollPaneSample extends Application {
 
         @Override
         public void start(javafx.stage.Stage primaryStage) throws Exception {
+            javafx.scene.Scene scene = new javafx.scene.Scene(createRoot());
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        }
+
+        public Parent createRoot() {
             VBox content = new VBox();
             for (int i = 0; i < 100; i++) {
                 // add a label
@@ -18,9 +25,8 @@ public class HTMLScrollPaneSample extends Application {
             ScrollPane scrollPane = new ScrollPane();
             scrollPane.setContent(content);
             scrollPane.setSkin(new HTMLScrollPaneSkin(scrollPane));
-            javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
-            primaryStage.setScene(scene);
-            primaryStage.show();
+
+            return scrollPane;
         }
 
         public static void main(String[] args) {

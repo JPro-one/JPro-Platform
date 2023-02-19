@@ -2,6 +2,8 @@ package one.jpro.example.media;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -13,7 +15,7 @@ import javafx.util.Duration;
 import one.jpro.media.MediaSource;
 import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.MediaView;
-
+import one.jpro.media.player.impl.FXMediaPlayerView;
 import java.net.URL;
 import java.util.Optional;
 
@@ -29,6 +31,13 @@ public class MediaPlayerSample extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("JPro Media Player");
+        Scene scene = new Scene(createRoot(stage), 1140, 640);
+        scene.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public Parent createRoot(Stage stage) {
 
         // Media player
         MediaPlayer mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
@@ -107,13 +116,11 @@ public class MediaPlayerSample extends Application {
         rootPane.getStyleClass().add("root-pane");
         VBox.setVgrow(mediaView, Priority.ALWAYS);
 
-        Scene scene = new Scene(rootPane, 1140, 640);
-        scene.getStylesheets().add(new PrimerLight().getUserAgentStylesheet());
         Optional.ofNullable(getClass().getResource("css/media_sample.css"))
                 .map(URL::toExternalForm)
-                .ifPresent(cssResource -> scene.getStylesheets().add(cssResource));
-        stage.setScene(scene);
-        stage.show();
+                .ifPresent(cssResource -> rootPane.getStylesheets().add(cssResource));
+
+        return rootPane;
     }
 
     public static void main(String[] args) {
