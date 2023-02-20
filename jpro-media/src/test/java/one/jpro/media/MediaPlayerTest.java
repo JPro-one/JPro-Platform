@@ -27,7 +27,7 @@ import static javafx.scene.media.MediaPlayer.Status;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 /**
- * Tests MediaPlayer API.
+ * Automated tests for MediaPlayer API.
  *
  * @author Besmir Beqiri
  */
@@ -97,6 +97,7 @@ public class MediaPlayerTest {
             stopButton.setDisable(false);
             seekSlider.setMax(mediaPlayer.getDuration().toSeconds());
         });
+        mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
 
         // User interface
         FlowPane controlsPane = new FlowPane(playButton, pauseButton, stopButton, seekSlider,

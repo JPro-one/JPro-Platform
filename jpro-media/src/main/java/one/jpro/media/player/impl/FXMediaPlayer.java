@@ -84,14 +84,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
         mediaPlayer.setOnError(() -> {
             // set error status
             setStatus(Status.HALTED);
-            setError(new MediaPlayerException(mediaPlayer.getError().getMessage()));
-
-            // Fire error event
-            Event.fireEvent(FXMediaPlayer.this,
-                    new MediaPlayerEvent(FXMediaPlayer.this,
-                            MediaPlayerEvent.MEDIA_PLAYER_ERROR));
-
-            log.error("Media player error: {}", mediaPlayer.getError(), mediaPlayer.getError());
+            setError(new MediaPlayerException(mediaPlayer.getError().getMessage(), mediaPlayer.getError()));
         });
 
         mediaPlayer.currentTimeProperty().addListener(observable ->

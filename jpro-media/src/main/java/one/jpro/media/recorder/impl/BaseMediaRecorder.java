@@ -6,6 +6,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.Event;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
@@ -352,7 +353,12 @@ abstract class BaseMediaRecorder implements MediaRecorder {
                 @Override
                 protected void invalidated() {
                     final MediaRecorderException exception = get();
-                    log.error(exception.toString(), exception);
+                    if (exception != null) {
+                        // Fire error event
+                        Event.fireEvent(BaseMediaRecorder.this,
+                                new MediaRecorderEvent(BaseMediaRecorder.this,
+                                        MediaRecorderEvent.MEDIA_RECORDER_ERROR));
+                    }
                 }
             };
         }
