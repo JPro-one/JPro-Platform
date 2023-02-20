@@ -5,26 +5,23 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-
 public class SessionManager {
 
-    private static Logger logger = Logger.getLogger("one.jpro.sessionmanager.SessionManager");
+    private static final Logger logger = Logger.getLogger(SessionManager.class.getName());
 
-    private File baseDirectory;
-    private String cookieName;
-    private static Random random = new Random();
+    private final File baseDirectory;
+    private final String cookieName;
+    private static final Random random = new Random();
 
     public SessionManager(String appName) {
         this(new File(new File(System.getProperty("user.home")), "." + appName).getAbsoluteFile(), "c-"+appName);
@@ -91,7 +88,7 @@ public class SessionManager {
         try {
             for(File file: cookieDirectory.listFiles()) {
                 String key = file.getName();
-                String str = FileUtils.readFileToString(file, Charset.forName("utf-8"));
+                String str = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
                 session.put(key,str);
             }
         } catch (IOException e) {
@@ -107,7 +104,7 @@ public class SessionManager {
             if(change.wasAdded()) {
                 try {
                     logger.warning("Saving to: " + f);
-                    FileUtils.writeStringToFile(f, change.getValueAdded(), Charset.forName("utf-8"));
+                    FileUtils.writeStringToFile(f, change.getValueAdded(), StandardCharsets.UTF_8);
                     if(!f.exists()) {
                         throw new RuntimeException("Internal Error: file was not written: " + f);
                     }
@@ -122,8 +119,7 @@ public class SessionManager {
 
      private Boolean isValidCookie(String cookieValue) {
         try {
-            int i = Integer.valueOf(cookieValue);
-            return i >= 0 && i <= Integer.MAX_VALUE;
+            return Integer.parseInt(cookieValue) >= 0;
         } catch (NumberFormatException e) {
             logger.log(Level.WARNING, "Unexpected cookie format: " + cookieValue);
             return false;

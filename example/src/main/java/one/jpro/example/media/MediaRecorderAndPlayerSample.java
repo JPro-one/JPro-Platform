@@ -30,7 +30,6 @@ public class MediaRecorderAndPlayerSample extends Application {
 
     private StackPane previewPane;
     private MediaView mediaView;
-    private MediaView cameraView;
     private Button enableCamButton;
     private Button recordButton;
     private Button pauseButton;
@@ -45,15 +44,15 @@ public class MediaRecorderAndPlayerSample extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder and Player");
-        var scene = new Scene(createRoot(stage), 760, 540);
+        Scene scene = new Scene(createRoot(stage), 760, 540);
         scene.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         stage.setScene(scene);
         stage.show();
     }
 
     public Parent createRoot(Stage stage) {
-        var controlsPane = createControlsPane();
-        cameraView = createCameraView(stage);
+        Pane controlsPane = createControlsPane();
+        MediaView cameraView = createCameraView(stage);
         mediaView = MediaView.create(stage);
         controlsPane.maxWidthProperty().bind(mediaView.fitWidthProperty());
 
@@ -63,7 +62,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         preserveRatioCheckBox.setSelected(mediaView.isPreserveRatio());
         previewPane.getStyleClass().add("preview-pane");
 
-        var rootPane = new VBox(previewPane, controlsPane);
+        VBox rootPane = new VBox(previewPane, controlsPane);
         rootPane.getStyleClass().add("root-pane");
         cameraView.fitWidthProperty().bind(rootPane.widthProperty());
         cameraView.fitHeightProperty().bind(rootPane.heightProperty()
@@ -95,7 +94,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         muteCheckBox = new CheckBox("Mute");
         volumeSlider = new Slider(0, 1, 1);
 
-        var controlsPane = new FlowPane(recordButton, playButton, pauseButton, stopButton,
+        FlowPane controlsPane = new FlowPane(recordButton, playButton, pauseButton, stopButton,
                 saveButton, seekSlider, preserveRatioCheckBox, muteCheckBox, volumeSlider);
         seekSlider.prefWidthProperty().bind(controlsPane.widthProperty().subtract(32));
         controlsPane.getStyleClass().add("controls-pane");
@@ -103,8 +102,8 @@ public class MediaRecorderAndPlayerSample extends Application {
     }
 
     private MediaView createCameraView(Stage stage) {
-        var mediaRecorder = MediaRecorder.create(stage);
-        var cameraView = MediaView.create(mediaRecorder);
+        MediaRecorder mediaRecorder = MediaRecorder.create(stage);
+        MediaView cameraView = MediaView.create(mediaRecorder);
 
         // button events
         enableCamButton.setOnAction(event -> {
@@ -163,8 +162,8 @@ public class MediaRecorderAndPlayerSample extends Application {
         return cameraView;
     }
 
-    private MediaPlayer loadMedia(Stage stage, MediaSource mediaSource) {
-        final var mediaPlayer = MediaPlayer.create(stage, mediaSource);
+    private void loadMedia(Stage stage, MediaSource mediaSource) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(stage, mediaSource);
         mediaPlayer.setMute(muteCheckBox.isSelected());
         mediaPlayer.setVolume(volumeSlider.getValue());
         mediaView.setMediaEngine(mediaPlayer);
@@ -182,7 +181,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         });
         stopButton.setOnAction(event -> mediaPlayer.stop());
         mediaPlayer.durationProperty().addListener((observable) -> {
-            final var duration = mediaPlayer.getDuration();
+            Duration duration = mediaPlayer.getDuration();
             if (duration.isUnknown()) {
                 seekSlider.setDisable(true);
             } else {
@@ -219,7 +218,7 @@ public class MediaRecorderAndPlayerSample extends Application {
         mediaPlayer.setOnReady(event -> {
             playButton.setDisable(false);
             stopButton.setDisable(false);
-            final var duration = mediaPlayer.getDuration();
+            Duration duration = mediaPlayer.getDuration();
             if (duration.isUnknown()) {
                 seekSlider.setDisable(true);
             } else {
@@ -241,8 +240,6 @@ public class MediaRecorderAndPlayerSample extends Application {
             pauseButton.setDisable(true);
         });
         mediaPlayer.setOnError(event -> System.out.println("Error: " + mediaPlayer.getError()));
-
-        return mediaPlayer;
     }
 
     /**

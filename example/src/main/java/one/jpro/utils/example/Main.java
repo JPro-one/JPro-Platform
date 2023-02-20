@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import static com.jpro.routing.RouteUtils.getNode;
 import static com.jpro.routing.RouteUtils.redirect;
+import static com.jpro.routing.extensions.linkheader.LinkHeaderFilter.Link;
 
 /**
  * Launcher class to switch example applications via routing.
@@ -22,30 +23,30 @@ import static com.jpro.routing.RouteUtils.redirect;
  */
 public class Main extends RouteApp {
 
-    private static final String MEDIA_PLAYER_SAMPLE_PATH = "/media/player";
-    private static final String MEDIA_RECORDER_SAMPLE_PATH = "/media/recorder";
-    private static final String MEDIA_RECORDER_AND_PLAYER_SAMPLE_PATH = "/media/recorder_player";
-    private static final String SCROLLPANE_PATH = "/scrollpane";
+    private final Link mediaPlayerSampleLink = new Link("MediaPlayer", "/media/player");
+    private final Link mediaRecorderSampleLink = new Link("MediaRecorder", "/media/recorder");
+    private final Link mediaRecorderAndPlayerSampleLink = new Link("MediaRecorderAndPlayer", "/media/recorder_player");
+    private final Link scrollPaneLink = new Link("ScrollPane", "/scrollpane");
 
     @Override
     public Route createRoute() {
         var links = new ArrayList<LinkHeaderFilter.Link>();
-        links.add(new LinkHeaderFilter.Link("MediaPlayer", MEDIA_PLAYER_SAMPLE_PATH));
-        links.add(new LinkHeaderFilter.Link("MediaRecorder", MEDIA_RECORDER_SAMPLE_PATH));
-        links.add(new LinkHeaderFilter.Link("MediaRecorderAndPlayer", MEDIA_RECORDER_AND_PLAYER_SAMPLE_PATH));
-        links.add(new LinkHeaderFilter.Link("Scrollpane", SCROLLPANE_PATH));
+        links.add(mediaPlayerSampleLink);
+        links.add(mediaRecorderSampleLink);
+        links.add(mediaRecorderAndPlayerSampleLink);
+        links.add(scrollPaneLink);
 
         getScene().setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         return Route.empty()
-                .and(redirect("/", MEDIA_PLAYER_SAMPLE_PATH))
-                .and(getNode(MEDIA_PLAYER_SAMPLE_PATH, (r) ->
+                .and(redirect("/", mediaPlayerSampleLink.prefix()))
+                .and(getNode(mediaPlayerSampleLink.prefix(), request ->
                         new MediaPlayerSample().createRoot(getStage())))
-                .and(getNode(MEDIA_RECORDER_SAMPLE_PATH, (r) ->
+                .and(getNode(mediaRecorderSampleLink.prefix(), request ->
                         new MediaRecorderSample().createRoot(getStage())))
-                .and(getNode(MEDIA_RECORDER_AND_PLAYER_SAMPLE_PATH, (r) ->
+                .and(getNode(mediaRecorderAndPlayerSampleLink.prefix(), request ->
                         new MediaRecorderAndPlayerSample().createRoot(getStage())))
-                .and(getNode(SCROLLPANE_PATH, (r) ->
+                .and(getNode(scrollPaneLink.prefix(), request ->
                         new HTMLScrollPaneSample().createRoot()))
                 .filter(LinkHeaderFilter.create(links))
                 .filter(Filters.FullscreenFilter(true));
