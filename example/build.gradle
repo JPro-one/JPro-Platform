@@ -1,5 +1,5 @@
 plugins {
-    id 'org.bytedeco.gradle-javacpp-platform' version "$javacppVersion"
+    id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
 }
 
 apply plugin: 'org.openjfx.javafxplugin'
@@ -12,8 +12,8 @@ dependencies {
     implementation project(":jpro-media")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
 
-    implementation "org.bytedeco:javacv-platform:$javacvVersion"
-//    compileOnly "org.bytedeco:javacv-platform:$javacvVersion" // when running on JPro
+    implementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
+//    compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION" // when running on JPro
     implementation "io.github.mkpaz:atlantafx-base:1.2.0"
     runtimeOnly "ch.qos.logback:logback-classic:1.4.5"
 
