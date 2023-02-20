@@ -33,7 +33,7 @@ test {
         exceptionFormat "full"
     }
 
-    enabled = false
+    onlyIf { !Boolean.getBoolean("ciTest") }
 }
 
 javadoc {
