@@ -20,8 +20,8 @@ public class SessionManagerSample extends Application {
     static SessionManager sm = new SessionManager("example-sm");
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        ObservableMap session = sm.getSession(WebAPI.getWebAPI(primaryStage));
+    public void start(Stage primaryStage) {
+        ObservableMap<String,String> session = sm.getSession(WebAPI.getWebAPI(primaryStage));
 
         VBox pin = new VBox();
         pin.setAlignment(Pos.CENTER);
@@ -55,9 +55,7 @@ public class SessionManagerSample extends Application {
         // Show the content of the session
         Label sessionLabel = new Label();
         sessionLabel.setFont(new Font(15));
-        session.addListener((MapChangeListener) c -> {
-            sessionLabel.setText("Session: " + session);
-        });
+        session.addListener((MapChangeListener<String, String>) change -> sessionLabel.setText("Session: " + session));
         sessionLabel.setText("Session: " + session);
         pin.getChildren().add(sessionLabel);
 
