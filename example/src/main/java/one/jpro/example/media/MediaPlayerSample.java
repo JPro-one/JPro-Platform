@@ -37,7 +37,6 @@ public class MediaPlayerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-
         // Media player
         MediaPlayer mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
         MediaView mediaView = MediaView.create(mediaPlayer);
@@ -118,6 +117,13 @@ public class MediaPlayerSample extends Application {
         Optional.ofNullable(getClass().getResource("css/media_sample.css"))
                 .map(URL::toExternalForm)
                 .ifPresent(cssResource -> rootPane.getStylesheets().add(cssResource));
+
+        // Stop media player and release resources when we switch views via routing links
+        rootPane.sceneProperty().addListener(observable -> {
+            if (rootPane.getScene() == null) {
+                mediaPlayer.stop();
+            }
+        });
 
         return rootPane;
     }
