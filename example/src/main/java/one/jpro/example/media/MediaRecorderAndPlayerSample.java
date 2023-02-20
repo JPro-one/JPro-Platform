@@ -52,7 +52,6 @@ public class MediaRecorderAndPlayerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-
         var controlsPane = createControlsPane();
         cameraView = createCameraView(stage);
         mediaView = MediaView.create(stage);
