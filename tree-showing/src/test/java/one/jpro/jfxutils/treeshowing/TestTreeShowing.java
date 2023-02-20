@@ -4,7 +4,6 @@ import de.sandec.jmemorybuddy.JMemoryBuddy;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -12,6 +11,7 @@ import one.jpro.jproutils.treeshowing.TreeShowing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,9 +21,7 @@ public class TestTreeShowing {
     @BeforeAll
     public static void startJavaFX() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.startup(() -> {
-            latch.countDown();
-        });
+        Platform.startup(latch::countDown);
 
         latch.await();
     }
@@ -93,7 +91,7 @@ public class TestTreeShowing {
 
     public void inFX(Runnable r) {
         CountDownLatch l = new CountDownLatch(1);
-        AtomicReference<Throwable> ex = new AtomicReference();
+        AtomicReference<Throwable> ex = new AtomicReference<>();
         Platform.runLater(() -> {
             try {
                 r.run();
