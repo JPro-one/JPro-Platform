@@ -2,6 +2,7 @@ package one.jpro.example.media;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.FlowPane;
@@ -27,7 +28,13 @@ public class MediaRecorderSample extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder");
+        Scene scene = new Scene(createRoot(stage), 760, 540);
+        scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());
+        stage.setScene(scene);
+        stage.show();
+    }
 
+    public Parent createRoot(Stage stage) {
         // Controls
         Button enableCamButton = new Button("Enable Cam");
         Button startButton = new Button("Start");
@@ -97,13 +104,11 @@ public class MediaRecorderSample extends Application {
         cameraView.fitHeightProperty().bind(rootPane.heightProperty()
                 .subtract(controlsPane.heightProperty()));
 
-        Scene scene = new Scene(rootPane, 760, 540);
-        scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());
         Optional.ofNullable(getClass().getResource("css/media_sample.css"))
                 .map(URL::toExternalForm)
-                .ifPresent(cssResource -> scene.getStylesheets().add(cssResource));
-        stage.setScene(scene);
-        stage.show();
+                .ifPresent(cssResource -> rootPane.getStylesheets().add(cssResource));
+
+        return rootPane;
     }
 
     /**
