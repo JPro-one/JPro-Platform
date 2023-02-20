@@ -8,13 +8,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.*;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
-import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.MediaView;
+import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.recorder.MediaRecorder;
-import javafx.scene.media.MediaPlayer.Status;
 import one.jpro.media.util.MediaUtil;
 
 import java.io.IOException;
@@ -119,7 +119,7 @@ public class MediaRecorderAndPlayerSample extends Application {
             playButton.setDisable(true);
             mediaRecorder.start();
             pauseButton.setOnAction(event2 -> mediaRecorder.pause());
-            stopButton.setOnAction(event2-> mediaRecorder.stop());
+            stopButton.setOnAction(event2 -> mediaRecorder.stop());
         });
         saveButton.setOnAction(event -> {
             try {
@@ -141,6 +141,8 @@ public class MediaRecorderAndPlayerSample extends Application {
             pauseButton.setDisable(false);
             stopButton.setDisable(false);
             saveButton.setDisable(true);
+            seekSlider.setDisable(true);
+            seekSlider.setValue(0);
         });
         mediaRecorder.setOnPause(event -> {
             recordButton.setDisable(false);
@@ -177,7 +179,7 @@ public class MediaRecorderAndPlayerSample extends Application {
                 mediaPlayer.play();
             }
             pauseButton.setOnAction(event2 -> mediaPlayer.pause());
-            stopButton.setOnAction(event2-> mediaPlayer.stop());
+            stopButton.setOnAction(event2 -> mediaPlayer.stop());
         });
         stopButton.setOnAction(event -> mediaPlayer.stop());
         mediaPlayer.durationProperty().addListener((observable) -> {
