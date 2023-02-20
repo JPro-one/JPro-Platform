@@ -1,16 +1,37 @@
 plugins {
     id 'java-library'
+    id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
 }
 
 dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    compileOnly "org.bytedeco:javacv-platform:$javacvVersion"
+    compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION"
     api 'org.slf4j:slf4j-api:2.0.5'
     api 'org.json:json:20220924'
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testImplementation "org.testfx:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
+    testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
 compileJava {
     options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"]
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs = [
+            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media",
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx"
+    ]
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        exceptionFormat "full"
+    }
 }
 
 javadoc {
