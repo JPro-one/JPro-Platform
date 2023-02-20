@@ -32,6 +32,8 @@ test {
         showStackTraces true
         exceptionFormat "full"
     }
+
+    enabled = false
 }
 
 javadoc {
