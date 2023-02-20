@@ -112,16 +112,11 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
         });
 
         webAPI.registerJavaFunction(mediaRecorderRef + "_onerror", result -> {
-            // Reset status to inactive
+            // Set status to inactive
             setStatus(Status.INACTIVE);
 
             // Set error
             setError(MediaRecorderException.fromJSON(result));
-
-            // Fire error event
-            Event.fireEvent(WebMediaRecorder.this,
-                    new MediaRecorderEvent(WebMediaRecorder.this,
-                            MediaRecorderEvent.MEDIA_RECORDER_ERROR));
         });
     }
 

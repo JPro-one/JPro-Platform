@@ -134,17 +134,12 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                     console.log("$mediaPlayerId => error occurred with code: " + elem.error.code);
                     java_fun(elem.error.code);
                 """, errorCode -> {
-            // Set error
-            WebMediaError.fromCode(Integer.parseInt(errorCode)).ifPresent(webErrorCode ->
-                    setError(new MediaPlayerException(webErrorCode.getDescription())));
-
             // Set status to halted
             setStatus(Status.HALTED);
 
-            // Fire error event
-            Event.fireEvent(WebMediaPlayer.this,
-                    new MediaPlayerEvent(WebMediaPlayer.this,
-                            MediaPlayerEvent.MEDIA_PLAYER_ERROR));
+            // Set error
+            WebMediaError.fromCode(Integer.parseInt(errorCode)).ifPresent(webErrorCode ->
+                    setError(new MediaPlayerException(webErrorCode.getDescription())));
         });
     }
 

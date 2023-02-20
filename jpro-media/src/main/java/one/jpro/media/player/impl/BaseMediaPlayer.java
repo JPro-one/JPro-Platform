@@ -2,6 +2,7 @@ package one.jpro.media.player.impl;
 
 import com.sun.javafx.event.EventHandlerManager;
 import javafx.beans.property.*;
+import javafx.event.Event;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
 import javafx.scene.media.MediaPlayer.Status;
@@ -361,7 +362,12 @@ abstract class BaseMediaPlayer implements MediaPlayer {
                 @Override
                 protected void invalidated() {
                     final MediaPlayerException exception = get();
-                    log.error(exception.toString(), exception);
+                    if (exception != null) {
+                        // Fire error event
+                        Event.fireEvent(BaseMediaPlayer.this,
+                                new MediaPlayerEvent(BaseMediaPlayer.this,
+                                        MediaPlayerEvent.MEDIA_PLAYER_ERROR));
+                    }
                 }
             };
         }

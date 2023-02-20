@@ -2,19 +2,21 @@ package one.jpro.example.media;
 
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
-import one.jpro.media.player.MediaPlayer;
 import one.jpro.media.MediaView;
+import one.jpro.media.player.MediaPlayer;
+
 import java.net.URL;
 import java.util.Optional;
 
@@ -104,7 +106,7 @@ public class MediaPlayerSample extends Application {
         mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
         mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
         mediaPlayer.setOnStopped(event -> playPauseButton.setText("Play"));
-        mediaPlayer.setOnError(event -> mediaPlayer.getError().printStackTrace());
+        mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
 
         // User interface
         FlowPane controlsPane = new FlowPane(playPauseButton, stopButton, seekSlider,
