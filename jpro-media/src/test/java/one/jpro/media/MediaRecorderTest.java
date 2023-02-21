@@ -117,7 +117,7 @@ public class MediaRecorderTest {
     @Test
     @Order(1)
     public void media_recorder_enable(FxRobot robot) throws TimeoutException {
-        log.info("Media recorder => enable test started...");
+        log.info("MediaRecorder => Testing enable functionality...");
         log.info("Click on enable camera button");
         robot.clickOn(enableCamButton); // Enable camera (asynchronous operation)
 
@@ -125,25 +125,24 @@ public class MediaRecorderTest {
         waitForStatus(Status.READY, 10, TimeUnit.SECONDS);
         log.info("Media recorder is ready");
 
-        log.info("Run checks...");
-        assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.READY);
+        log.info("Run additional checks...");
         assertThat(startButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isTrue();
-        log.info("Media recorder => enable test successfully passed.");
+        log.info("Checks passed");
+        log.info("MediaRecorder => Enable test successfully passed.");
     }
 
     @Test
     @Order(2)
     public void media_recorder_controls(FxRobot robot) throws TimeoutException {
-        log.info("Media recorder => controls test started...");
+        log.info("MediaRecorder => Testing controls...");
         log.info("Click on enable camera button");
         robot.clickOn(enableCamButton); // Enable camera (asynchronous operation)
         log.info("Wait for media recorder to be ready...");
         waitForStatus(Status.READY, 10, TimeUnit.SECONDS);
         log.info("Media recorder is ready");
-        log.info("Run checks...");
-        assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.READY);
+        log.info("Run additional checks...");
         assertThat(startButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isTrue();
@@ -154,8 +153,7 @@ public class MediaRecorderTest {
         log.info("Wait for media recorder to start...");
         waitForStatus(Status.RECORDING);
         log.info("Media recorder has started recording");
-        log.info("Run checks...");
-        assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.RECORDING);
+        log.info("Run additional checks...");
         assertThat(startButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
         assertThat(stopButton.isDisable()).isFalse();
@@ -167,7 +165,7 @@ public class MediaRecorderTest {
 
         log.info("Click on pause button");
         robot.clickOn(pauseButton); // Pause recording (synchronous operation, but not blocking)
-        log.info("Run checks...");
+        log.info("Run additional checks...");
         assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.PAUSED);
         assertThat(startButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
@@ -176,7 +174,7 @@ public class MediaRecorderTest {
 
         log.info("Click on start button to resume button");
         robot.clickOn(startButton); // Resume recording (synchronous operation, but not blocking)
-        log.info("Run checks...");
+        log.info("Run additional checks...");
         assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.RECORDING);
         assertThat(startButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -188,26 +186,24 @@ public class MediaRecorderTest {
         log.info("Wait for media recorder to stop...");
         waitForStatus(Status.INACTIVE);
         log.info("Media recorder has stop recording");
-        log.info("Run checks...");
-        assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.INACTIVE);
+        log.info("Run additional checks...");
         assertThat(startButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isTrue();
         log.info("Checks passed");
-        log.info("Media recorder => controls test successfully passed.");
+        log.info("MediaRecorder => Test successfully passed.");
     }
 
     @Test
     @Order(3)
     public void media_recorder_stress(FxRobot robot) throws TimeoutException {
-        log.info("Media recorder => stress test started...");
+        log.info("MediaRecorder => Stress test started...");
         log.info("Click on enable camera button");
         robot.clickOn(enableCamButton); // Enable camera (asynchronous operation)
         log.info("Wait for media recorder to be ready...");
         waitForStatus(Status.READY, 10, TimeUnit.SECONDS);
         log.info("Media recorder is ready");
-        log.info("Run checks...");
-        assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.READY);
+        log.info("Run additional checks...");
         assertThat(startButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isTrue();
@@ -220,8 +216,7 @@ public class MediaRecorderTest {
             log.info("Wait for media recorder to start...");
             waitForStatus(Status.RECORDING);
             log.info("Media recorder has started recording");
-            log.info("Run checks...");
-            assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.RECORDING);
+            log.info("Run additional checks...");
             assertThat(startButton.isDisable()).isTrue();
             assertThat(pauseButton.isDisable()).isFalse();
             assertThat(stopButton.isDisable()).isFalse();
@@ -235,14 +230,13 @@ public class MediaRecorderTest {
             robot.clickOn(stopButton); // Stop recording (asynchronous operation)
             waitForStatus(Status.INACTIVE);
             log.info("Media recorder has stop recording");
-            log.info("Run checks...");
-            assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.INACTIVE);
+            log.info("Run additional checks...");
             assertThat(startButton.isDisable()).isFalse();
             assertThat(pauseButton.isDisable()).isTrue();
             assertThat(stopButton.isDisable()).isTrue();
             log.info("Checks passed");
         }
-        log.info("Media recorder => stress test successfully passed.");
+        log.info("MediaRecorder => Stress test successfully passed.");
     }
 
     private void waitForStatus(Status status) throws TimeoutException {
