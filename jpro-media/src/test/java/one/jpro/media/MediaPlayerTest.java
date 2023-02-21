@@ -13,7 +13,10 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.player.MediaPlayer;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
@@ -32,6 +35,7 @@ import static org.testfx.assertions.api.Assertions.assertThat;
  * @author Besmir Beqiri
  */
 @ExtendWith(ApplicationExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MediaPlayerTest {
 
     private static final String MEDIA_SOURCE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
@@ -114,6 +118,28 @@ public class MediaPlayerTest {
     }
 
     @Test
+    @Order(1)
+    void control_buttons_play_pause_stop(FxRobot robot) throws TimeoutException {
+        waitForStatus(Status.READY);
+
+        // Play
+        robot.clickOn(playButton);
+        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.PLAYING);
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(5)),
+                mediaPlayer.currentTimeProperty()));
+
+        // Pause
+        robot.clickOn(pauseButton);
+        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.PAUSED);
+
+        // Stop
+        robot.clickOn(stopButton);
+        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.STOPPED);
+    }
+
+    @Test
+    @Order(2)
     void media_view_is_preserve_ratio(FxRobot robot) throws TimeoutException {
         waitForStatus(Status.READY);
 
@@ -141,6 +167,7 @@ public class MediaPlayerTest {
     }
 
     @Test
+    @Order(3)
     void media_player_is_muted(FxRobot robot) throws TimeoutException {
         waitForStatus(Status.READY);
 
@@ -170,26 +197,7 @@ public class MediaPlayerTest {
     }
 
     @Test
-    void control_buttons_play_pause_stop(FxRobot robot) throws TimeoutException {
-        waitForStatus(Status.READY);
-
-        // Play
-        robot.clickOn(playButton);
-        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.PLAYING);
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
-                        mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(5)),
-                mediaPlayer.currentTimeProperty()));
-
-        // Pause
-        robot.clickOn(pauseButton);
-        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.PAUSED);
-
-        // Stop
-        robot.clickOn(stopButton);
-        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.STOPPED);
-    }
-
-    @Test
+    @Order(4)
     void seek_after_media_player_is_ready(FxRobot robot) throws TimeoutException {
         waitForStatus(Status.READY);
 
@@ -200,6 +208,7 @@ public class MediaPlayerTest {
     }
 
     @Test
+    @Order(5)
     void seek_after_media_player_is_playing(FxRobot robot) throws TimeoutException {
         waitForStatus(Status.READY);
 
@@ -219,6 +228,7 @@ public class MediaPlayerTest {
     }
 
     @Test
+    @Order(6)
     void seek_after_media_player_is_paused(FxRobot robot) throws TimeoutException {
         waitForStatus(Status.READY);
 
@@ -239,6 +249,7 @@ public class MediaPlayerTest {
     }
 
     @Test
+    @Order(7)
     void seek_negative_time(FxRobot robot) throws TimeoutException {
         waitForStatus(Status.READY);
 
@@ -258,8 +269,7 @@ public class MediaPlayerTest {
     }
 
     private void waitForStatus(Status status) throws TimeoutException {
-        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS,
-                mediaPlayer.statusProperty().isEqualTo(status));
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, mediaPlayer.statusProperty().isEqualTo(status));
         assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(status);
     }
 
