@@ -164,7 +164,7 @@ public class MediaRecorderTest {
                 mediaRecorder.durationProperty()));
 
         log.debug("Click on pause button");
-        robot.clickOn(pauseButton); // Pause recording (synchronous operation, but not blocking)
+        robot.clickOn(pauseButton); // Pause recording (asynchronous operation)
         log.debug("Run additional checks...");
         assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.PAUSED);
         assertThat(startButton.isDisable()).isFalse();
@@ -173,7 +173,7 @@ public class MediaRecorderTest {
         log.debug("Checks passed");
 
         log.debug("Click on start button to resume button");
-        robot.clickOn(startButton); // Resume recording (synchronous operation, but not blocking)
+        robot.clickOn(startButton); // Resume recording (asynchronous operation)
         log.debug("Run additional checks...");
         assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(Status.RECORDING);
         assertThat(startButton.isDisable()).isTrue();
@@ -225,6 +225,19 @@ public class MediaRecorderTest {
             WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
                             mediaRecorder.getDuration().greaterThan(Duration.seconds(2)),
                     mediaRecorder.durationProperty()));
+            
+            if (i % 2 == 0) {
+                log.debug("Click on pause button");
+                robot.clickOn(pauseButton); // Pause recording (asynchronous operation)
+                log.debug("Wait for media recorder to pause...");
+                waitForStatus(Status.PAUSED);
+                log.debug("Media recorder has paused");
+                log.debug("Run additional checks...");
+                assertThat(startButton.isDisable()).isFalse();
+                assertThat(pauseButton.isDisable()).isTrue();
+                assertThat(stopButton.isDisable()).isFalse();
+                log.debug("Checks passed");
+            }
 
             log.debug("Click on stop button");
             robot.clickOn(stopButton); // Stop recording (asynchronous operation)
