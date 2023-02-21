@@ -80,18 +80,16 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
                 }
             };
 
-            Platform.runLater(() -> {
-                setupHTMLView(webapi);
-                registerChangeListener(control.contentProperty(), e -> {
-                    System.out.println("Trigger: content");
-                    updateContent.run();
-                });
-                registerChangeListener(TreeShowing.treeShowing(control), e -> {
-                    System.out.println("Trigger: treeshowing");
-                    updateContent.run();
-                });
+            setupHTMLView(webapi);
+            registerChangeListener(control.contentProperty(), e -> {
+                System.out.println("Trigger: content");
                 updateContent.run();
             });
+            registerChangeListener(TreeShowing.treeShowing(control), e -> {
+                System.out.println("Trigger: treeshowing");
+                updateContent.run();
+            });
+            updateContent.run();
         });
     }
 
