@@ -143,8 +143,8 @@ public class MediaPlayerTest {
 
     @Test
     @Order(1)
-    void control_buttons_play_pause_stop(FxRobot robot) throws TimeoutException {
-        log.info("MediaPlayer => Testing controls buttons: play, pause, stop");
+    void media_player_controls(FxRobot robot) throws TimeoutException {
+        log.info("MediaPlayer => Testing controls...");
         log.info("Waiting for media player to be ready...");
         waitForStatus(Status.READY);
         log.info("Media player is ready");
@@ -180,6 +180,59 @@ public class MediaPlayerTest {
         assertThat(stopButton.isDisable()).isFalse();
         log.info("Checks passed");
 
+        log.info("Click play button");
+        robot.clickOn(playButton);
+
+        log.info("Click on preserve ratio check box");
+        robot.clickOn(preserveRatioCheckBox);
+        log.info("Run checks...");
+        assertThat(mediaView.isPreserveRatio()).isTrue();
+        log.info("Checks passed");
+
+        log.info("Waiting for media player to play for additional 3 seconds...");
+        final Duration currentTime1 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime1.add(Duration.seconds(3))),
+                mediaPlayer.currentTimeProperty()));
+
+        log.info("Click on preserve ratio check box again");
+        robot.clickOn(preserveRatioCheckBox);
+        log.info("Run checks...");
+        assertThat(mediaView.isPreserveRatio()).isFalse();
+        log.info("Checks passed");
+
+        log.info("Waiting for media player to play for additional 3 seconds...");
+        final Duration currentTime2 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime2.add(Duration.seconds(3))),
+                mediaPlayer.currentTimeProperty()));
+
+        log.info("Click on mute check box");
+        robot.clickOn(muteCheckBox);
+        log.info("Run checks...");
+        assertThat(muteCheckBox.isSelected()).isTrue();
+        assertThat(mediaPlayer.isMute()).isTrue();
+        log.info("Checks passed");
+
+        log.info("Waiting for media player to play for additional 3 seconds...");
+        final Duration currentTime3 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime3.add(Duration.seconds(3))),
+                mediaPlayer.currentTimeProperty()));
+
+        log.info("Click on mute check box again");
+        robot.clickOn(muteCheckBox);
+        log.info("Run checks...");
+        assertThat(muteCheckBox.isSelected()).isFalse();
+        assertThat(mediaPlayer.isMute()).isFalse();
+        log.info("Checks passed");
+
+        log.info("Waiting for media player to play for additional 3 seconds...");
+        final Duration currentTime4 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime4.add(Duration.seconds(3))),
+                mediaPlayer.currentTimeProperty()));
+
         log.info("Click on stop button");
         robot.clickOn(stopButton);
         log.info("Waiting for media player to stop...");
@@ -195,66 +248,8 @@ public class MediaPlayerTest {
 
     @Test
     @Order(2)
-    void media_view_is_preserve_ratio(FxRobot robot) throws TimeoutException {
-        waitForStatus(Status.READY);
-
-        // Play
-        robot.clickOn(playButton);
-
-        robot.clickOn(preserveRatioCheckBox);
-        assertThat(mediaView.isPreserveRatio()).isTrue();
-
-        // Play for 3 seconds
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
-                        mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(3)),
-                mediaPlayer.currentTimeProperty()));
-
-        robot.clickOn(preserveRatioCheckBox);
-        assertThat(mediaView.isPreserveRatio()).isFalse();
-
-        // Play for 3 seconds
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
-                        mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(6)),
-                mediaPlayer.currentTimeProperty()));
-
-        robot.clickOn(stopButton);
-        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.STOPPED);
-    }
-
-    @Test
-    @Order(3)
-    void media_player_is_muted(FxRobot robot) throws TimeoutException {
-        waitForStatus(Status.READY);
-
-        // Play
-        robot.clickOn(playButton);
-
-        robot.clickOn(muteCheckBox);
-        assertThat(muteCheckBox.isSelected()).isTrue();
-        assertThat(mediaPlayer.isMute()).isTrue();
-
-        // Play for 3 seconds
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
-                        mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(3)),
-                mediaPlayer.currentTimeProperty()));
-
-        robot.clickOn(muteCheckBox);
-        assertThat(muteCheckBox.isSelected()).isFalse();
-        assertThat(mediaPlayer.isMute()).isFalse();
-
-        // Play for 3 seconds
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
-                        mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(6)),
-                mediaPlayer.currentTimeProperty()));
-
-        robot.clickOn(stopButton);
-        assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(Status.STOPPED);
-    }
-
-    @Test
-    @Order(4)
     void seek_after_media_player_after_is_ready(FxRobot robot) throws TimeoutException {
-        log.info("MediaPlayer => Testing seek after media player is ready");
+        log.info("MediaPlayer => Testing seek after media player is ready...");
         log.info("Waiting for media player to be ready...");
         waitForStatus(Status.READY);
         log.info("Media player is ready");
@@ -278,7 +273,7 @@ public class MediaPlayerTest {
     }
 
     @Test
-    @Order(5)
+    @Order(3)
     void seek_after_media_player_after_is_playing(FxRobot robot) throws TimeoutException {
         log.info("MediaPlayer => Testing seek after media player is playing");
         log.info("Waiting for media player to be ready...");
@@ -331,9 +326,9 @@ public class MediaPlayerTest {
     }
 
     @Test
-    @Order(6)
+    @Order(4)
     void seek_after_media_player_after_is_paused(FxRobot robot) throws TimeoutException {
-        log.info("MediaPlayer => Testing seek after media player is paused");
+        log.info("MediaPlayer => Testing seek after media player is paused...");
         log.info("Waiting for media player to be ready...");
         waitForStatus(Status.READY);
         log.info("Media player is ready");
@@ -381,9 +376,9 @@ public class MediaPlayerTest {
     }
 
     @Test
-    @Order(7)
+    @Order(5)
     void seek_to_negative_time(FxRobot robot) throws TimeoutException {
-        log.info("MediaPlayer => Testing seek to negative time");
+        log.info("MediaPlayer => Testing seek to negative time...");
         log.info("Waiting for media player to be ready...");
         waitForStatus(Status.READY);
         log.info("Media player is ready");
