@@ -65,7 +65,10 @@ public class MediaPlayerSample extends Application {
                 mediaPlayer.pause();
             }
         });
-        stopButton.setOnAction(event -> mediaPlayer.stop());
+        stopButton.setOnAction(event -> {
+            mediaPlayer.stop();
+            seekSlider.setValue(0);
+        });
 
         seekSlider.setOnMousePressed(mouseEvent ->
                 mediaPlayer.seek(Duration.seconds(seekSlider.getValue())));

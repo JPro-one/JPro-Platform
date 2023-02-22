@@ -179,7 +179,10 @@ public class MediaRecorderAndPlayerSample extends Application {
             pauseButton.setOnAction(event2 -> mediaPlayer.pause());
             stopButton.setOnAction(event2 -> mediaPlayer.stop());
         });
-        stopButton.setOnAction(event -> mediaPlayer.stop());
+        stopButton.setOnAction(event -> {
+            mediaPlayer.stop();
+            seekSlider.setValue(0);
+        });
         mediaPlayer.durationProperty().addListener((observable) -> {
             Duration duration = mediaPlayer.getDuration();
             if (duration.isUnknown()) {
