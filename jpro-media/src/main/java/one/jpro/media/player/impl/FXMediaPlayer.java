@@ -88,7 +88,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
         });
 
         mediaPlayer.currentTimeProperty().addListener(observable ->
-                log.trace("Current time: {}", mediaPlayer.getCurrentTime()));
+                log.trace("Current time: {} seconds", mediaPlayer.getCurrentTime().toSeconds()));
 
         mediaPlayer.volumeProperty().addListener(observable ->
                 log.trace("Volume: {}", mediaPlayer.getVolume()));
