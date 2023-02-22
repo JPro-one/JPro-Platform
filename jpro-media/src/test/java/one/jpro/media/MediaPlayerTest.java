@@ -247,6 +247,24 @@ public class MediaPlayerTest {
         assertThat(pauseButton.isDisable()).isFalse();
         assertThat(stopButton.isDisable()).isFalse();
         log.debug("Checks passed");
+
+        log.debug("Click on play button");
+        robot.clickOn(playButton);
+        log.debug("Waiting for media player to play...");
+        waitForStatus(Status.PLAYING);
+        log.debug("Media player is playing");
+        log.debug("Run additional checks...");
+        assertThat(playButton.isDisable()).isTrue();
+        assertThat(pauseButton.isDisable()).isFalse();
+        assertThat(stopButton.isDisable()).isFalse();
+        assertThat(mediaPlayer.getCurrentTime()).isGreaterThanOrEqualTo(seekTime);
+        log.debug("Checks passed");
+
+        log.debug("Wait for media player to play for additional 3 seconds");
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(seekTime.add(Duration.seconds(3))),
+                mediaPlayer.currentTimeProperty()));
+
         log.debug("MediaPlayer => Test successfully passed.");
     }
 
