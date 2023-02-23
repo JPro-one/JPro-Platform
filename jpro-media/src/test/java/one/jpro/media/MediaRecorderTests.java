@@ -31,15 +31,15 @@ import static one.jpro.media.recorder.MediaRecorder.Status;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 /**
- * Automated tests for MediaRecorder API.
+ * Automated tests for {@link MediaRecorder} API.
  *
  * @author Besmir Beqiri
  */
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MediaRecorderTest {
+public class MediaRecorderTests {
 
-    private final Logger log = LoggerFactory.getLogger(MediaRecorderTest.class);
+    private final Logger log = LoggerFactory.getLogger(MediaRecorderTests.class);
 
     private MediaRecorder mediaRecorder;
     private MediaView cameraView;
