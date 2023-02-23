@@ -25,6 +25,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
     private final Logger log = LoggerFactory.getLogger(FXMediaPlayer.class);
 
     private final MediaPlayer mediaPlayer;
+    private volatile boolean eom = false;
 
     public FXMediaPlayer(MediaSource mediaSource) {
         setMediaSource(mediaSource);
@@ -72,10 +73,22 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
         });
 
         mediaPlayer.setOnEndOfMedia(() -> {
-            // set current status
-            setStatus(mediaPlayer.getStatus());
+            // Set end of media flag
+            eom = true;
 
-            // Fire end of media event
+            // While the internal media player reached the end of media,
+            // it "pauses" even though no PAUSE event is fired and its
+            // internal status is still PLAYING. So we need to set the
+            // status to PAUSED here and fire the MEDIA_PLAYER_PAUSE event
+            // to mimic the behavior of the Web media player implementation.
+            setStatus(Status.PAUSED);
+
+            // Fire pause event
+            Event.fireEvent(FXMediaPlayer.this,
+                    new MediaPlayerEvent(FXMediaPlayer.this,
+                            MediaPlayerEvent.MEDIA_PLAYER_PAUSE));
+
+            // Finally, fire end of media event
             Event.fireEvent(FXMediaPlayer.this,
                     new MediaPlayerEvent(FXMediaPlayer.this,
                             MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
@@ -86,6 +99,8 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             setStatus(Status.HALTED);
             setError(new MediaPlayerException(mediaPlayer.getError().getMessage(), mediaPlayer.getError()));
         });
+
+        mediaPlayer.statusProperty().addListener(observable -> setStatus(mediaPlayer.getStatus()));
 
         mediaPlayer.currentTimeProperty().addListener(observable ->
                 log.trace("Current time: {} seconds", mediaPlayer.getCurrentTime().toSeconds()));
@@ -171,16 +186,31 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
     }
 
     @Override
-    public Status getStatus() {
-        return mediaPlayer.getStatus();
-    }
-    @Override
-    public ReadOnlyObjectProperty<Status> statusProperty() {
-        return mediaPlayer.statusProperty();
-    }
-
-    @Override
     public void play() {
+        // If the end of media was reached, seek to the beginning
+        // before playing, to mimic the behavior of the Web media
+        // player implementation.
+        if (eom) {
+            // Seek to the beginning
+            mediaPlayer.seek(Duration.ZERO);
+
+            // The internal media player status is still PLAYING,
+            // so we need to set the status to PLAYING and fire
+            // again the MEDIA_PLAYER_PLAY event.
+            if (mediaPlayer.getStatus() == Status.PLAYING) {
+                // set playing status
+                setStatus(Status.PLAYING);
+
+                // Fire playing event since is not fired by the internal media player
+                Event.fireEvent(FXMediaPlayer.this,
+                        new MediaPlayerEvent(FXMediaPlayer.this,
+                                MediaPlayerEvent.MEDIA_PLAYER_PLAY));
+            }
+
+            // Reset end of media flag
+            eom = false;
+        }
+
         mediaPlayer.play();
     }
 
@@ -219,6 +249,17 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
             }
 
             mediaPlayer.seek(seekTime);
+
+            // Check if end of media flag is set
+            if (eom) {
+                // If previously end of media was reached, we need to pause
+                // the internal media player after the seek operation to mimic
+                // the behaviour of the Web media player implementation.
+                mediaPlayer.pause();
+
+                // Reset end of media flag
+                eom = false;
+            }
         }
     }
 }
