@@ -1,5 +1,8 @@
 package one.jpro.media;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -52,6 +55,7 @@ public class MediaPlayerTest {
     private CheckBox preserveRatioCheckBox;
     private CheckBox muteCheckBox;
     private volatile boolean eom = false;
+    private Scene scene;
 
     @Start
     private void start(Stage stage) {
@@ -136,7 +140,7 @@ public class MediaPlayerTest {
         controlsPane.setPadding(new Insets(8));
         StackPane rootPane = new StackPane(mediaView, controlsPane);
 
-        Scene scene = new Scene(rootPane, 800, 540);
+        scene = new Scene(rootPane, 800, 540);
         stage.setScene(scene);
         stage.show();
     }
@@ -407,6 +411,63 @@ public class MediaPlayerTest {
         log.debug("Waiting for media player to play for additional 3 seconds");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
                         mediaPlayer.getCurrentTime().greaterThan(Duration.seconds(3)),
+                mediaPlayer.currentTimeProperty()));
+
+        clickStopButton(robot);
+        log.debug("MediaPlayer => Test successfully passed.");
+    }
+
+    @Test
+    @Order(7)
+    public void media_view_fit_width_height(FxRobot robot) throws TimeoutException {
+        log.debug("MediaPlayer => Testing media view fit width and height...");
+        waitForStatusReady();
+
+        log.debug("Click play button");
+        robot.clickOn(playButton); // Play media (asynchronous operation)
+        log.debug("Waiting for media player to start playing...");
+        waitForStatus(Status.PLAYING);
+        log.debug("Media player is playing");
+        log.debug("Run additional checks...");
+        assertThat(playButton.isDisable()).isTrue();
+        assertThat(pauseButton.isDisable()).isFalse();
+        assertThat(stopButton.isDisable()).isFalse();
+        log.debug("Checks passed");
+
+        log.debug("Waiting for media player to play for additional 3 seconds...");
+        final Duration currentTime1 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime1.add(Duration.seconds(2))),
+                mediaPlayer.currentTimeProperty()));
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(mediaView.fitWidthProperty(), scene.getWidth()),
+                        new KeyValue(mediaView.fitHeightProperty(), scene.getHeight())),
+                new KeyFrame(Duration.seconds(3.0),
+                        new KeyValue(mediaView.fitWidthProperty(), 1.0),
+                        new KeyValue(mediaView.fitHeightProperty(), 1.0)),
+                new KeyFrame(Duration.seconds(6.0),
+                        new KeyValue(mediaView.fitWidthProperty(), scene.getWidth()),
+                        new KeyValue(mediaView.fitHeightProperty(), scene.getHeight())));
+        timeline.play();
+
+        log.debug("Waiting for media player to play for additional 6 seconds...");
+        final Duration currentTime2 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime2.add(Duration.seconds(6))),
+                mediaPlayer.currentTimeProperty()));
+
+        log.debug("Reset media view fit width and height to 0");
+        mediaView.setFitWidth(0.0);
+        assertThat(mediaView.getFitWidth()).isEqualTo(0.0);
+        mediaView.setFitHeight(0.0);
+        assertThat(mediaView.getFitHeight()).isEqualTo(0.0);
+
+        log.debug("Waiting for media player to play for additional 3 seconds...");
+        final Duration currentTime3 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime3.add(Duration.seconds(3))),
                 mediaPlayer.currentTimeProperty()));
 
         clickStopButton(robot);
