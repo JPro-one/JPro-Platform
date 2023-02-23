@@ -222,25 +222,26 @@ public class MediaPlayerApplication extends Application {
         stopButton.setDisable(true);
 
         // Control events
-        playPauseButton.setOnAction(event -> {
-            if (mediaPlayer.getStatus() == Status.READY ||
-                    mediaPlayer.getStatus() == Status.PAUSED ||
-                    mediaPlayer.getStatus() == Status.STOPPED) {
-                mediaPlayer.play();
-            } else {
-                mediaPlayer.pause();
-            }
-        });
         stopButton.setOnAction(event -> mediaPlayer.stop());
 
         // Event handlers
         mediaPlayer.setOnReady(event -> {
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
             playPauseButton.setDisable(false);
             stopButton.setDisable(false);
         });
-        mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
-        mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
-        mediaPlayer.setOnStopped(event -> playPauseButton.setText("Play"));
+        mediaPlayer.setOnPlaying(event -> {
+            playPauseButton.setText("Pause");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.pause());
+        });
+        mediaPlayer.setOnPause(event -> {
+            playPauseButton.setText("Play");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
+        });
+        mediaPlayer.setOnStopped(event -> {
+            playPauseButton.setText("Play");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
+        });
         mediaPlayer.setOnError(event -> System.out.println("Error: " + mediaPlayer.getError()));
 
         // User interface
