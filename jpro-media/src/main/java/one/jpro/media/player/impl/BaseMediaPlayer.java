@@ -204,22 +204,22 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     }
 
     // On pause event handler
-    private ObjectProperty<EventHandler<MediaPlayerEvent>> onPause;
+    private ObjectProperty<EventHandler<MediaPlayerEvent>> onPaused;
 
     @Override
-    public final EventHandler<MediaPlayerEvent> getOnPause() {
-        return (onPause == null) ? null : onPause.get();
+    public final EventHandler<MediaPlayerEvent> getOnPaused() {
+        return (onPaused == null) ? null : onPaused.get();
     }
 
     @Override
-    public final void setOnPause(EventHandler<MediaPlayerEvent> value) {
-        onPauseProperty().set(value);
+    public final void setOnPaused(EventHandler<MediaPlayerEvent> value) {
+        onPausedProperty().set(value);
     }
 
     @Override
-    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onPauseProperty() {
-        if (onPause == null) {
-            onPause = new SimpleObjectProperty<>(this, "onPause") {
+    public final ObjectProperty<EventHandler<MediaPlayerEvent>> onPausedProperty() {
+        if (onPaused == null) {
+            onPaused = new SimpleObjectProperty<>(this, "onPaused") {
 
                 @Override
                 protected void invalidated() {
@@ -227,7 +227,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
                 }
             };
         }
-        return onPause;
+        return onPaused;
     }
 
     // On stalled event handler

@@ -115,7 +115,7 @@ public class MediaPlayerTests {
             pauseButton.setDisable(false);
             stopButton.setDisable(false);
         });
-        mediaPlayer.setOnPause(event -> {
+        mediaPlayer.setOnPaused(event -> {
             playButton.setDisable(false);
             pauseButton.setDisable(true);
             stopButton.setDisable(false);

@@ -51,7 +51,7 @@ public class MediaPlayerApplication extends Application {
             playPauseButton.setText("Pause");
             playPauseButton.setOnAction(event2 -> mediaPlayer.pause());
         });
-        mediaPlayer.setOnPause(event -> {
+        mediaPlayer.setOnPaused(event -> {
             playPauseButton.setText("Play");
             playPauseButton.setOnAction(event2 -> mediaPlayer.play());
         });

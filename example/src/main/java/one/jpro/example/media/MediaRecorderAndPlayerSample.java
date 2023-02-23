@@ -229,7 +229,7 @@ public class MediaRecorderAndPlayerSample extends Application {
             playButton.setDisable(true);
             pauseButton.setDisable(false);
         });
-        mediaPlayer.setOnPause(event -> {
+        mediaPlayer.setOnPaused(event -> {
             playButton.setDisable(false);
             pauseButton.setDisable(true);
         });

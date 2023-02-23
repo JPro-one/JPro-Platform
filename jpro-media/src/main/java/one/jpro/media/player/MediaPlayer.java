@@ -36,7 +36,7 @@ import one.jpro.media.player.impl.WebMediaPlayer;
  * <p>All operations of a <code>MediaPlayer</code> are inherently asynchronous.
  * When the given <code>MediaSource</code> is loaded, use the {@link #setOnReady(EventHandler)}
  * to get notified when the <code>MediaPlayer</code> is ready to play. Other
- * event handlers like {@link #setOnPlaying(EventHandler)}, {@link #setOnPause(EventHandler)},
+ * event handlers like {@link #setOnPlaying(EventHandler)}, {@link #setOnPaused(EventHandler)},
  * {@link #setOnStopped(EventHandler)}, {@link #setOnEndOfMedia(EventHandler)} and
  * {@link #setOnStalled(EventHandler)} can be used to get notified of the
  * corresponding events.
@@ -237,19 +237,19 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      *
      * @return the event handler or <code>null</code>.
      */
-    EventHandler<MediaPlayerEvent> getOnPause();
+    EventHandler<MediaPlayerEvent> getOnPaused();
 
     /**
      * Sets the {@link Status#PAUSED} event handler.
      *
      * @param value the event handler or <code>null</code>.
      */
-    void setOnPause(EventHandler<MediaPlayerEvent> value);
+    void setOnPaused(EventHandler<MediaPlayerEvent> value);
 
     /**
      * Event handler invoked when the status changes to <code>PAUSED</code>.
      */
-    ObjectProperty<EventHandler<MediaPlayerEvent>> onPauseProperty();
+    ObjectProperty<EventHandler<MediaPlayerEvent>> onPausedProperty();
 
     /**
      * Retrieves the {@link Status#STOPPED} event handler.
