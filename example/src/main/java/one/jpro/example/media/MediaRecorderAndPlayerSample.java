@@ -8,7 +8,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.*;
-import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
@@ -171,11 +170,7 @@ public class MediaRecorderAndPlayerSample extends Application {
 
         // events
         playButton.setOnAction(event -> {
-            if (mediaPlayer.getStatus() == Status.READY ||
-                    mediaPlayer.getStatus() == Status.PAUSED ||
-                    mediaPlayer.getStatus() == Status.STOPPED) {
-                mediaPlayer.play();
-            }
+            mediaPlayer.play();
             pauseButton.setOnAction(event2 -> mediaPlayer.pause());
             stopButton.setOnAction(event2 -> mediaPlayer.stop());
         });
