@@ -10,7 +10,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.media.MediaSource;
@@ -102,7 +101,7 @@ public class MediaPlayerSample extends Application {
             playPauseButton.setText("Pause");
             playPauseButton.setOnAction(event2 -> mediaPlayer.pause());
         });
-        mediaPlayer.setOnPause(event -> {
+        mediaPlayer.setOnPaused(event -> {
             playPauseButton.setText("Play");
             playPauseButton.setOnAction(event2 -> mediaPlayer.play());
         });
