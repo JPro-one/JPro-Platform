@@ -56,15 +56,6 @@ public class MediaPlayerSample extends Application {
         Slider volumeSlider = new Slider(0, 100, mediaPlayer.getVolume() * 100.0);
 
         // Control events
-        playPauseButton.setOnAction(event -> {
-            if (mediaPlayer.getStatus() == Status.READY ||
-                    mediaPlayer.getStatus() == Status.PAUSED ||
-                    mediaPlayer.getStatus() == Status.STOPPED) {
-                mediaPlayer.play();
-            } else {
-                mediaPlayer.pause();
-            }
-        });
         stopButton.setOnAction(event -> {
             mediaPlayer.stop();
             seekSlider.setValue(0);
@@ -101,14 +92,24 @@ public class MediaPlayerSample extends Application {
 
         // Player event handlers
         mediaPlayer.setOnReady(event -> {
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
             playPauseButton.setDisable(false);
             stopButton.setDisable(false);
             seekSlider.setMax(mediaPlayer.getDuration().toSeconds());
             volumeSlider.setValue(mediaPlayer.getVolume() * 100.0);
         });
-        mediaPlayer.setOnPlaying(event -> playPauseButton.setText("Pause"));
-        mediaPlayer.setOnPause(event -> playPauseButton.setText("Play"));
-        mediaPlayer.setOnStopped(event -> playPauseButton.setText("Play"));
+        mediaPlayer.setOnPlaying(event -> {
+            playPauseButton.setText("Pause");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.pause());
+        });
+        mediaPlayer.setOnPause(event -> {
+            playPauseButton.setText("Play");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
+        });
+        mediaPlayer.setOnStopped(event -> {
+            playPauseButton.setText("Play");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
+        });
         mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
 
         // User interface
