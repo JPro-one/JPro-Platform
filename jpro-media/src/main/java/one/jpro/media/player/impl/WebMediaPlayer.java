@@ -120,8 +120,6 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                     java_fun(elem.ended);
                 """, ended -> {
             if (Boolean.parseBoolean(ended)) {
-                stop();
-
                 // Fire end of media event
                 Event.fireEvent(WebMediaPlayer.this,
                         new MediaPlayerEvent(WebMediaPlayer.this,

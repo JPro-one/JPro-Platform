@@ -153,9 +153,7 @@ public class MediaPlayerTest {
 
         log.debug("Click play button");
         robot.clickOn(playButton); // Play media (asynchronous operation)
-        log.debug("Waiting for media player to start playing...");
         waitForStatus(Status.PLAYING);
-        log.debug("Media player is playing");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -168,9 +166,7 @@ public class MediaPlayerTest {
 
         log.debug("Click pause button");
         robot.clickOn(pauseButton); // Pause media (asynchronous operation)
-        log.debug("Waiting for media player to pause...");
         waitForStatus(Status.PAUSED);
-        log.debug("Media player is paused");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
@@ -254,9 +250,7 @@ public class MediaPlayerTest {
 
         log.debug("Click on play button");
         robot.clickOn(playButton);
-        log.debug("Waiting for media player to play...");
         waitForStatus(Status.PLAYING);
-        log.debug("Media player is playing");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -281,9 +275,7 @@ public class MediaPlayerTest {
 
         log.debug("Click on play button");
         robot.clickOn(playButton);
-        log.debug("Waiting for media player to play...");
         waitForStatus(Status.PLAYING);
-        log.debug("Media player is playing");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -352,7 +344,7 @@ public class MediaPlayerTest {
 
         log.debug("Click on play button");
         robot.clickOn(playButton);
-        WaitForAsyncUtils.waitForFxEvents();
+        waitForStatus(Status.PLAYING);
 
         final Duration seekTime = mediaPlayer.getDuration().subtract(Duration.seconds(2));
         log.debug("Seek to {} seconds", seekTime.toSeconds());
@@ -367,6 +359,13 @@ public class MediaPlayerTest {
         log.debug("Checks passed");
 
         WaitForAsyncUtils.waitFor(3, TimeUnit.SECONDS, () -> eom);
+        waitForStatus(Status.PAUSED);
+
+        log.debug("Run additional checks...");
+        assertThat(playButton.isDisable()).isFalse();
+        assertThat(pauseButton.isDisable()).isTrue();
+        assertThat(stopButton.isDisable()).isFalse();
+        log.debug("Checks passed");
 
         final Duration seekTime2 = Duration.seconds(19);
         log.debug("Seek to {} seconds", seekTime2.toSeconds());
@@ -374,6 +373,10 @@ public class MediaPlayerTest {
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is {} seconds", seekTime2.toSeconds());
         assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime2);
+
+        robot.clickOn(playButton);
+        waitForStatus(Status.PLAYING);
+
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -424,10 +427,8 @@ public class MediaPlayerTest {
         waitForStatusReady();
 
         log.debug("Click play button");
-        robot.clickOn(playButton); // Play media (asynchronous operation)
-        log.debug("Waiting for media player to start playing...");
+        robot.clickOn(playButton);
         waitForStatus(Status.PLAYING);
-        log.debug("Media player is playing");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -475,9 +476,7 @@ public class MediaPlayerTest {
     }
 
     private void waitForStatusReady() throws TimeoutException {
-        log.debug("Waiting for media player to be ready...");
         waitForStatus(Status.READY);
-        log.debug("Media player is ready");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -490,9 +489,7 @@ public class MediaPlayerTest {
     private void clickStopButton(FxRobot robot) throws TimeoutException {
         log.debug("Click on stop button");
         robot.clickOn(stopButton);
-        log.debug("Waiting for media player to stop...");
         waitForStatus(Status.STOPPED);
-        log.debug("Media player is stopped");
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
@@ -501,9 +498,11 @@ public class MediaPlayerTest {
     }
 
     private void waitForStatus(Status status) throws TimeoutException {
-        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, mediaPlayer.statusProperty().isEqualTo(status));
+        log.debug("Waiting for media player status {}...", status);
         WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, mediaPlayer.statusProperty().isEqualTo(status));
         assertThat(mediaPlayer.getStatus()).isEqualByComparingTo(status);
+        log.debug("Media player status is {}", status);
     }
 
     private void seekViaRobot(FxRobot robot, Duration duration) {
