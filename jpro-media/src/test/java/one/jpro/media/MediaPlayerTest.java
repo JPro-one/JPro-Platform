@@ -51,6 +51,7 @@ public class MediaPlayerTest {
     private Slider seekSlider;
     private CheckBox preserveRatioCheckBox;
     private CheckBox muteCheckBox;
+    private volatile boolean eom = false;
 
     @Start
     private void start(Stage stage) {
@@ -121,9 +122,8 @@ public class MediaPlayerTest {
             stopButton.setDisable(true);
         });
         mediaPlayer.setOnEndOfMedia(event -> {
-            playButton.setDisable(false);
-            pauseButton.setDisable(true);
-            stopButton.setDisable(true);
+            eom = true;
+            System.out.println("End of media reached");
         });
         mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
 
@@ -265,6 +265,7 @@ public class MediaPlayerTest {
                         mediaPlayer.getCurrentTime().greaterThan(seekTime.add(Duration.seconds(3))),
                 mediaPlayer.currentTimeProperty()));
 
+        clickStopButton(robot);
         log.debug("MediaPlayer => Test successfully passed.");
     }
 
@@ -341,6 +342,51 @@ public class MediaPlayerTest {
 
     @Test
     @Order(5)
+    void seek_after_media_player_reached_eom(FxRobot robot) throws TimeoutException {
+        log.debug("MediaPlayer => Testing seek after media player has reached EOM...");
+        waitForStatusReady();
+
+        log.debug("Click on play button");
+        robot.clickOn(playButton);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        final Duration seekTime = mediaPlayer.getDuration().subtract(Duration.seconds(2));
+        log.debug("Seek to {} seconds", seekTime.toSeconds());
+        mediaPlayer.seek(seekTime);
+        WaitForAsyncUtils.waitForFxEvents();
+        log.debug("Check current time is {} seconds", seekTime.toSeconds());
+        assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime);
+        log.debug("Run additional checks...");
+        assertThat(playButton.isDisable()).isTrue();
+        assertThat(pauseButton.isDisable()).isFalse();
+        assertThat(stopButton.isDisable()).isFalse();
+        log.debug("Checks passed");
+
+        WaitForAsyncUtils.waitFor(3, TimeUnit.SECONDS, () -> eom);
+
+        final Duration seekTime2 = Duration.seconds(19);
+        log.debug("Seek to {} seconds", seekTime2.toSeconds());
+        mediaPlayer.seek(seekTime2);
+        WaitForAsyncUtils.waitForFxEvents();
+        log.debug("Check current time is {} seconds", seekTime2.toSeconds());
+        assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime2);
+        log.debug("Run additional checks...");
+        assertThat(playButton.isDisable()).isTrue();
+        assertThat(pauseButton.isDisable()).isFalse();
+        assertThat(stopButton.isDisable()).isFalse();
+        log.debug("Checks passed");
+
+        log.debug("Wait for media player to play for additional 3 seconds");
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(seekTime2.add(Duration.seconds(3))),
+                mediaPlayer.currentTimeProperty()));
+
+        clickStopButton(robot);
+        log.debug("MediaPlayer => Test successfully passed.");
+    }
+
+    @Test
+    @Order(6)
     void seek_to_negative_time(FxRobot robot) throws TimeoutException {
         log.debug("MediaPlayer => Testing seek to negative time...");
         waitForStatusReady();
