@@ -35,15 +35,15 @@ import static javafx.scene.media.MediaPlayer.Status;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 /**
- * Automated tests for MediaPlayer API.
+ * Automated tests for {@link MediaPlayer} API.
  *
  * @author Besmir Beqiri
  */
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MediaPlayerTest {
+public class MediaPlayerTests {
 
-    private final Logger log = LoggerFactory.getLogger(MediaPlayerTest.class);
+    private final Logger log = LoggerFactory.getLogger(MediaPlayerTests.class);
 
     private static final String MEDIA_SOURCE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
     private MediaPlayer mediaPlayer;
