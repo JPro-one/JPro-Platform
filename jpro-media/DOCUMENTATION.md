@@ -200,8 +200,6 @@ import one.jpro.media.MediaSource;
 import one.jpro.media.MediaView;
 import one.jpro.media.player.MediaPlayer;
 
-import static javafx.scene.media.MediaPlayer.Status;
-
 public class MediaPlayerApplication extends Application {
     
     public void start(Stage stage) {
