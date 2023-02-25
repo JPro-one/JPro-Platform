@@ -54,12 +54,19 @@ import one.jpro.media.player.impl.WebMediaPlayer;
 public interface MediaPlayer extends MediaEngine, EventTarget {
 
     /**
+     * A value representing an effectively infinite number of playback cycles.
+     * When {@link #cycleCountProperty cycleCount} is set to this value, the player
+     * will replay the <code>MediaSource</code> until stopped or paused.
+     */
+    int INDEFINITE = -1; // Note: this is a count, not a Duration.
+
+    /**
      * Creates a media player. If the application is running in a
      * browser via JPro server, then a web version of media player
      * is returned. If the application is not running inside the
      * browser than a desktop version of the media player is returned.
      *
-     * @param stage the application stage
+     * @param stage       the application stage
      * @param mediaSource the media source
      * @return a {@link MediaPlayer} object.
      */
@@ -75,27 +82,6 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     }
 
     /**
-     * Sets the {@link #autoPlayProperty autoPlay} property value.
-     * @param value whether to enable auto-playback
-     */
-    void setAutoPlay(boolean value);
-
-    /**
-     * Retrieves the {@link #autoPlayProperty autoPlay} property value.
-     * @return the value.
-     */
-    boolean isAutoPlay();
-
-    /**
-     * Whether playing should start as soon as possible. For a new player this
-     * will occur once the player has reached the READY state. The default
-     * value is <code>false</code>.
-     *
-     * @see javafx.scene.media.MediaPlayer.Status
-     */
-    BooleanProperty autoPlayProperty();
-
-    /**
      * Retrieves the current media source.
      *
      * @return {@link MediaSource} object
@@ -108,6 +94,29 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      * form URI locally, or via {@link WebAPI.JSFile} remotely.
      */
     ReadOnlyObjectProperty<MediaSource> mediaSourceProperty();
+
+    /**
+     * Sets the {@link #autoPlayProperty autoPlay} property value.
+     *
+     * @param value whether to enable auto-playback
+     */
+    void setAutoPlay(boolean value);
+
+    /**
+     * Retrieves the {@link #autoPlayProperty autoPlay} property value.
+     *
+     * @return the value.
+     */
+    boolean isAutoPlay();
+
+    /**
+     * Whether playing should start as soon as possible. For a new player this
+     * will occur once the player has reached the READY state. The default
+     * value is <code>false</code>.
+     *
+     * @see javafx.scene.media.MediaPlayer.Status
+     */
+    BooleanProperty autoPlayProperty();
 
     /**
      * Retrieves the muteProperty value.
@@ -193,6 +202,122 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      * @return the current playback time
      */
     ReadOnlyObjectProperty<Duration> currentTimeProperty();
+
+    /**
+     * Retrieves the start time. The default value is <code>Duration.ZERO</code>.
+     *
+     * @return the start time
+     */
+    Duration getStartTime();
+
+    /**
+     * Sets the start time. Its effect will be clamped to the range
+     * <code>[{@link Duration#ZERO},&nbsp;{@link #stopTimeProperty stopTime})</code>.
+     * Invoking this method will have no effect if media duration is {@link Duration#INDEFINITE}.
+     *
+     * @param value the start time
+     */
+    void setStartTime(Duration value);
+
+    /**
+     * The time offset where media should start playing, or restart from when
+     * repeating. When playback is stopped, the current time is reset to this
+     * value. If this value is positive, then the first time the media is
+     * played there might be a delay before playing begins unless the play
+     * position can be set to an arbitrary time within the media. This could
+     * occur for example for a video which does not contain a lookup table
+     * of the offsets of intra-frames in the video stream. In such a case the
+     * video frames would need to be skipped over until the position of the
+     * first intra-frame before the start time was reached. The default value is
+     * <code>Duration.ZERO</code>.
+     *
+     * <p>Constraints: <code>0&nbsp;&le;&nbsp;startTime&nbsp;&lt;&nbsp;{@link #stopTimeProperty stopTime}</code>
+     */
+    ObjectProperty<Duration> startTimeProperty();
+
+    /**
+     * Retrieves the stop time. The default value is <code>{@link #getDuration()}</code>.
+     * Note that <code>{@link MediaPlayer#durationProperty}</code> may have the value
+     * <code>Duration.UNKNOWN</code> if media initialization is not complete.
+     *
+     * @return the stop time
+     */
+    Duration getStopTime();
+
+    /**
+     * Sets the stop time. Its effect will be clamped to
+     * the range <code>({@link #startTimeProperty startTime},&nbsp;{@link MediaPlayer#durationProperty Media.duration}]</code>.
+     * Invoking this method will have no effect if media duration is {@link Duration#INDEFINITE}.
+     *
+     * @param value the stop time
+     */
+    void setStopTime(Duration value);
+
+    /**
+     * The time offset where media should stop playing or restart when repeating.
+     * The default value is <code>{@link #getDuration()}</code>.
+     *
+     * <p>Constraints: <code>{@link #startTimeProperty startTime}&nbsp;&lt;&nbsp;stopTime&nbsp;&le;&nbsp;{@link MediaPlayer#durationProperty MediaPlayer.duration}</code>
+     */
+    ObjectProperty<Duration> stopTimeProperty();
+
+    /**
+     * Retrieves the cycle count.
+     *
+     * @return the cycle count.
+     */
+    int getCycleCount();
+
+    /**
+     * Sets the cycle count. Its effect will be constrained to <code>[1,{@link Integer#MAX_VALUE}]</code>.
+     * Invoking this method will have no effect if media duration is {@link Duration#INDEFINITE}.
+     *
+     * @param value the cycle count
+     */
+    void setCycleCount(int value);
+
+    /**
+     * The number of times the media will be played.  By default,
+     * <code>cycleCount</code> is set to <code>1</code>
+     * meaning the media will only be played once. Setting <code>cycleCount</code>
+     * to a value greater than 1 will cause the media to play the given number
+     * of times or until stopped. If set to {@link #INDEFINITE INDEFINITE},
+     * playback will repeat until stop() or pause() is called.
+     *
+     * <p>constraints: <code>cycleCount&nbsp;&ge;&nbsp;1</code>
+     */
+    public IntegerProperty cycleCountProperty();
+
+    /**
+     * Retrieves the cycle duration in seconds.
+     *
+     * @return the cycle duration
+     */
+    Duration getCycleDuration();
+
+    /**
+     * The amount of time between the {@link #startTimeProperty startTime} and
+     * {@link #stopTimeProperty stopTime} of this player.
+     * For the total duration of the MediaSource use the
+     * {@link #durationProperty MediaPlayer.duration} property.
+     */
+    ReadOnlyObjectProperty<Duration> cycleDurationProperty();
+
+    /**
+     * Retrieves the total playback duration including all cycles (repetitions).
+     *
+     * @return the total playback duration
+     */
+    Duration getTotalDuration();
+
+    /**
+     * The total amount of play time if allowed to play until finished. If
+     * <code>cycleCount</code> is set to <code>INDEFINITE</code> then this will
+     * also be INDEFINITE. If the media resource duration is UNKNOWN, then this will
+     * likewise be UNKNOWN. Otherwise, total duration will be the product of
+     * cycleDuration and cycleCount.
+     */
+    ReadOnlyObjectProperty<Duration> totalDurationProperty();
 
     /**
      * Retrieves the {@link Status#READY} event handler.

@@ -120,6 +120,51 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         return currentTime;
     }
 
+    // cycleCount property
+    private IntegerProperty cycleCount;
+
+    @Override
+    public int getCycleCount() {
+        return cycleCount == null ? 1 : cycleCount.get();
+    }
+
+    @Override
+    public void setCycleCount(int value) {
+        cycleCountProperty().set(value);
+    }
+
+    @Override
+    public IntegerProperty cycleCountProperty() {
+        if (cycleCount == null) {
+            cycleCount = new SimpleIntegerProperty(this, "cycleCount", 1);
+        }
+        return cycleCount;
+    }
+
+    // cycleDuration property
+    private ReadOnlyObjectWrapper<Duration> cycleDuration;
+
+    @Override
+    public Duration getCycleDuration() {
+        return cycleDuration == null ? Duration.UNKNOWN : cycleDuration.get();
+    }
+
+    void setCycleDuration(Duration value) {
+        cycleDurationPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> cycleDurationProperty() {
+        return cycleDurationPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<Duration> cycleDurationPropertyImpl() {
+        if (cycleDuration == null) {
+            cycleDuration = new ReadOnlyObjectWrapper<>(this, "cycleDuration");
+        }
+        return cycleDuration;
+    }
+
     // duration property
     private ReadOnlyObjectWrapper<Duration> duration;
 
@@ -148,6 +193,30 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             };
         }
         return duration;
+    }
+
+    // total duration property
+    private ReadOnlyObjectWrapper<Duration> totalDuration;
+
+    @Override
+    public Duration getTotalDuration() {
+        return totalDuration == null ? Duration.UNKNOWN : totalDuration.get();
+    }
+
+    void setTotalDuration(Duration value) {
+        totalDurationPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> totalDurationProperty() {
+        return totalDurationPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<Duration> totalDurationPropertyImpl() {
+        if (totalDuration == null) {
+            totalDuration = new ReadOnlyObjectWrapper<>(this, "totalDuration");
+        }
+        return totalDuration;
     }
 
     // On ready event handler
@@ -192,7 +261,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     @Override
     public final ObjectProperty<EventHandler<MediaPlayerEvent>> onPlayingProperty() {
         if (onPlaying == null) {
-            onPlaying = new SimpleObjectProperty<>(this, "onPlaying"){
+            onPlaying = new SimpleObjectProperty<>(this, "onPlaying") {
 
                 @Override
                 protected void invalidated() {

@@ -1,9 +1,6 @@
 package one.jpro.media.player.impl;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.*;
 import javafx.event.Event;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -24,12 +21,13 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
 
     private final Logger log = LoggerFactory.getLogger(FXMediaPlayer.class);
 
+    private final Media media;
     private final MediaPlayer mediaPlayer;
     private volatile boolean eom = false;
 
     public FXMediaPlayer(MediaSource mediaSource) {
         setMediaSource(mediaSource);
-        final Media media = new Media(mediaSource.source());
+        media = new Media(mediaSource.source());
         mediaPlayer = new MediaPlayer(media);
 
         mediaPlayer.setOnReady(() -> {
@@ -136,6 +134,81 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
     }
 
     @Override
+    public Duration getStartTime() {
+        return mediaPlayer.getStartTime();
+    }
+
+    @Override
+    public void setStartTime(Duration startTime) {
+        mediaPlayer.setStartTime(startTime);
+    }
+
+    @Override
+    public ObjectProperty<Duration> startTimeProperty() {
+        return mediaPlayer.startTimeProperty();
+    }
+
+    @Override
+    public Duration getStopTime() {
+        return mediaPlayer.getStopTime();
+    }
+
+    @Override
+    public void setStopTime(Duration stopTime) {
+        mediaPlayer.setStopTime(stopTime);
+    }
+
+    @Override
+    public ObjectProperty<Duration> stopTimeProperty() {
+        return mediaPlayer.stopTimeProperty();
+    }
+
+    @Override
+    public int getCycleCount() {
+        return mediaPlayer.getCycleCount();
+    }
+
+    @Override
+    public void setCycleCount(int cycleCount) {
+        mediaPlayer.setCycleCount(cycleCount);
+    }
+
+    @Override
+    public IntegerProperty cycleCountProperty() {
+        return mediaPlayer.cycleCountProperty();
+    }
+
+    @Override
+    public Duration getCycleDuration() {
+        return mediaPlayer.getCycleDuration();
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> cycleDurationProperty() {
+        return mediaPlayer.cycleDurationProperty();
+    }
+
+    @Override
+    public Duration getDuration() {
+        return media.getDuration();
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> durationProperty() {
+        return media.durationProperty();
+    }
+
+    @Override
+    public Duration getTotalDuration() {
+        return mediaPlayer.getTotalDuration();
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> totalDurationProperty() {
+        return mediaPlayer.totalDurationProperty();
+    }
+
+    @Override
     public Duration getCurrentTime() {
         return mediaPlayer.getCurrentTime();
     }
@@ -143,16 +216,6 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
     @Override
     public ReadOnlyObjectProperty<Duration> currentTimeProperty() {
         return mediaPlayer.currentTimeProperty();
-    }
-
-    @Override
-    public Duration getDuration() {
-        return mediaPlayer.getTotalDuration();
-    }
-
-    @Override
-    public ReadOnlyObjectProperty<Duration> durationProperty() {
-        return mediaPlayer.totalDurationProperty();
     }
 
     @Override
