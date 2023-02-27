@@ -286,7 +286,7 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      *
      * <p>constraints: <code>cycleCount&nbsp;&ge;&nbsp;1</code>
      */
-    public IntegerProperty cycleCountProperty();
+    IntegerProperty cycleCountProperty();
 
     /**
      * Retrieves the cycle duration in seconds.
@@ -432,6 +432,27 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      * Event handler invoked when the end of media is reached naturally.
      */
     ObjectProperty<EventHandler<MediaPlayerEvent>> onEndOfMediaProperty();
+
+    /**
+     * Retrieves the repeat event handler.
+     *
+     * @return the event handler or <code>null</code>.
+     */
+    EventHandler<MediaPlayerEvent> getOnRepeat();
+
+    /**
+     * Sets the repeat event handler.
+     *
+     * @param value the event handler or <code>null</code>.
+     */
+    void setOnRepeat(EventHandler<MediaPlayerEvent> value);
+
+    /**
+     * Event handler invoked when the player <code>currentTime</code> reaches
+     * <code>stopTime</code> and <i>will be</i> repeating. This callback is made
+     * prior to seeking back to <code>startTime</code>.
+     */
+    ObjectProperty<EventHandler<MediaPlayerEvent>> onRepeatProperty();
 
     /**
      * Retrieves the event handler for errors.

@@ -120,7 +120,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         return currentTime;
     }
 
-    // cycleCount property
+    // cycle count property
     private IntegerProperty cycleCount;
 
     @Override
@@ -139,6 +139,28 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             cycleCount = new SimpleIntegerProperty(this, "cycleCount", 1);
         }
         return cycleCount;
+    }
+
+    // current count property
+    private ReadOnlyIntegerWrapper currentCount;
+
+    public final int getCurrentCount() {
+        return currentCount == null ? 0 : currentCount.get();
+    }
+
+    void setCurrentCount(int value) {
+        currentCountPropertyImpl().set(value);
+    }
+
+    public ReadOnlyIntegerProperty currentCountProperty() {
+        return currentCountPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyIntegerWrapper currentCountPropertyImpl() {
+        if (currentCount == null) {
+            currentCount = new ReadOnlyIntegerWrapper(this, "currentCount");
+        }
+        return currentCount;
     }
 
     // cycleDuration property
@@ -378,6 +400,33 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             };
         }
         return onEndOfMedia;
+    }
+
+    // On repeat event handler
+    private ObjectProperty<EventHandler<MediaPlayerEvent>> onRepeat;
+
+    @Override
+    public final EventHandler<MediaPlayerEvent> getOnRepeat() {
+        return onRepeat == null ? null : onRepeat.get();
+    }
+
+    @Override
+    public final void setOnRepeat(EventHandler<MediaPlayerEvent> value) {
+        onRepeatProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<EventHandler<MediaPlayerEvent>> onRepeatProperty() {
+        if (onRepeat == null) {
+            onRepeat = new SimpleObjectProperty<>(this, "onRepeat") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaPlayerEvent.MEDIA_PLAYER_REPEAT, get());
+                }
+            };
+        }
+        return onRepeat;
     }
 
     // On error event handler

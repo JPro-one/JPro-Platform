@@ -92,6 +92,13 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
                             MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
         });
 
+        mediaPlayer.setOnRepeat(() -> {
+            // Fire repeat event
+            Event.fireEvent(FXMediaPlayer.this,
+                    new MediaPlayerEvent(FXMediaPlayer.this,
+                            MediaPlayerEvent.MEDIA_PLAYER_REPEAT));
+        });
+
         mediaPlayer.setOnError(() -> {
             // set error status
             setStatus(Status.HALTED);
