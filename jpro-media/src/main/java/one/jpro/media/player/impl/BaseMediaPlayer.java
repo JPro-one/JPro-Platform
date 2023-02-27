@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 abstract class BaseMediaPlayer implements MediaPlayer {
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaPlayer.class);
+    boolean isEOS = false;
 
     // source property
     ReadOnlyObjectWrapper<MediaSource> mediaSource;
@@ -95,7 +96,27 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
     @Override
     public Duration getCurrentTime() {
-        return (currentTime == null) ? Duration.UNKNOWN : currentTime.get();
+        if (getStatus() == Status.DISPOSED) {
+            return Duration.ZERO;
+        }
+
+        if (getStatus() == Status.STOPPED) {
+            return Duration.millis(getStartTime().toMillis());
+        }
+
+        if (isEOS) {
+            final Duration duration = getDuration();
+            final Duration stopTime = getStopTime();
+            if (stopTime != Duration.UNKNOWN && duration != Duration.UNKNOWN) {
+                if (stopTime.greaterThan(duration)) {
+                    return Duration.millis(duration.toMillis());
+                } else {
+                    return Duration.millis(stopTime.toMillis());
+                }
+            }
+        }
+
+        return (currentTime == null) ? Duration.ZERO : currentTime.get();
     }
 
     void setCurrentTime(Duration value) {
@@ -109,7 +130,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
     private ReadOnlyObjectWrapper<Duration> currentTimePropertyImpl() {
         if (currentTime == null) {
-            currentTime = new ReadOnlyObjectWrapper<>(this, "currentTime", Duration.UNKNOWN) {
+            currentTime = new ReadOnlyObjectWrapper<>(this, "currentTime", Duration.ZERO) {
 
                 @Override
                 protected void invalidated() {

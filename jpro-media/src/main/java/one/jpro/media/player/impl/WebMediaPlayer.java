@@ -50,7 +50,36 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         handleWebEvent("timeupdate", """
                 console.log("$mediaPlayerId => current time: " + elem.currentTime);
                 java_fun(elem.currentTime);
-                """, currentTime -> setCurrentTime(Duration.seconds(Double.parseDouble(currentTime))));
+                """, currentTime -> {
+            final Duration theCurrentTime = Duration.seconds(Double.parseDouble(currentTime));
+            setCurrentTime(theCurrentTime);
+
+            final Duration stopTime = getStopTime();
+            if (stopTime != Duration.UNKNOWN && getCurrentTime().greaterThan(getStopTime())) {
+                setCurrentCount(getCurrentCount() + 1);
+
+                if ((getCurrentCount() < getCycleCount()) || (getCycleCount() == INDEFINITE)) {
+                    // Fire end of media event
+                    Event.fireEvent(WebMediaPlayer.this,
+                            new MediaPlayerEvent(WebMediaPlayer.this,
+                                    MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
+
+                    // Loop playback
+                    seek(getStartTime());
+
+                    // Fire repeat media event
+                    Event.fireEvent(WebMediaPlayer.this,
+                            new MediaPlayerEvent(WebMediaPlayer.this,
+                                    MediaPlayerEvent.MEDIA_PLAYER_REPEAT));
+                } else {
+                    // Set end of stream flag
+                    isEOS = true;
+
+                    // Pause playback to mimic the actual ended event
+                    pause();
+                }
+            }
+        });
 
         // handle duration change
         handleWebEvent("durationchange", """
@@ -97,6 +126,13 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 Event.fireEvent(WebMediaPlayer.this,
                         new MediaPlayerEvent(WebMediaPlayer.this,
                                 MediaPlayerEvent.MEDIA_PLAYER_PAUSE));
+
+                if (isEOS) {
+                    // Fire end of media event
+                    Event.fireEvent(WebMediaPlayer.this,
+                            new MediaPlayerEvent(WebMediaPlayer.this,
+                                    MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
+                }
             }
         });
 
@@ -122,6 +158,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                     java_fun(elem.ended);
                 """, ended -> {
             if (Boolean.parseBoolean(ended)) {
+                // Set end of stream flag
+                isEOS = true;
+
                 // Fire end of media event
                 Event.fireEvent(WebMediaPlayer.this,
                         new MediaPlayerEvent(WebMediaPlayer.this,
@@ -279,11 +318,11 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                     if (get().getCode() >= WebReadyState.HAVE_METADATA.getCode()) {
                         playerReady = true;
 
-                        // Handle requested changes once player is ready
-                        handleRequestedChanges();
-
                         // Set state to ready
                         setStatus(Status.READY);
+
+                        // Handle requested changes once player is ready
+                        handleRequestedChanges();
 
                         // Fire ready event
                         Event.fireEvent(WebMediaPlayer.this,
@@ -364,6 +403,10 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
     @Override
     public void play() {
         if (playerReady && getStatus() != Status.DISPOSED) {
+            if (isEOS) {
+                seek(getStartTime());
+            }
+
             webAPI.executeScript("""
                     %s.play();
                     """.formatted(playerVideoElement.getName()));
@@ -383,9 +426,11 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
     public void stop() {
         if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                    $playerVideoElem.pause();
-                    $playerVideoElem.currentTime = 0;
-                    """.replace("$playerVideoElem", playerVideoElement.getName()));
+                    %s.pause();
+                    """.formatted(playerVideoElement.getName()));
+
+            seek(getStartTime());
+            setCurrentCount(0);
         }
 
         setStatus(Status.STOPPED);
@@ -393,6 +438,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
 
     @Override
     public void seek(Duration seekTime) {
+        // Check if parameter is null
         if (seekTime == null) {
             setError(new MediaPlayerException("Seek time is null."));
         } else if (playerReady) {
@@ -411,16 +457,39 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 seekTime = Duration.ZERO;
             }
 
-            // Check if seek time is greater than duration
-            Duration duration = getDuration();
-            if (duration != null && (!duration.isUnknown() || !duration.isIndefinite()) && seekTime.greaterThan(duration)) {
-                setError(new MediaPlayerException("Seek time is greater than duration."));
-                return;
+            // Determine the seek position in seconds.
+            double seekSeconds;
+            if (seekTime.isIndefinite()) {
+                // Determine the effective duration.
+                Duration duration = getDuration();
+                if (duration == null || duration.isUnknown() || duration.isIndefinite()) {
+                    duration = Duration.millis(Double.MAX_VALUE);
+                }
+
+                // Convert duration to seconds.
+                seekSeconds = duration.toMillis() / 1000.0;
+            } else {
+                // Convert the parameter to seconds.
+                seekSeconds = seekTime.toMillis() / 1000.0;
+
+                // Clamp the seconds if needed.
+                double[] startStop = calculateStartStopTimes(getStartTime(), getStopTime());
+                if (seekSeconds < startStop[0]) {
+                    seekSeconds = startStop[0];
+                } else if (seekSeconds > startStop[1]) {
+                    seekSeconds = startStop[1];
+                }
+            }
+
+            if ((getStatus() == Status.PLAYING || getStatus() == Status.PAUSED)
+                    && getStartTime().toSeconds() <= seekSeconds
+                    && seekSeconds <= getStopTime().toSeconds()) {
+                isEOS = false;
             }
 
             webAPI.executeScript("""
-                    %s.currentTime=%s;
-                    """.formatted(playerVideoElement.getName(), seekTime.toSeconds()));
+                    %s.currentTime = %s;
+                    """.formatted(playerVideoElement.getName(), seekSeconds));
         }
     }
 
@@ -480,7 +549,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             final Duration startTime = Duration.seconds(startStopTimes[0]);
             if (getStatus() == Status.READY || getStatus() == Status.PAUSED) {
                 if (startTime.greaterThan(getCurrentTime())) {
-                    setCurrentTime(startValue);
+                    setCurrentTime(startTime);
+                    seek(startTime);
                 }
             }
         }
@@ -489,6 +559,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             if (getStatus() == Status.READY || getStatus() == Status.PAUSED) {
                 if (stopTime.lessThan(getCurrentTime())) {
                     setCurrentTime(stopTime);
+                    seek(stopTime);
                 }
             }
         }
@@ -529,7 +600,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         }
 
         // Derive the duration in seconds.
-        Duration mediaDuration = getDuration();
+        final Duration mediaDuration = getDuration();
         double duration = mediaDuration == Duration.UNKNOWN ?
                 Double.MAX_VALUE : mediaDuration.toMillis() / 1000.0;
 
