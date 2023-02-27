@@ -257,7 +257,7 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
 
     /**
      * Retrieves the stop time. The default value is <code>{@link #getDuration()}</code>.
-     * Note that <code>{@link MediaPlayer#durationProperty}</code> may have the value
+     * Note that <code>{@link MediaPlayer#durationProperty duration}</code> may have the value
      * <code>Duration.UNKNOWN</code> if media initialization is not complete.
      *
      * @return the stop time
@@ -277,7 +277,7 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      * The time offset where media should stop playing or restart when repeating.
      * The default value is <code>{@link #getDuration()}</code>.
      *
-     * <p>Constraints: <code>{@link #startTimeProperty startTime}&nbsp;&lt;&nbsp;stopTime&nbsp;&le;&nbsp;{@link MediaPlayer#durationProperty MediaPlayer.duration}</code>
+     * <p>Constraints: <code>{@link #startTimeProperty() startTime}&nbsp;&lt;&nbsp;stopTime&nbsp;&le;&nbsp;{@link MediaPlayer#durationProperty() MediaPlayer.duration}</code>
      */
     ObjectProperty<Duration> stopTimeProperty();
 
@@ -524,7 +524,7 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     /**
      * Starts playing the media. If previously paused, then playback resumes
      * where it was paused. If playback was stopped, playback starts
-     * from the beginning. When playing actually starts the
+     * from the {@link #startTimeProperty startTime}. When playing actually starts the
      * {@link #statusProperty status} will be set to {@link Status#PLAYING}.
      */
     void play();
@@ -536,19 +536,36 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     void pause();
 
     /**
-     * Stops playing the media. This operation resets playback to zero.
+     * Stops playing the media. This operation resets playback to
+     * {@link #startTimeProperty startTime} and {@link #currentCountProperty currentCount} to zero.
      * Once the player is actually stopped, the {@link #statusProperty status}
      * will be set to {@link Status#STOPPED}. The only transitions out of <code>STOPPED</code> status
      * are to {@link Status#PAUSED} and {@link Status#PLAYING} which occur after
      * invoking {@link #pause()} or {@link #play()}, respectively.
      * While stopped, the player will not respond to playback position changes
-     * requested by {@link #seek(Duration)}.
+     * requested by {@link #seek(Duration)}, although this is not the case for the
+     * player on the web when running via JPro.
      */
     void stop();
 
     /**
      * Seeks the player to a new playback time. Invoking this method will have no effect
      * while the player status is {@link Status#STOPPED} or media duration is {@link Duration#INDEFINITE}.
+     *
+     * <p>The behavior of <code>seek()</code> is constrained as follows where
+     * <i>start time</i> and <i>stop time</i> indicate the effective lower and
+     * upper bounds, respectively, of media playback:
+     * </p>
+     * <table style="border: 1px solid;">
+     * <caption>MediaPlayer Seek Table</caption>
+     * <tr><th scope="col">seekTime</th><th scope="col">seek position</th></tr>
+     * <tr><th scope="row"><code>null</code></th><td>no change</td></tr>
+     * <tr><th scope="row">{@link Duration#UNKNOWN}</th><td>no change</td></tr>
+     * <tr><th scope="row">{@link Duration#INDEFINITE}</th><td>stop time</td></tr>
+     * <tr><th scope="row">seekTime&nbsp;&lt;&nbsp;start time</th><td>start time</td></tr>
+     * <tr><th scope="row">seekTime&nbsp;&gt;&nbsp;stop time</th><td>stop time</td></tr>
+     * <tr><th scope="row">start time&nbsp;&le;&nbsp;seekTime&nbsp;&le;&nbsp;stop time</th><td>seekTime</td></tr>
+     * </table>
      *
      * @param seekTime the requested playback time
      */

@@ -645,7 +645,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         } else if (getCycleDuration().isUnknown()) {
             setTotalDuration(Duration.UNKNOWN);
         } else {
-            setTotalDuration(getCycleDuration().multiply((double) getCycleCount()));
+            setTotalDuration(getCycleDuration().multiply(getCycleCount()));
         }
     }
 
