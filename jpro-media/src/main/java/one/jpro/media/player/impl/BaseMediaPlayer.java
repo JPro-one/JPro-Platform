@@ -144,6 +144,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     // current count property
     private ReadOnlyIntegerWrapper currentCount;
 
+    @Override
     public final int getCurrentCount() {
         return currentCount == null ? 0 : currentCount.get();
     }
@@ -152,6 +153,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
         currentCountPropertyImpl().set(value);
     }
 
+    @Override
     public ReadOnlyIntegerProperty currentCountProperty() {
         return currentCountPropertyImpl().getReadOnlyProperty();
     }

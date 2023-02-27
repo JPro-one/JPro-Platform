@@ -33,6 +33,26 @@ import one.jpro.media.player.impl.WebMediaPlayer;
  * {@link #currentTimeProperty currentTime} property to determine the current
  * time position of the media.
  *
+ * <p>For finite duration media, playback may be positioned at any point in time
+ * between <code>0.0</code> and the duration of the media. <code>MediaPlayer</code>
+ * refines this definition by adding the {@link #startTimeProperty startTime} and
+ * {@link #stopTimeProperty stopTime}
+ * properties which in effect define a virtual media source with time position
+ * constrained to <code>[startTime,stopTime]</code>. Media playback
+ * commences at <code>startTime</code> and continues to <code>stopTime</code>.
+ * The interval defined by these two endpoints is termed a <i>cycle</i> with
+ * duration being the difference of the stop and start times. This cycle
+ * may be set to repeat a specific or indefinite number of times. The total
+ * duration of media playback is then the product of the cycle duration and the
+ * number of times the cycle is played. If the stop time of the cycle is reached
+ * and the cycle is to be played again, the event handler registered with the
+ * {@link #onRepeatProperty onRepeat} property is invoked. If the stop time is
+ * reached, then the event handler registered with the {@link #onEndOfMediaProperty onEndOfMedia}
+ * property is invoked regardless of whether the cycle is to be repeated or not.
+ * A zero-relative index of which cycle is presently being played is maintained
+ * by {@link #currentCountProperty currentCount}.
+ * </p>
+ *
  * <p>All operations of a <code>MediaPlayer</code> are inherently asynchronous.
  * When the given <code>MediaSource</code> is loaded, use the {@link #setOnReady(EventHandler)}
  * to get notified when the <code>MediaPlayer</code> is ready to play. Other
@@ -287,6 +307,21 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
      * <p>constraints: <code>cycleCount&nbsp;&ge;&nbsp;1</code>
      */
     IntegerProperty cycleCountProperty();
+
+    /**
+     * Retrieves the index of the current cycle.
+     *
+     * @return the current cycle index
+     */
+    int getCurrentCount();
+
+    /**
+     * The number of completed playback cycles. On the first pass, the value should be 0.
+     * On the second pass, the value should be 1 and so on. It is incremented at the end
+     * of each cycle just prior to seeking back to {@link #startTimeProperty startTime},
+     * i.e., when {@link #stopTimeProperty stopTime} or the end of media has been reached.
+     */
+    ReadOnlyIntegerProperty currentCountProperty();
 
     /**
      * Retrieves the cycle duration in seconds.
