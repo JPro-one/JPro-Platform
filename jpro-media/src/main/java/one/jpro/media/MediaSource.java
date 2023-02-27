@@ -1,12 +1,14 @@
 package one.jpro.media;
 
 import com.jpro.webapi.WebAPI;
+import javafx.beans.NamedArg;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import one.jpro.media.recorder.MediaRecorder;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,8 +34,20 @@ import java.util.Optional;
  */
 public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) {
 
+    /**
+     * Compact constructor.
+     *
+     * @throws NullPointerException if the source is <code>null</code>.
+     * @throws IllegalArgumentException if the source is not a valid URI.
+     */
     public MediaSource {
         Objects.requireNonNull(source, "Source can not be null");
+
+        try {
+            new URI(source);
+        } catch(URISyntaxException use) {
+            throw new IllegalArgumentException(use);
+        }
     }
 
     /**
@@ -41,7 +55,7 @@ public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) 
      *
      * @param source a URI string
      */
-    public MediaSource(String source) {
+    public MediaSource(@NamedArg("source") String source) {
         this(source, true, null);
     }
 
@@ -65,9 +79,8 @@ public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) 
 
     /**
      * Returns the local file representing this media source.
-     * To be used only when running on a desktop/device.
      *
-     * @return the file object or <code>null</code> if this media source is not local.
+     * @return an optional file object.
      */
     public Optional<File> file() {
         if (isLocal) {
