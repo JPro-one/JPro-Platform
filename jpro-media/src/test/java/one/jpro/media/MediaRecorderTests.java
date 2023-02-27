@@ -87,7 +87,7 @@ public class MediaRecorderTests {
             pauseButton.setDisable(false);
             stopButton.setDisable(false);
         });
-        mediaRecorder.setOnPause(event -> {
+        mediaRecorder.setOnPaused(event -> {
             startButton.setDisable(false);
             pauseButton.setDisable(true);
         });

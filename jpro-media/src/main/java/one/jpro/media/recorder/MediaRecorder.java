@@ -34,7 +34,7 @@ import java.util.Optional;
  * <p>All operations of a <code>MediaRecorder</code> are inherently asynchronous.
  * Use the {@link #setOnReady(EventHandler)} to get notified when the
  * <code>MediaRecorder</code> is ready to record. Other event handlers like
- * {@link #setOnStart(EventHandler)}, {@link #setOnPause(EventHandler)},
+ * {@link #setOnStart(EventHandler)}, {@link #setOnPaused(EventHandler)},
  * {@link #setOnResume(EventHandler)}, {@link #setOnStopped(EventHandler)} and
  * {@link #setOnDataAvailable(EventHandler)} can be used to get notified of the
  * corresponding events.
@@ -215,7 +215,7 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
      *
      * @return the event handler or <code>null</code>.
      */
-    EventHandler<MediaRecorderEvent> getOnPause();
+    EventHandler<MediaRecorderEvent> getOnPaused();
 
     /**
      * Sets the event handler when the media recorder has paused
@@ -223,13 +223,13 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
      *
      * @param value the event handler or <code>null</code>.
      */
-    void setOnPause(EventHandler<MediaRecorderEvent> value);
+    void setOnPaused(EventHandler<MediaRecorderEvent> value);
 
     /**
      * Event handler invoked when the recorder has paused,
      * and status is set to {@link MediaRecorder.Status#PAUSED}.
      */
-    ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty();
+    ObjectProperty<EventHandler<MediaRecorderEvent>> onPausedProperty();
 
     /**
      * Retrieves the event handler when recording has resumed
@@ -319,7 +319,7 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
     void enable();
 
     /**
-     * Begins recording media or resumes recording of media after having been paused..
+     * Begins recording media or resumes recording of media after having been paused.
      */
     void start();
 

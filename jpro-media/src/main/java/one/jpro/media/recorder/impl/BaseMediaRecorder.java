@@ -222,22 +222,22 @@ abstract class BaseMediaRecorder implements MediaRecorder {
     }
 
     // On pause event handler
-    private ObjectProperty<EventHandler<MediaRecorderEvent>> onPause;
+    private ObjectProperty<EventHandler<MediaRecorderEvent>> onPaused;
 
     @Override
-    public final EventHandler<MediaRecorderEvent> getOnPause() {
-        return (onPause == null) ? null : onPause.get();
+    public final EventHandler<MediaRecorderEvent> getOnPaused() {
+        return (onPaused == null) ? null : onPaused.get();
     }
 
     @Override
-    public final void setOnPause(EventHandler<MediaRecorderEvent> value) {
-        onPauseProperty().set(value);
+    public final void setOnPaused(EventHandler<MediaRecorderEvent> value) {
+        onPausedProperty().set(value);
     }
 
     @Override
-    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onPauseProperty() {
-        if (onPause == null) {
-            onPause = new SimpleObjectProperty<>(this, "onPause") {
+    public final ObjectProperty<EventHandler<MediaRecorderEvent>> onPausedProperty() {
+        if (onPaused == null) {
+            onPaused = new SimpleObjectProperty<>(this, "onPaused") {
 
                 @Override
                 protected void invalidated() {
@@ -245,7 +245,7 @@ abstract class BaseMediaRecorder implements MediaRecorder {
                 }
             };
         }
-        return onPause;
+        return onPaused;
     }
 
     // On resume event handler

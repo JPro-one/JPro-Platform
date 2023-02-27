@@ -80,7 +80,7 @@ public class MediaRecorderSample extends Application {
             stopButton.setDisable(false);
             saveButton.setDisable(true);
         });
-        mediaRecorder.setOnPause(event -> {
+        mediaRecorder.setOnPaused(event -> {
             startButton.setDisable(false);
             pauseButton.setDisable(true);
         });

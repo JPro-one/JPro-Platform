@@ -141,7 +141,7 @@ public class MediaRecorderAndPlayerSample extends Application {
             seekSlider.setDisable(true);
             seekSlider.setValue(0);
         });
-        mediaRecorder.setOnPause(event -> {
+        mediaRecorder.setOnPaused(event -> {
             recordButton.setDisable(false);
             pauseButton.setDisable(true);
         });
