@@ -49,6 +49,13 @@ public class MediaPlayerEvent extends Event {
             new EventType<>(ANY, "MEDIA_PLAYER_STOP");
 
     /**
+     * Fired when the player <code>currentTime</code> reaches
+     * <code>stopTime</code> and <i>will be</i> repeating.
+     */
+    public static final EventType<MediaPlayerEvent> MEDIA_PLAYER_REPEAT =
+            new EventType<>(ANY, "MEDIA_PLAYER_REPEAT");
+
+    /**
      * Fired when media playback has ended.
      */
     public static final EventType<MediaPlayerEvent> MEDIA_PLAYER_END_OF_MEDIA =

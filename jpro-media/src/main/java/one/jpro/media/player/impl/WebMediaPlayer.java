@@ -31,6 +31,8 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
     private final JSVariable playerVideoElement;
 
     private boolean playerReady = false;
+    private boolean startTimeChangeRequested = false;
+    private boolean stopTimeChangeRequested = false;
 
     public WebMediaPlayer(WebAPI webAPI, MediaSource mediaSource) {
         this.webAPI = Objects.requireNonNull(webAPI, "WebAPI cannot be null.");
@@ -48,7 +50,36 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         handleWebEvent("timeupdate", """
                 console.log("$mediaPlayerId => current time: " + elem.currentTime);
                 java_fun(elem.currentTime);
-                """, currentTime -> setCurrentTime(Duration.seconds(Double.parseDouble(currentTime))));
+                """, currentTime -> {
+            final Duration theCurrentTime = Duration.seconds(Double.parseDouble(currentTime));
+            setCurrentTime(theCurrentTime);
+
+            final Duration stopTime = getStopTime();
+            if (stopTime != Duration.UNKNOWN && getCurrentTime().greaterThan(getStopTime())) {
+                setCurrentCount(getCurrentCount() + 1);
+
+                if ((getCurrentCount() < getCycleCount()) || (getCycleCount() == INDEFINITE)) {
+                    // Fire end of media event
+                    Event.fireEvent(WebMediaPlayer.this,
+                            new MediaPlayerEvent(WebMediaPlayer.this,
+                                    MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
+
+                    // Loop playback
+                    seek(getStartTime());
+
+                    // Fire repeat media event
+                    Event.fireEvent(WebMediaPlayer.this,
+                            new MediaPlayerEvent(WebMediaPlayer.this,
+                                    MediaPlayerEvent.MEDIA_PLAYER_REPEAT));
+                } else {
+                    // Set end of stream flag
+                    isEOS = true;
+
+                    // Pause playback to mimic the actual ended event
+                    pause();
+                }
+            }
+        });
 
         // handle duration change
         handleWebEvent("durationchange", """
@@ -95,6 +126,13 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 Event.fireEvent(WebMediaPlayer.this,
                         new MediaPlayerEvent(WebMediaPlayer.this,
                                 MediaPlayerEvent.MEDIA_PLAYER_PAUSE));
+
+                if (isEOS) {
+                    // Fire end of media event
+                    Event.fireEvent(WebMediaPlayer.this,
+                            new MediaPlayerEvent(WebMediaPlayer.this,
+                                    MediaPlayerEvent.MEDIA_PLAYER_END_OF_MEDIA));
+                }
             }
         });
 
@@ -120,6 +158,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                     java_fun(elem.ended);
                 """, ended -> {
             if (Boolean.parseBoolean(ended)) {
+                // Set end of stream flag
+                isEOS = true;
+
                 // Fire end of media event
                 Event.fireEvent(WebMediaPlayer.this,
                         new MediaPlayerEvent(WebMediaPlayer.this,
@@ -168,6 +209,73 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
         return mediaSource;
     }
 
+    // startTime property
+    private ObjectProperty<Duration> startTime;
+
+    @Override
+    public Duration getStartTime() {
+        return (startTime == null) ? Duration.ZERO : startTime.get();
+    }
+
+    @Override
+    public void setStartTime(Duration value) {
+        startTimeProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<Duration> startTimeProperty() {
+        if (startTime == null) {
+            startTime = new SimpleObjectProperty<>(this, "startTime", Duration.ZERO) {
+                @Override
+                protected void invalidated() {
+                    if (getStatus() != Status.DISPOSED) {
+                        if (playerReady) {
+                            setStartStopTimes(getStartTime(), true, getStopTime(), false);
+                        } else {
+                            startTimeChangeRequested = true;
+                        }
+                        calculateCycleDuration();
+                    }
+                }
+            };
+        }
+        return startTime;
+    }
+
+    // stopTime property
+    private ObjectProperty<Duration> stopTime;
+
+    @Override
+    public Duration getStopTime() {
+        return (stopTime == null) ? getDuration() : stopTime.get();
+    }
+
+    @Override
+    public void setStopTime(Duration value) {
+        stopTimeProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<Duration> stopTimeProperty() {
+        if (stopTime == null) {
+            stopTime = new SimpleObjectProperty<>(this, "stopTime", getDuration()) {
+
+                @Override
+                protected void invalidated() {
+                    if (getStatus() != Status.DISPOSED) {
+                        if (playerReady) {
+                            setStartStopTimes(getStartTime(), false, stopTime.get(), true);
+                        } else {
+                            stopTimeChangeRequested = true;
+                        }
+                        calculateCycleDuration();
+                    }
+                }
+            };
+        }
+        return stopTime;
+    }
+
     @Override
     public BooleanProperty autoPlayProperty() {
         if (autoPlay == null) {
@@ -212,6 +320,9 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
 
                         // Set state to ready
                         setStatus(Status.READY);
+
+                        // Handle requested changes once player is ready
+                        handleRequestedChanges();
 
                         // Fire ready event
                         Event.fireEvent(WebMediaPlayer.this,
@@ -292,6 +403,10 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
     @Override
     public void play() {
         if (playerReady && getStatus() != Status.DISPOSED) {
+            if (isEOS) {
+                seek(getStartTime());
+            }
+
             webAPI.executeScript("""
                     %s.play();
                     """.formatted(playerVideoElement.getName()));
@@ -311,9 +426,11 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
     public void stop() {
         if (playerReady && getStatus() != Status.DISPOSED) {
             webAPI.executeScript("""
-                    $playerVideoElem.pause();
-                    $playerVideoElem.currentTime = 0;
-                    """.replace("$playerVideoElem", playerVideoElement.getName()));
+                    %s.pause();
+                    """.formatted(playerVideoElement.getName()));
+
+            seek(getStartTime());
+            setCurrentCount(0);
         }
 
         setStatus(Status.STOPPED);
@@ -321,6 +438,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
 
     @Override
     public void seek(Duration seekTime) {
+        // Check if parameter is null
         if (seekTime == null) {
             setError(new MediaPlayerException("Seek time is null."));
         } else if (playerReady) {
@@ -339,16 +457,39 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 seekTime = Duration.ZERO;
             }
 
-            // Check if seek time is greater than duration
-            final Duration duration = getDuration();
-            if (duration != null && (!duration.isUnknown() || !duration.isIndefinite()) && seekTime.greaterThan(duration)) {
-                setError(new MediaPlayerException("Seek time is greater than duration."));
-                return;
+            // Determine the seek position in seconds.
+            double seekSeconds;
+            if (seekTime.isIndefinite()) {
+                // Determine the effective duration.
+                Duration duration = getDuration();
+                if (duration == null || duration.isUnknown() || duration.isIndefinite()) {
+                    duration = Duration.millis(Double.MAX_VALUE);
+                }
+
+                // Convert duration to seconds.
+                seekSeconds = duration.toMillis() / 1000.0;
+            } else {
+                // Convert the parameter to seconds.
+                seekSeconds = seekTime.toMillis() / 1000.0;
+
+                // Clamp the seconds if needed.
+                double[] startStop = calculateStartStopTimes(getStartTime(), getStopTime());
+                if (seekSeconds < startStop[0]) {
+                    seekSeconds = startStop[0];
+                } else if (seekSeconds > startStop[1]) {
+                    seekSeconds = startStop[1];
+                }
+            }
+
+            if ((getStatus() == Status.PLAYING || getStatus() == Status.PAUSED)
+                    && getStartTime().toSeconds() <= seekSeconds
+                    && seekSeconds <= getStopTime().toSeconds()) {
+                isEOS = false;
             }
 
             webAPI.executeScript("""
-                    %s.currentTime=%s;
-                    """.formatted(playerVideoElement.getName(), seekTime.toSeconds()));
+                    %s.currentTime = %s;
+                    """.formatted(playerVideoElement.getName(), seekSeconds));
         }
     }
 
@@ -386,5 +527,132 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 $playerVideoElem.setAttribute("playsinline", 'playsinline');
                 """.replace("$playerVideoElem", videoElement));
         return new JSVariable(webAPI, videoElement);
+    }
+
+    /**
+     * Set the effective start and stop times on the underlying player,
+     * clamping as needed.
+     *
+     * @param startValue      the new start time
+     * @param isStartValueSet if the start time should be set
+     * @param stopValue       the new stop time
+     * @param isStopValueSet  if the stop time should be set
+     */
+    private void setStartStopTimes(Duration startValue, boolean isStartValueSet, Duration stopValue, boolean isStopValueSet) {
+        if (getDuration().isIndefinite()) {
+            return;
+        }
+
+        // Clamp the start and stop times to values in seconds.
+        double[] startStopTimes = calculateStartStopTimes(startValue, stopValue);
+        if (isStartValueSet) {
+            final Duration startTime = Duration.seconds(startStopTimes[0]);
+            if (getStatus() == Status.READY || getStatus() == Status.PAUSED) {
+                if (startTime.greaterThan(getCurrentTime())) {
+                    setCurrentTime(startTime);
+                    seek(startTime);
+                }
+            }
+        }
+        if (isStopValueSet) {
+            final Duration stopTime = Duration.seconds(startStopTimes[1]);
+            if (getStatus() == Status.READY || getStatus() == Status.PAUSED) {
+                if (stopTime.lessThan(getCurrentTime())) {
+                    setCurrentTime(stopTime);
+                    seek(stopTime);
+                }
+            }
+        }
+    }
+
+    /**
+     * Clamp the start and stop times. The parameters are clamped
+     * to the range <code>[0.0,&nbsp;duration]</code>. If the duration
+     * is unknown, {@link Double#MAX_VALUE} is used instead. Furthermore,
+     * if the separately clamped values satisfy <code>startTime&nbsp;&gt;&nbsp;stopTime</code>
+     * then <code>stopTime</code> is clamped as <code>stopTime&nbsp;&ge;&nbsp;startTime</code>.
+     *
+     * @param startValue the new start time
+     * @param stopValue  the new stop time
+     * @return the clamped times in seconds as <code>{actualStart,&nbsp;actualStop}</code>.
+     */
+    private double[] calculateStartStopTimes(Duration startValue, Duration stopValue) {
+        // Derive start time in seconds.
+        double newStart;
+        if (startValue == null || startValue.lessThan(Duration.ZERO)
+                || startValue.equals(Duration.UNKNOWN)) {
+            newStart = 0.0;
+        } else if (startValue.equals(Duration.INDEFINITE)) {
+            newStart = Double.MAX_VALUE;
+        } else {
+            newStart = startValue.toMillis() / 1000.0;
+        }
+
+        // Derive stop time in seconds.
+        double newStop;
+        if (stopValue == null || stopValue.equals(Duration.UNKNOWN)
+                || stopValue.equals(Duration.INDEFINITE)) {
+            newStop = Double.MAX_VALUE;
+        } else if (stopValue.lessThan(Duration.ZERO)) {
+            newStop = 0.0;
+        } else {
+            newStop = stopValue.toMillis() / 1000.0;
+        }
+
+        // Derive the duration in seconds.
+        final Duration mediaDuration = getDuration();
+        double duration = mediaDuration == Duration.UNKNOWN ?
+                Double.MAX_VALUE : mediaDuration.toMillis() / 1000.0;
+
+        // Clamp the start and stop times to [0,duration].
+        double actualStart = clamp(newStart, 0.0, duration);
+        double actualStop = clamp(newStop, 0.0, duration);
+
+        // Restrict actual stop time to [startTime,duration].
+        if (actualStart > actualStop) {
+            actualStop = actualStart;
+        }
+
+        return new double[]{actualStart, actualStop};
+    }
+
+    private void calculateCycleDuration() {
+        Duration endTime;
+        Duration mediaDuration = getDuration();
+
+        if (!getStopTime().isUnknown()) {
+            endTime = getStopTime();
+        } else {
+            endTime = mediaDuration;
+        }
+        if (endTime.greaterThan(mediaDuration)) {
+            endTime = mediaDuration;
+        }
+
+        // filter bad values
+        if (endTime.isUnknown() || getStartTime().isUnknown() || getStartTime().isIndefinite()) {
+            if (!getCycleDuration().isUnknown())
+                setCycleDuration(Duration.UNKNOWN);
+        }
+
+        setCycleDuration(endTime.subtract(getStartTime()));
+        calculateTotalDuration(); // since it's dependent on cycle duration
+    }
+
+    private void calculateTotalDuration() {
+        if (getCycleCount() == INDEFINITE) {
+            setTotalDuration(Duration.INDEFINITE);
+        } else if (getCycleDuration().isUnknown()) {
+            setTotalDuration(Duration.UNKNOWN);
+        } else {
+            setTotalDuration(getCycleDuration().multiply(getCycleCount()));
+        }
+    }
+
+    private void handleRequestedChanges() {
+        if (startTimeChangeRequested || stopTimeChangeRequested) {
+            setStartStopTimes(getStartTime(), startTimeChangeRequested, getStopTime(), stopTimeChangeRequested);
+            startTimeChangeRequested = stopTimeChangeRequested = false;
+        }
     }
 }

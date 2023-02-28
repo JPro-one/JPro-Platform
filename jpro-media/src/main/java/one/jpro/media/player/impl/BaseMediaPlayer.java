@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 abstract class BaseMediaPlayer implements MediaPlayer {
 
     private final Logger log = LoggerFactory.getLogger(BaseMediaPlayer.class);
+    boolean isEOS = false;
 
     // source property
     ReadOnlyObjectWrapper<MediaSource> mediaSource;
@@ -95,7 +96,27 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
     @Override
     public Duration getCurrentTime() {
-        return (currentTime == null) ? Duration.UNKNOWN : currentTime.get();
+        if (getStatus() == Status.DISPOSED) {
+            return Duration.ZERO;
+        }
+
+        if (getStatus() == Status.STOPPED) {
+            return Duration.millis(getStartTime().toMillis());
+        }
+
+        if (isEOS) {
+            final Duration duration = getDuration();
+            final Duration stopTime = getStopTime();
+            if (stopTime != Duration.UNKNOWN && duration != Duration.UNKNOWN) {
+                if (stopTime.greaterThan(duration)) {
+                    return Duration.millis(duration.toMillis());
+                } else {
+                    return Duration.millis(stopTime.toMillis());
+                }
+            }
+        }
+
+        return (currentTime == null) ? Duration.ZERO : currentTime.get();
     }
 
     void setCurrentTime(Duration value) {
@@ -109,7 +130,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
 
     private ReadOnlyObjectWrapper<Duration> currentTimePropertyImpl() {
         if (currentTime == null) {
-            currentTime = new ReadOnlyObjectWrapper<>(this, "currentTime", Duration.UNKNOWN) {
+            currentTime = new ReadOnlyObjectWrapper<>(this, "currentTime", Duration.ZERO) {
 
                 @Override
                 protected void invalidated() {
@@ -118,6 +139,75 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             };
         }
         return currentTime;
+    }
+
+    // cycle count property
+    private IntegerProperty cycleCount;
+
+    @Override
+    public int getCycleCount() {
+        return cycleCount == null ? 1 : cycleCount.get();
+    }
+
+    @Override
+    public void setCycleCount(int value) {
+        cycleCountProperty().set(value);
+    }
+
+    @Override
+    public IntegerProperty cycleCountProperty() {
+        if (cycleCount == null) {
+            cycleCount = new SimpleIntegerProperty(this, "cycleCount", 1);
+        }
+        return cycleCount;
+    }
+
+    // current count property
+    private ReadOnlyIntegerWrapper currentCount;
+
+    @Override
+    public final int getCurrentCount() {
+        return currentCount == null ? 0 : currentCount.get();
+    }
+
+    void setCurrentCount(int value) {
+        currentCountPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyIntegerProperty currentCountProperty() {
+        return currentCountPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyIntegerWrapper currentCountPropertyImpl() {
+        if (currentCount == null) {
+            currentCount = new ReadOnlyIntegerWrapper(this, "currentCount");
+        }
+        return currentCount;
+    }
+
+    // cycleDuration property
+    private ReadOnlyObjectWrapper<Duration> cycleDuration;
+
+    @Override
+    public Duration getCycleDuration() {
+        return cycleDuration == null ? Duration.UNKNOWN : cycleDuration.get();
+    }
+
+    void setCycleDuration(Duration value) {
+        cycleDurationPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> cycleDurationProperty() {
+        return cycleDurationPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<Duration> cycleDurationPropertyImpl() {
+        if (cycleDuration == null) {
+            cycleDuration = new ReadOnlyObjectWrapper<>(this, "cycleDuration");
+        }
+        return cycleDuration;
     }
 
     // duration property
@@ -148,6 +238,30 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             };
         }
         return duration;
+    }
+
+    // total duration property
+    private ReadOnlyObjectWrapper<Duration> totalDuration;
+
+    @Override
+    public Duration getTotalDuration() {
+        return totalDuration == null ? Duration.UNKNOWN : totalDuration.get();
+    }
+
+    void setTotalDuration(Duration value) {
+        totalDurationPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Duration> totalDurationProperty() {
+        return totalDurationPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<Duration> totalDurationPropertyImpl() {
+        if (totalDuration == null) {
+            totalDuration = new ReadOnlyObjectWrapper<>(this, "totalDuration");
+        }
+        return totalDuration;
     }
 
     // On ready event handler
@@ -192,7 +306,7 @@ abstract class BaseMediaPlayer implements MediaPlayer {
     @Override
     public final ObjectProperty<EventHandler<MediaPlayerEvent>> onPlayingProperty() {
         if (onPlaying == null) {
-            onPlaying = new SimpleObjectProperty<>(this, "onPlaying"){
+            onPlaying = new SimpleObjectProperty<>(this, "onPlaying") {
 
                 @Override
                 protected void invalidated() {
@@ -309,6 +423,33 @@ abstract class BaseMediaPlayer implements MediaPlayer {
             };
         }
         return onEndOfMedia;
+    }
+
+    // On repeat event handler
+    private ObjectProperty<EventHandler<MediaPlayerEvent>> onRepeat;
+
+    @Override
+    public final EventHandler<MediaPlayerEvent> getOnRepeat() {
+        return onRepeat == null ? null : onRepeat.get();
+    }
+
+    @Override
+    public final void setOnRepeat(EventHandler<MediaPlayerEvent> value) {
+        onRepeatProperty().set(value);
+    }
+
+    @Override
+    public ObjectProperty<EventHandler<MediaPlayerEvent>> onRepeatProperty() {
+        if (onRepeat == null) {
+            onRepeat = new SimpleObjectProperty<>(this, "onRepeat") {
+
+                @Override
+                protected void invalidated() {
+                    eventHandlerManager.setEventHandler(MediaPlayerEvent.MEDIA_PLAYER_REPEAT, get());
+                }
+            };
+        }
+        return onRepeat;
     }
 
     // On error event handler
