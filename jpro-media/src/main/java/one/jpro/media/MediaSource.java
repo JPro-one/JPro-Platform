@@ -20,33 +20,33 @@ import java.util.Optional;
  * <p>The same <code>MediaSource</code> object may be shared among multiple
  * <code>MediaPlayer</code> or <code>MediaRecorder</code> objects.
  *
- * @param source string form of a media source URI
+ * @param source  string form of a media source URI
  * @param isLocal <code>true</code> if this media source is local when running
  *                on a desktop/mobile or as a local resource to JPro server,
  *                otherwise <code>false</code> when inside the client's browser
- * @param jsFile the non-local media source located inside the client's browser
- *
+ * @param jsFile  the non-local media source located inside the client's browser
+ * @author Besmir Beqiri
  * @see MediaPlayer
  * @see MediaRecorder
  * @see MediaException
- *
- * @author Besmir Beqiri
  */
 public record MediaSource(String source, boolean isLocal, WebAPI.JSFile jsFile) {
 
     /**
      * Compact constructor.
      *
-     * @throws NullPointerException if the source is <code>null</code>.
+     * @throws NullPointerException     if the source is <code>null</code>.
      * @throws IllegalArgumentException if the source is not a valid URI.
      */
     public MediaSource {
         Objects.requireNonNull(source, "Source can not be null");
 
-        try {
-            new URI(source);
-        } catch(URISyntaxException use) {
-            throw new IllegalArgumentException(use);
+        if (isLocal) {
+            try {
+                new URI(source);
+            } catch (URISyntaxException use) {
+                throw new IllegalArgumentException(use);
+            }
         }
     }
 
