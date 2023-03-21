@@ -109,6 +109,10 @@ public class MediaPlayerSample extends Application {
             playPauseButton.setText("Play");
             playPauseButton.setOnAction(event2 -> mediaPlayer.play());
         });
+        mediaPlayer.setOnEndOfMedia(event -> {
+            playPauseButton.setText("Play");
+            playPauseButton.setOnAction(event2 -> mediaPlayer.play());
+        });
         mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
 
         // User interface
