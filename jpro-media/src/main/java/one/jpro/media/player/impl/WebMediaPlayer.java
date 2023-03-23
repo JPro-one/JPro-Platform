@@ -525,6 +525,10 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 $playerVideoElem.muted = false;
                 $playerVideoElem.setAttribute("webkit-playsinline", 'webkit-playsinline');
                 $playerVideoElem.setAttribute("playsinline", 'playsinline');
+                $playerVideoElem.style.transform = "translate(-50%, -50%)";
+                $playerVideoElem.style.position = "absolute";
+                $playerVideoElem.style.top = "50%";
+                $playerVideoElem.style.left = "50%";
                 """.replace("$playerVideoElem", videoElement));
         return new JSVariable(webAPI, videoElement);
     }
