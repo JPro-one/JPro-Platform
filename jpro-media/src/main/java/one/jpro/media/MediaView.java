@@ -213,7 +213,7 @@ public abstract class MediaView extends Region {
      * @return the height of the resized media.
      */
     public final double getFitWidth() {
-        return fitWidth == null ? 0.0 : fitWidth.get();
+        return fitWidth == null ? USE_COMPUTED_SIZE : fitWidth.get();
     }
 
     /**
@@ -245,7 +245,7 @@ public abstract class MediaView extends Region {
      * @return the height of the resized media.
      */
     public final double getFitHeight() {
-        return fitHeight == null ? 0.0 : fitHeight.get();
+        return fitHeight == null ? USE_COMPUTED_SIZE : fitHeight.get();
     }
 
     /**
@@ -273,10 +273,10 @@ public abstract class MediaView extends Region {
     protected void layoutChildren() {
         for (Node child : getManagedChildren()) {
             if (child instanceof javafx.scene.media.MediaView fxMediaView) {
-                if (getFitWidth() <= 0) {
+                if (getFitWidth() < 0) {
                     fxMediaView.setFitWidth(getWidth());
                 }
-                if (getFitHeight() <= 0) {
+                if (getFitHeight() < 0) {
                     fxMediaView.setFitHeight(getHeight());
                 }
             }

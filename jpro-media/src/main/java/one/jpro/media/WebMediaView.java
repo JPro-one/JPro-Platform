@@ -92,10 +92,11 @@ public abstract class WebMediaView extends MediaView {
                 @Override
                 protected void invalidated() {
                     if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
+                        final double fitWidth = get();
                         webAPI.executeScript("""
                                 %s.width = "%s";
-                                """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
-                        log.trace("video width: " + getFitWidth());
+                                """.formatted(webMediaEngine.getVideoElement().getName(), fitWidth));
+                        log.trace("video width: {}", fitWidth);
                     }
                 }
             };
@@ -110,10 +111,11 @@ public abstract class WebMediaView extends MediaView {
                 @Override
                 protected void invalidated() {
                     if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
+                        final double fitHeight = get();
                         webAPI.executeScript("""
                                 %s.height = "%s";
-                                """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
-                        log.trace("video height: " + get());
+                                """.formatted(webMediaEngine.getVideoElement().getName(), fitHeight));
+                        log.trace("video height: " + fitHeight);
                     }
                 }
             };
@@ -151,12 +153,12 @@ public abstract class WebMediaView extends MediaView {
     protected void layoutChildren() {
         for (Node child : getManagedChildren()) {
             if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
-                if (getFitWidth() <= 0) {
+                if (getFitWidth() < 0) {
                     webAPI.executeScript("""
                             %s.width = "%s";
                             """.formatted(webMediaEngine.getVideoElement().getName(), getWidth()));
                 }
-                if (getFitHeight() <= 0) {
+                if (getFitHeight() < 0) {
                     webAPI.executeScript("""
                             %s.height = "%s";
                             """.formatted(webMediaEngine.getVideoElement().getName(), getHeight()));
