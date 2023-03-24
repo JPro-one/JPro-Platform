@@ -413,8 +413,8 @@ public class MediaPlayerTests {
                         new KeyValue(mediaView.fitWidthProperty(), scene.getWidth()),
                         new KeyValue(mediaView.fitHeightProperty(), scene.getHeight())),
                 new KeyFrame(Duration.seconds(3.0),
-                        new KeyValue(mediaView.fitWidthProperty(), 1.0),
-                        new KeyValue(mediaView.fitHeightProperty(), 1.0)),
+                        new KeyValue(mediaView.fitWidthProperty(), 0.0),
+                        new KeyValue(mediaView.fitHeightProperty(), 0.0)),
                 new KeyFrame(Duration.seconds(6.0),
                         new KeyValue(mediaView.fitWidthProperty(), scene.getWidth()),
                         new KeyValue(mediaView.fitHeightProperty(), scene.getHeight())));
@@ -426,11 +426,11 @@ public class MediaPlayerTests {
                         mediaPlayer.getCurrentTime().greaterThan(currentTime2.add(Duration.seconds(6))),
                 mediaPlayer.currentTimeProperty()));
 
-        log.debug("Reset media view fit width and height to 0");
-        mediaView.setFitWidth(0.0);
-        assertThat(mediaView.getFitWidth()).isEqualTo(0.0);
-        mediaView.setFitHeight(0.0);
-        assertThat(mediaView.getFitHeight()).isEqualTo(0.0);
+        log.debug("Reset media view fit width and height to MediaView.USE_COMPUTED_SIZE");
+        mediaView.setFitWidth(MediaView.USE_COMPUTED_SIZE);
+        assertThat(mediaView.getFitWidth()).isEqualTo(-1.0);
+        mediaView.setFitHeight(MediaView.USE_COMPUTED_SIZE);
+        assertThat(mediaView.getFitHeight()).isEqualTo(-1.0);
 
         log.debug("Waiting for media player to play for additional 3 seconds...");
         final Duration currentTime3 = mediaPlayer.getCurrentTime();
@@ -448,8 +448,8 @@ public class MediaPlayerTests {
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isFalse();
         assertThat(stopButton.isDisable()).isFalse();
-        assertThat(mediaView.getFitWidth()).isEqualTo(0.0);
-        assertThat(mediaView.getFitHeight()).isEqualTo(0.0);
+        assertThat(mediaView.getFitWidth()).isEqualTo(MediaView.USE_COMPUTED_SIZE);
+        assertThat(mediaView.getFitHeight()).isEqualTo(MediaView.USE_COMPUTED_SIZE);
         log.debug("Checks passed");
     }
 
