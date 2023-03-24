@@ -209,15 +209,18 @@ public abstract class MediaView extends Region {
 
     /**
      * Retrieves the width of the bounding box of the resized media.
+     * Default value is <code>-1.0</code>.
      *
      * @return the height of the resized media.
      */
     public final double getFitWidth() {
-        return fitWidth == null ? USE_COMPUTED_SIZE : fitWidth.get();
+        return fitWidth == null ? -1.0 : fitWidth.get();
     }
 
     /**
      * Sets the width of the bounding box of the resized media.
+     * If <code>value &lt; 0</code>, than the width of the
+     * bounding box will match the width of the parent container node.
      *
      * @param value the width of the resized media.
      */
@@ -227,7 +230,7 @@ public abstract class MediaView extends Region {
 
     /**
      * Determines the width of the bounding box within which the source media is
-     * resized as necessary to fit. If <code>value &le; 0</code>, than the width
+     * resized as necessary to fit. If <code>value &lt; 0</code>, than the width
      * of the bounding box will match the width of the parent container node.
      * <p>
      * See {@link #preserveRatioProperty preserveRatio} for information on interaction
@@ -241,15 +244,18 @@ public abstract class MediaView extends Region {
 
     /**
      * Retrieves the height of the bounding box of the resized media.
+     * Default value is <code>-1.0</code>.
      *
      * @return the height of the resized media.
      */
     public final double getFitHeight() {
-        return fitHeight == null ? USE_COMPUTED_SIZE : fitHeight.get();
+        return fitHeight == null ? -1.0 : fitHeight.get();
     }
 
     /**
      * Sets the height of the bounding box of the resized media.
+     * If <code>value &lt; 0</code>, than the height of the
+     * bounding box will match the height of the parent container node.
      *
      * @param value the height of the resized media.
      */
@@ -259,7 +265,7 @@ public abstract class MediaView extends Region {
 
     /**
      * Determines the height of the bounding box within which the source media is
-     * resized as necessary to fit. If <code>value &le; 0</code>, than the height
+     * resized as necessary to fit. If <code>value &lt; 0</code>, than the height
      * of the bounding box will match the height of the parent container node.
      * <p>
      * See {@link #preserveRatioProperty preserveRatio} for information on interaction
