@@ -1,5 +1,7 @@
 package one.jpro.media.player.impl;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.*;
 import one.jpro.media.MediaEngine;
 import one.jpro.media.MediaView;
@@ -34,14 +36,9 @@ public class FXMediaPlayerView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    final MediaEngine mediaPlayer = getMediaEngine();
-                    if (mediaPlayer instanceof FXMediaPlayer fxMediaPlayer) {
-                        fxMediaView = new javafx.scene.media.MediaView(fxMediaPlayer.getMediaPlayer());
-                        fxMediaView.setPreserveRatio(isPreserveRatio());
-                        fxMediaView.setFitWidth(getFitWidth());
-                        fxMediaView.setFitHeight(getFitHeight());
-                        getChildren().setAll(fxMediaView);
-                    }
+                    sceneProperty().removeListener(weakUpdateViewContainerListener);
+                    updateViewContainer();
+                    sceneProperty().addListener(weakUpdateViewContainerListener);
                 }
             };
         }
@@ -55,10 +52,7 @@ public class FXMediaPlayerView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    if (fxMediaView != null) {
-                        fxMediaView.setFitWidth(get());
-                    }
-                    log.trace("video width: " + getFitWidth());
+                    setInternalFitWidth(get());
                 }
             };
         }
@@ -72,10 +66,7 @@ public class FXMediaPlayerView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    if (fxMediaView != null) {
-                        fxMediaView.setFitHeight(get());
-                    }
-                    log.trace("video height: " + getFitHeight());
+                    setInternalFitHeight(get());
                 }
             };
         }
@@ -96,5 +87,42 @@ public class FXMediaPlayerView extends MediaView {
             };
         }
         return preserveRatio;
+    }
+
+    private void setInternalFitWidth(double fitWidth) {
+        if (fxMediaView != null) {
+            if (fitWidth == 0) {
+                getChildren().remove(fxMediaView);
+            } else if (!getChildren().contains(fxMediaView)) {
+                getChildren().add(fxMediaView);
+            }
+            fxMediaView.setFitWidth(fitWidth);
+            log.trace("video width: {}", fitWidth);
+        }
+    }
+
+    private void setInternalFitHeight(double fitHeight) {
+        if (fxMediaView != null) {
+            if (fitHeight == 0) {
+                getChildren().remove(fxMediaView);
+            } else if (!getChildren().contains(fxMediaView)) {
+                getChildren().add(fxMediaView);
+            }
+            fxMediaView.setFitHeight(fitHeight);
+            log.trace("video height: " + fitHeight);
+        }
+    }
+
+    private final InvalidationListener updateViewContainerListener = observable -> updateViewContainer();
+    private final WeakInvalidationListener weakUpdateViewContainerListener =
+            new WeakInvalidationListener(updateViewContainerListener);
+
+    private void updateViewContainer() {
+        if (getScene() != null && getMediaEngine() instanceof FXMediaPlayer fxMediaPlayer) {
+            fxMediaView = new javafx.scene.media.MediaView(fxMediaPlayer.getMediaPlayer());
+            fxMediaView.setPreserveRatio(isPreserveRatio());
+            setInternalFitWidth(getFitWidth());
+            setInternalFitHeight(getFitHeight());
+        }
     }
 }

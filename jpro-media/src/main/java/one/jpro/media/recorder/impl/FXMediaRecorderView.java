@@ -1,5 +1,7 @@
 package one.jpro.media.recorder.impl;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.*;
 import javafx.scene.image.ImageView;
 import one.jpro.media.MediaEngine;
@@ -35,14 +37,9 @@ public class FXMediaRecorderView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    final MediaEngine mediaRecorder = getMediaEngine();
-                    if (mediaRecorder instanceof FXMediaRecorder fxMediaRecorder) {
-                        fxFrameView = fxMediaRecorder.getCameraView();
-                        fxFrameView.setPreserveRatio(isPreserveRatio());
-                        fxFrameView.setFitWidth(getFitWidth());
-                        fxFrameView.setFitHeight(getFitHeight());
-                        getChildren().setAll(fxFrameView);
-                    }
+                    sceneProperty().removeListener(weakUpdateViewContainerListener);
+                    updateViewContainer();
+                    sceneProperty().addListener(weakUpdateViewContainerListener);
                 }
             };
         }
@@ -56,10 +53,7 @@ public class FXMediaRecorderView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    if (fxFrameView != null) {
-                        fxFrameView.setFitWidth(get());
-                    }
-                    log.trace("video width: {}", getFitWidth());
+                    setInternalFitWidth(get());
                 }
             };
         }
@@ -73,10 +67,7 @@ public class FXMediaRecorderView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    if (fxFrameView != null) {
-                        fxFrameView.setFitHeight(get());
-                    }
-                    log.trace("video height: {}", getFitHeight());
+                    setInternalFitHeight(get());
                 }
             };
         }
@@ -98,5 +89,42 @@ public class FXMediaRecorderView extends MediaView {
             };
         }
         return preserveRatio;
+    }
+
+    private void setInternalFitWidth(double fitWidth) {
+        if (fxFrameView != null) {
+            if (fitWidth == 0) {
+                getChildren().remove(fxFrameView);
+            } else if (!getChildren().contains(fxFrameView)) {
+                getChildren().add(fxFrameView);
+            }
+            fxFrameView.setFitWidth(fitWidth);
+            log.trace("video width: {}", fitWidth);
+        }
+    }
+
+    private void setInternalFitHeight(double fitHeight) {
+        if (fxFrameView != null) {
+            if (fitHeight == 0) {
+                getChildren().remove(fxFrameView);
+            } else if (!getChildren().contains(fxFrameView)) {
+                getChildren().add(fxFrameView);
+            }
+            fxFrameView.setFitHeight(fitHeight);
+            log.trace("video height: " + fitHeight);
+        }
+    }
+
+    private final InvalidationListener updateViewContainerListener = observable -> updateViewContainer();
+    private final WeakInvalidationListener weakUpdateViewContainerListener =
+            new WeakInvalidationListener(updateViewContainerListener);
+
+    private void updateViewContainer() {
+        if (getScene() != null && getMediaEngine() instanceof FXMediaRecorder fxMediaRecorder) {
+            fxFrameView = fxMediaRecorder.getCameraView();
+            fxFrameView.setPreserveRatio(isPreserveRatio());
+            setInternalFitWidth(getFitWidth());
+            setInternalFitHeight(getFitHeight());
+        }
     }
 }
