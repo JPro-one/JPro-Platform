@@ -24,10 +24,8 @@ configure(subprojects.findAll {it.name != 'example'}) {
   apply plugin: 'java-library'
   apply plugin: 'org.openjfx.javafxplugin'
 
-  compileJava {
-    sourceCompatibility = 17
-    targetCompatibility = 17
-  }
+  sourceCompatibility = 11
+  targetCompatibility = 11
 
   javafx {
     version = "$JAVAFX_VERSION"
@@ -52,7 +50,7 @@ configure(subprojects.findAll {it.name != 'example'}) {
 configure([project("jpro-sessions")]) {
   dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation "commons-io:commons-io:2.11.0"
   }
 }
 configure([project("tree-showing"), project("jpro-media"), project("jpro-sound"), project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
