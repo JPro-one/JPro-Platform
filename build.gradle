@@ -61,7 +61,7 @@ configure([project("tree-showing"), project("jpro-media"), project("jpro-sound")
         from components.java
         groupId "one.jpro.jproutils"
         artifactId project.name
-        version JFX_UTILS_VERSION
+        version JPRO_UTILS_VERSION
       }
     }
     java {

@@ -61,7 +61,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId "one.jpro.jproutils"
             artifactId project.name
-            version JFX_UTILS_VERSION
+            version JPRO_UTILS_VERSION
             artifact docArtifact
         }
     }
