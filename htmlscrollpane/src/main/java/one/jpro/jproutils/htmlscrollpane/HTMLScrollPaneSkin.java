@@ -155,11 +155,11 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
 
     static class WeakPopupControlSkin implements Skin {
-        WeakReference<Node> whtmlViewContent = null;
+        WeakReference<Node> whtmlViewContent;
 
         public WeakPopupControlSkin(Node n) {
             super();
-            whtmlViewContent = new WeakReference(n);
+            whtmlViewContent = new WeakReference<>(n);
         }
         @Override
         public Skinnable getSkinnable() {
