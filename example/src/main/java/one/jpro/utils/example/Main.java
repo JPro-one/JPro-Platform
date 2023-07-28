@@ -1,19 +1,19 @@
 package one.jpro.utils.example;
 
 import atlantafx.base.theme.PrimerLight;
-import com.jpro.routing.Filters;
-import com.jpro.routing.Route;
-import com.jpro.routing.RouteApp;
-import com.jpro.routing.extensions.linkheader.LinkHeaderFilter;
 import one.jpro.example.media.MediaPlayerSample;
 import one.jpro.example.media.MediaRecorderAndPlayerSample;
 import one.jpro.example.media.MediaRecorderSample;
+import one.jpro.routing.Filters;
+import one.jpro.routing.Route;
+import one.jpro.routing.RouteApp;
+import one.jpro.routing.extensions.linkheader.LinkHeaderFilter;
 
 import java.util.ArrayList;
 
-import static com.jpro.routing.RouteUtils.getNode;
-import static com.jpro.routing.RouteUtils.redirect;
-import static com.jpro.routing.extensions.linkheader.LinkHeaderFilter.Link;
+import static one.jpro.routing.RouteUtils.getNode;
+import static one.jpro.routing.RouteUtils.redirect;
+import static one.jpro.routing.extensions.linkheader.LinkHeaderFilter.Link;
 
 /**
  * Launcher class to switch example applications via routing.
@@ -30,7 +30,7 @@ public class Main extends RouteApp {
 
     @Override
     public Route createRoute() {
-        var links = new ArrayList<LinkHeaderFilter.Link>();
+        var links = new ArrayList<Link>();
         links.add(mediaPlayerSampleLink);
         links.add(mediaRecorderSampleLink);
         links.add(mediaRecorderAndPlayerSampleLink);
