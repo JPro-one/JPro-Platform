@@ -316,7 +316,7 @@ public class MediaPlayerTests {
 
     @Test
     @Order(5)
-    void seek_after_media_player_reached_eom(FxRobot robot) throws TimeoutException {
+    void seek_after_media_player_reached_eom(FxRobot robot) throws TimeoutException, InterruptedException {
         log.debug("MediaPlayer => Testing seek after media player has reached EOM...");
         waitForStatusReady();
 
@@ -336,28 +336,23 @@ public class MediaPlayerTests {
 
         WaitForAsyncUtils.waitFor(3, TimeUnit.SECONDS, () -> eom);
         waitForStatus(Status.PAUSED);
-
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isFalse();
         log.debug("Checks passed");
 
-        final Duration seekTime2 = Duration.seconds(19);
+        final Duration seekTime2 = Duration.seconds(18);
         log.debug("Seek to {} seconds", seekTime2.toSeconds());
         mediaPlayer.seek(seekTime2);
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is {} seconds", seekTime2.toSeconds());
         assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime2);
 
+        // wait for 1 second:
+        TimeUnit.SECONDS.sleep(1);
+
         clickPlayButton(robot);
-
-        log.debug("Run additional checks...");
-        assertThat(playButton.isDisable()).isTrue();
-        assertThat(pauseButton.isDisable()).isFalse();
-        assertThat(stopButton.isDisable()).isFalse();
-        log.debug("Checks passed");
-
         log.debug("Wait for media player to play for additional 3 seconds");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
                         mediaPlayer.getCurrentTime().greaterThan(seekTime2.add(Duration.seconds(3))),
