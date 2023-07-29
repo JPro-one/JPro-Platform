@@ -139,30 +139,6 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     BooleanProperty autoPlayProperty();
 
     /**
-     * Retrieves the muteProperty value.
-     *
-     * @return the mute setting
-     */
-    boolean isMute();
-
-    /**
-     * Sets the muteProperty value.
-     *
-     * @param value the mute setting
-     */
-    void setMute(boolean value);
-
-    /**
-     * Whether the player audio is muted. A value of <code>true</code> indicates
-     * that audio is <i>not</i> being produced. The value of this property has
-     * no effect on {@link #volumeProperty volume}, i.e., if the audio is muted and then
-     * unmuted, audio playback will resume at the same audible level provided
-     * of course that the <code>volume</code> property has not been modified
-     * meanwhile. The default value is <code>false</code>.
-     */
-    BooleanProperty muteProperty();
-
-    /**
      * Retrieves the current player status.
      *
      * @return the playback {@link Status}
@@ -206,6 +182,66 @@ public interface MediaPlayer extends MediaEngine, EventTarget {
     void setVolume(double value);
 
     DoubleProperty volumeProperty();
+
+    /**
+     * Retrieves the muteProperty value.
+     *
+     * @return the mute setting
+     */
+    boolean isMute();
+
+    /**
+     * Sets the muteProperty value.
+     *
+     * @param value the mute setting
+     */
+    void setMute(boolean value);
+
+    /**
+     * Whether the player audio is muted. A value of <code>true</code> indicates
+     * that audio is <i>not</i> being produced. The value of this property has
+     * no effect on {@link #volumeProperty volume}, i.e., if the audio is muted and then
+     * unmuted, audio playback will resume at the same audible level provided
+     * of course that the <code>volume</code> property has not been modified
+     * meanwhile. The default value is <code>false</code>.
+     */
+    BooleanProperty muteProperty();
+
+    /**
+     * Retrieves the playback rate.
+     * @return the playback rate
+     */
+    double getRate();
+
+    /**
+     * Sets the playback rate to the supplied value. Its effect will be clamped
+     * to the range <code>[0.0,&nbsp;8.0]</code>.
+     * Invoking this method will have no effect if media duration is {@link Duration#INDEFINITE}.
+     * @param value the playback rate
+     */
+    void setRate(double value);
+
+    /**
+     * The rate at which the media should be played. For example, a rate of
+     * <code>1.0</code> plays the media at its normal (encoded) playback rate,
+     * <code>2.0</code> plays back at twice the normal rate, etc. The currently
+     * supported range of rates is <code>[0.0,&nbsp;8.0]</code>. The default
+     * value is <code>1.0</code>.
+     */
+    DoubleProperty rateProperty();
+
+    /**
+     * Retrieves the current playback rate.
+     * @return the current rate
+     */
+    double getCurrentRate();
+
+    /**
+     * The current rate of playback regardless of settings. For example, if
+     * <code>rate</code> is set to 1.0 and the player is paused or stalled,
+     * then <code>currentRate</code> will be zero.
+     */
+    ReadOnlyDoubleProperty currentRateProperty();
 
     /**
      * Retrieves the current media time.

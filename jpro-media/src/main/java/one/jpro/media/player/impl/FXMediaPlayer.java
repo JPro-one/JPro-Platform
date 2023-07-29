@@ -256,6 +256,31 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
     }
 
     @Override
+    public double getRate() {
+        return mediaPlayer.getRate();
+    }
+
+    @Override
+    public void setRate(double value) {
+        mediaPlayer.setRate(value);
+    }
+
+    @Override
+    public DoubleProperty rateProperty() {
+        return mediaPlayer.rateProperty();
+    }
+
+    @Override
+    public double getCurrentRate() {
+        return mediaPlayer.getCurrentRate();
+    }
+
+    @Override
+    public ReadOnlyDoubleProperty currentRateProperty() {
+        return mediaPlayer.currentRateProperty();
+    }
+
+    @Override
     public void play() {
         // If the end of media was reached, seek to the beginning
         // before playing, to mimic the behavior of the Web media
