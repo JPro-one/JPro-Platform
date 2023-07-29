@@ -15,56 +15,58 @@ import one.jpro.media.player.impl.FXMediaPlayer;
 import one.jpro.media.player.impl.WebMediaPlayer;
 
 /**
- * The MediaPlayer provides functionality to easily play media, both on
- * desktop/mobile and web platforms.
+ * The MediaPlayer offers functionalities for media playback
+ * across desktop/mobile and web platforms with ease.
  * <p>
- * This class provides the controls for playing media.
- * It is used in combination with the {@link MediaSource} and {@link MediaView}
- * classes to display and control media playback. <code>MediaPlayer</code> does
- * not contain any visual elements so must be used in combination with the
- * {@link MediaView} class to view any video track which may be present.
+ * This class equips the user with controls for managing media.
+ * It is typically utilized with the {@link MediaSource} and {@link MediaView}
+ * classes to control and display media playback. Since <code>MediaPlayer</code>
+ * doesn't incorporate any visual elements, it should be used with the
+ * {@link MediaView} class to view any present video track.
  *
- * <p><code>MediaPlayer</code> provides the {@link #play()}, {@link #pause()},
- * {@link #stop()} and {@link #seek(javafx.util.Duration) seek()} controls
- * as playback functionalities. It also provides the {@link #muteProperty mute}
- * and {@link #volumeProperty volume} properties which control audio playback
- * characteristics. Use the {@link #statusProperty status} property to
- * determine the current status of the <code>MediaPlayer</code> and
- * {@link #currentTimeProperty currentTime} property to determine the current
- * time position of the media.
+ * <p><code>MediaPlayer</code> includes {@link #play()}, {@link #pause()},
+ * {@link #stop()}, and {@link #seek(javafx.util.Duration) seek()} controls
+ * for playback functionalities. It also supports the {@link #rateProperty rate}
+ * and {@link #autoPlayProperty autoPlay} properties applicable to all media types.
+ * The class provides the {@link #muteProperty mute} and {@link #volumeProperty volume}
+ * properties to manage audio playback characteristics. The {@link #statusProperty status}
+ * property can be used to ascertain the current status of the <code>MediaPlayer</code>,
+ * and the {@link #currentTimeProperty currentTime} property helps determine the current
+ * time position of the media. The playback rate can be adjusted using the
+ * {@link #rateProperty rate} property, while the {@link #currentRateProperty currentRate}
+ * property offers information about the current rate during playback.
  *
- * <p>For finite duration media, playback may be positioned at any point in time
+ * <p>For media with a finite duration, playback can be positioned at any point in time
  * between <code>0.0</code> and the duration of the media. <code>MediaPlayer</code>
- * refines this definition by adding the {@link #startTimeProperty startTime} and
+ * further refines this by adding the {@link #startTimeProperty startTime} and
  * {@link #stopTimeProperty stopTime}
- * properties which in effect define a virtual media source with time position
- * constrained to <code>[startTime,stopTime]</code>. Media playback
- * commences at <code>startTime</code> and continues to <code>stopTime</code>.
- * The interval defined by these two endpoints is termed a <i>cycle</i> with
- * duration being the difference of the stop and start times. This cycle
- * may be set to repeat a specific or indefinite number of times. The total
- * duration of media playback is then the product of the cycle duration and the
+ * properties, thereby defining a virtual media source with time position
+ * constrained between <code>[startTime,stopTime]</code>. Media playback
+ * starts at <code>startTime</code> and continues till <code>stopTime</code>.
+ * The interval specified by these two endpoints is termed a <i>cycle</i>, with
+ * duration being the difference between the stop and start times. This cycle
+ * can be set to repeat a certain or indefinite number of times. The total
+ * duration of media playback equals the product of the cycle duration and the
  * number of times the cycle is played. If the stop time of the cycle is reached
- * and the cycle is to be played again, the event handler registered with the
+ * and the cycle is set to be played again, the event handler registered with the
  * {@link #onRepeatProperty onRepeat} property is invoked. If the stop time is
  * reached, then the event handler registered with the {@link #onEndOfMediaProperty onEndOfMedia}
- * property is invoked regardless of whether the cycle is to be repeated or not.
- * A zero-relative index of which cycle is presently being played is maintained
+ * property is invoked regardless of whether the cycle is set to be repeated or not.
+ * A zero-relative index of the currently playing cycle is maintained
  * by {@link #currentCountProperty currentCount}.
  * </p>
  *
  * <p>All operations of a <code>MediaPlayer</code> are inherently asynchronous.
- * When the given <code>MediaSource</code> is loaded, use the {@link #setOnReady(EventHandler)}
- * to get notified when the <code>MediaPlayer</code> is ready to play. Other
+ * Upon loading the given <code>MediaSource</code>, use the {@link #setOnReady(EventHandler)}
+ * to get notified when the <code>MediaPlayer</code> is ready for playback. Other
  * event handlers like {@link #setOnPlaying(EventHandler)}, {@link #setOnPaused(EventHandler)},
- * {@link #setOnStopped(EventHandler)}, {@link #setOnEndOfMedia(EventHandler)} and
+ * {@link #setOnStopped(EventHandler)}, {@link #setOnEndOfMedia(EventHandler)}, and
  * {@link #setOnStalled(EventHandler)} can be used to get notified of the
  * corresponding events.
  *
- * <p>The same <code>MediaPlayer</code> object may be shared among multiple
- * <code>MediaView</code>s. This will not affect the player itself. In
- * particular, the property settings of the view will not have any effect on
- * media playback.</p>
+ * <p>A single <code>MediaPlayer</code> object can be shared among multiple
+ * <code>MediaView</code>s without affecting the player. Specifically, the property settings
+ * of the view don't influence media playback.
  *
  * @see MediaSource
  * @see MediaView
