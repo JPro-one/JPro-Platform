@@ -24,7 +24,9 @@ import java.util.Objects;
  */
 public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEngine {
 
-    private final Logger log = LoggerFactory.getLogger(WebMediaPlayer.class);
+    private static final Logger log = LoggerFactory.getLogger(WebMediaPlayer.class);
+    private static final double RATE_MIN = 0.0;
+    private static final double RATE_MAX = 8.0;
 
     private final WebAPI webAPI;
     private final String mediaPlayerId;
@@ -99,6 +101,12 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 java_fun(elem.volume);
                 """, volume -> volumeProperty().set(Double.parseDouble(volume)));
 
+        // handle rate change
+        handleWebEvent("ratechange", """
+                console.log("$mediaPlayerId => rate change: " + elem.playbackRate);
+                java_fun(elem.playbackRate);
+                """, rate -> setCurrentRate(Double.parseDouble(rate)));
+
         // handle play event
         handleWebEvent("play", """
                     console.log("$mediaPlayerId => playing...");
@@ -106,6 +114,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 """, currentTime -> {
             // Set status to playing
             setStatus(Status.PLAYING);
+            setCurrentRate(getRate());
 
             // Fire play event
             Event.fireEvent(WebMediaPlayer.this,
@@ -121,6 +130,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             if (Boolean.parseBoolean(paused)) {
                 // Set status to paused
                 setStatus(Status.PAUSED);
+                setCurrentRate(0.0);
 
                 // Fire pause event
                 Event.fireEvent(WebMediaPlayer.this,
@@ -145,6 +155,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
 
             // Set status to stalled
             setStatus(Status.STALLED);
+            setCurrentRate(0.0);
 
             // Fire stalled event
             Event.fireEvent(WebMediaPlayer.this,
@@ -160,6 +171,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             if (Boolean.parseBoolean(ended)) {
                 // Set end of stream flag
                 isEOS = true;
+                setCurrentRate(0.0);
 
                 // Fire end of media event
                 Event.fireEvent(WebMediaPlayer.this,
@@ -175,6 +187,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
                 """, errorCode -> {
             // Set status to halted
             setStatus(Status.HALTED);
+            setCurrentRate(0.0);
 
             // Set error
             WebMediaError.fromCode(Integer.parseInt(errorCode)).ifPresent(webErrorCode ->
@@ -398,6 +411,61 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
             };
         }
         return muted;
+    }
+
+    // rate property
+    private DoubleProperty rate;
+
+    @Override
+    public double getRate() {
+        return rate == null ? 1.0 : rate.get();
+    }
+
+    @Override
+    public void setRate(double value) {
+        rateProperty().set(value);
+    }
+
+    public DoubleProperty rateProperty() {
+        if (rate == null) {
+            rate = new SimpleDoubleProperty(this, "rate", 1.0) {
+
+                @Override
+                protected void invalidated() {
+                    if (getStatus() != Status.DISPOSED) {
+                        final var rate = clamp(get(), RATE_MIN, RATE_MAX);
+                        webAPI.executeScript("""
+                                %s.playbackRate = $rate;
+                                """.formatted(playerVideoElement.getName())
+                                .replace("$rate", String.valueOf(rate)));
+                    }
+                }
+            };
+        }
+        return rate;
+    }
+
+    // current rate property
+    private ReadOnlyDoubleWrapper currentRate;
+
+    @Override
+    public double getCurrentRate() {
+        return currentRate == null ? 0.0 : currentRate.get();
+    }
+
+    private void setCurrentRate(double value) {
+        currentRatePropertyImpl().set(value);
+    }
+
+    public ReadOnlyDoubleProperty currentRateProperty() {
+        return currentRatePropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyDoubleWrapper currentRatePropertyImpl() {
+        if (currentRate == null) {
+            currentRate = new ReadOnlyDoubleWrapper(this, "currentRate");
+        }
+        return currentRate;
     }
 
     @Override

@@ -131,6 +131,10 @@ public class MediaPlayerTests {
         });
         mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
 
+        mediaPlayer.currentRateProperty().addListener(observable -> {
+            log.debug("mediaPlayer.currentRate(): {}", mediaPlayer.getCurrentRate());
+        });
+
         // User interface
         FlowPane controlsPane = new FlowPane(playButton, pauseButton, stopButton, seekSlider,
                 preserveRatioCheckBox, muteCheckBox);
@@ -397,7 +401,7 @@ public class MediaPlayerTests {
 
         clickPlayButton(robot);
 
-        log.debug("Waiting for media player to play for additional 3 seconds...");
+        log.debug("Waiting for media player to play for additional 2 seconds...");
         final Duration currentTime1 = mediaPlayer.getCurrentTime();
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
                         mediaPlayer.getCurrentTime().greaterThan(currentTime1.add(Duration.seconds(2))),
@@ -435,6 +439,102 @@ public class MediaPlayerTests {
 
         clickStopButton(robot);
         log.debug("MediaPlayer => Test successfully passed.");
+    }
+
+    @Test
+    @Order(8)
+    public void playback_rate_behaviour(FxRobot robot) throws TimeoutException, InterruptedException {
+        log.debug("MediaPlayer => Testing media playback rate...");
+        waitForStatusReady();
+
+        log.debug("Check initial playback rate and current rate in ready state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(1.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(0.0);
+        log.debug("Checks passed");
+
+        robot.clickOn(playButton);
+
+        log.debug("Waiting for media player to play for additional 5 seconds...");
+        final Duration currentTime1 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime1.add(Duration.seconds(5))),
+                mediaPlayer.currentTimeProperty()));
+
+        log.debug("Check initial playback rate and current rate in playing state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(1.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(1.0);
+        log.debug("Checks passed");
+
+        robot.clickOn(pauseButton);
+
+        log.debug("Check initial playback rate and current rate in paused state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(1.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(0.0);
+        log.debug("Checks passed");
+
+        log.debug("Set playback rate to 4.0");
+        mediaPlayer.setRate(4.0);
+
+        robot.clickOn(playButton);
+
+        log.debug("Waiting for media player to play for additional 20 seconds...");
+        final Duration currentTime2 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime2.add(Duration.seconds(20))),
+                mediaPlayer.currentTimeProperty()));
+
+        log.debug("Check initial playback rate and current rate in playing state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(4.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(4.0);
+        log.debug("Checks passed");
+
+        log.debug("Set playback rate to 2.0 while playing");
+        mediaPlayer.setRate(2.0);
+
+        log.debug("Waiting for media player to play for additional 10 seconds...");
+        final Duration currentTime3 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime3.add(Duration.seconds(5))),
+                mediaPlayer.currentTimeProperty()));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        log.debug("Check new playback rate and current rate in playing state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(2.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(4.0);
+        log.debug("Checks passed");
+
+        log.debug("Set playback rate to -1.0 while playing");
+        mediaPlayer.setRate(-1.0); // less than 0.0, is clamp to 0.0
+
+        log.debug("Check new playback rate and current rate in playing state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(-1.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(4.0);
+        log.debug("Checks passed");
+
+        robot.clickOn(pauseButton);
+        TimeUnit.SECONDS.sleep(1);
+        log.debug("Set playback rate to 10.0");
+        mediaPlayer.setRate(10.0); // more than 8.0, is clamp to 8.0
+        robot.clickOn(playButton);
+
+        log.debug("Waiting for media player to play for additional 30 seconds...");
+        final Duration currentTime5 = mediaPlayer.getCurrentTime();
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, Bindings.createBooleanBinding(() ->
+                        mediaPlayer.getCurrentTime().greaterThan(currentTime5.add(Duration.seconds(30))),
+                mediaPlayer.currentTimeProperty()));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        log.debug("Check new playback rate and current rate in playing state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(10.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(10.0);
+        log.debug("Checks passed");
+
+        robot.clickOn(stopButton);
+
+        log.debug("Check playback rate and current rate in stopped state...");
+        assertThat(mediaPlayer.getRate()).isEqualTo(10.0);
+        assertThat(mediaPlayer.getCurrentRate()).isEqualTo(0.0);
+        log.debug("Checks passed");
     }
 
     private void waitForStatusReady() throws TimeoutException {
