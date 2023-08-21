@@ -59,9 +59,9 @@ configure([project("tree-showing"), project("jpro-media"), project("jpro-sound")
     publications {
       mavenJava(MavenPublication) {
         from components.java
-        groupId "one.jpro.jproutils"
+        groupId "one.jpro.platform"
         artifactId project.name
-        version JPRO_UTILS_VERSION
+        version JPRO_PLATFORM_VERSION
       }
     }
     java {

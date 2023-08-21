@@ -59,9 +59,9 @@ def docArtifact = artifacts.add('archives', new File("$projectDir", 'DOCUMENTATI
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId "one.jpro.jproutils"
+            groupId "one.jpro.platform"
             artifactId project.name
-            version JPRO_UTILS_VERSION
+            version JPRO_PLATFORM_VERSION
             artifact docArtifact
         }
     }

@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
-import one.jpro.jproutils.htmlscrollpane.HTMLScrollPaneSkin;
+import one.jpro.htmlscrollpane.HTMLScrollPaneSkin;
 
 public class HTMLScrollPaneSample extends Application {
 

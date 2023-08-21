@@ -1,4 +1,4 @@
-# JPro Utils
+# JPro Platform
 
 Various utilities for JavaFX.
 To use them, you need the following repository:
@@ -18,7 +18,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 Maven
 ```
 <dependency>
-  <groupId>one.jpro.jproutils</groupId>
+  <groupId>one.jpro.platform</groupId>
   <artifactId>jpro-sessions</artifactId>
    <version>0.2.2</version>
 </dependency>
@@ -43,16 +43,16 @@ Notes:
 #### Maven
 ```
 <dependency>
-  <groupId>one.jpro.jproutils</groupId>
+  <groupId>one.jpro.platform</groupId>
   <artifactId>jpro-media</artifactId>
-  <version>0.2.3-SNAPSHOT</version>
+  <version>0.2.3</version>
 </dependency>
 ```
 
 #### Gradle
 ```
 dependencies {
-    implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
+    implementation 'one.jpro.platform:jpro-media:0.2.3'
 }
 ```
 
@@ -68,7 +68,7 @@ With this project, we want to make the property available to the common JavaFX D
 #### Maven
 ```
 <dependency>
-  <groupId>one.jpro.jproutils</groupId>
+  <groupId>one.jpro.platform</groupId>
   <artifactId>tree-showing</artifactId>
   <version>0.2.2</version>
 </dependency>
@@ -77,7 +77,7 @@ With this project, we want to make the property available to the common JavaFX D
 #### Gradle
 ```
 dependencies {
-    implementation 'one.jpro.jproutils:tree-showing:0.2.2'
+    implementation 'one.jpro.platform:tree-showing:0.2.3'
 }
 ```
 The module name is `jpro.utils.treeshowing`

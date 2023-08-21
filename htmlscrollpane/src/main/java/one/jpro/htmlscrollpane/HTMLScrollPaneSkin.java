@@ -1,4 +1,4 @@
-package one.jpro.jproutils.htmlscrollpane;
+package one.jpro.htmlscrollpane;
 
 
 import com.jpro.webapi.HTMLView;
@@ -17,7 +17,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
-import one.jpro.jproutils.treeshowing.TreeShowing;
+import one.jpro.treeshowing.TreeShowing;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -53,7 +53,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
         htmlView.setMinHeight(500);
 
-        one.jpro.jproutils.treeshowing.TreeShowing.treeShowing(control).addListener(
+        TreeShowing.treeShowing(control).addListener(
                 (p,o,n) -> {
                     // add cssBridgeTarget when scene is not null, remove otherwise
                     if (n) {
