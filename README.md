@@ -1,6 +1,29 @@
 # JPro Platform
+![Build](https://github.com/jpro-one/jpro-utils/actions/workflows/linux.yml/badge.svg)
 
-Various utilities for JavaFX.
+The JPro Platform represents the foundation of cross-platform application development,
+seamlessly integrating the power of JavaFX with the limitless potential of web-based applications.
+By offering specialized modules and a dedicated API, JPro ensures developers can harness the strengths of JavaFX
+while deploying applications that run beautifully on the web.
+
+### Key Features:
+* **Modular Components**: Begin your development journey with an assortment of pre-configured modules designed to 
+bolster various functionalities and UI/UX standards. Each module encapsulates reusability, encouraging developers to 
+integrate them across a multitude of projects.
+* **Web-Ready JavaFX Applications**: JPro empowers developers to run JavaFX applications directly in the web browser,
+eliminating the boundary between desktop and web applications.
+* **Cross-Platform API**: The JPro Web API provides a simplified interface that meshes with JavaFX constructs, effortlessly
+catering to the specifics of web-based deployments.
+
+### Benefits:
+* **Unified Development Paradigm**: JPro provides a cohesive development environment, ensuring consistent behavior 
+between JavaFX and web deployments.
+* **Accelerated Deployment**: The combination of ready-made modules and a user-friendly API paves the way for rapid
+development and deployment.
+* **Economic Efficiency**: The ability to cater to both JavaFX and web platforms using a singular codebase leads to
+significant savings in development time, resources, and costs.
+____
+
 To use them, you need the following repository:
 ```
   maven {
