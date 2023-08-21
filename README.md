@@ -31,6 +31,26 @@ To use them, you need the following repository:
   }
 ```
 
+## JPro Auth
+Rely on `jpro-auth` module to add sophisticated authentication and authorization to your JPro/JavaFX applications.
+Finely control access with a degree of customization that can accommodate even the most complex security requirements.
+
+#### Maven configuration
+```maven
+<dependency>
+  <groupId>one.jpro.platform</groupId>
+  <artifactId>jpro-auth</artifactId>
+   <version>0.2.4-SNAPSHOT</version>
+</dependency>
+```
+
+#### Gradle configuration
+```gradle
+dependencies {
+    implementation 'one.jpro.platform:jpro-auth:0.2.4-SNAPSHOT'
+}
+```
+
 ## JPro Sessions
 #### Explanation
 This library provides a simple implementation of a session manager for JavaFX/JPro applications.
