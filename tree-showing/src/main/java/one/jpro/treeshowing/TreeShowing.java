@@ -38,9 +38,7 @@ public class TreeShowing {
                     myScene.getWindow().isShowing());
             };
 
-            ChangeListener<Boolean> updateVisibleListener = (p,o,value) -> {
-                updateValue.run();
-            };
+            ChangeListener<Boolean> updateVisibleListener = (p, o, value) -> updateValue.run();
 
             ChangeListener<Window> updateWindowListener = (p, o, ignore) -> {
                 Scene scene = node.getScene();

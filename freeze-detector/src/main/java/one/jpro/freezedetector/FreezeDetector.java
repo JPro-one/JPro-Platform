@@ -30,7 +30,7 @@ public class FreezeDetector {
         }.start();
 
         var t = new Thread(() -> {
-            while(true && fxthread.getState() != Thread.State.TERMINATED) {
+            while(fxthread.getState() != Thread.State.TERMINATED) {
                 long now = System.currentTimeMillis();
                 long timeGone = now - lastUpdate;
                 try {
@@ -38,16 +38,16 @@ public class FreezeDetector {
                     if(toSleep > 0) {
                         Thread.sleep(toSleep);
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
                 if(System.currentTimeMillis() - lastUpdate > duration.toMillis()) {
                     callback.accept(fxthread);
                     lastUpdate = System.currentTimeMillis();
                     try {
                         Thread.sleep(duration.toMillis());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }

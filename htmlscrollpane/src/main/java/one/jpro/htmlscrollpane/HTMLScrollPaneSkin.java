@@ -203,19 +203,17 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
     }
 
     static class WeakCleanupRunnable implements Runnable {
-        WeakReference<WebAPI> webAPI = null;
-        WeakReference<WebAPI> webAPI2 = null;
-        String action = null;
-
-        WeakReference<Window> toClose = null;
+        WeakReference<WebAPI> webAPI;
+        WeakReference<WebAPI> webAPI2;
+        String action;
 
         public WeakCleanupRunnable(WebAPI webAPI, String action, WebAPI webAPI2) {
             if(webAPI == webAPI2) {
                 throw new RuntimeException("Got same WebAPI twice!");
             }
-            this.webAPI = new WeakReference(webAPI);
+            this.webAPI = new WeakReference<>(webAPI);
             this.action = action;
-            this.webAPI2 = new WeakReference(webAPI2);
+            this.webAPI2 = new WeakReference<>(webAPI2);
         }
 
         public void run() {
@@ -241,13 +239,13 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             parentField.setAccessible(true);
             Object peer = parentField.get(node);
             if(peer != null) {
-                Class ngnode = peer.getClass().getClassLoader().loadClass("com.sun.javafx.sg.prism.NGNode");
+                var ngnode = peer.getClass().getClassLoader().loadClass("com.sun.javafx.sg.prism.NGNode");
                 parentField = ngnode.getDeclaredField("parent");
                 parentField.setAccessible(true);
                 parentField.set(peer, null);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -260,7 +258,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             mouseHandlerField.setAccessible(true);
             Object mouseHandler = mouseHandlerField.get(scene);
             if (mouseHandler != null) {
-                Class mousehandler = mouseHandler.getClass();
+                var mousehandler = mouseHandler.getClass();
                 Field newEventTargetsField = mousehandler.getDeclaredField("newEventTargets");
                 newEventTargetsField.setAccessible(true);
                 List<Object> newEventTargets = (List<Object>) newEventTargetsField.get(mouseHandler);
@@ -268,8 +266,8 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
                     newEventTargets.clear();
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -282,8 +280,8 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             ownerNodeField.setAccessible(true);
             Property<Object> p = (Property<Object>) ownerNodeField.get(window);
             p.setValue(null);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
