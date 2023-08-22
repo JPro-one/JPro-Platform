@@ -55,34 +55,6 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
   }
-
-  java {
-    withSourcesJar() // this also works for scala, nice!
-    //withJavadocJar() // let's skip this for now, because it's unclear how this interacts with scala
-  }
-
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from components.java
-        groupId project.group
-        artifactId ("jpro-routing-" + project.name)
-        version project.version
-        //artifact sourcesJar
-      }
-    }
-
-    repositories {
-      maven {
-        name = "artifactory"
-        url = "https://sandec.jfrog.io/artifactory/repo"
-        credentials {
-          username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
-          password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
-        }
-      }
-    }
-  }
 }
 
 configure([project(':jpro-routing:core')]) {

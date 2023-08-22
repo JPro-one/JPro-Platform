@@ -83,3 +83,34 @@ configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"),
     }
   }
 }
+
+configure([project(":jpro-routing:core"), project(":jpro-routing:dev"), project(":jpro-routing:popup")]) {
+  apply plugin: 'maven-publish'
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        groupId "one.jpro.platform"
+        artifactId "jpro-routing-" + project.name
+        version JPRO_PLATFORM_VERSION
+      }
+    }
+
+    java {
+      withSourcesJar()
+      withJavadocJar()
+    }
+
+    repositories {
+      maven {
+        name = "artifactory"
+        url = "https://sandec.jfrog.io/artifactory/repo"
+        credentials {
+          username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
+          password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
+        }
+      }
+    }
+  }
+}
