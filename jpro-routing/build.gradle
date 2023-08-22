@@ -1,0 +1,112 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
+System.setProperty("file.encoding", "UTF-8")
+
+buildscript {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    maven {
+      url "https://sandec.jfrog.io/artifactory/repo"
+    }
+  }
+
+  dependencies {
+    classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
+    classpath "SANDEC:simplefx-plugin-gradle:$SIMPLEFX_VERSION"
+    classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
+  }
+}
+
+configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:core-test')]) {
+  repositories {
+    mavenCentral()
+    maven {
+      url "https://sandec.jfrog.io/artifactory/repo"
+    }
+  }
+
+  apply plugin: 'de.sandec.simplefx'
+
+  compileScala {
+    targetCompatibility = "1.8"
+  }
+
+  test {
+    useJUnitPlatform()
+
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat TestExceptionFormat.FULL
+    testLogging.showExceptions true
+    testLogging.showCauses true
+    testLogging.showStackTraces true
+  }
+}
+
+configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
+  apply plugin: 'java-library'
+  apply plugin: 'maven-publish'
+
+  dependencies {
+    api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    api "SANDEC:jnodes:$JNODES_VERSION"
+    api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+    api "org.scala-lang:scala-library:2.12.10"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+  }
+
+  java {
+    withSourcesJar() // this also works for scala, nice!
+    //withJavadocJar() // let's skip this for now, because it's unclear how this interacts with scala
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        groupId project.group
+        artifactId ("jpro-routing-" + project.name)
+        version project.version
+        //artifact sourcesJar
+      }
+    }
+
+    repositories {
+      maven {
+        name = "artifactory"
+        url = "https://sandec.jfrog.io/artifactory/repo"
+        credentials {
+          username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
+          password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
+        }
+      }
+    }
+  }
+}
+
+configure([project(':jpro-routing:core')]) {
+  dependencies {
+    api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
+  }
+}
+
+configure([project(':jpro-routing:dev')]) {
+  dependencies {
+    implementation project(':jpro-routing:core')
+    api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
+    api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
+    api "org.kordamp.ikonli:ikonli-ionicons4-pack:$IKONLI_VERSION"
+    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+    implementation 'org.scenic-view:scenic-view:11.0.3-SNAPSHOT-FORK'
+  }
+}
+
+configure([project(':jpro-routing:core-test')]) {
+  dependencies {
+    implementation project(':jpro-routing:core')
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+  }
+}

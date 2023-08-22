@@ -52,6 +52,7 @@ configure([project("jpro-sessions")]) {
     implementation "commons-io:commons-io:2.11.0"
   }
 }
+
 configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"), project("jpro-sound"),
            project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
@@ -64,10 +65,12 @@ configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"),
         version JPRO_PLATFORM_VERSION
       }
     }
+
     java {
       withSourcesJar()
       withJavadocJar()
     }
+
     repositories {
       maven {
         name = "artifactory"

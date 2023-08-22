@@ -1,0 +1,26 @@
+
+
+.devfilter-hbox {
+    -fx-alignment: center; 
+    -fx-padding: 5;
+    -fx-spacing: 16;
+    -fx-background-color: white;
+}
+.devfilter-icon-button,
+.devfilter-icon-button:focused {
+    -fx-font-size: 24;
+    -fx-padding: 0;
+    -fx-background-radius: 20;
+    -fx-min-width: 35;
+    -fx-min-height: 35;
+
+    /*-fx-border: null;*/
+    -fx-border: transparent;
+    -fx-background-color: transparent;
+}
+.devfilter-icon-button:hover {
+  -fx-background-color: #eee;
+}
+.devfilter-icon-button:pressed {
+  -fx-background-color: #ddd;
+}
