@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.sessionmanager
 
-import com.jpro.webapi.{WebAPI, WebCallback}
+import com.jpro.webapi.WebAPI
 import one.jpro.platform.routing.{Redirect, Response, RouteNode, View}
 import simplefx.all._
 

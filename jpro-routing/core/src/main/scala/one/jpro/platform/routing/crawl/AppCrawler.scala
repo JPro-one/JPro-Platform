@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.crawl
 
-import one.jpro.platform.routing.{Redirect, RouteNode, SessionManagerContext, View}
 import one.jpro.platform.routing.sessionmanager.DummySessionManager
+import one.jpro.platform.routing.{Redirect, RouteNode, SessionManagerContext, View}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._

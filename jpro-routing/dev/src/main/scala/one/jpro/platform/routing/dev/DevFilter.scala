@@ -1,15 +1,15 @@
 package one.jpro.platform.routing.dev
 
-import simplefx.core._
-import simplefx.all._
-import simplefx.experimental._
-import org.scenicview.ScenicView
-import fr.brouillard.oss.cssfx.CSSFX
 import com.jpro.webapi.WebAPI
 import de.sandec.jmemorybuddy.JMemoryBuddyLive
-import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
+import fr.brouillard.oss.cssfx.CSSFX
 import one.jpro.platform.routing.filter.container.ContainerFilter
+import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
 import org.kordamp.ikonli.javafx.FontIcon
+import org.scenicview.ScenicView
+import simplefx.all._
+import simplefx.core._
+import simplefx.experimental._
 
 object DevFilter {
 

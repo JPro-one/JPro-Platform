@@ -1,10 +1,8 @@
 package one.jpro.platform.routing.popup;
 
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import simplefx.experimental.parts.FXFuture;
 

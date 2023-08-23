@@ -1,10 +1,9 @@
 package one.jpro.platform.routing.crawl
 
-import TestUtils._
-import one.jpro.platform.routing.{Redirect, Route, RouteNode}
 import one.jpro.platform.routing.RouteUtils._
+import one.jpro.platform.routing.crawl.TestUtils._
+import one.jpro.platform.routing.{Redirect, Route, RouteNode}
 import org.junit.jupiter.api.Test
-import simplefx.core._
 import simplefx.experimental._
 
 class TestSitemapGenerator {

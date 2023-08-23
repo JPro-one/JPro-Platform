@@ -2,9 +2,9 @@ package one.jpro.platform.auth.http.impl;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpServerException;
-import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpStatus;
 import one.jpro.platform.auth.utils.PlatformUtils;
 import org.jetbrains.annotations.NotNull;

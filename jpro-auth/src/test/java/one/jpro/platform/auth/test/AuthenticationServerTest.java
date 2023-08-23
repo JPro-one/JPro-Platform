@@ -1,7 +1,7 @@
 package one.jpro.platform.auth.test;
 
-import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpMethod;
+import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 

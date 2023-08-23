@@ -1,9 +1,9 @@
 package one.jpro.platform.routing.popup.simplepopup;
 
-import one.jpro.platform.routing.popup.PopupAPI;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import one.jpro.platform.routing.popup.PopupAPI;
 
 import java.util.Arrays;
 

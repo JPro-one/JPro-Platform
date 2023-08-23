@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.crawl
 
-import AppCrawler.CrawlReportApp
 import de.sandec.jmemorybuddy.JMemoryBuddy
+import one.jpro.platform.routing.crawl.AppCrawler.CrawlReportApp
 import one.jpro.platform.routing.{RouteNode, View}
 import simplefx.cores.default.inFX
 

@@ -1,8 +1,6 @@
 package one.jpro.platform.routing.filter.container
 
 import one.jpro.platform.routing.{Filter, Request, View}
-import simplefx.core._
-import simplefx.experimental._
 import simplefx.all._
 
 import java.util.function.Supplier

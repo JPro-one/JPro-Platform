@@ -3,9 +3,8 @@ package one.jpro.platform.routing
 import com.jpro.webapi.WebAPI
 import javafx.application.Application
 import javafx.scene.Scene
-import javafx.stage.{Stage, StageStyle}
-import javafx.scene.Parent
 import javafx.scene.layout.StackPane
+import javafx.stage.{Stage, StageStyle}
 import one.jpro.platform.routing.sessionmanager.SessionManager
 
 abstract class RouteApp extends Application {

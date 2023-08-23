@@ -1,12 +1,8 @@
 package one.jpro.platform.routing.sessionmanager
 
-import java.net.URL
-import java.net.URLDecoder
-import com.jpro.webapi.{InstanceCloseListener, ScriptResultListener, WebAPI, WebCallback}
-import one.jpro.platform.routing.{HistoryEntry, Redirect, Response, RouteNode, View}
+import one.jpro.platform.routing._
 import simplefx.all._
 import simplefx.core._
-import simplefx.experimental._
 import simplefx.util.ReflectionUtil
 
 

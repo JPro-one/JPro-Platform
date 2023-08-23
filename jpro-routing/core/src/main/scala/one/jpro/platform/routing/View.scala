@@ -2,7 +2,6 @@ package one.jpro.platform.routing
 
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import simplefx.all
-import simplefx.core._
 import simplefx.all._
 
 abstract class View extends Response { THIS =>

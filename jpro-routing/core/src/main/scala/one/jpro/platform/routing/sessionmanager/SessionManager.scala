@@ -1,19 +1,17 @@
 package one.jpro.platform.routing.sessionmanager
 
-import java.net.URL
-import java.net.URLDecoder
-import com.jpro.webapi.{InstanceCloseListener, ScriptResultListener, WebAPI, WebCallback}
+import com.jpro.webapi.WebAPI
 import de.sandec.jmemorybuddy.JMemoryBuddyLive
-import javafx.beans.property.{ObjectProperty, Property, SimpleObjectProperty, SimpleStringProperty, StringProperty}
+import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
 import one.jpro.platform.routing.{HistoryEntry, Response, RouteNode, View}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
 
+import java.awt.Desktop
 import java.net.URI
 import java.util.function.Consumer
-import java.awt.Desktop
 
 
 trait SessionManager { THIS =>

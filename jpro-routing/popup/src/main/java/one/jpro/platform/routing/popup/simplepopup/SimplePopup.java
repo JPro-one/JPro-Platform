@@ -1,12 +1,12 @@
 package one.jpro.platform.routing.popup.simplepopup;
 
 
-import one.jpro.platform.routing.popup.PopupAPI;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import one.jpro.platform.routing.popup.PopupAPI;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;

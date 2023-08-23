@@ -1,10 +1,10 @@
 package one.jpro.platform.routing
 
-import java.net.URL
-
-import com.jpro.webapi.{HTMLView, SVGView, WebAPI}
+import com.jpro.webapi.{SVGView, WebAPI}
 import simplefx.all._
 import simplefx.core._
+
+import java.net.URL
 
 class ParallaxView(imgurl: URL) extends StackPane { THIS =>
 

@@ -1,12 +1,11 @@
 package one.jpro.platform.routing.crawl
 
-import AppCrawler.CrawlReportApp
+import one.jpro.platform.routing.crawl.AppCrawler.CrawlReportApp
 
 import javax.xml.transform.OutputKeys
 
 object SitemapGenerator {
   def createSitemap(prefix: String, report: CrawlReportApp): String = {
-    import javax.xml.parsers.DocumentBuilder
     import javax.xml.parsers.DocumentBuilderFactory
     import javax.xml.transform.TransformerFactory
     import javax.xml.transform.dom.DOMSource
@@ -47,7 +46,6 @@ object SitemapGenerator {
     transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
     val source = new DOMSource(doc)
 
-    import javax.xml.transform.stream.StreamResult
     import java.io.StringWriter
     val writer = new StringWriter
     val result = new StreamResult(writer)

@@ -1,5 +1,6 @@
 package one.jpro.platform;
 
+import javafx.application.Platform;
 import one.jpro.platform.freezedetector.FreezeDetector;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javafx.application.Platform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestFreezeDetector {

@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.filter.container
 
-import javafx.beans.property.{ObjectProperty, Property}
+import javafx.beans.property.ObjectProperty
 import one.jpro.platform.routing.Request
 
 trait Container {

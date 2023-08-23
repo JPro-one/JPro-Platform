@@ -1,10 +1,10 @@
 package one.jpro.platform.routing
 
-import LinkUtil.isValidLink
 import javafx.scene.Node
+import one.jpro.platform.routing.LinkUtil.isValidLink
 
 import java.lang.ref.WeakReference
-import java.net.{URI, URLEncoder}
+import java.net.URI
 
 case class Request (
   url: String,
