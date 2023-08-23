@@ -9,6 +9,6 @@ module one.jpro.routing.popup {
     requires scala.library;
     requires org.kordamp.ikonli.javafx;
 
-    exports one.jpro.routing.popup.simplepopup;
-    exports one.jpro.routing.popup;
+    exports one.jpro.platform.routing.popup.simplepopup;
+    exports one.jpro.platform.routing.popup;
 }

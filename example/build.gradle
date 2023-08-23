@@ -20,17 +20,17 @@ dependencies {
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
-mainClassName = 'one.jpro.utils.example.Main'
+mainClassName = 'one.jpro.platform.utils.example.Main'
 
-//mainClassName = 'one.jpro.utils.example.JProSoundSample'
-//mainClassName = 'one.jpro.utils.example.SessionManagerSample'
-//mainClassName = 'one.jpro.utils.example.HTMLScrollPaneSample'
+//mainClassName = 'one.jpro.platform.utils.example.JProSoundSample'
+//mainClassName = 'one.jpro.platform.utils.example.SessionManagerSample'
+//mainClassName = 'one.jpro.platform.utils.example.HTMLScrollPaneSample'
 
-//mainClassName = 'one.jpro.example.media.MediaPlayerSample'
-//mainClassName = 'one.jpro.example.media.MediaRecorderSample'
-//mainClassName = 'one.jpro.example.media.MediaRecorderAndPlayerSample'
-//mainClassName = 'one.jpro.example.media.MediaPlayerApplication'
-//mainClassName = 'one.jpro.example.media.MediaRecorderApplication'
+//mainClassName = 'one.jpro.platform.example.media.MediaPlayerSample'
+//mainClassName = 'one.jpro.platform.example.media.MediaRecorderSample'
+//mainClassName = 'one.jpro.platform.example.media.MediaRecorderAndPlayerSample'
+//mainClassName = 'one.jpro.platform.example.media.MediaPlayerApplication'
+//mainClassName = 'one.jpro.platform.example.media.MediaRecorderApplication'
 
 javafx {
     version = "$JAVAFX_VERSION"

@@ -6,5 +6,5 @@
 module one.jpro.freezedetector {
     requires javafx.graphics;
 
-    exports one.jpro.freezedetector;
+    exports one.jpro.platform.freezedetector;
 }

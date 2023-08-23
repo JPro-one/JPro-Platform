@@ -1,7 +1,7 @@
-import one.jpro.media.MediaSource;
-import one.jpro.media.MediaView;
-import one.jpro.media.player.MediaPlayer;
-import one.jpro.media.recorder.MediaRecorder;
+import one.jpro.platform.media.MediaSource;
+import one.jpro.platform.media.MediaView;
+import one.jpro.platform.media.player.MediaPlayer;
+import one.jpro.platform.media.recorder.MediaRecorder;
 
 /**
  * Defines APIs for playback and recording of video and audio content.
@@ -28,10 +28,10 @@ module one.jpro.media {
     requires org.bytedeco.opencv;
     requires org.bytedeco.ffmpeg;
 
-    opens one.jpro.media;
-    exports one.jpro.media;
-    exports one.jpro.media.event;
-    exports one.jpro.media.player;
-    exports one.jpro.media.recorder;
-    exports one.jpro.media.util;
+    opens one.jpro.platform.media;
+    exports one.jpro.platform.media;
+    exports one.jpro.platform.media.event;
+    exports one.jpro.platform.media.player;
+    exports one.jpro.platform.media.recorder;
+    exports one.jpro.platform.media.util;
 }

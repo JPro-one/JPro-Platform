@@ -11,5 +11,5 @@ open module one.jpro.routing.dev {
     requires org.kordamp.ikonli.ionicons4;
     requires org.scenicview.scenicview;
 
-    exports one.jpro.routing.dev;
+    exports one.jpro.platform.routing.dev;
 }

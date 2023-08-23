@@ -10,9 +10,9 @@ module one.jpro.routing.core {
     requires transitive jpro.webapi;
     requires java.desktop;
 
-    exports one.jpro.routing;
-    exports one.jpro.routing.crawl;
-    exports one.jpro.routing.filter.container;
-    exports one.jpro.routing.sessionmanager;
-    exports one.jpro.routing.extensions.linkheader;
+    exports one.jpro.platform.routing;
+    exports one.jpro.platform.routing.crawl;
+    exports one.jpro.platform.routing.filter.container;
+    exports one.jpro.platform.routing.sessionmanager;
+    exports one.jpro.platform.routing.extensions.linkheader;
 }

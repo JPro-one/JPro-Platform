@@ -2,5 +2,5 @@ module jpro.utils.treeshowing {
     requires javafx.controls;
     requires de.sandec.jmemorybuddy;
 
-    exports one.jpro.treeshowing;
+    exports one.jpro.platform.treeshowing;
 }

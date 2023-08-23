@@ -4,5 +4,5 @@ module one.jpro.sessionmanager {
     requires java.logging;
     requires org.apache.commons.io;
 
-    exports one.jpro.sessionmanager;
+    exports one.jpro.platform.sessionmanager;
 }

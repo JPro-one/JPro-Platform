@@ -4,5 +4,5 @@ module jpro.utils.htmlscrollpane {
     requires jpro.webapi;
     requires jpro.utils.treeshowing;
 
-    exports one.jpro.htmlscrollpane;
+    exports one.jpro.platform.htmlscrollpane;
 }
