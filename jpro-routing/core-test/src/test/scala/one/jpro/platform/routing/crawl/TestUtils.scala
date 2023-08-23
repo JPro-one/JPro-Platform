@@ -4,7 +4,7 @@ import one.jpro.platform.routing.{LinkUtil, View}
 import simplefx.all._
 
 object TestUtils {
-  def pageWithLink(links: List[String]) = new View {
+  def pageWithLink(links: List[String]): View = new View {
     def title = "title"
     def description = "desc"
     override def content: Node = new HBox {

@@ -2,8 +2,8 @@ package one.jpro.platform.routing.crawl
 
 import TestUtils.{Page1, Page2}
 import javafx.scene.control.Label
-import one.jpro.platform.routing.crawl.{AppCrawler, MemoryTester}
 import one.jpro.platform.routing.{Route, RouteNode}
+import one.jpro.platform.routing.RouteUtils._
 import simplefx.cores.default.inFX
 import simplefx.util.Predef.intercept
 import org.junit.jupiter.api.Test

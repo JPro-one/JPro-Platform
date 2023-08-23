@@ -3,8 +3,9 @@ package one.jpro.platform.routing.crawl
 import simplefx.all._
 import simplefx.core._
 import TestUtils._
-import one.jpro.platform.routing.crawl.AppCrawler
+import one.jpro.platform.routing.crawl.AppCrawler.LinkInfo
 import one.jpro.platform.routing.{LinkUtil, Route, RouteNode, RouteUtils, View}
+import one.jpro.platform.routing.RouteUtils._
 import simplefx.all
 import org.junit.jupiter.api.Test
 import simplefx.util.Predef.intercept

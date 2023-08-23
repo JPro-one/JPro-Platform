@@ -1,6 +1,5 @@
 package one.jpro.platform.routing
 
-import one.jpro.platform.routing.{LinkUtil, Request}
 import org.junit.jupiter.api.Test
 
 class TestRequest {

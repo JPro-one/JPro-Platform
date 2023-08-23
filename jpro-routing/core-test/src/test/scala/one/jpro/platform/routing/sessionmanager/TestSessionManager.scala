@@ -1,6 +1,5 @@
 package one.jpro.platform.routing.sessionmanager
 
-import one.jpro.platform.routing.sessionmanager.SessionManager
 import org.junit.jupiter.api.Test
 
 class TestSessionManager {
