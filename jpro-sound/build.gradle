@@ -1,4 +1,0 @@
-
-dependencies {
-  implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-}

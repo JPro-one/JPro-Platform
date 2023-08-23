@@ -4,7 +4,6 @@ module one.jpro.utils.example {
     requires jpro.webapi;
     requires jpro.utils.htmlscrollpane;
     requires one.jpro.media;
-    requires one.jpro.sound;
     requires one.jpro.sessionmanager;
 
     requires atlantafx.base;

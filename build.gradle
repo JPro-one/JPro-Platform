@@ -5,6 +5,7 @@ buildscript {
         url "https://sandec.jfrog.io/artifactory/repo"
     }
   }
+
   dependencies {
     classpath 'org.openjfx:javafx-plugin:0.0.14'
     classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
@@ -53,7 +54,7 @@ configure([project("jpro-sessions")]) {
   }
 }
 
-configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"), project("jpro-sound"),
+configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"),
            project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {
