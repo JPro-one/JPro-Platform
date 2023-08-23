@@ -2,7 +2,7 @@ module jpro.utils.htmlscrollpane {
     requires javafx.controls;
     requires de.sandec.jmemorybuddy;
     requires jpro.webapi;
-    requires jpro.utils.treeshowing;
+    requires one.jpro.platform.treeshowing;
 
-    exports one.jpro.jproutils.htmlscrollpane;
+    exports one.jpro.platform.htmlscrollpane;
 }

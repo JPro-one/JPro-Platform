@@ -1,0 +1,45 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.openjfx.javafxplugin'
+}
+
+group = 'one.jpro'
+version = "$JPRO_PLATFORM_VERSION"
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://sandec.jfrog.io/artifactory/repo"
+    }
+}
+
+dependencies {
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "com.auth0:java-jwt:$AUTH0_JAVAJWT_VERSION"
+    implementation "com.auth0:jwks-rsa:$AUTH0_JWKSRSA_VERSION"
+    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
+    api "jakarta.inject:jakarta.inject-api:$JAKARTA_INJECT_VERSION"
+    api "org.slf4j:slf4j-api:$SLF4J_VERSION"
+    api "org.json:json:$JSON_VERSION"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+    testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        exceptionFormat "full"
+    }
+}

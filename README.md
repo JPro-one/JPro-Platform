@@ -1,11 +1,54 @@
-# JPro Utils
+# JPro Platform
+![Build](https://github.com/jpro-one/jpro-utils/actions/workflows/linux.yml/badge.svg)
 
-Various utilities for JavaFX.
+The JPro Platform represents the foundation of cross-platform application development,
+seamlessly integrating the power of JavaFX with the limitless potential of web-based applications.
+By offering specialized modules and a dedicated API, JPro ensures developers can harness the strengths of JavaFX
+while deploying applications that run beautifully on the web.
+
+### Key Features:
+* **Modular Components**: Begin your development journey with an assortment of pre-configured modules designed to 
+bolster various functionalities and UI/UX standards. Each module encapsulates reusability, encouraging developers to 
+integrate them across a multitude of projects.
+* **Web-Ready JavaFX Applications**: JPro empowers developers to run JavaFX applications directly in the web browser,
+eliminating the boundary between desktop and web applications.
+* **Cross-Platform API**: The JPro Web API provides a simplified interface that meshes with JavaFX constructs, effortlessly
+catering to the specifics of web-based deployments.
+
+### Benefits:
+* **Unified Development Paradigm**: JPro provides a cohesive development environment, ensuring consistent behavior 
+between JavaFX and web deployments.
+* **Accelerated Deployment**: The combination of ready-made modules and a user-friendly API paves the way for rapid
+development and deployment.
+* **Economic Efficiency**: The ability to cater to both JavaFX and web platforms using a singular codebase leads to
+significant savings in development time, resources, and costs.
+____
+
 To use them, you need the following repository:
 ```
   maven {
     url "https://sandec.jfrog.io/artifactory/repo"
   }
+```
+
+## JPro Auth
+Rely on `jpro-auth` module to add sophisticated authentication and authorization to your JPro/JavaFX applications.
+Finely control access with a degree of customization that can accommodate even the most complex security requirements.
+
+#### Maven configuration
+```maven
+<dependency>
+  <groupId>one.jpro.platform</groupId>
+  <artifactId>jpro-auth</artifactId>
+   <version>0.2.4-SNAPSHOT</version>
+</dependency>
+```
+
+#### Gradle configuration
+```gradle
+dependencies {
+    implementation 'one.jpro.platform:jpro-auth:0.2.4-SNAPSHOT'
+}
 ```
 
 ## JPro Sessions
@@ -18,7 +61,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 Maven
 ```
 <dependency>
-  <groupId>one.jpro.jproutils</groupId>
+  <groupId>one.jpro.platform</groupId>
   <artifactId>jpro-sessions</artifactId>
    <version>0.2.2</version>
 </dependency>
@@ -43,16 +86,16 @@ Notes:
 #### Maven
 ```
 <dependency>
-  <groupId>one.jpro.jproutils</groupId>
+  <groupId>one.jpro.platform</groupId>
   <artifactId>jpro-media</artifactId>
-  <version>0.2.3-SNAPSHOT</version>
+  <version>0.2.3</version>
 </dependency>
 ```
 
 #### Gradle
 ```
 dependencies {
-    implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
+    implementation 'one.jpro.platform:jpro-media:0.2.3'
 }
 ```
 
@@ -68,7 +111,7 @@ With this project, we want to make the property available to the common JavaFX D
 #### Maven
 ```
 <dependency>
-  <groupId>one.jpro.jproutils</groupId>
+  <groupId>one.jpro.platform</groupId>
   <artifactId>tree-showing</artifactId>
   <version>0.2.2</version>
 </dependency>
@@ -77,7 +120,7 @@ With this project, we want to make the property available to the common JavaFX D
 #### Gradle
 ```
 dependencies {
-    implementation 'one.jpro.jproutils:tree-showing:0.2.2'
+    implementation 'one.jpro.platform:tree-showing:0.2.3'
 }
 ```
 The module name is `jpro.utils.treeshowing`

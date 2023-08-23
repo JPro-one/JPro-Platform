@@ -1,8 +1,8 @@
-module one.jpro.sessionmanager {
+module one.jpro.platform.sessionmanager {
     requires javafx.controls;
     requires jpro.webapi;
     requires java.logging;
     requires org.apache.commons.io;
 
-    exports one.jpro.sessionmanager;
+    exports one.jpro.platform.sessionmanager;
 }

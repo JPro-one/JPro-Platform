@@ -3,8 +3,8 @@
  *
  * @author Besmir Beqiri
  */
-module one.jpro.freezedetector {
+module one.jpro.platform.freezedetector {
     requires javafx.graphics;
 
-    exports one.jpro.freezedetector;
+    exports one.jpro.platform.freezedetector;
 }

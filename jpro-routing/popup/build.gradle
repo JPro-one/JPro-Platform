@@ -1,0 +1,11 @@
+dependencies {
+    api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    api "SANDEC:jnodes:$JNODES_VERSION"
+    api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+    api project(':jpro-routing:core')
+
+    api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
+    api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+}

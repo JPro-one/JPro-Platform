@@ -1,11 +1,10 @@
-module one.jpro.utils.example {
+module one.jpro.platform.example {
     requires javafx.controls;
     requires javafx.media;
     requires jpro.webapi;
     requires jpro.utils.htmlscrollpane;
-    requires one.jpro.media;
-    requires one.jpro.sound;
-    requires one.jpro.sessionmanager;
+    requires one.jpro.platform.media;
+    requires one.jpro.platform.sessionmanager;
 
     requires atlantafx.base;
 
@@ -25,8 +24,8 @@ module one.jpro.utils.example {
     requires org.bytedeco.ffmpeg.macosx.arm64;
     requires org.bytedeco.opencv.macosx.arm64;
     requires org.bytedeco.openblas.macosx.arm64;
-    requires one.jpro.routing.core;
+    requires one.jpro.platform.routing.core;
 
-    exports one.jpro.utils.example;
-    exports one.jpro.example.media;
+    exports one.jpro.platform.utils.example;
+    exports one.jpro.platform.example.media;
 }
