@@ -16,7 +16,7 @@ import one.jpro.platform.media.recorder.MediaRecorder;
  *
  * @author Besmir Beqiri
  */
-module one.jpro.media {
+module one.jpro.platform.media {
     requires javafx.controls;
     requires javafx.media;
     requires javafx.swing;

@@ -50,7 +50,7 @@ dependencies {
 run {
     doFirst {
         jvmArgs = [
-                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.media'
+                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.platform.media'
         ]
     }
 }
@@ -58,7 +58,7 @@ run {
 or as an application default `jvm argument`:
 ```groovy
 applicationDefaultJvmArgs = [
-        "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"
+        "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
 ]
 ```
 ### Maven
@@ -72,7 +72,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
     <dependency>
         <groupId>one.jpro.jproutils</groupId>
         <artifactId>jpro-media</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>0.2.4-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>org.bytedeco</groupId>
@@ -94,7 +94,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
         <mainClass>one.jpro.example.App</mainClass>
         <options>
             <option>--add-exports</option>
-            <option>javafx.base/com.sun.javafx.event=one.jpro.media</option>
+            <option>javafx.base/com.sun.javafx.event=one.jpro.platform.media</option>
         </options>
     </configuration>
 </plugin>
@@ -196,9 +196,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import one.jpro.media.MediaSource;
-import one.jpro.media.MediaView;
-import one.jpro.media.player.MediaPlayer;
+import one.jpro.platform.media.MediaSource;
+import one.jpro.platform.media.MediaView;
+import one.jpro.platform.media.player.MediaPlayer;
 
 public class MediaPlayerApplication extends Application {
     
@@ -273,9 +273,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import one.jpro.media.MediaView;
-import one.jpro.media.recorder.MediaRecorder;
-import one.jpro.media.util.MediaUtil;
+import one.jpro.platform.media.MediaView;
+import one.jpro.platform.media.recorder.MediaRecorder;
+import one.jpro.platform.media.util.MediaUtil;
 
 import java.io.IOException;
 

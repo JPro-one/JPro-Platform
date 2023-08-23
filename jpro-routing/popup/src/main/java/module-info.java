@@ -3,7 +3,7 @@
  *
  * @author Besmir Beqiri
  */
-module one.jpro.routing.popup {
+module one.jpro.platform.routing.popup {
     requires javafx.controls;
     requires simplefx.extended;
     requires scala.library;

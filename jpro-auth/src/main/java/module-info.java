@@ -3,7 +3,7 @@
  *
  * @author Besmir Beqiri
  */
-module one.jpro.auth {
+module one.jpro.platform.auth {
     requires javafx.graphics;
     requires java.net.http;
     requires jpro.webapi;

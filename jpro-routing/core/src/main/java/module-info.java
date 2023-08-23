@@ -1,4 +1,4 @@
-module one.jpro.routing.core {
+module one.jpro.platform.routing.core {
     requires transitive javafx.controls;
 
     requires transitive de.sandec.jnodes;

@@ -19,13 +19,13 @@ dependencies {
 }
 
 compileJava {
-    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"]
+    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"]
 }
 
 test {
     useJUnitPlatform()
     jvmArgs = [
-            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media",
+            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media",
             "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx"
     ]
     testLogging {
@@ -45,7 +45,7 @@ javadoc {
         version = true
         author = true
         addMultilineStringsOption("-add-exports").setValue([
-                "javafx.base/com.sun.javafx.event=one.jpro.media"
+                "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
         ])
         addStringOption('Xdoclint:none', '-quiet')
     }

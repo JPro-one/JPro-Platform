@@ -38,7 +38,7 @@ javafx {
 run {
     doFirst {
         jvmArgs = [
-                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.media'
+                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.platform.media'
         ]
     }
 }
@@ -47,6 +47,6 @@ application {
   mainClass = "$mainClassName"
   mainModule = moduleName
   applicationDefaultJvmArgs = [
-          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.media"
+          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
   ]
 }
