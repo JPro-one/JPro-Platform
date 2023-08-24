@@ -98,7 +98,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         PopupControl contentPage = new PopupControl();
         contentPage.setSkin(new WeakPopupControlSkin(htmlViewContent));
 
-        contentPage.getProperties().put("APP",null);
+        String windowId = webapi.registerWindow(contentPage); // Hm?
 
         widthListener = (p, o, n) -> {
             htmlViewContent.prefWidthProperty().set(n.doubleValue());
@@ -119,8 +119,6 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
                 workaroundOwnerWindow(contentPage);
             }
         });
-
-        String windowId = webapi.registerWindow(contentPage);
 
         String number = "" + new Random().nextInt(1000000);
         String id = "scrollelem_" + number;
