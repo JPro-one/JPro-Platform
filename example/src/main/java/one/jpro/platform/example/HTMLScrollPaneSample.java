@@ -1,4 +1,4 @@
-package one.jpro.platform.utils.example;
+package one.jpro.platform.example;
 
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -9,7 +9,7 @@ import one.jpro.platform.htmlscrollpane.HTMLScrollPaneSkin;
 public class HTMLScrollPaneSample extends Application {
 
         @Override
-        public void start(javafx.stage.Stage primaryStage) throws Exception {
+        public void start(javafx.stage.Stage primaryStage) {
             javafx.scene.Scene scene = new javafx.scene.Scene(createRoot());
             primaryStage.setScene(scene);
             primaryStage.show();

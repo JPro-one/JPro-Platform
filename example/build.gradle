@@ -19,10 +19,9 @@ dependencies {
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
-mainClassName = 'one.jpro.platform.utils.example.Main'
-
-//mainClassName = 'one.jpro.platform.utils.example.SessionManagerSample'
-//mainClassName = 'one.jpro.platform.utils.example.HTMLScrollPaneSample'
+mainClassName = 'one.jpro.platform.example.Main'
+//mainClassName = 'one.jpro.platform.example.SessionManagerSample'
+//mainClassName = 'one.jpro.platform.example.HTMLScrollPaneSample'
 
 //mainClassName = 'one.jpro.platform.example.media.MediaPlayerSample'
 //mainClassName = 'one.jpro.platform.example.media.MediaRecorderSample'

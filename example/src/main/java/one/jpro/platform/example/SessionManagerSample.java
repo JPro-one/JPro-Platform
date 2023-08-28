@@ -1,4 +1,4 @@
-package one.jpro.platform.utils.example;
+package one.jpro.platform.example;
 
 import com.jpro.webapi.WebAPI;
 import javafx.application.Application;

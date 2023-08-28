@@ -26,6 +26,6 @@ module one.jpro.platform.example {
     requires org.bytedeco.openblas.macosx.arm64;
     requires one.jpro.platform.routing.core;
 
-    exports one.jpro.platform.utils.example;
+    exports one.jpro.platform.example;
     exports one.jpro.platform.example.media;
 }
