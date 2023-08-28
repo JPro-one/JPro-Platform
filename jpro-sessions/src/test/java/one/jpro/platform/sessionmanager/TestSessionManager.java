@@ -16,19 +16,16 @@ public class TestSessionManager {
     @BeforeAll
     public static void startJavaFX() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.startup(() -> {
-            latch.countDown();
-        });
-
+        Platform.startup(latch::countDown);
         latch.await();
     }
 
     @Test
     public void testSessionManager() {
-        inFX(() -> testSessionManagerFX());
+        inFX(this::testSessionManagerFX);
     }
 
-    public void testSessionManagerFX() {
+    private void testSessionManagerFX() {
         // SessionManager should only be instantiated once per VM (per context)
         SessionManager sm1 = new SessionManager("test");
         ObservableMap<String, String> s1 = sm1.getSession("tester1");
@@ -41,7 +38,7 @@ public class TestSessionManager {
         ObservableMap<String, String> s2 = sm2.getSession("tester1");
         ObservableMap<String, String> s3 = sm2.getSession("tester1");
 
-        assertEquals(s2,s3, "Assert that the session are equal");
+        assertEquals(s2, s3, "Assert that the session are equal");
 
         assertEquals(s1.get("k1"), "v1");
         assertEquals(s1.get("k2"), "v2");
@@ -68,9 +65,9 @@ public class TestSessionManager {
         assertFalse(s6.containsKey("k1"));
     }
 
-    public void inFX(Runnable r) {
+    private void inFX(Runnable r) {
         CountDownLatch l = new CountDownLatch(1);
-        AtomicReference<Throwable> ex = new AtomicReference();
+        AtomicReference<Throwable> ex = new AtomicReference<>();
         Platform.runLater(() -> {
             try {
                 r.run();
@@ -82,7 +79,7 @@ public class TestSessionManager {
         });
         try {
             l.await();
-            if(ex.get() != null) {
+            if (ex.get() != null) {
                 throw new RuntimeException(ex.get());
             }
         } catch (Exception e) {

@@ -26,5 +26,4 @@ class TestLinkUtil {
     assert(LinkUtil.isValidLink("http://localhost:8070/info?name=Abid%26Aqib"))
 
   }
-
 }

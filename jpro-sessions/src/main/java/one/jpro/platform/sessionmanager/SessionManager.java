@@ -24,13 +24,13 @@ public class SessionManager {
     private static final Random random = new Random();
 
     public SessionManager(String appName) {
-        this(new File(new File(System.getProperty("user.home")), "." + appName).getAbsoluteFile(), "c-"+appName);
+        this(new File(new File(System.getProperty("user.home")), "." + appName).getAbsoluteFile(), "c-" + appName);
     }
 
     public SessionManager(File baseDirectory, String cookieName) {
         this.baseDirectory = baseDirectory;
         this.cookieName = cookieName;
-        if(!baseDirectory.exists()) {
+        if (!baseDirectory.exists()) {
             baseDirectory.mkdir();
         }
 
@@ -40,34 +40,35 @@ public class SessionManager {
         return baseDirectory;
     }
 
-    public ObservableMap<String,String> getSession(WebAPI webAPI) {
+    public ObservableMap<String, String> getSession(WebAPI webAPI) {
         String cookieValue = webAPI.getCookies().get(cookieName);
-        if(cookieValue == null || !isValidCookie(cookieValue)) {
+        if (cookieValue == null || !isValidCookie(cookieValue)) {
             cookieValue = null;
         } else {
             File sessionDirectory = new File(baseDirectory, cookieValue);
-            if(!sessionDirectory.exists()) {
+            if (!sessionDirectory.exists()) {
                 cookieValue = null;
             }
         }
-        if(cookieValue == null) {
+        if (cookieValue == null) {
             cookieValue = createUniqueIdentifier();
             webAPI.setCookie(cookieName, cookieValue);
         }
         return getSession(cookieValue);
     }
 
-    public ObservableMap<String,String> getSession(String sessionKey) {
-        if(!Platform.isFxApplicationThread()) {
+    public ObservableMap<String, String> getSession(String sessionKey) {
+        if (!Platform.isFxApplicationThread()) {
             throw new RuntimeException("Please use the JFX Application Thread!");
         }
         return getSessionCached(sessionKey);
     }
 
-    private WeakHashMap<String, ObservableMap<String,String>> sessionCache = new WeakHashMap<>();
-    private ObservableMap<String,String> getSessionCached(String sessionKey) {
-        ObservableMap<String,String> res = sessionCache.get(sessionKey);
-        if(res != null) return res;
+    private final WeakHashMap<String, ObservableMap<String, String>> sessionCache = new WeakHashMap<>();
+
+    private ObservableMap<String, String> getSessionCached(String sessionKey) {
+        ObservableMap<String, String> res = sessionCache.get(sessionKey);
+        if (res != null) return res;
         else {
             res = getSessionImpl(sessionKey);
             sessionCache.put(sessionKey, res);
@@ -75,37 +76,37 @@ public class SessionManager {
         }
     }
 
-    private ObservableMap<String,String> getSessionImpl(String sessionKey) {
-        ObservableMap<String,String> session = FXCollections.observableHashMap();
-        if(!baseDirectory.exists()) {
+    private ObservableMap<String, String> getSessionImpl(String sessionKey) {
+        ObservableMap<String, String> session = FXCollections.observableHashMap();
+        if (!baseDirectory.exists()) {
             throw new RuntimeException("Internal Error: session directory does not exist: " + baseDirectory);
         }
         File cookieDirectory = new File(baseDirectory, sessionKey);
-        if(!cookieDirectory.exists()) {
+        if (!cookieDirectory.exists()) {
             cookieDirectory.mkdir();
         }
 
         try {
-            for(File file: cookieDirectory.listFiles()) {
+            for (File file : cookieDirectory.listFiles()) {
                 String key = file.getName();
                 String str = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-                session.put(key,str);
+                session.put(key, str);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        session.addListener((MapChangeListener<String,String>) change -> {
+        session.addListener((MapChangeListener<String, String>) change -> {
             String k = change.getKey();
             File f = new File(cookieDirectory, k);
-            if(change.wasRemoved()) {
+            if (change.wasRemoved()) {
                 f.delete();
             }
-            if(change.wasAdded()) {
+            if (change.wasAdded()) {
                 try {
                     logger.warning("Saving to: " + f);
                     FileUtils.writeStringToFile(f, change.getValueAdded(), StandardCharsets.UTF_8);
-                    if(!f.exists()) {
+                    if (!f.exists()) {
                         throw new RuntimeException("Internal Error: file was not written: " + f);
                     }
                 } catch (Exception e) {
@@ -117,7 +118,7 @@ public class SessionManager {
         return session;
     }
 
-     private Boolean isValidCookie(String cookieValue) {
+    private Boolean isValidCookie(String cookieValue) {
         try {
             return Integer.parseInt(cookieValue) >= 0;
         } catch (NumberFormatException e) {

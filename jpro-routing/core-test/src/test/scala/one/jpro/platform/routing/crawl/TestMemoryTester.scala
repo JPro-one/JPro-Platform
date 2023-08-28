@@ -61,5 +61,4 @@ class TestMemoryTester {
     val result = AppCrawler.crawlApp("http://localhost", () => app)
     intercept[Throwable](MemoryTester.testForLeaks(result, () => app)) // fails because the webapp is not collectable
   }
-
 }

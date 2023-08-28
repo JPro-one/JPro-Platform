@@ -22,7 +22,7 @@ class TestAppCrawler {
     println("Links: " + result.pictures)
     assert(result.links contains LinkInfo("/page2", "desc1"))
     assert(result.links contains LinkInfo("/page2", ""), result.links)
-    assert(!result.pictures.filter(x => x.description == "The Description").isEmpty)
+    assert(result.pictures.exists(x => x.description == "The Description"))
   }
 
   @Test
@@ -104,11 +104,11 @@ class TestAppCrawler {
       override def title: String = ""
       override def description: String = ""
       val content: Node = new Region() {
-        style = ("-fx-background-image: url('/testfiles/test.jpg');")
+        style = "-fx-background-image: url('/testfiles/test.jpg');"
       }
     }
     val r = AppCrawler.crawlPage(view)
-    assert(!r.pictures.isEmpty)
+    assert(r.pictures.nonEmpty)
   }
 
   @Test

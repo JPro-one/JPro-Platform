@@ -19,19 +19,17 @@ public class PopupAPI {
     public static void closePopup(Node popupNode) {
         Node popup = getPopup(popupNode);
         Pane popupContext = getPopupContext(popup);
-        if(popupContext == null) {
-            throw new RuntimeException("popupContext must not be null");
-        }
         popupContext.getChildren().remove(popup);
     }
 
     /**
      * Shows a popup with the given content.
-     * @param popupContext
-     * @param popup
+     *
+     * @param popupContext the popup context
+     * @param popup        the popup node
      */
     public static void openPopup(Pane popupContext, Node popup) {
-        if(popupContext == null) {
+        if (popupContext == null) {
             throw new RuntimeException("popupContext must not be null");
         }
         popup.getProperties().put(POPUP_CONTEXT, popupContext);
@@ -42,8 +40,8 @@ public class PopupAPI {
      * Shows a loading screen, which is a progress indicator, until the given future is completed.
      * Feel encouraged to copy this implementation, and modify it to your needs.
      */
-    public static FXFuture showLoadingScreen(Pane popupContext, FXFuture fu) {
-        if(popupContext == null) {
+    public static <T> FXFuture<T> showLoadingScreen(Pane popupContext, FXFuture<T> fu) {
+        if (popupContext == null) {
             throw new RuntimeException("popupContext must not be null");
         }
         ProgressIndicator indicator = new ProgressIndicator();
@@ -65,7 +63,7 @@ public class PopupAPI {
      */
     public static Pane getPopupContext(Node popup) {
         Pane context = (Pane) popup.getProperties().get(POPUP_CONTEXT);
-        if(context == null) {
+        if (context == null) {
             return getPopupContext(popup.getParent());
         } else {
             return context;
@@ -75,7 +73,7 @@ public class PopupAPI {
 
     public static Node getPopup(Node popupNode) {
         Node context = (Node) popupNode.getProperties().get(POPUP_CONTEXT);
-        if(context == null) {
+        if (context == null) {
             return getPopup(popupNode.getParent());
         } else {
             return popupNode;

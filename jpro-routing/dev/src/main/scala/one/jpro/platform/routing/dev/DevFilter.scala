@@ -23,12 +23,12 @@ object DevFilter {
       styleClass <++ "devfilter-vbox"
       override def toString(): String = s"DevFilter(content=$content)"
 
-      @Bind var report:JMemoryBuddyLive.Report = JMemoryBuddyLive.getReport()
+      @Bind var report:JMemoryBuddyLive.Report = JMemoryBuddyLive.getReport
       request --> updateReport
       def updateReport(): Unit = {
         println("Calling GC (DevFilter)")
         System.gc()
-        report = JMemoryBuddyLive.getReport()
+        report = JMemoryBuddyLive.getReport
       }
 
       this <++ new HBox {
@@ -69,8 +69,8 @@ object DevFilter {
             onAction --> {
                 if(WebAPI.isBrowser) {
                     val stage = new Stage()
-                    WebAPI.getWebAPI(CONTAINER.getScene()).openStageAsPopup(stage)
-                    ScenicView.show(content.getScene().getRoot, stage)
+                    WebAPI.getWebAPI(CONTAINER.getScene).openStageAsPopup(stage)
+                    ScenicView.show(content.getScene.getRoot, stage)
                 } else {
                     ScenicView.show(this.scene)
                 }

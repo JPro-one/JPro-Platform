@@ -4,6 +4,7 @@ import one.jpro.platform.routing.{LinkUtil, View}
 import simplefx.all._
 
 object TestUtils {
+
   def pageWithLink(links: List[String]): View = new View {
     def title = "title"
     def description = "desc"
@@ -15,6 +16,7 @@ object TestUtils {
       }
     }
   }
+
   class Page1 extends View {
     def title = "title"
     def description = "desc"
@@ -35,6 +37,7 @@ object TestUtils {
       }
     }
   }
+
   class Page2 extends View {
     def title = "title"
     def description = "desc"
