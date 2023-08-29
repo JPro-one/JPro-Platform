@@ -126,8 +126,11 @@ public class ImageManager {
 
     private void deleteDirectoryRecursively(File file) {
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                deleteDirectoryRecursively(child);
+            final File[] files = file.listFiles();
+            if (files != null) {
+                for (File child : files) {
+                    deleteDirectoryRecursively(child);
+                }
             }
         }
         file.delete();
