@@ -21,7 +21,7 @@ public class ImageManager {
     private static final Logger logger = LoggerFactory.getLogger(ImageManager.class);
     private static final String CACHE_DIR_HOME = System.getProperty("user.home") + "/.jproimageloader/imagecache";
     private static String CACHE_DIR = null;
-    private static ImageManager defaultInstance;
+    private static volatile ImageManager defaultInstance;
 
     private ImageManager() {}
 
@@ -47,7 +47,6 @@ public class ImageManager {
     }
 
     public ImageResult loadImage(ImageDefinition def) {
-
         String origFileName = def.getSource().fileName();
         String baseName = origFileName.substring(0, origFileName.lastIndexOf("."));
         String fileName = baseName + "." + def.getEncoder().fileExtension();
