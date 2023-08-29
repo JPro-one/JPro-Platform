@@ -1,9 +1,8 @@
 package one.jpro.platform.media;
 
 import com.jpro.webapi.HTMLView;
+import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.*;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -21,10 +20,10 @@ import java.util.Objects;
  */
 public abstract class WebMediaView extends MediaView {
 
-    private final Logger log = LoggerFactory.getLogger(WebMediaView.class);
+    private static final Logger log = LoggerFactory.getLogger(WebMediaView.class);
 
     private final WebAPI webAPI;
-    private String mediaContainerId;
+    private JSVariable mediaContainerElement;
 
     public WebMediaView(WebAPI webAPI) {
         this.webAPI = Objects.requireNonNull(webAPI, "WebAPI must not be null.");
@@ -33,10 +32,8 @@ public abstract class WebMediaView extends MediaView {
 
     protected void initialize() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
-        mediaContainerId = webAPI.createUniqueJSName("media_container_id_");
-        final HTMLView viewContainer = new HTMLView("""
-                <div id="%s"></div>
-                """.formatted(mediaContainerId));
+        final HTMLView viewContainer = new HTMLView();
+        mediaContainerElement = webAPI.getHTMLViewElement(viewContainer);
         getChildren().setAll(viewContainer);
     }
 
@@ -47,9 +44,32 @@ public abstract class WebMediaView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    sceneProperty().removeListener(weakUpdateViewContainerListener);
-                    updateViewContainer();
-                    sceneProperty().addListener(weakUpdateViewContainerListener);
+                    if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
+                        webAPI.executeScript("""
+                                // clear all elements
+                                while ($mediaContainer.firstChild) {
+                                    elem.removeChild(elem.firstChild);
+                                }
+                                // add new element
+                                $mediaContainer.appendChild(%s);
+                                """.replace("$mediaContainer", mediaContainerElement.getName())
+                                .formatted(webMediaEngine.getVideoElement().getName()));
+                        if (webMediaEngine instanceof WebMediaRecorder) {
+                            webAPI.executeScript("""
+                                    %s.play();
+                                    """.formatted(webMediaEngine.getVideoElement().getName()));
+                        }
+                        webAPI.executeScript("""
+                                %s.width = "%s";
+                                """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
+                        webAPI.executeScript("""
+                                %s.height = "%s";
+                                """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
+                        webAPI.executeScript("""
+                                %s.controls = $controls;
+                                """.formatted(webMediaEngine.getVideoElement().getName())
+                                .replace("$controls", String.valueOf(isShowControls())));
+                    }
                 }
             };
         }
@@ -166,39 +186,6 @@ public abstract class WebMediaView extends MediaView {
             }
             layoutInArea(child, 0.0, 0.0, getWidth(), getHeight(),
                     0.0, HPos.CENTER, VPos.CENTER);
-        }
-    }
-
-    private final InvalidationListener updateViewContainerListener = observable -> updateViewContainer();
-    private final WeakInvalidationListener weakUpdateViewContainerListener =
-            new WeakInvalidationListener(updateViewContainerListener);
-
-    private void updateViewContainer() {
-        if (getScene() != null && getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
-            webAPI.executeScript("""
-                    let elem = document.getElementById("%s");
-                    // clear all elements
-                    while (elem.firstChild) {
-                        elem.removeChild(elem.firstChild);
-                    }
-                    // add new element
-                    elem.appendChild(%s);
-                    """.formatted(mediaContainerId, webMediaEngine.getVideoElement().getName()));
-            if (webMediaEngine instanceof WebMediaRecorder) {
-                webAPI.executeScript("""
-                    %s.play();
-                    """.formatted(webMediaEngine.getVideoElement().getName()));
-            }
-            webAPI.executeScript("""
-                    %s.width = "%s";
-                    """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
-            webAPI.executeScript("""
-                    %s.height = "%s";
-                    """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
-            webAPI.executeScript("""
-                    %s.controls = $controls;
-                    """.formatted(webMediaEngine.getVideoElement().getName())
-                    .replace("$controls", String.valueOf(isShowControls())));
         }
     }
 }
