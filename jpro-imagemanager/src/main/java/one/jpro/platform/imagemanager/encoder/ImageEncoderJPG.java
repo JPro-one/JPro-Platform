@@ -28,11 +28,10 @@ public class ImageEncoderJPG implements ImageEncoder {
             target.getParentFile().mkdirs();
             boolean result = ImageIO.write(image, "JPG", target);
             if(!result) {
-                throw new RuntimeException("Failed to save image");
+                throw new ImageEncoderException("The given JPG format is not supported.");
             }
-            System.out.println("Saved image to " + target.getAbsolutePath());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save image", e);
+        } catch (IOException ex) {
+            throw new ImageEncoderException("Error while saving the image to JPG format.", ex);
         }
     }
 
