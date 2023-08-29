@@ -60,10 +60,10 @@ public class ImageManager {
             if (hashDir.exists()) {
                 File keyFile = new File(hashDir, "key");
                 if (keyFile.exists() && imageFile.exists()) {
-                    String savedDef = new String(Files.readAllBytes(keyFile.toPath()), StandardCharsets.UTF_8);
+                    String savedDef = Files.readString(keyFile.toPath());
                     if (savedDef.equals(def.toJson())) {
 
-                        String wh = new String(Files.readAllBytes(new File(hashDir, "wh").toPath()), StandardCharsets.UTF_8);
+                        String wh = Files.readString(new File(hashDir, "wh").toPath());
                         String[] dims = wh.split(",");
                         return new ImageResult(imageFile, Integer.parseInt(dims[0]), Integer.parseInt(dims[1]));
                     }
