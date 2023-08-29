@@ -7,7 +7,8 @@ buildscript {
   }
 
   dependencies {
-    classpath 'org.openjfx:javafx-plugin:0.0.14'
+    classpath "com.google.gradle:osdetector-gradle-plugin:$OSDETECTOR_PLUGIN_VERSION"
+    classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
     classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
   }
 }
@@ -21,6 +22,7 @@ allprojects {
     }
   }
 }
+
 configure(subprojects.findAll {it.name != 'example'}) {
   apply plugin: 'java-library'
   apply plugin: 'org.openjfx.javafxplugin'
@@ -37,7 +39,7 @@ configure(subprojects.findAll {it.name != 'example'}) {
   dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-    testImplementation "de.sandec:JMemoryBuddy:0.5.2"
+    testImplementation "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
   }
 
   test {
@@ -50,11 +52,11 @@ configure(subprojects.findAll {it.name != 'example'}) {
 configure([project("jpro-sessions")]) {
   dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    implementation "commons-io:commons-io:2.11.0"
+    implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
   }
 }
 
-configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"),
+configure([project("tree-showing"), project("jpro-auth"), project("jpro-imagemanager"), project("jpro-media"),
            project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
   publishing {
