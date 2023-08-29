@@ -31,7 +31,7 @@ public class ImageSourceFileTest {
         File testImageFile = new File("src/test/resources/testImage.png");
         ImageSourceFile imageSource = new ImageSourceFile(testImageFile);
 
-        String json = imageSource.toJson();
+        String json = imageSource.toJSON();
         assertTrue(json.contains("ImageSourceFile"));
         assertTrue(json.contains(testImageFile.getAbsolutePath()));
     }

@@ -26,7 +26,7 @@ public class ImageEncoderPNG implements ImageEncoder {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"ImageEncoderPNG\"}";
     }
 }

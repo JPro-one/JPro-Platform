@@ -12,7 +12,7 @@ public class ImageTransformerIdentity implements ImageTransformer {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"ImageTransformerIdentity\"}";
     }
 

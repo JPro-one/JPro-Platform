@@ -22,7 +22,7 @@ public class ImageTransformerWHTest {
     @Test
     public void testToJson() {
         ImageTransformer transformer = new ImageTransformerWH(200, 300);
-        String json = transformer.toJson();
+        String json = transformer.toJSON();
         assertEquals("{\"type\":\"ImageTransformerWH\",\"targetWidth\":200,\"targetHeight\":300}", json);
     }
 }

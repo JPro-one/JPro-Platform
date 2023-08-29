@@ -29,7 +29,7 @@ public class ImageTransformerWH implements ImageTransformer {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"ImageTransformerWH\",\"targetWidth\":" + targetWidth + ",\"targetHeight\":" + targetHeight + "}";
     }
 }

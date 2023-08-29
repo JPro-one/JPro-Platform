@@ -25,7 +25,7 @@ class ImageDefinitionTest {
 
         ImageDefinition definition = new ImageDefinition(source, transformer, encoding);
         // got
-        String json = definition.toJson();
+        String json = definition.toJSON();
         // check whether it's valid JSON
         try {
             new JSONObject(json);

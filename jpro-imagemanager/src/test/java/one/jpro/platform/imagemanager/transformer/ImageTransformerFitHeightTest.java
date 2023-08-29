@@ -24,7 +24,7 @@ public class ImageTransformerFitHeightTest {
     @Test
     public void testToJson() {
         ImageTransformer transformer = new ImageTransformerFitHeight(500);
-        String json = transformer.toJson();
+        String json = transformer.toJSON();
         assertEquals("{ \"type\": \"fitHeight\", \"targetHeight\": 500 }", json);
     }
 }

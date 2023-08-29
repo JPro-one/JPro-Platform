@@ -28,7 +28,7 @@ public class ImageTransformerFitHeight implements ImageTransformer {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{ \"type\": \"fitHeight\", \"targetHeight\": " + targetHeight + " }";
     }
 }

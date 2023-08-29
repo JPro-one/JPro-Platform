@@ -40,7 +40,7 @@ public class ImageSourceFile implements ImageSource {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"ImageSourceFile\", \"path\":\"" + Utils.escapeJson(file.getAbsolutePath()) + "\"}";
     }
 

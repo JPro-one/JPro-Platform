@@ -55,6 +55,6 @@ public class ImageEncoderJPGTest {
     @Test
     public void testToJson() {
         ImageEncoderJPG encoder = new ImageEncoderJPG(0.5);
-        assertEquals("{\"type\":\"ImageEncoderJPG\", \"quality\":0.5}", encoder.toJson());
+        assertEquals("{\"type\":\"ImageEncoderJPG\", \"quality\":0.5}", encoder.toJSON());
     }
 }

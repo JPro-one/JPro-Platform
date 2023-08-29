@@ -31,7 +31,7 @@ public class ImageSourceURLTest {
         URL testURL = this.getClass().getResource("/testImage.png");
         ImageSourceURL source = new ImageSourceURL(testURL);
 
-        String json = source.toJson();
+        String json = source.toJSON();
         assertTrue(json.contains(testURL.toString()), "JSON representation should contain the URL");
     }
 }

@@ -50,7 +50,7 @@ public class ImageSourceResource implements ImageSource {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         // Escaping might be necessary depending on the structure of resourcePath.
         return "{\"type\":\"ImageSourceResource\",\"resourcePath\":\"" + Utils.escapeJson(resourcePath) + "\"}";
     }

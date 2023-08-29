@@ -31,7 +31,7 @@ class ImageSourceResourceTest {
     @Test
     void testToJson_returnsExpectedJson() {
         ImageSourceResource resource = new ImageSourceResource("/testImage.png");
-        String json = resource.toJson();
+        String json = resource.toJSON();
         assertEquals("{\"type\":\"ImageSourceResource\",\"resourcePath\":\"/testImage.png\"}", json);
     }
 }

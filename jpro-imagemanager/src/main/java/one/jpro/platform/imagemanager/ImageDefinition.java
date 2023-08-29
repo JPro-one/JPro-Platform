@@ -17,11 +17,11 @@ public class ImageDefinition implements JsonStringConvertible {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{" +
-                "\"source\":" + source.toJson() + "," +
-                "\"transformer\":" + transformer.toJson() + "," +
-                "\"encoder\":" + encoder.toJson() +
+                "\"source\":" + source.toJSON() + "," +
+                "\"transformer\":" + transformer.toJSON() + "," +
+                "\"encoder\":" + encoder.toJSON() +
                 "}";
     }
 

@@ -30,7 +30,7 @@ public class ImageTransformerFitWidth implements ImageTransformer {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"ImageTransformerFitWidth\",\"targetWidth\":" + targetWidth + "}";
     }
 }

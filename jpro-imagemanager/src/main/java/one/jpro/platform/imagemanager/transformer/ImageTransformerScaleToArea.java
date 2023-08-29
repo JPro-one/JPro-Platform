@@ -32,7 +32,7 @@ public class ImageTransformerScaleToArea implements ImageTransformer {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"scaleToArea\",\"targetArea\":" + targetArea + "}";
     }
 }

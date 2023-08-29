@@ -42,7 +42,7 @@ public class ImageEncoderJPG implements ImageEncoder {
     }
 
     @Override
-    public String toJson() {
+    public String toJSON() {
         return "{\"type\":\"ImageEncoderJPG\", \"quality\":" + quality + "}";
     }
 }
