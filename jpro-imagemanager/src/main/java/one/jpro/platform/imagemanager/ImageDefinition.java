@@ -3,10 +3,12 @@ package one.jpro.platform.imagemanager;
 import one.jpro.platform.imagemanager.encoder.ImageEncoder;
 import one.jpro.platform.imagemanager.source.ImageSource;
 import one.jpro.platform.imagemanager.transformer.ImageTransformer;
+
 public class ImageDefinition implements JsonStringConvertible {
-    private ImageSource source;
-    private ImageTransformer transformer;
-    private ImageEncoder encoder;
+
+    private final ImageSource source;
+    private final ImageTransformer transformer;
+    private final ImageEncoder encoder;
 
     public ImageDefinition(ImageSource source, ImageTransformer transformer, ImageEncoder encoder) {
         this.source = source;
