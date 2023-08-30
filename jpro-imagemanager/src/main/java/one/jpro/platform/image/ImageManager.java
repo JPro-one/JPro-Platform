@@ -49,7 +49,7 @@ public class ImageManager {
     public ImageResult loadImage(ImageDefinition def) {
         String origFileName = def.getSource().fileName();
         String baseName = origFileName.substring(0, origFileName.lastIndexOf("."));
-        String fileName = baseName + "." + def.getEncoder().fileExtension();
+        String fileName = baseName + "." + def.getEncoder().getFileExtension();
 
         try {
             String hash = computeImageDefinitionHash(def);

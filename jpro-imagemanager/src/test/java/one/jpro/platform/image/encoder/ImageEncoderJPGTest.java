@@ -53,7 +53,7 @@ public class ImageEncoderJPGTest {
     @Test
     public void testFileExtension() {
         ImageEncoderJPG encoder = new ImageEncoderJPG(0.5);
-        assertEquals("jpg", encoder.fileExtension());
+        assertEquals("jpg", encoder.getFileExtension());
     }
 
     @Test

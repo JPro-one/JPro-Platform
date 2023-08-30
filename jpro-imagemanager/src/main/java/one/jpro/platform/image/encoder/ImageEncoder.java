@@ -29,5 +29,5 @@ public interface ImageEncoder extends JsonConvertible {
      *
      * @return The file extension as a string.
      */
-    String fileExtension();
+    String getFileExtension();
 }

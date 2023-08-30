@@ -23,7 +23,7 @@ public class ImageEncoderPNG implements ImageEncoder {
     }
 
     @Override
-    public String fileExtension() {
+    public String getFileExtension() {
         return "png";
     }
 
@@ -31,7 +31,7 @@ public class ImageEncoderPNG implements ImageEncoder {
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
-        json.put("fileExtension", fileExtension());
+        json.put("fileExtension", getFileExtension());
         return json;
     }
 }

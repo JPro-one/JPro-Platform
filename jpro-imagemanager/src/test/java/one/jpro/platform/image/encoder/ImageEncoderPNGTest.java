@@ -36,6 +36,6 @@ public class ImageEncoderPNGTest {
 
     @Test
     public void testFileExtension() {
-        assertEquals("png", encoder.fileExtension());
+        assertEquals("png", encoder.getFileExtension());
     }
 }

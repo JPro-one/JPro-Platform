@@ -28,7 +28,7 @@ public class ImageEncoderJPG implements ImageEncoder {
             // Java's ImageIO doesn't support JPG quality settings, so we would need another method
             // For simplicity, we'll just save it without specifying quality
             target.getParentFile().mkdirs();
-            boolean result = ImageIO.write(image, "JPG", target);
+            boolean result = ImageIO.write(image, getFileExtension().toUpperCase(), target);
             if(!result) {
                 throw new ImageEncoderException("The given JPG format is not supported.");
             }
@@ -38,7 +38,7 @@ public class ImageEncoderJPG implements ImageEncoder {
     }
 
     @Override
-    public String fileExtension() {
+    public String getFileExtension() {
         return "jpg";
     }
 
@@ -47,7 +47,7 @@ public class ImageEncoderJPG implements ImageEncoder {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
         json.put("quality", quality);
-        json.put("fileExtension", fileExtension());
+        json.put("fileExtension", getFileExtension());
         return json;
     }
 }
