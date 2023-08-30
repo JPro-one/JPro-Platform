@@ -5,11 +5,23 @@ import org.json.JSONObject;
 import java.awt.image.BufferedImage;
 
 /**
- * Useful for creating VirtualImages with JPro.
+ * This class implements an identity transformer for images. When applied,
+ * it will return the original image without any modification.
+ *
+ * @author Florian Kirmaier
+ * @author Besmir Beqiri
+ * @see ImageTransformer
  */
 public class ImageTransformerIdentity implements ImageTransformer {
 
-    public BufferedImage transform(BufferedImage image){
+    /**
+     * Transforms the provided image. In the case of this identity transformer,
+     * the original image is returned without any modifications.
+     *
+     * @param image The image to be transformed.
+     * @return The same image that was passed as a parameter.
+     */
+    public BufferedImage transform(BufferedImage image) {
         return image;
     }
 

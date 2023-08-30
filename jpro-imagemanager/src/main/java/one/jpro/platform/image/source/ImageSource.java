@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
  * The ImageSource interface represents a source of images that can be loaded and manipulated.
  *
  * @author Florian Kirmaier
- * @author Besmir Beqiri
  * @see JsonConvertible
  */
 public interface ImageSource extends JsonConvertible {

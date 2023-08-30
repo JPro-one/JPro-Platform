@@ -11,10 +11,23 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * This class provides an implementation of the ImageSource interface
+ * for image resources available on the classpath.
+ *
+ * @author Florian Kirmaier
+ * @author Besmir Beqiri
+ * @see ImageSource
+ */
 public class ImageSourceResource implements ImageSource {
 
     private final String resourcePath;
 
+    /**
+     * Creates a new instance with the given resource path.
+     *
+     * @param resourcePath the path to the image resource.
+     */
     public ImageSourceResource(String resourcePath) {
         this.resourcePath = resourcePath;
     }

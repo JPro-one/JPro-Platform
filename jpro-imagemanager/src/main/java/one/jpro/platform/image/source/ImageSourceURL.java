@@ -9,6 +9,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * This class provides an implementation of the ImageSource interface
+ * for an image source fetched from a given URL.
+ *
+ * @author Florian Kirmaier
+ * @author Besmir Beqiri
+ * @see ImageSource
+ */
 public class ImageSourceURL implements ImageSource {
 
     private final URL url;

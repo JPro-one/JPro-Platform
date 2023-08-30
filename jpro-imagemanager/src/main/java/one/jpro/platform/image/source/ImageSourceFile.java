@@ -9,14 +9,33 @@ import java.io.File;
 import java.nio.file.Files;
 import java.io.IOException;
 
+/**
+ * Represents an image source based on a file.
+ * This class is used to load images from local files and perform various operations
+ * related to the image file, such as computing a hash value and converting its details to JSON.
+ *
+ * @author Florian Kirmaier
+ * @author Besmir Beqiri
+ * @see ImageSource
+ */
 public class ImageSourceFile implements ImageSource {
 
     private final File file;
 
+    /**
+     * Constructs an ImageSourceFile using a given File object.
+     *
+     * @param file The File object pointing to the image.
+     */
     public ImageSourceFile(File file) {
         this.file = file;
     }
 
+    /**
+     * Constructs an ImageSourceFile using a file path.
+     *
+     * @param path The file path pointing to the image.
+     */
     public ImageSourceFile(String path) {
         this.file = new File(path);
     }
@@ -41,15 +60,15 @@ public class ImageSourceFile implements ImageSource {
     }
 
     @Override
+    public String getFileName() {
+        return file.getName();
+    }
+
+    @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
         json.put("path", Utils.escapeJson(file.getAbsolutePath()));
         return json;
-    }
-
-    @Override
-    public String getFileName() {
-        return file.getName();
     }
 }

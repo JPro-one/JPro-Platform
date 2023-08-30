@@ -11,7 +11,6 @@ import java.io.File;
  * and returning the file extension of the encoded image.
  *
  * @author Florian Kirmaier
- * @author Besmir Beqiri
  * @see JsonConvertible
  */
 public interface ImageEncoder extends JsonConvertible {
