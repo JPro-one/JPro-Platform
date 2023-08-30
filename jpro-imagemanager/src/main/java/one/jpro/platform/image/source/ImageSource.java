@@ -1,6 +1,6 @@
-package one.jpro.platform.imagemanager.source;
+package one.jpro.platform.image.source;
 
-import one.jpro.platform.imagemanager.JsonConvertible;
+import one.jpro.platform.image.JsonConvertible;
 import java.awt.image.BufferedImage;
 
 public interface ImageSource extends JsonConvertible {

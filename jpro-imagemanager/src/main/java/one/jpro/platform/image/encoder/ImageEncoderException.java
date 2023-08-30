@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager.encoder;
+package one.jpro.platform.image.encoder;
 
 /**
  * A runtime exception that is thrown when an error occurs during image encoding.

@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager;
+package one.jpro.platform.image;
 
 import javafx.scene.image.Image;
 
@@ -10,9 +10,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.CompletableFuture;
 
-import one.jpro.platform.imagemanager.encoder.ImageEncoder;
-import one.jpro.platform.imagemanager.source.ImageSource;
-import one.jpro.platform.imagemanager.transformer.ImageTransformer;
+import one.jpro.platform.image.encoder.ImageEncoder;
+import one.jpro.platform.image.source.ImageSource;
+import one.jpro.platform.image.transformer.ImageTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

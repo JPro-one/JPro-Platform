@@ -1,8 +1,8 @@
-package one.jpro.platform.imagemanager;
+package one.jpro.platform.image;
 
-import one.jpro.platform.imagemanager.encoder.ImageEncoder;
-import one.jpro.platform.imagemanager.source.ImageSource;
-import one.jpro.platform.imagemanager.transformer.ImageTransformer;
+import one.jpro.platform.image.encoder.ImageEncoder;
+import one.jpro.platform.image.source.ImageSource;
+import one.jpro.platform.image.transformer.ImageTransformer;
 import org.json.JSONObject;
 
 public class ImageDefinition implements JsonConvertible {

@@ -1,6 +1,6 @@
-package one.jpro.platform.imagemanager.encoder;
+package one.jpro.platform.image.encoder;
 
-import one.jpro.platform.imagemanager.JsonConvertible;
+import one.jpro.platform.image.JsonConvertible;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

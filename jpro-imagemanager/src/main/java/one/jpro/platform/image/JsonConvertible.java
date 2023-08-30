@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager;
+package one.jpro.platform.image;
 
 import org.json.JSONObject;
 

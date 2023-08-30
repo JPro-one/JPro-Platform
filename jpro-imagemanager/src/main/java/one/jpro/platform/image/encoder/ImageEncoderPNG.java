@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager.encoder;
+package one.jpro.platform.image.encoder;
 
 import org.json.JSONObject;
 

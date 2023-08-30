@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager;
+package one.jpro.platform.image;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;

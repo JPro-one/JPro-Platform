@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager.transformer;
+package one.jpro.platform.image.transformer;
 
 import org.json.JSONObject;
 import java.awt.image.BufferedImage;

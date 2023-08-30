@@ -1,4 +1,7 @@
-open module one.jpro.imagemanager {
+/**
+ * Module descriptor for the JPro ImageManager module.
+ */
+module one.jpro.platform.imagemanager {
     requires java.desktop;
     requires javafx.graphics;
     requires javafx.controls;
@@ -6,8 +9,8 @@ open module one.jpro.imagemanager {
     requires jpro.webapi;
     requires org.json;
 
-    exports one.jpro.platform.imagemanager;
-    exports one.jpro.platform.imagemanager.encoder;
-    exports one.jpro.platform.imagemanager.source;
-    exports one.jpro.platform.imagemanager.transformer;
+    exports one.jpro.platform.image;
+    exports one.jpro.platform.image.encoder;
+    exports one.jpro.platform.image.source;
+    exports one.jpro.platform.image.transformer;
 }

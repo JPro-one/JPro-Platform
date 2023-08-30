@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager.source;
+package one.jpro.platform.image.source;
 
 /**
  * A runtime exception that is thrown when an error occurs during image source loading.

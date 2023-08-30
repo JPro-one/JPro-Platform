@@ -1,6 +1,6 @@
-package one.jpro.platform.imagemanager.source;
+package one.jpro.platform.image.source;
 
-import one.jpro.platform.imagemanager.Utils;
+import one.jpro.platform.image.Utils;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
