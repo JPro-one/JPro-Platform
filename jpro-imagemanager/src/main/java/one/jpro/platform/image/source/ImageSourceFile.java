@@ -26,7 +26,7 @@ public class ImageSourceFile implements ImageSource {
         try {
             return ImageIO.read(file);
         } catch (IOException ex) {
-            throw new ImageSourceException("Failed to load image from file", ex);
+            throw new ImageSourceException("Failed to load image from file: " + file.getAbsolutePath(), ex);
         }
     }
 
@@ -36,7 +36,7 @@ public class ImageSourceFile implements ImageSource {
             byte[] fileBytes = Files.readAllBytes(file.toPath());
             return Utils.computeHashValue(fileBytes);
         } catch (IOException ex) {
-            throw new ImageSourceException("Failed to compute hash value for the file", ex);
+            throw new ImageSourceException("Failed to compute hash value for the file: " + file.getAbsolutePath(), ex);
         }
     }
 
