@@ -1,5 +1,6 @@
-package one.jpro.platform.imagemanager.encoder;
+package one.jpro.platform.image.encoder;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -29,10 +30,13 @@ public class ImageEncoderJPGTest {
     @Test
     public void testSaveImage2() throws Exception {
         BufferedImage testImage = ImageIO.read(new File("src/test/resources/logo.png"));
-        File outputFile = new File("src/test/resources/testOutputImage.jpg");
-        if(outputFile.exists()) {
-            outputFile.delete();
-        }
+        System.out.println("testImage: " + testImage.getWidth() + "x" + testImage.getHeight());
+        File outputFile = File.createTempFile("image", ".jpg");
+        System.out.println("testOutputImage: " + outputFile.getAbsolutePath());
+//        if(outputFile.exists()) {
+//            outputFile.delete();
+//        }
+
         ImageEncoder encoder = new ImageEncoderPNG();
         encoder.saveImage(testImage, outputFile);
 
@@ -43,7 +47,7 @@ public class ImageEncoderJPGTest {
         assertEquals(testImage.getHeight(), loadedOutput.getHeight());
 
         // Cleanup
-        //outputFile.delete();
+        outputFile.delete();
     }
 
     @Test
@@ -55,6 +59,11 @@ public class ImageEncoderJPGTest {
     @Test
     public void testToJson() {
         ImageEncoderJPG encoder = new ImageEncoderJPG(0.5);
-        assertEquals("{\"type\":\"ImageEncoderJPG\", \"quality\":0.5}", encoder.toJSON());
+
+        JSONObject json = new JSONObject();
+        json.put("type", ImageEncoderJPG.class.getSimpleName());
+        json.put("quality", 0.5);
+        json.put("fileExtension", "jpg");
+        assertTrue(encoder.toJSON().similar(json));
     }
 }

@@ -1,5 +1,7 @@
-package one.jpro.platform.imagemanager.source;
+package one.jpro.platform.image.source;
 
+import one.jpro.platform.image.Utils;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
@@ -28,10 +30,13 @@ public class ImageSourceURLTest {
 
     @Test
     public void testJsonSerialization() {
-        URL testURL = this.getClass().getResource("/testImage.png");
-        ImageSourceURL source = new ImageSourceURL(testURL);
+        final URL testURL = this.getClass().getResource("/testImage.png");
+        final ImageSourceURL source = new ImageSourceURL(testURL);
 
-        String json = source.toJSON();
-        assertTrue(json.contains(testURL.toString()), "JSON representation should contain the URL");
+        JSONObject json = new JSONObject();
+        json.put("type", ImageSourceURL.class.getSimpleName());
+        json.put("url", Utils.escapeJson(testURL.toString()));
+
+        assertTrue(source.toJSON().similar(json), "JSON representation should contain the URL");
     }
 }

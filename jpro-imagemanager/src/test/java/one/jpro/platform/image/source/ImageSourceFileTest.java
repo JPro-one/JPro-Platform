@@ -1,5 +1,7 @@
-package one.jpro.platform.imagemanager.source;
+package one.jpro.platform.image.source;
 
+import one.jpro.platform.image.Utils;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,11 +30,13 @@ public class ImageSourceFileTest {
 
     @Test
     public void testToJson() {
-        File testImageFile = new File("src/test/resources/testImage.png");
-        ImageSourceFile imageSource = new ImageSourceFile(testImageFile);
+        final File testImageFile = new File("src/test/resources/testImage.png");
+        final ImageSourceFile imageSource = new ImageSourceFile(testImageFile);
 
-        String json = imageSource.toJSON();
-        assertTrue(json.contains("ImageSourceFile"));
-        assertTrue(json.contains(testImageFile.getAbsolutePath()));
+        JSONObject json = new JSONObject();
+        json.put("type", "ImageSourceFile");
+        json.put("path", Utils.escapeJson(testImageFile.getAbsolutePath()));
+
+        assertTrue(imageSource.toJSON().similar(json));
     }
 }

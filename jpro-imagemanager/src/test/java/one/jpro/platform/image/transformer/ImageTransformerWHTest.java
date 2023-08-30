@@ -1,11 +1,13 @@
-package one.jpro.platform.imagemanager.transformer;
+package one.jpro.platform.image.transformer;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImageTransformerWHTest {
 
@@ -22,7 +24,11 @@ public class ImageTransformerWHTest {
     @Test
     public void testToJson() {
         ImageTransformer transformer = new ImageTransformerWH(200, 300);
-        String json = transformer.toJSON();
-        assertEquals("{\"type\":\"ImageTransformerWH\",\"targetWidth\":200,\"targetHeight\":300}", json);
+
+        JSONObject json = new JSONObject();
+        json.put("type", "ImageTransformerWH");
+        json.put("targetWidth", 200);
+        json.put("targetHeight", 300);
+        assertTrue(transformer.toJSON().similar(json));
     }
 }

@@ -1,6 +1,7 @@
-package one.jpro.platform.imagemanager.source;
+package one.jpro.platform.image.source;
 
-import org.junit.jupiter.api.*;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
 
@@ -31,7 +32,10 @@ class ImageSourceResourceTest {
     @Test
     void testToJson_returnsExpectedJson() {
         ImageSourceResource resource = new ImageSourceResource("/testImage.png");
-        String json = resource.toJSON();
-        assertEquals("{\"type\":\"ImageSourceResource\",\"resourcePath\":\"/testImage.png\"}", json);
+
+        JSONObject json = new JSONObject();
+        json.put("type", "ImageSourceResource");
+        json.put("resourcePath", "/testImage.png");
+        assertTrue(resource.toJSON().similar(json));
     }
 }

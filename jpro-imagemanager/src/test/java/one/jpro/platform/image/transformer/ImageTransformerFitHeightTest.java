@@ -1,5 +1,6 @@
-package one.jpro.platform.imagemanager.transformer;
+package one.jpro.platform.image.transformer;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -7,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImageTransformerFitHeightTest {
 
@@ -24,7 +26,10 @@ public class ImageTransformerFitHeightTest {
     @Test
     public void testToJson() {
         ImageTransformer transformer = new ImageTransformerFitHeight(500);
-        String json = transformer.toJSON();
-        assertEquals("{ \"type\": \"fitHeight\", \"targetHeight\": 500 }", json);
+
+        JSONObject json = new JSONObject();
+        json.put("type", ImageTransformerFitHeight.class.getSimpleName());
+        json.put("targetHeight", 500);
+        assertTrue(transformer.toJSON().similar(json));
     }
 }

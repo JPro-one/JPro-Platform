@@ -1,4 +1,4 @@
-package one.jpro.platform.imagemanager.encoder;
+package one.jpro.platform.image.encoder;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,14 +1,14 @@
-package one.jpro.platform.imagemanager;
+package one.jpro.platform.image;
 
 import javafx.application.Platform;
-import one.jpro.platform.imagemanager.encoder.ImageEncoder;
-import one.jpro.platform.imagemanager.encoder.ImageEncoderJPG;
-import one.jpro.platform.imagemanager.encoder.ImageEncoderPNG;
-import one.jpro.platform.imagemanager.source.ImageSource;
-import one.jpro.platform.imagemanager.source.ImageSourceFile;
-import one.jpro.platform.imagemanager.source.ImageSourceResource;
-import one.jpro.platform.imagemanager.transformer.ImageTransformer;
-import one.jpro.platform.imagemanager.transformer.ImageTransformerFitWidth;
+import one.jpro.platform.image.encoder.ImageEncoder;
+import one.jpro.platform.image.encoder.ImageEncoderJPG;
+import one.jpro.platform.image.encoder.ImageEncoderPNG;
+import one.jpro.platform.image.source.ImageSource;
+import one.jpro.platform.image.source.ImageSourceFile;
+import one.jpro.platform.image.source.ImageSourceResource;
+import one.jpro.platform.image.transformer.ImageTransformer;
+import one.jpro.platform.image.transformer.ImageTransformerFitWidth;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,13 +33,11 @@ class ImageManagerTest {
     void setUp() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         try {
-            Platform.startup(() -> {
-                latch.countDown();
-            });
+            Platform.startup(latch::countDown);
             latch.await();
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException ex) {
+            // ignore
         }
-
 
         manager = ImageManager.getInstance();
 
@@ -83,7 +81,8 @@ class ImageManagerTest {
 
     @Test
     void testLoadFXImage() {
-        Image img = manager.loadFXImage(new ImageSourceFile("src/test/resources/testImage.png"), new ImageTransformerFitWidth(200), new ImageEncoderPNG());
+        Image img = manager.loadFXImage(new ImageSourceFile("src/test/resources/testImage.png"),
+                new ImageTransformerFitWidth(200), new ImageEncoderPNG());
         assertNotNull(img);
         assertEquals(200, img.getWidth());
     }
@@ -139,10 +138,10 @@ class ImageManagerTest {
 
     // Test changing image format
     @Test
-    void testChangingFromat() {
-        ImageDefinition def1 = new ImageDefinition(new ImageSourceFile("src/test/resources/testImage.png"), new ImageTransformerFitWidth(200), new ImageEncoderJPG());
-
-        ImageResult result = manager.loadImage(def1);
+    void testChangingFormat() {
+        var imageDefinition = new ImageDefinition(new ImageSourceFile("src/test/resources/testImage.png"),
+                new ImageTransformerFitWidth(200), new ImageEncoderJPG());
+        var result = manager.loadImage(imageDefinition);
 
         System.out.println("result: " + result.getFile().getAbsolutePath());
 
@@ -151,7 +150,6 @@ class ImageManagerTest {
 
         // starts with testImage
         assertTrue(result.getFile().getName().startsWith("testImage"));
-
     }
 
 
