@@ -1,6 +1,6 @@
 package one.jpro.platform.image.source;
 
-import one.jpro.platform.image.Utils;
+import one.jpro.platform.image.ImageUtils;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
@@ -55,7 +55,7 @@ public class ImageSourceResource implements ImageSource {
             long lastModified = conn.getLastModified();
             if (lastModified == 0) { // fallback to binary data hash
                 byte[] resourceData = Files.readAllBytes(Paths.get(resourceUrl.toURI()));
-                return Utils.computeHashValue(resourceData);
+                return ImageUtils.computeHashValue(resourceData);
             }
             return lastModified;
         } catch (Exception ex) {
@@ -68,7 +68,7 @@ public class ImageSourceResource implements ImageSource {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
         // Escaping might be necessary depending on the structure of resourcePath.
-        json.put("resourcePath", Utils.escapeJson(resourcePath));
+        json.put("resourcePath", ImageUtils.escapeJson(resourcePath));
         return json;
     }
 

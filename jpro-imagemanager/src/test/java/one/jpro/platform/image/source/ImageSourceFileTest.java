@@ -1,6 +1,6 @@
 package one.jpro.platform.image.source;
 
-import one.jpro.platform.image.Utils;
+import one.jpro.platform.image.ImageUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +35,7 @@ public class ImageSourceFileTest {
 
         JSONObject json = new JSONObject();
         json.put("type", "ImageSourceFile");
-        json.put("path", Utils.escapeJson(testImageFile.getAbsolutePath()));
+        json.put("path", ImageUtils.escapeJson(testImageFile.getAbsolutePath()));
 
         assertTrue(imageSource.toJSON().similar(json));
     }

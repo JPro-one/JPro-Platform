@@ -6,7 +6,7 @@ import java.security.MessageDigest;
 /**
  * This class provides utility methods for various image operations.
  */
-public class Utils {
+public class ImageUtils {
 
     /**
      * Computes the MD5 hash of the given data and returns the first 8 bytes

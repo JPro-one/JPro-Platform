@@ -1,6 +1,6 @@
 package one.jpro.platform.image.source;
 
-import one.jpro.platform.image.Utils;
+import one.jpro.platform.image.ImageUtils;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
@@ -53,7 +53,7 @@ public class ImageSourceFile implements ImageSource {
     public long identityHashValue() {
         try {
             byte[] fileBytes = Files.readAllBytes(file.toPath());
-            return Utils.computeHashValue(fileBytes);
+            return ImageUtils.computeHashValue(fileBytes);
         } catch (IOException ex) {
             throw new ImageSourceException("Failed to compute hash value for the file: " + file.getAbsolutePath(), ex);
         }
@@ -68,7 +68,7 @@ public class ImageSourceFile implements ImageSource {
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
-        json.put("path", Utils.escapeJson(file.getAbsolutePath()));
+        json.put("path", ImageUtils.escapeJson(file.getAbsolutePath()));
         return json;
     }
 }

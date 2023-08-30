@@ -1,6 +1,6 @@
 package one.jpro.platform.image.source;
 
-import one.jpro.platform.image.Utils;
+import one.jpro.platform.image.ImageUtils;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
@@ -43,7 +43,7 @@ public class ImageSourceURL implements ImageSource {
 
             // Combine the URL and modification date to generate the hash.
             String combined = url.toString() + lastModified;
-            return Utils.computeHashValue(combined.getBytes());
+            return ImageUtils.computeHashValue(combined.getBytes());
 
         } catch (IOException e) {
             throw new ImageSourceException("Error while getting modification date for URL: " + url, e);
@@ -54,7 +54,7 @@ public class ImageSourceURL implements ImageSource {
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
-        json.put("url", Utils.escapeJson(url.toString()));
+        json.put("url", ImageUtils.escapeJson(url.toString()));
         return json;
     }
 

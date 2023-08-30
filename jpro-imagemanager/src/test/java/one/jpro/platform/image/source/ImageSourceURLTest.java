@@ -1,6 +1,6 @@
 package one.jpro.platform.image.source;
 
-import one.jpro.platform.image.Utils;
+import one.jpro.platform.image.ImageUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,7 @@ public class ImageSourceURLTest {
 
         JSONObject json = new JSONObject();
         json.put("type", ImageSourceURL.class.getSimpleName());
-        json.put("url", Utils.escapeJson(testURL.toString()));
+        json.put("url", ImageUtils.escapeJson(testURL.toString()));
 
         assertTrue(source.toJSON().similar(json), "JSON representation should contain the URL");
     }
