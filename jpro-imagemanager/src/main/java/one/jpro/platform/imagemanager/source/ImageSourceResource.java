@@ -22,11 +22,11 @@ public class ImageSourceResource implements ImageSource {
     public BufferedImage loadImage() {
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
             if (is == null) {
-                throw new RuntimeException("Resource not found: " + resourcePath);
+                throw new ImageSourceException("Resource not found: " + resourcePath);
             }
             return ImageIO.read(is);
         } catch (Exception e) {
-            throw new RuntimeException("Error loading resource: " + resourcePath, e);
+            throw new ImageSourceException("Error loading resource: " + resourcePath, e);
         }
     }
 
@@ -35,7 +35,7 @@ public class ImageSourceResource implements ImageSource {
         try {
             URL resourceUrl = getClass().getResource(resourcePath);
             if (resourceUrl == null) {
-                throw new RuntimeException("Resource not found: " + resourcePath);
+                throw new ImageSourceException("Resource not found: " + resourcePath);
             }
             URLConnection conn = resourceUrl.openConnection();
             long lastModified = conn.getLastModified();
@@ -44,8 +44,8 @@ public class ImageSourceResource implements ImageSource {
                 return Utils.computeHashValue(resourceData);
             }
             return lastModified;
-        } catch (Exception e) {
-            throw new RuntimeException("Error obtaining modification date for resource: " + resourcePath, e);
+        } catch (Exception ex) {
+            throw new ImageSourceException("Error obtaining modification date for resource: " + resourcePath, ex);
         }
     }
 

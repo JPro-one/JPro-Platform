@@ -9,7 +9,8 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class ImageSourceURL implements ImageSource {
-    private URL url;
+
+    private final URL url;
 
     public ImageSourceURL(URL url) {
         this.url = url;
@@ -19,8 +20,8 @@ public class ImageSourceURL implements ImageSource {
     public BufferedImage loadImage() {
         try {
             return ImageIO.read(url);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while reading image from URL: " + url, e);
+        } catch (IOException ex) {
+            throw new ImageSourceException("Error while reading image from URL: " + url, ex);
         }
     }
 
@@ -36,7 +37,7 @@ public class ImageSourceURL implements ImageSource {
             return Utils.computeHashValue(combined.getBytes());
 
         } catch (IOException e) {
-            throw new RuntimeException("Error while getting modification date for URL: " + url, e);
+            throw new ImageSourceException("Error while getting modification date for URL: " + url, e);
         }
     }
 

@@ -24,8 +24,8 @@ public class ImageSourceFile implements ImageSource {
     public BufferedImage loadImage() {
         try {
             return ImageIO.read(file);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load image from file", e);
+        } catch (IOException ex) {
+            throw new ImageSourceException("Failed to load image from file", ex);
         }
     }
 
@@ -34,8 +34,8 @@ public class ImageSourceFile implements ImageSource {
         try {
             byte[] fileBytes = Files.readAllBytes(file.toPath());
             return Utils.computeHashValue(fileBytes);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to compute hash value for the file", e);
+        } catch (IOException ex) {
+            throw new ImageSourceException("Failed to compute hash value for the file", ex);
         }
     }
 
