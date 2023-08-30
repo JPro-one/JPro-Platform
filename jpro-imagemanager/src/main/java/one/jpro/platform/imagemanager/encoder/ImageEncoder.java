@@ -1,6 +1,6 @@
 package one.jpro.platform.imagemanager.encoder;
 
-import one.jpro.platform.imagemanager.JsonStringConvertible;
+import one.jpro.platform.imagemanager.JsonConvertible;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -10,11 +10,11 @@ import java.io.File;
  * Implementing classes must provide methods for saving a BufferedImage to a File,
  * and returning the file extension of the encoded image.
  *
- * @see JsonStringConvertible
  * @author Florian Kirmaier
  * @author Besmir Beqiri
+ * @see JsonConvertible
  */
-public interface ImageEncoder extends JsonStringConvertible {
+public interface ImageEncoder extends JsonConvertible {
 
     /**
      * Saves a {@link BufferedImage} to a specified {@link File}.

@@ -5,7 +5,7 @@ import one.jpro.platform.imagemanager.source.ImageSource;
 import one.jpro.platform.imagemanager.transformer.ImageTransformer;
 import org.json.JSONObject;
 
-public class ImageDefinition implements JsonStringConvertible {
+public class ImageDefinition implements JsonConvertible {
 
     private final ImageSource source;
     private final ImageTransformer transformer;
