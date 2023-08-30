@@ -47,7 +47,7 @@ public class ImageManager {
     }
 
     public ImageResult loadImage(ImageDefinition def) {
-        String origFileName = def.getSource().fileName();
+        String origFileName = def.getSource().getFileName();
         String baseName = origFileName.substring(0, origFileName.lastIndexOf("."));
         String fileName = baseName + "." + def.getEncoder().getFileExtension();
 

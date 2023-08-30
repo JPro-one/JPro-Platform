@@ -49,7 +49,7 @@ public class ImageSourceFile implements ImageSource {
     }
 
     @Override
-    public String fileName() {
+    public String getFileName() {
         return file.getName();
     }
 }

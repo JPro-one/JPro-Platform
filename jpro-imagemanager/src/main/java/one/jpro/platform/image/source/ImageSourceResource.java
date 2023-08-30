@@ -60,7 +60,7 @@ public class ImageSourceResource implements ImageSource {
     }
 
     @Override
-    public String fileName() {
+    public String getFileName() {
         return resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
     }
 }

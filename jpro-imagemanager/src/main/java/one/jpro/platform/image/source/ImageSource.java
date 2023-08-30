@@ -32,5 +32,5 @@ public interface ImageSource extends JsonConvertible {
      *
      * @return The file name as a string.
      */
-    String fileName();
+    String getFileName();
 }

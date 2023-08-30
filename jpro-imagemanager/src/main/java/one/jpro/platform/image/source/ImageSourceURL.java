@@ -51,7 +51,7 @@ public class ImageSourceURL implements ImageSource {
     }
 
     @Override
-    public String fileName() {
+    public String getFileName() {
         return url.toString().substring(url.toString().lastIndexOf('/') + 1);
     }
 }
