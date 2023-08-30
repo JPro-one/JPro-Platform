@@ -3,6 +3,7 @@ package one.jpro.platform.imagemanager;
 import one.jpro.platform.imagemanager.encoder.ImageEncoder;
 import one.jpro.platform.imagemanager.source.ImageSource;
 import one.jpro.platform.imagemanager.transformer.ImageTransformer;
+import org.json.JSONObject;
 
 public class ImageDefinition implements JsonStringConvertible {
 
@@ -17,12 +18,12 @@ public class ImageDefinition implements JsonStringConvertible {
     }
 
     @Override
-    public String toJSON() {
-        return "{" +
-                "\"source\":" + source.toJSON() + "," +
-                "\"transformer\":" + transformer.toJSON() + "," +
-                "\"encoder\":" + encoder.toJSON() +
-                "}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("source", source.toJSON());
+        json.put("transformer", transformer.toJSON());
+        json.put("encoder", encoder.toJSON());
+        return json;
     }
 
     public ImageSource getSource() {

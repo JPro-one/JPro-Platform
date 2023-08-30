@@ -1,5 +1,7 @@
 package one.jpro.platform.imagemanager.transformer;
 
+import org.json.JSONObject;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -15,7 +17,6 @@ public class ImageTransformerFitHeight implements ImageTransformer {
         this.targetHeight = targetHeight * devicePixelRatio;
     }
 
-
     @Override
     public BufferedImage transform(BufferedImage original) {
         double aspectRatio = (double) original.getWidth() / original.getHeight();
@@ -28,7 +29,10 @@ public class ImageTransformerFitHeight implements ImageTransformer {
     }
 
     @Override
-    public String toJSON() {
-        return "{ \"type\": \"fitHeight\", \"targetHeight\": " + targetHeight + " }";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("targetHeight", targetHeight);
+        return json;
     }
 }

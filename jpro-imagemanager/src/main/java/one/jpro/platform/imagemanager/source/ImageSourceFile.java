@@ -1,6 +1,7 @@
 package one.jpro.platform.imagemanager.source;
 
 import one.jpro.platform.imagemanager.Utils;
+import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
@@ -40,8 +41,11 @@ public class ImageSourceFile implements ImageSource {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"ImageSourceFile\", \"path\":\"" + Utils.escapeJson(file.getAbsolutePath()) + "\"}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("path", Utils.escapeJson(file.getAbsolutePath()));
+        return json;
     }
 
     @Override

@@ -60,8 +60,7 @@ public class ImageManager {
                 File keyFile = new File(hashDir, "key");
                 if (keyFile.exists() && imageFile.exists()) {
                     String savedDef = Files.readString(keyFile.toPath());
-                    if (savedDef.equals(def.toJSON())) {
-
+                    if (savedDef.equals(def.toJSON().toString())) {
                         String wh = Files.readString(new File(hashDir, "wh").toPath());
                         String[] dims = wh.split(",");
                         return new ImageResult(imageFile, Integer.parseInt(dims[0]), Integer.parseInt(dims[1]));
@@ -76,7 +75,7 @@ public class ImageManager {
             ImageResult result = new ImageResult(imageFile, img.getWidth(), img.getHeight());
 
             // Save metadata
-            Files.write(new File(hashDir, "key").toPath(), def.toJSON().getBytes(StandardCharsets.UTF_8));
+            Files.write(new File(hashDir, "key").toPath(), def.toJSON().toString().getBytes(StandardCharsets.UTF_8));
             Files.write(new File(hashDir, "wh").toPath(), (img.getWidth() + "," + img.getHeight()).getBytes(StandardCharsets.UTF_8));
 
             return result;
@@ -103,7 +102,7 @@ public class ImageManager {
     private String computeImageDefinitionHash(ImageDefinition def) {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
-            byte[] hashBytes = digest.digest(def.toJSON().getBytes(StandardCharsets.UTF_8));
+            byte[] hashBytes = digest.digest(def.toJSON().toString().getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hashBytes) {
                 String hex = Integer.toHexString(0xFF & b);

@@ -1,12 +1,13 @@
 package one.jpro.platform.imagemanager.transformer;
 
+import org.json.JSONObject;
 import java.awt.image.BufferedImage;
-
 import java.awt.Graphics2D;
 
 public class ImageTransformerWH implements ImageTransformer {
-    private int targetWidth;
-    private int targetHeight;
+
+    private final int targetWidth;
+    private final int targetHeight;
 
     public ImageTransformerWH(int targetWidth, int targetHeight) {
         this.targetWidth = targetWidth;
@@ -29,7 +30,11 @@ public class ImageTransformerWH implements ImageTransformer {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"ImageTransformerWH\",\"targetWidth\":" + targetWidth + ",\"targetHeight\":" + targetHeight + "}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("targetWidth", targetWidth);
+        json.put("targetHeight", targetHeight);
+        return json;
     }
 }

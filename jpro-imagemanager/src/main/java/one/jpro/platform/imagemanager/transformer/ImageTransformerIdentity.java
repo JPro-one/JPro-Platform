@@ -1,5 +1,7 @@
 package one.jpro.platform.imagemanager.transformer;
 
+import org.json.JSONObject;
+
 import java.awt.image.BufferedImage;
 
 /**
@@ -12,8 +14,10 @@ public class ImageTransformerIdentity implements ImageTransformer {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"ImageTransformerIdentity\"}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        return json;
     }
 
 }

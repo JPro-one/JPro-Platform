@@ -1,5 +1,7 @@
 package one.jpro.platform.imagemanager.transformer;
 
+import org.json.JSONObject;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -32,7 +34,10 @@ public class ImageTransformerScaleToArea implements ImageTransformer {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"scaleToArea\",\"targetArea\":" + targetArea + "}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("targetArea", targetArea);
+        return json;
     }
 }

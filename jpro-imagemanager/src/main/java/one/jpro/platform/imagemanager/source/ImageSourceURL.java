@@ -1,6 +1,7 @@
 package one.jpro.platform.imagemanager.source;
 
 import one.jpro.platform.imagemanager.Utils;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -42,13 +43,15 @@ public class ImageSourceURL implements ImageSource {
     }
 
     @Override
-    public String toJSON() {
-        return "{ \"type\": \"URL\", \"url\": \"" + Utils.escapeJson(url.toString()) + "\" }";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("url", Utils.escapeJson(url.toString()));
+        return json;
     }
 
     @Override
     public String fileName() {
-        String fileName = url.toString().substring(url.toString().lastIndexOf('/') + 1);
-        return fileName;
+        return url.toString().substring(url.toString().lastIndexOf('/') + 1);
     }
 }

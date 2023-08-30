@@ -28,7 +28,10 @@ public class ImageEncoderPNG implements ImageEncoder {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"ImageEncoderPNG\"}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("fileExtension", fileExtension());
+        return json;
     }
 }

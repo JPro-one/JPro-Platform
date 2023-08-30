@@ -1,11 +1,13 @@
 package one.jpro.platform.imagemanager.transformer;
 
+import org.json.JSONObject;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class ImageTransformerFitWidth implements ImageTransformer {
 
-    private int targetWidth;
+    private final int targetWidth;
 
     public ImageTransformerFitWidth(int targetWidth) {
         this.targetWidth = targetWidth;
@@ -30,7 +32,10 @@ public class ImageTransformerFitWidth implements ImageTransformer {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"ImageTransformerFitWidth\",\"targetWidth\":" + targetWidth + "}";
+    public JSONObject toJSON() {
+        final JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("targetWidth", targetWidth);
+        return json;
     }
 }

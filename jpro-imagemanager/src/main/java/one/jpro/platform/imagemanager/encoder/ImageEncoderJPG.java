@@ -1,5 +1,7 @@
 package one.jpro.platform.imagemanager.encoder;
 
+import org.json.JSONObject;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -41,7 +43,11 @@ public class ImageEncoderJPG implements ImageEncoder {
     }
 
     @Override
-    public String toJSON() {
-        return "{\"type\":\"ImageEncoderJPG\", \"quality\":" + quality + "}";
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("type", getClass().getSimpleName());
+        json.put("quality", quality);
+        json.put("fileExtension", fileExtension());
+        return json;
     }
 }
