@@ -24,16 +24,17 @@ public class ImageEncoderJPG implements ImageEncoder {
 
     @Override
     public void saveImage(BufferedImage image, File target) {
+        final String fileExtensionUpperCase = getFileExtension().toUpperCase();
         try {
             // Java's ImageIO doesn't support JPG quality settings, so we would need another method
             // For simplicity, we'll just save it without specifying quality
             target.getParentFile().mkdirs();
-            boolean result = ImageIO.write(image, getFileExtension().toUpperCase(), target);
+            boolean result = ImageIO.write(image, fileExtensionUpperCase, target);
             if(!result) {
-                throw new ImageEncoderException("The given JPG format is not supported.");
+                throw new ImageEncoderException("The given " + fileExtensionUpperCase + " format is not supported.");
             }
         } catch (IOException ex) {
-            throw new ImageEncoderException("Error while saving the image to JPG format.", ex);
+            throw new ImageEncoderException("Error while saving the image to " + fileExtensionUpperCase + " format.", ex);
         }
     }
 

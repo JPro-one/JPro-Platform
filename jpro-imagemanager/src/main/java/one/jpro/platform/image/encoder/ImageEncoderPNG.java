@@ -11,14 +11,15 @@ public class ImageEncoderPNG implements ImageEncoder {
 
     @Override
     public void saveImage(BufferedImage image, File target) {
+        final String fileExtensionUpperCase = getFileExtension().toUpperCase();
         try {
             target.getParentFile().mkdirs();
-            boolean result = ImageIO.write(image, "PNG", target);
+            boolean result = ImageIO.write(image, fileExtensionUpperCase, target);
             if (!result) {
-                throw new ImageEncoderException("The given PNG format is not supported.");
+                throw new ImageEncoderException("The given " + fileExtensionUpperCase + " format is not supported.");
             }
-        } catch (IOException e) {
-            throw new ImageEncoderException("Error while saving the image to PNG format.", e);
+        } catch (IOException ex) {
+            throw new ImageEncoderException("Error while saving the image to " + fileExtensionUpperCase + " format.", ex);
         }
     }
 
