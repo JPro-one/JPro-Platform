@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
  * while preserving the original aspect ratio.
  *
  * @author Florian Kirmaier
+ * @author Besmir Beqiri
  * @see ImageTransformer
  */
 public class ImageTransformerScaleToArea implements ImageTransformer {

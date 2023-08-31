@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
  * for transforming images based on specified width and height.
  *
  * @author Florian Kirmaier
+ * @author Besmir Beqiri
  * @see ImageTransformer
  */
 public class ImageTransformerWH implements ImageTransformer {

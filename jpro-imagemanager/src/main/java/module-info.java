@@ -1,5 +1,5 @@
 /**
- * Module descriptor for the JPro ImageManager module.
+ * Module descriptor for the JPro Image Manager module.
  */
 module one.jpro.platform.imagemanager {
     requires java.desktop;

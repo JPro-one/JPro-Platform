@@ -5,7 +5,7 @@ import java.awt.*;
 /**
  * Provides helper methods for image transformation tasks.
  *
- * @author Besmir Beqiri
+ * @author Florian Kirmaier
  */
 public class ImageTransformerHelpers {
 

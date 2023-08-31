@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
  * maintaining the original image's aspect ratio.
  *
  * @author Florian Kirmaier
+ * @author Besmir Beqiri
  * @see ImageTransformer
  */
 public class ImageTransformerFitWidth implements ImageTransformer {

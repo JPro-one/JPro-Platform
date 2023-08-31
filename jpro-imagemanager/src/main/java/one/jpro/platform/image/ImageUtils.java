@@ -5,6 +5,8 @@ import java.security.MessageDigest;
 
 /**
  * This class provides utility methods for various image operations.
+ *
+ * @author Florian Kirmaier
  */
 public class ImageUtils {
 
