@@ -73,6 +73,15 @@ configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"),
         groupId "one.jpro.platform"
         artifactId project.name
         version JPRO_PLATFORM_VERSION
+
+        pom {
+          licenses {
+            license {
+              name = 'Apache License, Version 2.0'
+              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+          }
+        }
       }
     }
 
