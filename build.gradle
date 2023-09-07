@@ -81,6 +81,12 @@ configure([project("tree-showing"), project("jpro-auth"), project("jpro-media"),
               url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
             }
           }
+
+          scm {
+            connection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
+            developerConnection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
+            url = "https://github.com/JPro-one/jpro-platform/tree/main/$project.name"
+          }
         }
       }
     }
