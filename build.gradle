@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 buildscript {
   repositories {
     gradlePluginPortal()
@@ -42,8 +44,15 @@ configure(subprojects.findAll {it.name != 'example'}) {
 
   test {
     useJUnitPlatform()
-    testLogging.showStandardStreams = true
-    testLogging.exceptionFormat = "full"
+
+    testLogging {
+      events "passed", "skipped", "failed"
+      showStandardStreams = true
+      showExceptions true
+      showCauses true
+      showStackTraces true
+      exceptionFormat TestExceptionFormat.FULL
+    }
   }
 }
 
