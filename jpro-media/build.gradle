@@ -59,10 +59,20 @@ def docArtifact = artifacts.add('archives', new File("$projectDir", 'DOCUMENTATI
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId "one.jpro.platform"
-            artifactId project.name
-            version JPRO_PLATFORM_VERSION
-            artifact docArtifact
+            pom {
+                packaging = 'jar'
+                name = 'JPro Media'
+                description = 'A library for playing audio and video files in JavaFX applications running via JPro server.'
+                url = 'https://www.jpro.one'
+
+                developers {
+                    developer {
+                        id = 'besidev'
+                        name = 'Besmir Beqiri'
+                        email = 'bb@sandec.de'
+                    }
+                }
+            }
         }
     }
 }
