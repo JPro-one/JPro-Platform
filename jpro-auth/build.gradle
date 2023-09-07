@@ -32,3 +32,24 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                packaging = 'jar'
+                name = 'JPro Auth'
+                description = 'A library for authenticating users in JavaFX applications running via JPro server.'
+                url = 'https://www.jpro.one'
+
+                developers {
+                    developer {
+                        id = 'besidev'
+                        name = 'Besmir Beqiri'
+                        email = 'bb@sandec.de'
+                    }
+                }
+            }
+        }
+    }
+}
