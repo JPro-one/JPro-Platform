@@ -18,7 +18,7 @@ object DevFilter {
     override def isContainer(x: Node): Boolean = x.isInstanceOf[MyContainer]
     override def createContainer() = new MyContainer
     class MyContainer extends VBox with Container { CONTAINER =>
-      stylesheets <++ "/one/jpro/routing/dev/devfilter.css"
+      stylesheets <++ DevFilter.getClass.getResource("/one/jpro/platform/routing/dev/devfilter.css").toExternalForm
 
       styleClass <++ "devfilter-vbox"
       override def toString(): String = s"DevFilter(content=$content)"

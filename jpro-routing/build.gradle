@@ -18,7 +18,9 @@ buildscript {
   }
 }
 
-configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:core-test')]) {
+configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:core-test'),
+           project(':jpro-routing:example')]) {
+
   repositories {
     mavenCentral()
     maven {
@@ -51,7 +53,7 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
     api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     api "SANDEC:jnodes:$JNODES_VERSION"
     api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
-    api "org.scala-lang:scala-library:2.12.10"
+    api "org.scala-lang:scala-library:$SCALA_LIBRARY_VERSION"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
   }
@@ -80,5 +82,44 @@ configure([project(':jpro-routing:core-test')]) {
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+  }
+}
+
+configure(project(':jpro-routing:example')) {
+  apply plugin: 'org.openjfx.javafxplugin'
+  apply plugin: 'jpro-gradle-plugin'
+
+//  mainClassName = "example.scala.TestWebApplication"
+//  mainClassName = "example.scala.TestExtensions"
+//  mainClassName = "example.scala.ColorTransitionApp"
+//  mainClassName = "example.colors.ColorsApp"
+//  mainClassName = "example.popup.PopupApp"
+  mainClassName = "example.login.LoginApp"
+
+  application {
+    mainClass = "$mainClassName"
+    mainModule = moduleName
+  }
+
+  dependencies {
+    implementation project(':jpro-auth')
+    implementation project(':jpro-routing:core')
+    implementation project(':jpro-routing:dev')
+    implementation project(':jpro-routing:popup')
+
+    implementation "com.sandec:mdfx:$MDFX_VERSION"
+    implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
+    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+    implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+  }
+
+  javafx {
+    version = "$JAVAFX_VERSION"
+    modules = [ 'javafx.graphics', 'javafx.controls','javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
+  }
+
+  jpro {
+    openingPath = "/"
   }
 }

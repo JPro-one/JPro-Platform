@@ -1,0 +1,111 @@
+.header-label {
+    -fx-font: 32px "RobotoBold";
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-max-width: infinity;
+}
+
+.header2-label {
+     -fx-font: 22px "Roboto";
+}
+
+.page {
+    -fx-padding: 36px;
+}
+
+.description-box {
+    -fx-alignment: center;
+}
+
+.login-pane {
+    -fx-max-width: 1080px;
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.login-pane > .tile-pane {
+    -fx-hgap: 24px;
+    -fx-vgap: 24px;
+    -fx-alignment: center;
+}
+
+.login-pane > .tile-pane > .login-button {
+    -fx-pref-width: 148px;
+    -fx-pref-height: 148px;
+    -fx-content-display: top;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+
+.auth-provider-pane {
+    -fx-max-width: 800px;
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center_left;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.signed-in-user-pane {
+    -fx-max-width: 800px;
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center_left;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.openid-provider-discovery-pane {
+    -fx-max-width: 800px;
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center_left;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.auth-info-pane {
+    -fx-max-width: 1080px;
+    -fx-background-color: -color-success-subtle;
+    -fx-border-color: -color-success-emphasis;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center_left;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.user-info-pane {
+    -fx-max-width: 800px;
+    -fx-background-color: -color-success-subtle;
+    -fx-border-color: -color-success-emphasis;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-alignment: center_left;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.error-pane {
+    -fx-max-width: 600px;
+    -fx-background-color: -color-danger-muted;
+    -fx-background-radius: 16px;
+    -fx-alignment: center_left;
+    -fx-spacing: 24px;
+    -fx-padding: 36px;
+}
+
+.error-pane > .text-area {
+    -fx-pref-height: 400px;
+}
