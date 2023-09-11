@@ -1,14 +1,9 @@
-.devfilter-hbox {
+.devfilter-hbox,
+.devfilter-vbox {
     -fx-alignment: center;
     -fx-padding: 6;
     -fx-spacing: 16;
 }
-
-.devfilter-vbox {
-     -fx-alignment: center;
-     -fx-padding: 6;
-     -fx-spacing: 16;
- }
 
 .devfilter-icon-button,
 .devfilter-icon-button:focused {
