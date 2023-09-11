@@ -39,7 +39,7 @@ publishing {
             pom {
                 packaging = 'jar'
                 name = 'JPro Auth'
-                description = 'A library for authenticating users in JavaFX applications running via JPro server.'
+                description = 'A library for authenticating and authorizing users in JavaFX applications running via JPro server.'
                 url = 'https://www.jpro.one'
 
                 developers {
