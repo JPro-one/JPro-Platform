@@ -105,7 +105,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
   def start() = {
 
-    gotoFullEncodedURL(webAPI.getServerName, false, false)
+    gotoFullEncodedURL(webAPI.getBrowserURL, false, false)
     println("registering popstate")
     webAPI.registerJavaFunction("popstatejava", (s: String) => {
       gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""), false)
