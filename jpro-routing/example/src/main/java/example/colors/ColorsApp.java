@@ -1,24 +1,23 @@
 package example.colors;
 
 
-import one.jpro.routing.*;
-import one.jpro.routing.dev.DevFilter;
-import one.jpro.routing.filter.container.ContainerFilter;
+import one.jpro.platform.routing.*;
+import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.filter.container.ContainerFilter;
 import example.filters.SimpleContainer;
 import example.filters.SimpleHamburgerMenu;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import one.jpro.routing.Route;
-import one.jpro.routing.RouteApp;
+import one.jpro.platform.routing.Route;
+import one.jpro.platform.routing.RouteApp;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static one.jpro.routing.RouteUtils.*;
+import static one.jpro.platform.routing.RouteUtils.*;
 
 public class ColorsApp extends RouteApp {
 

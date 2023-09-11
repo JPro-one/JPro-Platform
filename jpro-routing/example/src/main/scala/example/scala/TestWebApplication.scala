@@ -1,15 +1,14 @@
 package example.scala
 
-import one.jpro.routing._
-import simplefx.core._
-import simplefx.all._
-import one.jpro.routing.LinkUtil._
 import com.jpro.webapi.{HTMLView, WebAPI}
 import de.sandec.jmemorybuddy.JMemoryBuddyLive
-import one.jpro.routing.{LinkUtil, ParallaxView, Redirect, Route, RouteNode, View}
+import one.jpro.platform.routing.LinkUtil._
+import one.jpro.platform.routing.RouteUtils._
+import one.jpro.platform.routing.sessionmanager.SessionManager
+import one.jpro.platform.routing._
 import org.controlsfx.control.PopOver
-import one.jpro.routing.RouteUtils._
-import one.jpro.routing.sessionmanager.SessionManager
+import simplefx.all._
+import simplefx.core._
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 

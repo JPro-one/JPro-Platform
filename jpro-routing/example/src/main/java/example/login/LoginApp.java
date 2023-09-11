@@ -11,14 +11,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import one.jpro.auth.AuthAPI;
-import one.jpro.auth.authentication.Authentication;
-import one.jpro.auth.authentication.User;
-import one.jpro.auth.oath2.OAuth2AuthenticationProvider;
-import one.jpro.auth.oath2.OAuth2Credentials;
-import one.jpro.auth.oath2.OAuth2Options;
-import one.jpro.routing.Route;
-import one.jpro.routing.dev.DevFilter;
+import one.jpro.platform.auth.AuthAPI;
+import one.jpro.platform.auth.authentication.Authentication;
+import one.jpro.platform.auth.authentication.User;
+import one.jpro.platform.auth.oath2.OAuth2AuthenticationProvider;
+import one.jpro.platform.auth.oath2.OAuth2Credentials;
+import one.jpro.platform.auth.oath2.OAuth2Options;
+import one.jpro.platform.routing.Route;
+import one.jpro.platform.routing.dev.DevFilter;
 import simplefx.experimental.parts.FXFuture;
 
 import java.io.PrintWriter;
@@ -27,9 +27,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-import static one.jpro.routing.LinkUtil.gotoPage;
-import static one.jpro.routing.RouteUtils.getNode;
-import static one.jpro.routing.RouteUtils.redirect;
+import static one.jpro.platform.routing.LinkUtil.gotoPage;
+import static one.jpro.platform.routing.RouteUtils.getNode;
+import static one.jpro.platform.routing.RouteUtils.redirect;
 
 /**
  * An example application to show how to use the Authorization module in general

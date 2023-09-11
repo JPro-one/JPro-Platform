@@ -1,7 +1,7 @@
 package example.filters;
 
-import one.jpro.routing.filter.container.Container;
-import one.jpro.routing.Request;
+import one.jpro.platform.routing.filter.container.Container;
+import one.jpro.platform.routing.Request;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;

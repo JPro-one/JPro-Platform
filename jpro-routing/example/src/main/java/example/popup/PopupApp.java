@@ -1,17 +1,17 @@
 package example.popup;
 
-import one.jpro.routing.Route;
-import one.jpro.routing.RouteApp;
-import one.jpro.routing.dev.DevFilter;
-import one.jpro.routing.popup.PopupAPI;
-import one.jpro.routing.popup.simplepopup.SimplePopup;
-import one.jpro.routing.popup.simplepopup.SimplePopups;
+import one.jpro.platform.routing.Route;
+import one.jpro.platform.routing.RouteApp;
+import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.popup.PopupAPI;
+import one.jpro.platform.routing.popup.simplepopup.SimplePopup;
+import one.jpro.platform.routing.popup.simplepopup.SimplePopups;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import simplefx.experimental.parts.FXFuture;
 
-import static one.jpro.routing.RouteUtils.*;
+import static one.jpro.platform.routing.RouteUtils.*;
 
 public class PopupApp extends RouteApp {
 
@@ -45,8 +45,8 @@ public class PopupApp extends RouteApp {
             FXFuture<Object> future = FXFuture.runBackground(() -> {
                 try {
                     Thread.sleep(3000);
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
                 return null;
             });
