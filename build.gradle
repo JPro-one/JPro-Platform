@@ -68,6 +68,7 @@ configure([project("jpro-sessions")]) {
 configure([project("tree-showing"), project("jpro-auth"), project("jpro-imagemanager"), project("jpro-media"),
            project("jpro-sessions"), project("htmlscrollpane"), project("freeze-detector")]) {
   apply plugin: 'maven-publish'
+
   publishing {
     publications {
       mavenJava(MavenPublication) {

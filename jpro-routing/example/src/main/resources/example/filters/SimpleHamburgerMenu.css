@@ -1,0 +1,46 @@
+
+.top-box {
+  /*-fx-background-color: orange;*/
+  -fx-background-color: linear-gradient(to left, #f46b45, #eea849);
+  -fx-min-height: 50;
+  -fx-pref-height: 50;
+  -fx-max-height: 50;
+  -fx-padding: 0 20 0 20;
+  -fx-alignment: center-left;
+}
+
+.simplehamburgermenu-burger {
+  -fx-pref-width: 30;
+  -fx-alignment: center;
+  -fx-font-size: 30px;
+  -fx-text-fill: white;
+}
+
+.simplehamburgermenu-top-links {
+  -fx-alignment: center-right;
+  -fx-spacing: 28;
+}
+.simplehamburgermenu-top-link {
+  -fx-font-size: 24px;
+  -fx-text-fill: white;
+}
+.simplehamburgermenu-top-link.selected,
+.simplehamburgermenu-top-link:hover {
+  -fx-underline: true;
+}
+
+.simplehamburgermenu-expanded-links {
+  -fx-alignment: center;
+  -fx-background-color: #000000DD;
+  -fx-spacing: 20;
+  -fx-padding: 20;
+}
+
+.simplehamburgermenu-expanded-link {
+  -fx-font-size: 20px;
+  -fx-text-fill: white;
+}
+.simplehamburgermenu-expanded-link.selected,
+.simplehamburgermenu-expanded-link:hover {
+  -fx-underline: true;
+}

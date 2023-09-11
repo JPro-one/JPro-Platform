@@ -1,0 +1,11 @@
+.header-link {
+  -fx-background-radius: 5;
+  -fx-insets: 4;
+  -fx-font-size: 25;
+  -fx-background-color: white;
+}
+
+.header-link:hover {
+  -fx-font-size: 30;
+  -fx-background-color: yellow;
+}
