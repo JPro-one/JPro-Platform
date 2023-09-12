@@ -12,7 +12,6 @@ module one.jpro.platform.auth {
     requires jwks.rsa;
     requires org.slf4j;
     requires com.auth0.jwt;
-    requires jdk.httpserver;
 
     opens one.jpro.platform.auth;
     exports one.jpro.platform.auth;
