@@ -8,7 +8,6 @@ module one.jpro.platform.routing.core {
     requires transitive simplefx.utility;
     requires transitive scala.library;
     requires transitive jpro.webapi;
-    requires java.desktop;
 
     exports one.jpro.platform.routing;
     exports one.jpro.platform.routing.crawl;
