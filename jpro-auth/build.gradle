@@ -28,11 +28,6 @@ dependencies {
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {

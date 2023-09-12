@@ -3,9 +3,6 @@ plugins {
     id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
 }
 
-sourceCompatibility = 17
-targetCompatibility = 17
-
 dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION"
