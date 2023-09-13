@@ -211,7 +211,7 @@ class ConnectionEventLoop {
                 requestTimeoutTask = null;
             }
             Request request = requestParser.request();
-            httpOneDotZero = request.getVersion().equalsIgnoreCase(HTTP_1_0);
+            httpOneDotZero = request.version().equalsIgnoreCase(HTTP_1_0);
             keepAlive = request.hasHeader(HEADER_CONNECTION, KEEP_ALIVE);
             byteTokenizer.compact();
             requestParser = new RequestParser(byteTokenizer);

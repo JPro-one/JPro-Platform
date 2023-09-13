@@ -114,7 +114,7 @@ public final class HttpServerImpl implements HttpServer {
                 getResourceAsBytes("default-response.html"));
 
         final Handler handler = (request, callback) -> {
-            this.uri = request.getUri();
+            this.uri = request.uri();
 
             log.debug("***************************************************************************");
             log.debug("Server host: {}", getServerHost());
@@ -122,19 +122,20 @@ public final class HttpServerImpl implements HttpServer {
             log.debug("Full requested URL: {}", getFullRequestedURL());
             log.debug("Parameters: {}", getParameters());
             log.debug("Request hashCode = {}", HttpServerImpl.this.hashCode());
-            log.debug("Request URI: {}", request.getUri());
-            log.debug("Request method: {}", request.getMethod());
-            log.debug("Request version: {}", request.getVersion());
-            log.debug("Request headers: {}", request.getHeaders());
+            log.debug("Request URI: {}", request.uri());
+            log.debug("Request method: {}", request.method());
+            log.debug("Request version: {}", request.version());
+            log.debug("Request headers: {}", request.headers());
             log.debug("Response status: {}", response.getStatus());
-            log.debug("Request body: {}", new String(request.getBody()));
+//            log.debug("Request body: {}", new String(request.body()));
             log.debug("***************************************************************************");
 
             callback.accept(response);
 
             if (stage != null && stage.isShowing()) {
                 Platform.runLater(() -> {
-                    this.uri = request.getUri();
+                    this.uri = request.uri();
+                    System.out.println("URI: " + this.uri);
                     // TODO: trigger the browser to open the URL, or add handler to the response
                     stage.toFront();
                 });

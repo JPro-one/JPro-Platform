@@ -247,8 +247,8 @@ final class RequestParser {
     private boolean hasMultipleTransferLengths() {
         int count = 0;
         for (Header header : headers) {
-            if (header.getName().equalsIgnoreCase(HEADER_CONTENT_LENGTH)
-                    || header.getName().equalsIgnoreCase(HEADER_TRANSFER_ENCODING)) {
+            if (header.name().equalsIgnoreCase(HEADER_CONTENT_LENGTH)
+                    || header.name().equalsIgnoreCase(HEADER_TRANSFER_ENCODING)) {
                 count++;
             }
         }
@@ -261,8 +261,8 @@ final class RequestParser {
     private Integer findContentLength() {
         try {
             for (Header header : headers) {
-                if (header.getName().equalsIgnoreCase(HEADER_CONTENT_LENGTH)) {
-                    return Integer.parseInt(header.getValue());
+                if (header.name().equalsIgnoreCase(HEADER_CONTENT_LENGTH)) {
+                    return Integer.parseInt(header.value());
                 }
             }
             return null;
@@ -276,8 +276,8 @@ final class RequestParser {
      */
     private boolean hasChunkedEncodingHeader() {
         for (Header header : headers) {
-            if (header.getName().equalsIgnoreCase(HEADER_TRANSFER_ENCODING)
-                    && header.getValue().equalsIgnoreCase(CHUNKED)) {
+            if (header.name().equalsIgnoreCase(HEADER_TRANSFER_ENCODING)
+                    && header.value().equalsIgnoreCase(CHUNKED)) {
                 return true;
             }
         }

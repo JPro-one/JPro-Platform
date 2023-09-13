@@ -7,75 +7,7 @@ import java.util.List;
  *
  * @author Besmir Beqiri
  */
-final class Request {
-
-    private final String method;
-    private final String uri;
-    private final String version;
-    private final List<Header> headers;
-    private final byte[] body;
-
-    /**
-     * Constructs a new Request object with the specified method, URI, version, headers, and body.
-     *
-     * @param method  The HTTP method of the request.
-     * @param uri     The URI of the request.
-     * @param version The HTTP version of the request.
-     * @param headers The list of headers of the request.
-     * @param body    The body of the request.
-     */
-    public Request(String method, String uri, String version, List<Header> headers, byte[] body) {
-        this.method = method;
-        this.uri = uri;
-        this.version = version;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    /**
-     * Returns the HTTP method of the request.
-     *
-     * @return The HTTP method.
-     */
-    public String getMethod() {
-        return method;
-    }
-
-    /**
-     * Returns the URI of the request.
-     *
-     * @return The URI.
-     */
-    public String getUri() {
-        return uri;
-    }
-
-    /**
-     * Returns the HTTP version of the request.
-     *
-     * @return The HTTP version.
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * Returns the list of headers of the request.
-     *
-     * @return The list of headers.
-     */
-    public List<Header> getHeaders() {
-        return headers;
-    }
-
-    /**
-     * Returns the body of the request.
-     *
-     * @return The body.
-     */
-    public byte[] getBody() {
-        return body;
-    }
+public record Request(String method, String uri, String version, List<Header> headers, byte[] body) {
 
     /**
      * Retrieves the value of the specified header.
@@ -85,8 +17,8 @@ final class Request {
      */
     public String header(String name) {
         for (Header header : headers) {
-            if (header.getName().equalsIgnoreCase(name)) {
-                return header.getValue();
+            if (header.name().equalsIgnoreCase(name)) {
+                return header.value();
             }
         }
         return null;
@@ -101,7 +33,7 @@ final class Request {
      */
     public boolean hasHeader(String name, String value) {
         for (Header header : headers) {
-            if (header.getName().equalsIgnoreCase(name) && header.getValue().equalsIgnoreCase(value)) {
+            if (header.name().equalsIgnoreCase(name) && header.value().equalsIgnoreCase(value)) {
                 return true;
             }
         }

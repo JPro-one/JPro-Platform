@@ -88,7 +88,7 @@ final class Response {
      */
     public boolean hasHeader(String name) {
         for (Header header : headers) {
-            if (header.getName().equalsIgnoreCase(name)) {
+            if (header.name().equalsIgnoreCase(name)) {
                 return true;
             }
         }
@@ -125,9 +125,9 @@ final class Response {
      */
     private static void appendHeaders(ByteMerger merger, List<Header> headers) {
         for (Header header : headers) {
-            merger.add(header.getName().getBytes());
+            merger.add(header.name().getBytes());
             merger.add(COLON_SPACE);
-            merger.add(header.getValue().getBytes());
+            merger.add(header.value().getBytes());
             merger.add(CRLF);
         }
     }
