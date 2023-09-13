@@ -33,16 +33,17 @@ must be used instead of `implementation` in order to prevent the inclusion of pl
 the `release` file. Even the `jproRun` task is faster since these files are not needed at `runtime`.*
 ```groovy
 plugins {
-    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.8"
+    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.9"
 }
 
 dependencies {
-    implementation 'one.jpro.jproutils:jpro-media:0.2.3-SNAPSHOT'
-    implementation "org.bytedeco:javacv-platform:1.5.8"
-    
+    implementation 'one.jpro.jproutils:jpro-media:0.2.4-SNAPSHOT'
+    runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
+
+    implementation "org.bytedeco:javacv-platform:1.5.9"
     // use compileOnly configuration when running/deploying with JPro, 
-    // since the platform related libraries are no more needed
-    // compileOnly "org.bytedeco:javacv-platform:1.5.8"
+    // since the platform specific libraries are no more needed
+    // compileOnly "org.bytedeco:javacv-platform:1.5.9"
 }
 ```
 3. Provide the following `jvm argument` inside the `run` task:
@@ -77,7 +78,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
     <dependency>
         <groupId>org.bytedeco</groupId>
         <artifactId>javacv-platform</artifactId>
-        <version>1.5.8</version>
+        <version>1.5.9</version>
 <!--        use compile scope when running/deploying with JPro,-->
 <!--        since the platform related libraries are no more needed-->
 <!--        <scope>compile</scope>-->
