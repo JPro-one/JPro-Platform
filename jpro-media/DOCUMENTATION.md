@@ -37,7 +37,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'one.jpro.jproutils:jpro-media:0.2.4-SNAPSHOT'
+    implementation 'one.jpro.platform:jpro-media:0.2.4-SNAPSHOT'
     runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
 
     implementation "org.bytedeco:javacv-platform:1.5.9"
@@ -71,7 +71,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
 ```xml
 <dependencies>
     <dependency>
-        <groupId>one.jpro.jproutils</groupId>
+        <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-media</artifactId>
         <version>0.2.4-SNAPSHOT</version>
     </dependency>
