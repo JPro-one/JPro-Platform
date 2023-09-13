@@ -5,6 +5,7 @@ import de.sandec.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
 import one.jpro.platform.routing.{HistoryEntry, Response, RouteNode, View}
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
@@ -15,6 +16,8 @@ import java.util.function.Consumer
 
 
 trait SessionManager { THIS =>
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def webApp: RouteNode
 
@@ -50,7 +53,7 @@ trait SessionManager { THIS =>
   def gotoURL(url: String, pushState: Boolean = true, track: Boolean = true): Unit = {
     val url2 = SessionManager.mergeURLs(THIS.url, url)
     try {
-      println(s"goto: $url")
+      logger.debug(s"goto: $url")
       val newView = if(view != null && view.handleURL(url)) FXFuture(view) else {
         getView(url2)
       }
@@ -64,9 +67,8 @@ trait SessionManager { THIS =>
         new NullPointerException(s"Error: no view found for $url").printStackTrace()
       }
     } catch {
-      case e: Exception =>
-        println(s"Error while loading the path $url2")
-        e.printStackTrace()
+      case ex: Exception =>
+        logger.error(s"Error while loading the path $url2", ex)
     }
   }
 
@@ -83,9 +85,9 @@ trait SessionManager { THIS =>
     JMemoryBuddyLive.markCollectable(s"Page url: ${view.url} title: ${view.title}", view.realContent)
   }
   def markViewCollectable(oldView: View, newView: View): Unit = {
-    //println("depths: " + viewDepth(oldView) + " - " + viewDepth(newView))
+//    logger.debug(s"depths: ${viewDepth(oldView)} - ${viewDepth(newView)}")
     if(oldView.realContent != newView.realContent) {
-      //println("nodes: " + oldView.realContent + " - " + newView.realContent)
+//      logger.debug(s"nodes: ${oldView.realContent} - ${newView.realContent}")
       JMemoryBuddyLive.markCollectable(s"Page url: ${oldView.url} title: ${oldView.title}", oldView.realContent)
     }
     if(oldView.subView() != null && newView.subView != null) {

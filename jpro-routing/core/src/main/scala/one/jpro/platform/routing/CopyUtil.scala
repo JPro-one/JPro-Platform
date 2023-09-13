@@ -2,11 +2,14 @@ package one.jpro.platform.routing
 
 import com.jpro.webapi.WebAPI
 import javafx.scene.input.Clipboard
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.core._
 import simplefx.all._
 import simplefx.util.ReflectionUtil._
 import simplefx.util.Predef._
 object CopyUtil {
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def setCopyOnClick(node: Node, text: String): Unit = {
     if(WebAPI.isBrowser) {
@@ -16,7 +19,7 @@ object CopyUtil {
       import CopyDesktop._
       node.setCopyOnClick(text)
     }
-    println("setCopyOnClick: " + node + ", " + text)
+    logger.debug(s"setCopyOnClick: $node, $text")
   }
 
   private object CopyDesktop {
@@ -27,10 +30,10 @@ object CopyUtil {
         @Bind var textToCopy = ""
 
         onMouseClicked --> {
-          val clipboard = Clipboard.getSystemClipboard();
-          val content = new ClipboardContent();
-          content.putString(textToCopy);
-          clipboard.setContent(content);
+          val clipboard = Clipboard.getSystemClipboard()
+          val content = new ClipboardContent()
+          content.putString(textToCopy)
+          clipboard.setContent(content)
         }
 
 

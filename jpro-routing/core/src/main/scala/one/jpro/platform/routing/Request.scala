@@ -2,6 +2,7 @@ package one.jpro.platform.routing
 
 import javafx.scene.Node
 import one.jpro.platform.routing.LinkUtil.isValidLink
+import org.slf4j.{Logger, LoggerFactory}
 
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -43,10 +44,13 @@ case class Request (
   }
 }
 object Request {
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+
   private var wref_null = new WeakReference[Node](null)
   def fromString(x: String): Request = {
     if(!isValidLink(x)) {
-      println("Warning - Invalid Link: " + x)
+      logger.debug("Warning - Invalid Link: " + x)
     }
     val uri = new URI(x)
     val rawQuery = uri.getRawQuery

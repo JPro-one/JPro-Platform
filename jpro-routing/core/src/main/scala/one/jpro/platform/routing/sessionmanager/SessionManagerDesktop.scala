@@ -1,6 +1,7 @@
 package one.jpro.platform.routing.sessionmanager
 
 import one.jpro.platform.routing._
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.util.ReflectionUtil
@@ -8,6 +9,7 @@ import simplefx.util.ReflectionUtil
 
 class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS =>
 
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def goBack(): Unit = {
     historyForward = historyCurrent :: historyForward
@@ -26,8 +28,8 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
 
   def gotoURL(_url: String, x: Response, pushState: Boolean, track: Boolean): Unit = {
     x match {
-      case Redirect(url) => 
-        println(s"redirect: ${_url} -> $url")
+      case Redirect(url) =>
+        logger.debug(s"redirect: ${_url} -> $url")
         gotoURL(url)
       case view: View =>
         val oldView = this.view
@@ -57,9 +59,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
   val container = new StackPane()
     val scrollpane: ScrollPane = if(System.getProperty("routing.scrollpane") != null) {
     ReflectionUtil.callNew(System.getProperty("routing.scrollpane"))().asInstanceOf[ScrollPane]
-  } else new ScrollPane()
-
-  {
+  } else new ScrollPane() {
     scrollpane.fitToWidth = true
     scrollpane.content <-- container
     scrollpane.fitToHeight <-- isFullscreen

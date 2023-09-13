@@ -45,6 +45,7 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
     api "SANDEC:jnodes:$JNODES_VERSION"
     api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
     api "org.scala-lang:scala-library:$SCALA_LIBRARY_VERSION"
+    api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
   }
