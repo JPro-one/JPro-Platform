@@ -20,14 +20,6 @@ buildscript {
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:core-test'),
            project(':jpro-routing:example')]) {
-
-  repositories {
-    mavenCentral()
-    maven {
-      url "https://sandec.jfrog.io/artifactory/repo"
-    }
-  }
-
   apply plugin: 'de.sandec.simplefx'
 
   compileScala {
@@ -47,7 +39,6 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
   apply plugin: 'java-library'
-  apply plugin: 'maven-publish'
 
   dependencies {
     api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
@@ -72,7 +63,7 @@ configure([project(':jpro-routing:dev')]) {
     api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
     api "org.kordamp.ikonli:ikonli-ionicons4-pack:$IKONLI_VERSION"
     implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
-    implementation 'org.scenic-view:scenic-view:11.0.3-SNAPSHOT-FORK'
+    implementation "org.scenic-view:scenic-view:$SCENIC_VIEW_VERSION"
   }
 }
 
