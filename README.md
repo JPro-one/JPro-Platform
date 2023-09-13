@@ -32,11 +32,11 @@ To use them, you need the following repository:
 ```
 
 ## JPro Auth
-Rely on `jpro-auth` module to add sophisticated authentication and authorization to your JPro/JavaFX applications.
+Rely on `jpro-auth` module to add sophisticated authentication and authorization to your **JPro/JavaFX** applications.
 Finely control access with a degree of customization that can accommodate even the most complex security requirements.
 
 #### Maven configuration
-```maven
+```xml
 <dependency>
   <groupId>one.jpro.platform</groupId>
   <artifactId>jpro-auth</artifactId>
@@ -45,17 +45,56 @@ Finely control access with a degree of customization that can accommodate even t
 ```
 
 #### Gradle configuration
-```gradle
+```groovy
 dependencies {
-    implementation 'one.jpro.platform:jpro-auth:0.2.4-SNAPSHOT'
+    implementation("one.jpro.platform:jpro-auth:0.2.4-SNAPSHOT")
+}
+```
+
+## JPro Media
+`jpro-media` is a library designed for audio and video playback and recording within JavaFX applications.
+It seamlessly operates on both desktop and mobile devices, as well as in web browsers via **JPro**, 
+all while utilizing the same codebase.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-media</artifactId>
+    <version>0.2.4-SNAPSHOT</version>
+  </dependency>
+  <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>javacv-platform</artifactId>
+      <version>1.5.9</version>
+      <!-- use compile scope when running/deploying with JPro,-->
+      <!-- since the platform related libraries are no more needed-->
+      <!-- <scope>compile</scope>-->
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+plugins {
+    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.9"
+}
+
+dependencies {
+    implementation("one.jpro.platform:jpro-media:0.2.4-SNAPSHOT")
+    runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
+
+    // use compileOnly configuration when running/deploying with JPro, 
+    // since the platform specific libraries are no more needed
+    // compileOnly "org.bytedeco:javacv-platform:1.5.9"
+    implementation "org.bytedeco:javacv-platform:1.5.9"
 }
 ```
 
 ## JPro Sessions
-#### Explanation
-This library provides a simple implementation of a session manager for JavaFX/JPro applications.
-It remembers the user, based on a cookie.
-A simple ObservableMap is used to store the session data.
+This library provides a simple implementation of a session manager for **JavaFX/JPro** applications.
+It remembers the user, based on a cookie. A simple ObservableMap is used to store the session data.
 This data is only accessible in the JPro Server, not in the browser - which can be important for some security reasons.
 
 Maven
@@ -81,23 +120,6 @@ Notes:
  * The SessionManager should be created only once, and should be static.
  * The SessionManager needs a name, which is used to identify the application.
  Different applications should use different names.
-
-## Media
-#### Maven
-```
-<dependency>
-  <groupId>one.jpro.platform</groupId>
-  <artifactId>jpro-media</artifactId>
-  <version>0.2.3</version>
-</dependency>
-```
-
-#### Gradle
-```
-dependencies {
-    implementation 'one.jpro.platform:jpro-media:0.2.3'
-}
-```
 
 ## TreeShowing
 #### Motivation

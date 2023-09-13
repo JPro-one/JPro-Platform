@@ -40,10 +40,10 @@ dependencies {
     implementation 'one.jpro.platform:jpro-media:0.2.4-SNAPSHOT'
     runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
 
-    implementation "org.bytedeco:javacv-platform:1.5.9"
     // use compileOnly configuration when running/deploying with JPro, 
     // since the platform specific libraries are no more needed
     // compileOnly "org.bytedeco:javacv-platform:1.5.9"
+    implementation "org.bytedeco:javacv-platform:1.5.9"
 }
 ```
 3. Provide the following `jvm argument` inside the `run` task:
