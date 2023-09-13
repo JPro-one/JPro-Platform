@@ -10,7 +10,7 @@ import java.util.function.Supplier
 object MemoryTester {
 
   def testForLeaks(x: CrawlReportApp, appFactory: Supplier[RouteNode]): Unit = {
-    x.pages.map { pageURL =>
+    x.pages.foreach { pageURL =>
       println("Checking for leak for the url: " + pageURL)
       JMemoryBuddy.memoryTest(checker1 => {
         JMemoryBuddy.memoryTest(checker2 => {

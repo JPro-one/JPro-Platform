@@ -17,11 +17,11 @@ abstract class View extends Response { THIS =>
   def onClose(): Unit = {}
   def subView(): View = null
 
-  override def toString(): String = s"View(title: $title, url: $url, description: $description)"
+  override def toString: String = s"View(title: $title, url: $url, description: $description)"
 
   /**
    * Only overwrite this method, if you handle the url-change by yourself.
-   * @param the path
+   * @param x path
    * @return whether the view handles the url change
    */
   def handleURL(x: String): Boolean = false

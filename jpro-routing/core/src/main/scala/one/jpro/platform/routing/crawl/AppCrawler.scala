@@ -50,7 +50,7 @@ object AppCrawler {
       if (x.isInstanceOf[ListView[_]]) {
         val lview = x.asInstanceOf[ListView[Any]]
         if(lview.getItems != null) {
-          lview.getItems.asScala.zipWithIndex.map { case (item,index) =>
+          lview.getItems.asScala.zipWithIndex.foreach { case (item,index) =>
             val factory = lview.cellFactoryProperty().get()
             if(factory != null) {
               val cell: ListCell[Any] = factory.call(lview)
@@ -105,7 +105,7 @@ object AppCrawler {
     var reports: List[CrawlReportPage] = List()
 
     def isOwnLink(x: String): Boolean = x.startsWith(prefix) || x.startsWith("/")
-    while (!toIndex.isEmpty) {
+    while (toIndex.nonEmpty) {
       val crawlNext = toIndex.head
       toIndex -= crawlNext
       indexed += crawlNext
@@ -130,7 +130,7 @@ object AppCrawler {
             def simplifyLink(x: String) = {
               if(x.startsWith(prefix)) x.drop(prefix.length) else x
             }
-            newReport.links.filter(x => isOwnLink(x.url)).map { link =>
+            newReport.links.filter(x => isOwnLink(x.url)).foreach { link =>
               val url = simplifyLink(link.url)
               if (!indexed.contains(url) && !toIndex.contains(url)) {
                 toIndex += url
@@ -152,7 +152,7 @@ object AppCrawler {
 
   def getImageURL(x: Image): String = {
     if(x.getUrl == null) return null;
-    val url = simplifyAndEncode(x.getUrl())
+    val url = simplifyAndEncode(x.getUrl)
     if(url.startsWith("http")) {
       url
     } else {

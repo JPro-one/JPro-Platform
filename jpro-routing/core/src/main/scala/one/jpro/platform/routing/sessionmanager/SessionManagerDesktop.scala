@@ -5,7 +5,6 @@ import simplefx.all._
 import simplefx.core._
 import simplefx.util.ReflectionUtil
 
-
 class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS =>
 
 
@@ -17,7 +16,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
   }
 
   def goForward(): Unit = {
-    assert(!historyForward.isEmpty, "Can't go forward, there is no entry in the forward history!")
+    assert(historyForward.nonEmpty, "Can't go forward, there is no entry in the forward history!")
     historyBackward = historyCurrent :: historyBackward
     historyCurrent = historyForward.head
     historyForward = historyForward.tail
@@ -77,7 +76,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     }
   }
 
-  def start() = {
+  def start(): Unit = {
     gotoURL("/", pushState = true)
   }
 }

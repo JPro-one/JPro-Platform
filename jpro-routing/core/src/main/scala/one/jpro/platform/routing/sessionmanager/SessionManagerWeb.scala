@@ -12,12 +12,10 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
   def goBack(): Unit = {
     webAPI.executeScript("history.go(-1);")
-
   }
 
   def goForward(): Unit = {
     webAPI.executeScript("history.go(1);")
-
   }
 
   webAPI.addInstanceCloseListener(() => {
@@ -86,7 +84,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
           """.stripMargin)
         }
         if(gtags && track) {
-          assert(!trackingID.isEmpty)
+          assert(trackingID.nonEmpty)
           webAPI.executeScript(s"""
                                   |gtag('config', '$trackingID', {
                                   |  'page_title' : "${view.title.replace("\"","\\\"")}",
@@ -103,8 +101,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     gotoURL(x, pushState, track)
   }
 
-  def start() = {
-
+  def start(): Unit = {
     gotoFullEncodedURL(webAPI.getBrowserURL, false, false)
     println("registering popstate")
     webAPI.registerJavaFunction("popstatejava", (s: String) => {
@@ -160,7 +157,5 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
         |  history.scrollRestoration = 'manual';
         |}
       """.stripMargin)
-
-
   }
 }

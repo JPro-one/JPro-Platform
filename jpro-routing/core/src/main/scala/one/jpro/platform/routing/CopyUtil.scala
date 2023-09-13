@@ -27,10 +27,10 @@ object CopyUtil {
         @Bind var textToCopy = ""
 
         onMouseClicked --> {
-          val clipboard = Clipboard.getSystemClipboard();
-          val content = new ClipboardContent();
-          content.putString(textToCopy);
-          clipboard.setContent(content);
+          val clipboard = Clipboard.getSystemClipboard()
+          val content = new ClipboardContent()
+          content.putString(textToCopy)
+          clipboard.setContent(content)
         }
 
 
@@ -59,8 +59,8 @@ object CopyUtil {
             .replace("\n", "\\n")
           webapi.executeScript(
             s"""${jsElem.getName}.onmousedown = function(event) {
-               |  console.log('copy: ${escapedText}');
-               |  navigator.clipboard.writeText('${escapedText}');
+               |  console.log('copy: $escapedText');
+               |  navigator.clipboard.writeText('$escapedText');
                |};
                |""".stripMargin)
         }

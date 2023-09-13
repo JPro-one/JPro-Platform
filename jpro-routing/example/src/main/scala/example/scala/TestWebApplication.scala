@@ -44,7 +44,7 @@ class Header(view: View, sessionManager: SessionManager) extends HBox {
   spacing = 10
   class HeaderLink(str: String, url: String) extends Label (str) {
     styleClass ::= "header-link"
-    if(!url.isEmpty) {
+    if(url.nonEmpty) {
       setLink(this, url, Some(str))
     }
   }
@@ -101,7 +101,7 @@ class Footer(sessionManager: SessionManager) extends HBox {
 }
 
 trait Page extends View { view =>
-  override lazy val realContent = {
+  override lazy val realContent: VBox = {
     new VBox {
   // Cousing leak? style = "-fx-background-color: white;"
     //  transform = Scale(1.3,1.3)
