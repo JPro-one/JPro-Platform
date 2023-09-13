@@ -33,9 +33,6 @@ public class ImageEncoderJPGTest {
         System.out.println("testImage: " + testImage.getWidth() + "x" + testImage.getHeight());
         File outputFile = File.createTempFile("image", ".jpg");
         System.out.println("testOutputImage: " + outputFile.getAbsolutePath());
-//        if(outputFile.exists()) {
-//            outputFile.delete();
-//        }
 
         ImageEncoder encoder = new ImageEncoderPNG();
         encoder.saveImage(testImage, outputFile);

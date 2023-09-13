@@ -16,11 +16,9 @@ public class ImageResultTest {
     void setUp() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         try {
-            Platform.startup(() -> {
-                latch.countDown();
-            });
+            Platform.startup(latch::countDown);
             latch.await();
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException ignored) {
         }
     }
 
