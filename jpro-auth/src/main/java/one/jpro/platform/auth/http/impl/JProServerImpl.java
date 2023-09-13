@@ -54,7 +54,7 @@ public class JProServerImpl implements HttpServer {
 
     @Override
     public String getFullRequestedURL() {
-        return URI.create(webAPI.getServerName()).toString();
+        return URI.create(webAPI.getBrowserURL()).toString();
     }
 
     @Override
