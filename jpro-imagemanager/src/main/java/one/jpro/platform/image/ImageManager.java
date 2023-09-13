@@ -26,7 +26,7 @@ public class ImageManager {
     private static final Logger logger = LoggerFactory.getLogger(ImageManager.class);
 
     private static final String CACHE_DIR_NAME = "jpro.imagemanager.cache";
-    private static final String CACHE_DIR_HOME = System.getProperty("user.home") + "/." + CACHE_DIR_NAME;
+    private static final String CACHE_DIR_HOME = System.getProperty("user.home") + "/." + "jpro" + "/image-manager";
     private static String CACHE_DIR = null;
     private static volatile ImageManager defaultInstance;
 
@@ -99,8 +99,8 @@ public class ImageManager {
             ImageResult result = new ImageResult(imageFile, img.getWidth(), img.getHeight());
 
             // Save metadata
-            Files.write(new File(hashDir, "key").toPath(), imageDefinition.toJSON().toString().getBytes(StandardCharsets.UTF_8));
-            Files.write(new File(hashDir, "wh").toPath(), (img.getWidth() + "," + img.getHeight()).getBytes(StandardCharsets.UTF_8));
+            Files.writeString(new File(hashDir, "key").toPath(), imageDefinition.toJSON().toString());
+            Files.writeString(new File(hashDir, "wh").toPath(), img.getWidth() + "," + img.getHeight());
 
             return result;
         } catch (IOException ex) {
