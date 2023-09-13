@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference
 class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
 
   def this(stage: Stage) = {
-    this(stage, Route.empty)
+    this(stage, Route.empty())
   }
 
   styleClass ::= "jpro-web-app"
@@ -29,10 +29,10 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
     }
   }
 
-  lazy val webAPI = if(WebAPI.isBrowser) com.jpro.webapi.WebAPI.getWebAPI(stage) else null
+  lazy val webAPI: WebAPI = if(WebAPI.isBrowser) com.jpro.webapi.WebAPI.getWebAPI(stage) else null
 
   var newRoute: Route = route
-  def getRoute(): Route = newRoute
+  def getRoute: Route = newRoute
   def setRoute(x: Route): Unit = newRoute = x
 
   def route(s: String, oldView: Node) = {

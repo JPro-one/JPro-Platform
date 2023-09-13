@@ -27,7 +27,7 @@ class ParallaxView(imgurl: URL) extends StackPane { THIS =>
     }
   }
 
-  if(WebAPI.isBrowser) (updated {
+  if(WebAPI.isBrowser) updated {
     onceWhen(scene != null) --> {
       webAPI = WebAPI.getWebAPI(this.scene)
 
@@ -60,9 +60,9 @@ class ParallaxView(imgurl: URL) extends StackPane { THIS =>
         webAPI.executeScript(
           s"""(function() {
             |var update = (function() {
-            |   var x = document.getElementById("${id}");
+            |   var x = document.getElementById("$id");
             |   if(x != null) {
-            |   var img = document.getElementById("${imgid}");
+            |   var img = document.getElementById("$imgid");
             |   var nodeHeight = x.getBoundingClientRect().height;
             |   var nodeY = x.getBoundingClientRect().top;
             |   var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
@@ -75,7 +75,7 @@ class ParallaxView(imgurl: URL) extends StackPane { THIS =>
             |   var perc = (nodeY - min) / dif
             |   var perc2 = Math.max(0.0, Math.min(perc,1.0))
             |
-            |   img.setAttribute("y", "" + (-perc2 * ${relativeHeight}) + "%");
+            |   img.setAttribute("y", "" + (-perc2 * $relativeHeight) + "%");
             |   }
             |});
             |window.addEventListener("scroll", update);
@@ -84,9 +84,7 @@ class ParallaxView(imgurl: URL) extends StackPane { THIS =>
             |})();
           """.stripMargin)
       }
-
     }
-  })
-
+  }
 
 }

@@ -62,8 +62,8 @@ object CopyUtil {
             .replace("\n", "\\n")
           webapi.executeScript(
             s"""${jsElem.getName}.onmousedown = function(event) {
-               |  console.log('copy: ${escapedText}');
-               |  navigator.clipboard.writeText('${escapedText}');
+               |  console.log('copy: $escapedText');
+               |  navigator.clipboard.writeText('$escapedText');
                |};
                |""".stripMargin)
         }

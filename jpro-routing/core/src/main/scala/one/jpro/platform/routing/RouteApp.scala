@@ -9,7 +9,7 @@ import one.jpro.platform.routing.sessionmanager.SessionManager
 
 abstract class RouteApp extends Application {
 
-  private var _stage: Stage = null;
+  private var _stage: Stage = null
   private var routeNode: RouteNode = null
   private var _scene: Scene = null
   def stageStyle(): StageStyle = StageStyle.DECORATED
@@ -20,7 +20,7 @@ abstract class RouteApp extends Application {
 
   override def start(stage: Stage): Unit = {
     _stage = stage
-    stage.initStyle(stageStyle)
+    stage.initStyle(stageStyle())
     routeNode = new RouteNode(stage)
 
     // Add node between RouteNode and Scene, so Popups work correctly with ScenicView

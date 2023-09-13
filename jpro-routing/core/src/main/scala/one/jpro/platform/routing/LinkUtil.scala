@@ -200,7 +200,7 @@ object LinkUtil {
           if(x.isDefined) {
             val escapedText = x.get.replace("'","\\'")
             webapi.executeScript(
-              s"""${aElem.getName}.title = '${escapedText}';""".stripMargin)
+              s"""${aElem.getName}.title = '$escapedText';""".stripMargin)
           } else {
             webapi.executeScript(
               s"""${aElem.getName}.removeAttribute("title");""".stripMargin)

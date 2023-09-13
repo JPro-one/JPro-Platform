@@ -113,7 +113,7 @@ object SessionManager {
       throw new Exception(s"Error while merging $orig and $next", e)
   }
 
-  def setExternalLinkImpl(f: Consumer[String]) = externalLinkImpl = f
+  def setExternalLinkImpl(f: Consumer[String]): Unit = externalLinkImpl = f
   var externalLinkImpl: Consumer[String] = { url =>
     Desktop.getDesktop.browse(URI.create(url))
   }

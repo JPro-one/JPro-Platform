@@ -13,7 +13,7 @@ object MemoryTester {
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def testForLeaks(x: CrawlReportApp, appFactory: Supplier[RouteNode]): Unit = {
-    x.pages.map { pageURL =>
+    x.pages.foreach { pageURL =>
       logger.debug(s"Checking for leak for the url: $pageURL")
       JMemoryBuddy.memoryTest(checker1 => {
         JMemoryBuddy.memoryTest(checker2 => {
