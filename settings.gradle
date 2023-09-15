@@ -1,5 +1,5 @@
 include "jpro-auth"
-include "jpro-imagemanager"
+include "jpro-image-manager"
 include "jpro-media"
 include "jpro-routing:core"
 include "jpro-routing:core-test"
