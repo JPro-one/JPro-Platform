@@ -1,9 +1,7 @@
-package one.jpro.platform.image;
+package one.jpro.platform.image.manager;
 
 import javafx.application.Platform;
-import one.jpro.platform.image.manager.ImageDefinition;
-import one.jpro.platform.image.manager.ImageManager;
-import one.jpro.platform.image.manager.ImageResult;
+import javafx.scene.image.Image;
 import one.jpro.platform.image.manager.encoder.ImageEncoder;
 import one.jpro.platform.image.manager.encoder.ImageEncoderJPG;
 import one.jpro.platform.image.manager.encoder.ImageEncoderPNG;
@@ -14,17 +12,15 @@ import one.jpro.platform.image.manager.transformer.ImageTransformer;
 import one.jpro.platform.image.manager.transformer.ImageTransformerFitWidth;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
-import javafx.scene.image.Image;
-import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ImageManagerTest {
 

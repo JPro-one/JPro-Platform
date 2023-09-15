@@ -1,15 +1,14 @@
-package one.jpro.platform.image;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package one.jpro.platform.image.manager;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
-import one.jpro.platform.image.manager.ImageResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ImageResultTest {
 

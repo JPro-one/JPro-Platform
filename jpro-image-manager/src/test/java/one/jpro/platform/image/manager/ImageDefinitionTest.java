@@ -1,6 +1,5 @@
-package one.jpro.platform.image;
+package one.jpro.platform.image.manager;
 
-import one.jpro.platform.image.manager.ImageDefinition;
 import one.jpro.platform.image.manager.encoder.ImageEncoder;
 import one.jpro.platform.image.manager.encoder.ImageEncoderPNG;
 import one.jpro.platform.image.manager.source.ImageSource;
