@@ -2,8 +2,8 @@ module one.jpro.platform.example {
     requires javafx.controls;
     requires javafx.media;
     requires jpro.webapi;
-    requires jpro.utils.htmlscrollpane;
     requires one.jpro.platform.media;
+    requires one.jpro.platform.htmlscrollpane;
     requires one.jpro.platform.sessionmanager;
 
     requires atlantafx.base;

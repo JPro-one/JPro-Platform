@@ -10,7 +10,7 @@ dependencies {
     implementation project(":jpro-routing:dev")
     implementation project(":jpro-media")
     implementation project(":jpro-sessions")
-    implementation project(":htmlscrollpane")
+    implementation project(":jpro-html-scrollpane")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
 
     implementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"

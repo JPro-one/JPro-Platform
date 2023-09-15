@@ -1,6 +1,5 @@
 package one.jpro.platform.htmlscrollpane;
 
-
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
 import de.sandec.jmemorybuddy.CleanupDetector;
@@ -40,6 +39,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
     public HTMLScrollPaneSkin(ScrollPane control) {
         this(control, "");
     }
+
     public HTMLScrollPaneSkin(ScrollPane control, String attributes) {
         super(control);
 
@@ -138,17 +138,13 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
                         "console.log('Disposed jpro."+idapp+"');", WebAPI.getWebAPI(contentPage)));
 
         // Update width and height of the htmlView
-        ((Region) getNode()).widthProperty().addListener((p,o,n) -> {
-            webapi.executeScript("document.getElementById('"+id+"').style.width = '"+n+"px';");
-        });
+        ((Region) getNode()).widthProperty().addListener((p,o,n) ->
+                webapi.executeScript("document.getElementById('"+id+"').style.width = '"+n+"px';"));
         webapi.executeScript("document.getElementById('"+id+"').style.width = '"+((Region) getNode()).getWidth()+"px';");
 
-        ((Region) getNode()).heightProperty().addListener((p,o,n) -> {
-            webapi.executeScript("document.getElementById('"+id+"').style.height = '"+n+"px';");
-        });
+        ((Region) getNode()).heightProperty().addListener((p,o,n) ->
+                webapi.executeScript("document.getElementById('"+id+"').style.height = '"+n+"px';"));
         webapi.executeScript("document.getElementById('"+id+"').style.height = '"+((Region) getNode()).getHeight()+"px';");
-
-
 
         htmlView.setContent(content);
     }

@@ -1,4 +1,4 @@
-module jpro.utils.htmlscrollpane {
+module one.jpro.platform.htmlscrollpane {
     requires javafx.controls;
     requires de.sandec.jmemorybuddy;
     requires jpro.webapi;
