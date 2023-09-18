@@ -1,6 +1,6 @@
 package one.jpro.platform.example;
 
-import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.example.media.MediaPlayerSample;
 import one.jpro.platform.example.media.MediaRecorderAndPlayerSample;
 import one.jpro.platform.example.media.MediaRecorderSample;
@@ -9,7 +9,9 @@ import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static one.jpro.platform.routing.RouteUtils.getNode;
 import static one.jpro.platform.routing.RouteUtils.redirect;
@@ -36,7 +38,10 @@ public class Main extends RouteApp {
         links.add(mediaRecorderAndPlayerSampleLink);
         links.add(scrollPaneLink);
 
-        getScene().setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        getScene().setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
+        Optional.ofNullable(getClass().getResource("/one/jpro/platform/example/media/css/main.css"))
+                .map(URL::toExternalForm)
+                .ifPresent(cssResource -> getScene().getStylesheets().add(cssResource));
 
         return Route.empty()
                 .and(redirect("/", mediaPlayerSampleLink.prefix()))
