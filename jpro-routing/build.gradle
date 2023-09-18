@@ -94,11 +94,11 @@ configure(project(':jpro-routing:example')) {
 
   dependencies {
     implementation project(':jpro-auth')
+    implementation project(':jpro-mdfx')
     implementation project(':jpro-routing:core')
     implementation project(':jpro-routing:dev')
     implementation project(':jpro-routing:popup')
 
-    implementation "com.sandec:mdfx:$MDFX_VERSION"
     implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
     implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"

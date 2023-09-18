@@ -1,7 +1,7 @@
 package example.login;
 
 import atlantafx.base.theme.PrimerLight;
-import com.sandec.mdfx.MarkdownView;
+import one.jpro.platform.mdfx.MarkdownView;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -216,7 +216,7 @@ public class LoginApp extends BaseAuthApp {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView providerDiscoveryView = new MarkdownView();
-        providerDiscoveryView.getStylesheets().add("/com/sandec/mdfx/mdfx-default.css");
+        providerDiscoveryView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         providerDiscoveryView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var authOptions = getAuthOptions();
             return authOptions == null ? "" : jsonToMarkdown(authOptions.toJSON());
@@ -392,7 +392,7 @@ public class LoginApp extends BaseAuthApp {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/com/sandec/mdfx/mdfx-default.css");
+        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var user = getUser();
             return user == null ? "" : jsonToMarkdown(user.toJSON());
@@ -409,7 +409,7 @@ public class LoginApp extends BaseAuthApp {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/com/sandec/mdfx/mdfx-default.css");
+        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var introspectionInfo = getIntrospectionInfo();
             return introspectionInfo == null ? "" : jsonToMarkdown(introspectionInfo);
@@ -427,7 +427,7 @@ public class LoginApp extends BaseAuthApp {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/com/sandec/mdfx/mdfx-default.css");
+        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var user = getUser();
             return user == null ? "" : jsonToMarkdown(user.toJSON());
@@ -444,7 +444,7 @@ public class LoginApp extends BaseAuthApp {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/com/sandec/mdfx/mdfx-default.css");
+        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var userInfo = getUserInfo();
             return userInfo == null ? "" : jsonToMarkdown(userInfo);

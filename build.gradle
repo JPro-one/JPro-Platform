@@ -68,8 +68,8 @@ configure([project("jpro-sessions")]) {
   }
 }
 
-configure([project("tree-showing"), project("jpro-auth"), project("jpro-image-manager"), project("jpro-media"),
-           project("jpro-sessions"), project("jpro-html-scrollpane"), project("freeze-detector"),
+configure([project("tree-showing"), project("jpro-auth"), project("jpro-image-manager"), project("jpro-mdfx"),
+           project("jpro-media"), project("jpro-sessions"), project("jpro-html-scrollpane"), project("freeze-detector"),
            project("jpro-routing:core"), project("jpro-routing:dev"), project("jpro-routing:popup")]) {
   apply plugin: 'maven-publish'
 
