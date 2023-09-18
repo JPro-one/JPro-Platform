@@ -13,12 +13,12 @@ import java.util.List;
 
 public class MarkdownView extends VBox {
 
-    private SimpleStringProperty mdString = new SimpleStringProperty("");
+    private final SimpleStringProperty mdString = new SimpleStringProperty("");
 
     public MarkdownView(String mdString) {
         this.mdString.set(mdString);
         this.mdString.addListener((p,o,n) -> updateContent());
-        getStylesheets().add("/one/jpro/mdfx/mdfx.css");
+        getStylesheets().add("/one/jpro/platform/mdfx/mdfx.css");
         getDefaultStylesheets().forEach(s -> getStylesheets().add(s));
         updateContent();
     }
@@ -27,7 +27,7 @@ public class MarkdownView extends VBox {
     }
 
     protected List<String> getDefaultStylesheets() {
-        return List.of("/one/jpro/mdfx/mdfx-default.css");
+        return List.of("/one/jpro/platform/mdfx/mdfx-default.css");
     }
 
     private void updateContent() {
@@ -64,7 +64,7 @@ public class MarkdownView extends VBox {
             Image img = new Image(url, false);
             AdaptiveImage r = new AdaptiveImage(img);
 
-            // The TextFlow does not limit the width of it's node based on the available width
+            // The TextFlow does not limit the width of its node based on the available width
             // As a workaround, we bind to the width of the MarkDownView.
             r.maxWidthProperty().bind(widthProperty());
 
