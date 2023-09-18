@@ -1,4 +1,4 @@
-module com.sandec.mdfx {
+module one.jpro.platform.mdfx {
     requires javafx.controls;
     requires javafx.fxml;
     requires flexmark;
