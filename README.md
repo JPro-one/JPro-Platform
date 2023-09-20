@@ -25,7 +25,7 @@ significant savings in development time, resources, and costs.
 ____
 
 To use them, you need the following repository:
-```
+```groovy
   maven {
     url "https://sandec.jfrog.io/artifactory/repo"
   }
@@ -97,14 +97,22 @@ This library provides a simple implementation of a session manager for **JavaFX/
 It remembers the user, based on a cookie. A simple ObservableMap is used to store the session data.
 This data is only accessible in the JPro Server, not in the browser - which can be important for some security reasons.
 
-Maven
-```
+#### Maven configuration
+```xml
 <dependency>
   <groupId>one.jpro.platform</groupId>
   <artifactId>jpro-sessions</artifactId>
-   <version>0.2.2</version>
+   <version>0.2.4-SNAPSHOT</version>
 </dependency>
 ```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-sessions:0.2.4-SNAPSHOT")
+}
+```
+
 ### Usage
 ```
 import one.jpro.sessionmanager.SessionManager;
@@ -130,19 +138,19 @@ Internally in JavaFX, the property "treeShowing" is used, to check whether a Nod
 But as an end-user, this property is not accessible in their application.
 With this project, we want to make the property available to the common JavaFX Developer - allowing them to write bug-free and leak-free applications.
 
-#### Maven
-```
+#### Maven configuration
+```xml
 <dependency>
   <groupId>one.jpro.platform</groupId>
   <artifactId>tree-showing</artifactId>
-  <version>0.2.2</version>
+  <version>0.2.4-SNAPSHOT</version>
 </dependency>
 ```
 
-#### Gradle
-```
+#### Gradle configuration
+```groovy
 dependencies {
-    implementation 'one.jpro.platform:tree-showing:0.2.3'
+    implementation 'one.jpro.platform:tree-showing:0.2.4-SNAPSHOT'
 }
 ```
 The module name is `jpro.utils.treeshowing`
@@ -168,8 +176,6 @@ if(treeShowing.get()) {
 ### Freeze Detector
 This library allows you to track whether the JavaFX Application Thread is frozen for a given time.
 This can be useful for debugging purposes, detecting deadlocks or other optimize performance.
-
-
 
 Internal Notes:
 
