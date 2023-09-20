@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-
 apply plugin: 'org.openjfx.javafxplugin'
 apply plugin: 'jpro-gradle-plugin'
 
@@ -21,17 +19,4 @@ mainClassName = 'one.jpro.platform.mdfx.example.MarkdownViewSample'
 application {
     mainClass = "$mainClassName"
     mainModule = moduleName
-    applicationDefaultJvmArgs = [
-            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
-    ]
-}
-
-test {
-    useJUnitPlatform()
-
-    testLogging.showStandardStreams = true
-    testLogging.exceptionFormat TestExceptionFormat.FULL
-    testLogging.showExceptions true
-    testLogging.showCauses true
-    testLogging.showStackTraces true
 }
