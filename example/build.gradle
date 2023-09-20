@@ -8,6 +8,7 @@ apply plugin: 'jpro-gradle-plugin'
 dependencies {
     implementation project(":jpro-routing:core")
     implementation project(":jpro-routing:dev")
+    implementation project(":jpro-mdfx:example")
     implementation project(":jpro-media")
     implementation project(":jpro-sessions")
     implementation project(":jpro-html-scrollpane")

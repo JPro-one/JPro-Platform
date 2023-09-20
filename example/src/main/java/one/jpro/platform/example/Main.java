@@ -4,6 +4,7 @@ import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.example.media.MediaPlayerSample;
 import one.jpro.platform.example.media.MediaRecorderAndPlayerSample;
 import one.jpro.platform.example.media.MediaRecorderSample;
+import one.jpro.platform.mdfx.example.MarkdownViewSample;
 import one.jpro.platform.routing.Filters;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
@@ -28,6 +29,7 @@ public class Main extends RouteApp {
     private final Link mediaPlayerSampleLink = new Link("MediaPlayer", "/media/player");
     private final Link mediaRecorderSampleLink = new Link("MediaRecorder", "/media/recorder");
     private final Link mediaRecorderAndPlayerSampleLink = new Link("MediaRecorderAndPlayer", "/media/recorder_player");
+    private final Link markdownViewSampleLink = new Link("MarkdownView", "/mdfx");
     private final Link scrollPaneLink = new Link("ScrollPane", "/scrollpane");
 
     @Override
@@ -36,6 +38,7 @@ public class Main extends RouteApp {
         links.add(mediaPlayerSampleLink);
         links.add(mediaRecorderSampleLink);
         links.add(mediaRecorderAndPlayerSampleLink);
+        links.add(markdownViewSampleLink);
         links.add(scrollPaneLink);
 
         getScene().setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
@@ -51,6 +54,8 @@ public class Main extends RouteApp {
                         new MediaRecorderSample().createRoot(getStage())))
                 .and(getNode(mediaRecorderAndPlayerSampleLink.prefix(), request ->
                         new MediaRecorderAndPlayerSample().createRoot(getStage())))
+                .and(getNode(markdownViewSampleLink.prefix(), request ->
+                        new MarkdownViewSample().createRoot(getStage())))
                 .and(getNode(scrollPaneLink.prefix(), request ->
                         new HTMLScrollPaneSample().createRoot()))
                 .filter(LinkHeaderFilter.create(links))
