@@ -1,6 +1,6 @@
 package one.jpro.platform.example.media;
 
-import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -32,7 +32,7 @@ public class MediaPlayerSample extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Media Player");
         Scene scene = new Scene(createRoot(stage), 1140, 640);
-        scene.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        scene.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
         stage.setScene(scene);
         stage.show();
     }

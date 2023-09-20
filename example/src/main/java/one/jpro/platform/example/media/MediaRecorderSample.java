@@ -1,6 +1,6 @@
 package one.jpro.platform.example.media;
 
-import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -29,7 +29,7 @@ public class MediaRecorderSample extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder");
         Scene scene = new Scene(createRoot(stage), 760, 540);
-        scene.getStylesheets().addAll(new PrimerLight().getUserAgentStylesheet());
+        scene.getStylesheets().addAll(new CupertinoLight().getUserAgentStylesheet());
         stage.setScene(scene);
         stage.show();
     }
