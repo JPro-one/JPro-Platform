@@ -1,10 +1,10 @@
 package one.jpro.platform.example;
 
 import atlantafx.base.theme.CupertinoLight;
-import one.jpro.platform.example.media.MediaPlayerSample;
-import one.jpro.platform.example.media.MediaRecorderAndPlayerSample;
-import one.jpro.platform.example.media.MediaRecorderSample;
 import one.jpro.platform.mdfx.example.MarkdownViewSample;
+import one.jpro.platform.media.example.MediaPlayerSample;
+import one.jpro.platform.media.example.MediaRecorderAndPlayerSample;
+import one.jpro.platform.media.example.MediaRecorderSample;
 import one.jpro.platform.routing.Filters;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;

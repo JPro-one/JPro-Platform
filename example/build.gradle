@@ -9,39 +9,20 @@ dependencies {
     implementation project(":jpro-routing:core")
     implementation project(":jpro-routing:dev")
     implementation project(":jpro-mdfx:example")
-    implementation project(":jpro-media")
+    implementation project(":jpro-media:example")
     implementation project(":jpro-sessions")
     implementation project(":jpro-html-scrollpane")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-
-    implementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
-//    compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION" // when running on JPro
-    runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
 mainClassName = 'one.jpro.platform.example.Main'
-//mainClassName = 'one.jpro.platform.example.SessionManagerSample'
-//mainClassName = 'one.jpro.platform.example.HTMLScrollPaneSample'
-
-//mainClassName = 'one.jpro.platform.example.media.MediaPlayerSample'
-//mainClassName = 'one.jpro.platform.example.media.MediaRecorderSample'
-//mainClassName = 'one.jpro.platform.example.media.MediaRecorderAndPlayerSample'
-//mainClassName = 'one.jpro.platform.example.media.MediaPlayerApplication'
-//mainClassName = 'one.jpro.platform.example.media.MediaRecorderApplication'
 
 javafx {
     version = "$JAVAFX_VERSION"
     modules = ['javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web']
-}
-
-run {
-    doFirst {
-        jvmArgs = [
-                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.platform.media'
-        ]
-    }
 }
 
 application {
