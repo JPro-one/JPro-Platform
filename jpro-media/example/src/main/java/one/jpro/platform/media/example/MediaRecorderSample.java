@@ -1,8 +1,8 @@
-package one.jpro.platform.example.media;
+package one.jpro.platform.media.example;
 
+import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.FlowPane;
@@ -15,42 +15,51 @@ import one.jpro.platform.media.recorder.MediaRecorder;
 import one.jpro.platform.media.util.MediaUtil;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
 
 /**
- * Simple camera recorder application using JPro-Media library.
- * This is the example shown on the documentation.
+ * Media recorder example.
  *
  * @author Besmir Beqiri
  */
-public class MediaRecorderApplication extends Application {
+public class MediaRecorderSample extends Application {
 
+    @Override
     public void start(Stage stage) {
         stage.setTitle("JPro Camera Recorder");
+        Scene scene = new Scene(createRoot(stage), 760, 540);
+        scene.getStylesheets().addAll(new CupertinoLight().getUserAgentStylesheet());
+        stage.setScene(scene);
+        stage.show();
+    }
 
-        // Create the media recorder and the media view.
-        MediaRecorder mediaRecorder = MediaRecorder.create(stage);
-        MediaView cameraView = MediaView.create(mediaRecorder);
-
+    public Parent createRoot(Stage stage) {
         // Controls
         Button enableCamButton = new Button("Enable Cam");
         Button startButton = new Button("Start");
         startButton.setDisable(true);
+        Button pauseButton = new Button("Pause");
+        pauseButton.setDisable(true);
         Button stopButton = new Button("Stop");
         stopButton.setDisable(true);
         Button saveButton = new Button("Save As...");
         saveButton.setDisable(true);
 
         StackPane previewPane = new StackPane(enableCamButton);
+        previewPane.getStyleClass().add("preview-pane");
 
-        FlowPane controlsPane = new FlowPane(startButton, stopButton, saveButton);
-        controlsPane.setAlignment(Pos.CENTER);
-        controlsPane.setHgap(8);
-        controlsPane.setVgap(8);
-        controlsPane.setPadding(new Insets(8));
+        // Create media recorder and media view
+        MediaRecorder mediaRecorder = MediaRecorder.create(stage);
+        MediaView cameraView = MediaView.create(mediaRecorder);
+
+        FlowPane controlsPane = new FlowPane(startButton, pauseButton, stopButton, saveButton);
+        controlsPane.getStyleClass().add("controls-pane");
 
         // Control events
         enableCamButton.setOnAction(event -> mediaRecorder.enable());
         startButton.setOnAction(event -> mediaRecorder.start());
+        pauseButton.setOnAction(event -> mediaRecorder.pause());
         stopButton.setOnAction(event -> mediaRecorder.stop());
         saveButton.setOnAction(event -> {
             try {
@@ -67,24 +76,45 @@ public class MediaRecorderApplication extends Application {
         });
         mediaRecorder.setOnStart(event -> {
             startButton.setDisable(true);
+            pauseButton.setDisable(false);
             stopButton.setDisable(false);
             saveButton.setDisable(true);
         });
+        mediaRecorder.setOnPaused(event -> {
+            startButton.setDisable(false);
+            pauseButton.setDisable(true);
+        });
+        mediaRecorder.setOnResume(event -> {
+            startButton.setDisable(true);
+            pauseButton.setDisable(false);
+        });
         mediaRecorder.setOnStopped(event -> {
             startButton.setDisable(false);
+            pauseButton.setDisable(true);
             stopButton.setDisable(true);
             saveButton.setDisable(false);
         });
         mediaRecorder.setOnError(event -> System.out.println(mediaRecorder.getError().toString()));
 
+        // User interface
         VBox rootPane = new VBox(previewPane, controlsPane);
+        rootPane.getStyleClass().add("root-pane");
         VBox.setVgrow(previewPane, Priority.ALWAYS);
         cameraView.fitWidthProperty().bind(rootPane.widthProperty());
         cameraView.fitHeightProperty().bind(rootPane.heightProperty()
                 .subtract(controlsPane.heightProperty()));
 
-        Scene scene = new Scene(rootPane, 760, 540);
-        stage.setScene(scene);
-        stage.show();
+        Optional.ofNullable(getClass().getResource("css/media_sample.css"))
+                .map(URL::toExternalForm)
+                .ifPresent(cssResource -> rootPane.getStylesheets().add(cssResource));
+
+        return rootPane;
+    }
+
+    /**
+     *  Application entry point.
+     */
+    public static void main(String[] args) {
+        launch(args);
     }
 }

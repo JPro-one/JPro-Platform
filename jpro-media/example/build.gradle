@@ -1,0 +1,44 @@
+plugins {
+    id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
+}
+
+apply plugin: 'org.openjfx.javafxplugin'
+apply plugin: 'jpro-gradle-plugin'
+
+dependencies {
+    implementation project(":jpro-media")
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+
+    implementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
+//    compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION" // when running on JPro
+    runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
+    implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+mainClassName = 'one.jpro.platform.media.example.MediaPlayerSample'
+//mainClassName = 'one.jpro.platform.media.example.MediaRecorderSample'
+//mainClassName = 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
+//mainClassName = 'one.jpro.platform.media.example.MediaPlayerApplication'
+//mainClassName = 'one.jpro.platform.media.example.MediaRecorderApplication'
+
+javafx {
+    version = "$JAVAFX_VERSION"
+    modules = ['javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web']
+}
+
+run {
+    doFirst {
+        jvmArgs = [
+                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.platform.media'
+        ]
+    }
+}
+
+application {
+  mainClass = "$mainClassName"
+  mainModule = moduleName
+  applicationDefaultJvmArgs = [
+          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
+  ]
+}

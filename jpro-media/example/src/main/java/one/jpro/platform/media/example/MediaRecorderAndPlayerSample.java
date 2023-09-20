@@ -1,4 +1,4 @@
-package one.jpro.platform.example.media;
+package one.jpro.platform.media.example;
 
 import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;

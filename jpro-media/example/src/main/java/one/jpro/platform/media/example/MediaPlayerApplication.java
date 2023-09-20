@@ -1,4 +1,4 @@
-package one.jpro.platform.example.media;
+package one.jpro.platform.media.example;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
