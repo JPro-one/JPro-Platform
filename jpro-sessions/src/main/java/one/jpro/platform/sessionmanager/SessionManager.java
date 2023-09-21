@@ -6,13 +6,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.WeakHashMap;
-import java.util.logging.Logger;
 
 /**
  * This class handles the management of sessions in an application.
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class SessionManager {
 
-    private static final Logger logger = Logger.getLogger(SessionManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SessionManager.class.getName());
 
     private final File baseDirectory;
     private final String cookieName;
@@ -149,18 +150,18 @@ public class SessionManager {
             File f = new File(cookieDirectory, k);
             if (change.wasRemoved()) {
                 if (!f.delete()) {
-                    logger.warning("Could not delete file: " + f);
+                    logger.warn("Could not delete file: " + f);
                 }
             }
             if (change.wasAdded()) {
                 try {
-                    logger.warning("Saving to: " + f);
+                    logger.warn("Saving to: " + f);
                     FileUtils.writeStringToFile(f, change.getValueAdded(), StandardCharsets.UTF_8);
                     if (!f.exists()) {
                         throw new SessionException("Internal Error: file was not written: " + f);
                     }
                 } catch (Exception ex) {
-                    logger.severe("Error writing session content: " + f);
+                    logger.error("Error writing session content: " + f);
                 }
             }
         });
@@ -178,7 +179,7 @@ public class SessionManager {
         try {
             return Integer.parseInt(cookieValue) >= 0;
         } catch (NumberFormatException ex) {
-            logger.warning("Unexpected cookie format: " + cookieValue);
+            logger.error("Unexpected cookie format: " + cookieValue);
             return false;
         }
     }
