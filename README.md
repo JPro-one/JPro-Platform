@@ -1,5 +1,6 @@
 # JPro Platform
 ![Build](https://github.com/jpro-one/jpro-utils/actions/workflows/linux.yml/badge.svg)
+[![JPro supported](https://img.shields.io/badge/JPro-supported-brightgreen.svg)](https://www.jpro.one/)
 
 The JPro Platform represents the foundation of cross-platform application development,
 seamlessly integrating the power of JavaFX with the limitless potential of web-based applications.
