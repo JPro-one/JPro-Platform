@@ -5,7 +5,6 @@
  */
 module one.jpro.platform.mdfx.example {
     requires javafx.controls;
-    requires javafx.media;
     requires atlantafx.base;
     requires org.slf4j;
     requires org.apache.commons.io;
