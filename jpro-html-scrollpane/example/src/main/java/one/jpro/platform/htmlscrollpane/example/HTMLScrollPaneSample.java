@@ -1,4 +1,4 @@
-package one.jpro.platform.example;
+package one.jpro.platform.htmlscrollpane.example;
 
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -27,9 +27,5 @@ public class HTMLScrollPaneSample extends Application {
             scrollPane.setSkin(new HTMLScrollPaneSkin(scrollPane));
 
             return scrollPane;
-        }
-
-        public static void main(String[] args) {
-            launch(args);
         }
 }

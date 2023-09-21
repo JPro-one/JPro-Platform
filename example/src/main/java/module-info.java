@@ -8,7 +8,7 @@ module one.jpro.platform.example {
     requires one.jpro.platform.routing.core;
     requires one.jpro.platform.mdfx.example;
     requires one.jpro.platform.media.example;
-    requires one.jpro.platform.htmlscrollpane;
+    requires one.jpro.platform.htmlscrollpane.example;
     requires one.jpro.platform.sessionmanager;
 
     exports one.jpro.platform.example;
