@@ -17,6 +17,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
 import one.jpro.platform.treeshowing.TreeShowing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -24,6 +26,8 @@ import java.util.List;
 import java.util.Random;
 
 public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
+
+    private static final Logger logger = LoggerFactory.getLogger(HTMLScrollPaneSkin.class);
 
     StackPane viewContent;
     HTMLView htmlView;
@@ -46,7 +50,6 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         cssBridgeTarget = new Pane();
         cssBridgeTarget.setId("cssBridgeTarget");
         htmlView.blockMouseInputProperty().set(true);
-
         htmlView.setMinHeight(500);
 
         TreeShowing.treeShowing(control).addListener(
@@ -77,11 +80,11 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
             setupHTMLView(webapi);
             registerChangeListener(control.contentProperty(), e -> {
-                System.out.println("Trigger: content");
+                logger.debug("Trigger: content");
                 updateContent.run();
             });
             registerChangeListener(TreeShowing.treeShowing(control), e -> {
-                System.out.println("Trigger: treeshowing");
+                logger.debug("Trigger: tree-showing");
                 updateContent.run();
             });
             updateContent.run();
@@ -119,7 +122,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         String idapp = "scrollelemapp_" + number;
 
         String content = "<div id=\"" + id + "\" style=\"overflow-x: hidden; overflow-y:scroll; \"><jpro-app loader=\"none\" id=\"" + idapp + "\" href=\"/app/" + windowId + "\" fxwidth=\"true\" fxheight=\"true\" nativeScrolling=\"true\" " + attributes + "></jpro-app></div>";
-        System.out.println("Setting content to: " + content);
+        logger.debug("Setting content to: " + content);
 
         webapi.executeScript("jpro." + idapp + " = document.getElementById('" + idapp + "');");
         // Remove the cleanuplistener, because it makes a reference to the stage. Or just remove it, when it's closed.
@@ -164,7 +167,6 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         public void dispose() {
         }
     }
-
 
     static class HorizontalStackPane extends StackPane {
         @Override
@@ -228,13 +230,13 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             parentField.setAccessible(true);
             Object peer = parentField.get(node);
             if (peer != null) {
-                var ngnode = peer.getClass().getClassLoader().loadClass("com.sun.javafx.sg.prism.NGNode");
-                parentField = ngnode.getDeclaredField("parent");
+                var ngNode = peer.getClass().getClassLoader().loadClass("com.sun.javafx.sg.prism.NGNode");
+                parentField = ngNode.getDeclaredField("parent");
                 parentField.setAccessible(true);
                 parentField.set(peer, null);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error while removing peer parent", ex);
         }
     }
 
@@ -256,7 +258,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error while clearing newEventTargets", ex);
         }
     }
 
@@ -270,7 +272,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             Property<Object> p = (Property<Object>) ownerNodeField.get(window);
             p.setValue(null);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error while setting ownerWindow to null", ex);
         }
     }
 }
