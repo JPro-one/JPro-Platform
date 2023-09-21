@@ -14,6 +14,13 @@ import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
+/**
+ * This class handles the management of sessions in an application.
+ * It provides the functionality to create, retrieve, and store sessions.
+ *
+ * @author Florian Kirmaier
+ * @author Besmir Beqiri
+ */
 public class SessionManager {
 
     private static final Logger logger = Logger.getLogger(SessionManager.class.getName());
@@ -21,11 +28,24 @@ public class SessionManager {
     private final File baseDirectory;
     private final String cookieName;
     private static final Random random = new Random();
+    private final WeakHashMap<String, ObservableMap<String, String>> sessionCache = new WeakHashMap<>();
 
+    /**
+     * Creates a SessionManager object with the given app name.
+     *
+     * @param appName the name of the application
+     */
     public SessionManager(String appName) {
         this(new File(new File(System.getProperty("user.home")), "." + appName).getAbsoluteFile(), "c-" + appName);
     }
 
+    /**
+     * Creates a SessionManager object with the given base directory and cookie name.
+     *
+     * @param baseDirectory the base directory for session storage
+     * @param cookieName the name of the cookie used for session tracking
+     * @throws SessionException if the session directory cannot be created
+     */
     public SessionManager(File baseDirectory, String cookieName) {
         this.baseDirectory = baseDirectory;
         this.cookieName = cookieName;
@@ -38,10 +58,21 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Returns the base directory used for session storage.
+     *
+     * @return the base directory for session storage
+     */
     public File getFolder() {
         return baseDirectory;
     }
 
+    /**
+     * Retrieves the session for the given JPro WebAPI.
+     *
+     * @param webAPI the WebAPI to retrieve the session for
+     * @return the session as an ObservableMap containing key-value pairs
+     */
     public ObservableMap<String, String> getSession(WebAPI webAPI) {
         String cookieValue = webAPI.getCookies().get(cookieName);
         if (cookieValue == null || !isValidCookie(cookieValue)) {
@@ -59,6 +90,13 @@ public class SessionManager {
         return getSession(cookieValue);
     }
 
+    /**
+     * Retrieves the session for the given session key.
+     *
+     * @param sessionKey the session key to retrieve the session for
+     * @return the session as an ObservableMap containing key-value pairs
+     * @throws SessionException if the session retrieval is called from a non-JFX Application Thread
+     */
     public ObservableMap<String, String> getSession(String sessionKey) {
         if (!Platform.isFxApplicationThread()) {
             throw new SessionException("Please use the JFX Application Thread!");
@@ -66,8 +104,12 @@ public class SessionManager {
         return getSessionCached(sessionKey);
     }
 
-    private final WeakHashMap<String, ObservableMap<String, String>> sessionCache = new WeakHashMap<>();
-
+    /**
+     * Retrieves the session for the given session key from the session cache.
+     *
+     * @param sessionKey the session key to retrieve the session for
+     * @return the session as an ObservableMap containing key-value pairs
+     */
     private ObservableMap<String, String> getSessionCached(String sessionKey) {
         ObservableMap<String, String> res = sessionCache.get(sessionKey);
         if (res != null) return res;
@@ -126,6 +168,12 @@ public class SessionManager {
         return session;
     }
 
+    /**
+     * Determines whether a cookie value is valid.
+     *
+     * @param cookieValue the cookie value to be checked
+     * @return {@code true} if the cookie value is a non-negative integer, {@code false} otherwise
+     */
     private Boolean isValidCookie(String cookieValue) {
         try {
             return Integer.parseInt(cookieValue) >= 0;
@@ -135,6 +183,11 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Creates a unique identifier.
+     *
+     * @return a unique identifier as a String
+     */
     private String createUniqueIdentifier() {
         while (true) {
             String newValue = createIdentifier();
@@ -144,6 +197,11 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Generates a unique identifier.
+     *
+     * @return a unique identifier as a String
+     */
     private static String createIdentifier() {
         return "" + random.nextInt(Integer.MAX_VALUE);
     }
