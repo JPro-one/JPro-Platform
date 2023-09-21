@@ -27,13 +27,9 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
     StackPane viewContent;
     HTMLView htmlView;
-
     Node cssBridgeTarget;
-
     Pane htmlViewContent;
-
     ChangeListener<Number> widthListener;
-
     String attributes;
 
     public HTMLScrollPaneSkin(ScrollPane control) {
@@ -54,13 +50,12 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         htmlView.setMinHeight(500);
 
         TreeShowing.treeShowing(control).addListener(
-                (p,o,n) -> {
+                (p, o, n) -> {
                     // add cssBridgeTarget when scene is not null, remove otherwise
                     if (n) {
                         getChildren().add(cssBridgeTarget);
                     } else {
                         getChildren().remove(cssBridgeTarget);
-
                         workaroundRemovePeerParent(cssBridgeTarget);
                     }
                 }
@@ -73,7 +68,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             getChildren().add(viewContent);
 
             Runnable updateContent = () -> {
-                if(TreeShowing.treeShowing(control).get()) {
+                if (TreeShowing.treeShowing(control).get()) {
                     htmlViewContent.getChildren().setAll(control.getContent());
                 } else {
                     htmlViewContent.getChildren().clear();
@@ -97,21 +92,18 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         // DO CSS BRIDGE
         PopupControl contentPage = new PopupControl();
         contentPage.setSkin(new WeakPopupControlSkin(htmlViewContent));
+        contentPage.getProperties().put("APP", null);
 
-        contentPage.getProperties().put("APP",null);
-
-        widthListener = (p, o, n) -> {
-            htmlViewContent.prefWidthProperty().set(n.doubleValue());
-        };
-        ((Region)getNode()).widthProperty().addListener(new WeakChangeListener<>(widthListener));
+        widthListener = (p, o, n) -> htmlViewContent.prefWidthProperty().set(n.doubleValue());
+        ((Region) getNode()).widthProperty().addListener(new WeakChangeListener<>(widthListener));
         htmlViewContent.prefWidthProperty().set(((Region) getNode()).getWidth());
 
-        contentPage.show(cssBridgeTarget,0,0);
+        contentPage.show(cssBridgeTarget, 0, 0);
 
         Node localCssBridgeTarget = cssBridgeTarget;
-        cssBridgeTarget.sceneProperty().addListener((p,o,n) -> {
-            if(n != null) {
-                contentPage.show(localCssBridgeTarget,0,0);
+        cssBridgeTarget.sceneProperty().addListener((p, o, n) -> {
+            if (n != null) {
+                contentPage.show(localCssBridgeTarget, 0, 0);
             } else {
                 contentPage.hide();
                 // set ownerWindow to null?
@@ -126,25 +118,25 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         String id = "scrollelem_" + number;
         String idapp = "scrollelemapp_" + number;
 
-        String content = "<div id=\""+id+"\" style=\"overflow-x: hidden; overflow-y:scroll; \"><jpro-app loader=\"none\" id=\""+idapp+"\" href=\"/app/"+windowId+"\" fxwidth=\"true\" fxheight=\"true\" nativeScrolling=\"true\" "+attributes+"></jpro-app></div>";
+        String content = "<div id=\"" + id + "\" style=\"overflow-x: hidden; overflow-y:scroll; \"><jpro-app loader=\"none\" id=\"" + idapp + "\" href=\"/app/" + windowId + "\" fxwidth=\"true\" fxheight=\"true\" nativeScrolling=\"true\" " + attributes + "></jpro-app></div>";
         System.out.println("Setting content to: " + content);
 
-        webapi.executeScript("jpro."+idapp+" = document.getElementById('"+idapp+"');");
+        webapi.executeScript("jpro." + idapp + " = document.getElementById('" + idapp + "');");
         // Remove the cleanuplistener, because it makes a reference to the stage. Or just remove it, when it's closed.
         CleanupDetector.onCleanup(this,
                 new WeakCleanupRunnable(webapi, "console.log('DISPOSING');" +
-                        "jpro."+idapp+".jproimpl.dispose();" +
-                        "delete jpro."+idapp+";" +
-                        "console.log('Disposed jpro."+idapp+"');", WebAPI.getWebAPI(contentPage)));
+                        "jpro." + idapp + ".jproimpl.dispose();" +
+                        "delete jpro." + idapp + ";" +
+                        "console.log('Disposed jpro." + idapp + "');", WebAPI.getWebAPI(contentPage)));
 
         // Update width and height of the htmlView
-        ((Region) getNode()).widthProperty().addListener((p,o,n) ->
-                webapi.executeScript("document.getElementById('"+id+"').style.width = '"+n+"px';"));
-        webapi.executeScript("document.getElementById('"+id+"').style.width = '"+((Region) getNode()).getWidth()+"px';");
+        ((Region) getNode()).widthProperty().addListener((p, o, n) ->
+                webapi.executeScript("document.getElementById('" + id + "').style.width = '" + n + "px';"));
+        webapi.executeScript("document.getElementById('" + id + "').style.width = '" + ((Region) getNode()).getWidth() + "px';");
 
-        ((Region) getNode()).heightProperty().addListener((p,o,n) ->
-                webapi.executeScript("document.getElementById('"+id+"').style.height = '"+n+"px';"));
-        webapi.executeScript("document.getElementById('"+id+"').style.height = '"+((Region) getNode()).getHeight()+"px';");
+        ((Region) getNode()).heightProperty().addListener((p, o, n) ->
+                webapi.executeScript("document.getElementById('" + id + "').style.height = '" + n + "px';"));
+        webapi.executeScript("document.getElementById('" + id + "').style.height = '" + ((Region) getNode()).getHeight() + "px';");
 
         htmlView.setContent(content);
     }
@@ -157,6 +149,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             super();
             whtmlViewContent = new WeakReference<>(n);
         }
+
         @Override
         public Skinnable getSkinnable() {
             return null;
@@ -173,7 +166,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
     }
 
 
-    static class HorizontalStackPane extends StackPane{
+    static class HorizontalStackPane extends StackPane {
         @Override
         public Orientation getContentBias() {
             return Orientation.HORIZONTAL;
@@ -204,7 +197,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         String action;
 
         public WeakCleanupRunnable(WebAPI webAPI, String action, WebAPI webAPI2) {
-            if(webAPI == webAPI2) {
+            if (webAPI == webAPI2) {
                 throw new RuntimeException("Got same WebAPI twice!");
             }
             this.webAPI = new WeakReference<>(webAPI);
@@ -214,12 +207,12 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
         public void run() {
             WebAPI webapi = webAPI.get();
-            if(webapi != null) {
+            if (webapi != null) {
                 webapi.executeScript(action);
             }
             Platform.runLater(() -> {
                 WebAPI webapi2 = webAPI2.get();
-                if(webapi2 != null) {
+                if (webapi2 != null) {
                     webapi2.closeInstance();
                 }
             });
@@ -234,7 +227,7 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             Field parentField = Node.class.getDeclaredField("peer");
             parentField.setAccessible(true);
             Object peer = parentField.get(node);
-            if(peer != null) {
+            if (peer != null) {
                 var ngnode = peer.getClass().getClassLoader().loadClass("com.sun.javafx.sg.prism.NGNode");
                 parentField = ngnode.getDeclaredField("parent");
                 parentField.setAccessible(true);
@@ -254,8 +247,8 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             mouseHandlerField.setAccessible(true);
             Object mouseHandler = mouseHandlerField.get(scene);
             if (mouseHandler != null) {
-                var mousehandler = mouseHandler.getClass();
-                Field newEventTargetsField = mousehandler.getDeclaredField("newEventTargets");
+                var mouseHandlerClass = mouseHandler.getClass();
+                Field newEventTargetsField = mouseHandlerClass.getDeclaredField("newEventTargets");
                 newEventTargetsField.setAccessible(true);
                 List<Object> newEventTargets = (List<Object>) newEventTargetsField.get(mouseHandler);
                 if (newEventTargets != null) {
@@ -280,5 +273,4 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
             ex.printStackTrace();
         }
     }
-
 }
