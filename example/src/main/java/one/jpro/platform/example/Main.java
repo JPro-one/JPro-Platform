@@ -9,6 +9,7 @@ import one.jpro.platform.routing.Filters;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter;
+import one.jpro.platform.sessions.example.SessionManagerSample;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class Main extends RouteApp {
     private final Link mediaRecorderAndPlayerSampleLink = new Link("MediaRecorderAndPlayer", "/media/recorder_player");
     private final Link markdownViewSampleLink = new Link("MarkdownView", "/mdfx");
     private final Link scrollPaneLink = new Link("ScrollPane", "/scrollpane");
+    private final Link sessionManagerLink = new Link("SessionManager", "/sessionmanager");
 
     @Override
     public Route createRoute() {
@@ -40,6 +42,7 @@ public class Main extends RouteApp {
         links.add(mediaRecorderAndPlayerSampleLink);
         links.add(markdownViewSampleLink);
         links.add(scrollPaneLink);
+        links.add(sessionManagerLink);
 
         getScene().setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
         Optional.ofNullable(getClass().getResource("/one/jpro/platform/example/media/css/main.css"))
@@ -58,6 +61,8 @@ public class Main extends RouteApp {
                         new MarkdownViewSample().createRoot(getStage())))
                 .and(getNode(scrollPaneLink.prefix(), request ->
                         new HTMLScrollPaneSample().createRoot()))
+                .and(getNode(sessionManagerLink.prefix(), request ->
+                        new SessionManagerSample().createRoot(getStage())))
                 .filter(LinkHeaderFilter.create(links))
                 .filter(Filters.FullscreenFilter(true));
     }
