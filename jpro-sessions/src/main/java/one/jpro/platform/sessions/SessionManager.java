@@ -1,4 +1,4 @@
-package one.jpro.platform.sessionmanager;
+package one.jpro.platform.sessions;
 
 import com.jpro.webapi.WebAPI;
 import javafx.application.Platform;

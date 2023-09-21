@@ -1,4 +1,4 @@
-package one.jpro.platform.sessionmanager;
+package one.jpro.platform.sessions;
 
 /**
  * SessionException is a runtime exception class that is used to indicate an error or exceptional condition

@@ -15,7 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import one.jpro.platform.sessionmanager.SessionManager;
+import one.jpro.platform.sessions.SessionManager;
 
 public class SessionManagerSample extends Application {
 
