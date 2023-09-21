@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SessionManager {
@@ -31,9 +30,12 @@ public class SessionManager {
         this.baseDirectory = baseDirectory;
         this.cookieName = cookieName;
         if (!baseDirectory.exists()) {
-            baseDirectory.mkdir();
+            if (baseDirectory.mkdir()) {
+                logger.info("Created session directory: " + baseDirectory);
+            } else {
+                throw new SessionException("Could not create session directory: " + baseDirectory);
+            }
         }
-
     }
 
     public File getFolder() {
@@ -59,7 +61,7 @@ public class SessionManager {
 
     public ObservableMap<String, String> getSession(String sessionKey) {
         if (!Platform.isFxApplicationThread()) {
-            throw new RuntimeException("Please use the JFX Application Thread!");
+            throw new SessionException("Please use the JFX Application Thread!");
         }
         return getSessionCached(sessionKey);
     }
@@ -79,11 +81,15 @@ public class SessionManager {
     private ObservableMap<String, String> getSessionImpl(String sessionKey) {
         ObservableMap<String, String> session = FXCollections.observableHashMap();
         if (!baseDirectory.exists()) {
-            throw new RuntimeException("Internal Error: session directory does not exist: " + baseDirectory);
+            throw new SessionException("Internal Error: session directory does not exist: " + baseDirectory);
         }
         File cookieDirectory = new File(baseDirectory, sessionKey);
         if (!cookieDirectory.exists()) {
-            cookieDirectory.mkdir();
+            if (cookieDirectory.mkdir()) {
+                logger.info("Created session directory: " + cookieDirectory);
+            } else {
+                throw new SessionException("Could not create session directory: " + cookieDirectory);
+            }
         }
 
         try {
@@ -92,25 +98,27 @@ public class SessionManager {
                 String str = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
                 session.put(key, str);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ex) {
+            throw new SessionException(ex);
         }
 
         session.addListener((MapChangeListener<String, String>) change -> {
             String k = change.getKey();
             File f = new File(cookieDirectory, k);
             if (change.wasRemoved()) {
-                f.delete();
+                if (!f.delete()) {
+                    logger.warning("Could not delete file: " + f);
+                }
             }
             if (change.wasAdded()) {
                 try {
                     logger.warning("Saving to: " + f);
                     FileUtils.writeStringToFile(f, change.getValueAdded(), StandardCharsets.UTF_8);
                     if (!f.exists()) {
-                        throw new RuntimeException("Internal Error: file was not written: " + f);
+                        throw new SessionException("Internal Error: file was not written: " + f);
                     }
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error writing session content: " + f);
+                } catch (Exception ex) {
+                    logger.severe("Error writing session content: " + f);
                 }
             }
         });
@@ -121,8 +129,8 @@ public class SessionManager {
     private Boolean isValidCookie(String cookieValue) {
         try {
             return Integer.parseInt(cookieValue) >= 0;
-        } catch (NumberFormatException e) {
-            logger.log(Level.WARNING, "Unexpected cookie format: " + cookieValue);
+        } catch (NumberFormatException ex) {
+            logger.warning("Unexpected cookie format: " + cookieValue);
             return false;
         }
     }
