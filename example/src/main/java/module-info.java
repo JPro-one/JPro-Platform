@@ -9,7 +9,7 @@ module one.jpro.platform.example {
     requires one.jpro.platform.mdfx.example;
     requires one.jpro.platform.media.example;
     requires one.jpro.platform.htmlscrollpane.example;
-    requires one.jpro.platform.sessionmanager;
+    requires one.jpro.platform.sessions.example;
 
     exports one.jpro.platform.example;
 }
