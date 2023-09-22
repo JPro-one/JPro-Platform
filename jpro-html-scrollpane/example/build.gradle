@@ -1,0 +1,21 @@
+apply plugin: 'org.openjfx.javafxplugin'
+apply plugin: 'jpro-gradle-plugin'
+
+dependencies {
+    implementation(project(":jpro-html-scrollpane"))
+    implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+javafx {
+    version = "$JAVAFX_VERSION"
+    modules = ['javafx.controls']
+}
+
+mainClassName = 'one.jpro.platform.htmlscrollpane.example.HTMLScrollPaneSample'
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = moduleName
+}

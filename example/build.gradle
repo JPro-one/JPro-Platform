@@ -10,8 +10,8 @@ dependencies {
     implementation project(":jpro-routing:dev")
     implementation project(":jpro-mdfx:example")
     implementation project(":jpro-media:example")
+    implementation project(":jpro-html-scrollpane:example")
     implementation project(":jpro-sessions:example")
-    implementation project(":jpro-html-scrollpane")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"

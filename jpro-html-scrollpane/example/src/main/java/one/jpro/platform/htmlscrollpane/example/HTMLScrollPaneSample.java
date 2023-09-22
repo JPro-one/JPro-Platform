@@ -1,16 +1,18 @@
-package one.jpro.platform.example;
+package one.jpro.platform.htmlscrollpane.example;
 
 import javafx.application.Application;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import one.jpro.platform.htmlscrollpane.HTMLScrollPaneSkin;
 
 public class HTMLScrollPaneSample extends Application {
 
         @Override
-        public void start(javafx.stage.Stage primaryStage) {
-            javafx.scene.Scene scene = new javafx.scene.Scene(createRoot());
+        public void start(Stage primaryStage) {
+            Scene scene = new Scene(createRoot());
             primaryStage.setScene(scene);
             primaryStage.show();
         }
@@ -27,9 +29,5 @@ public class HTMLScrollPaneSample extends Application {
             scrollPane.setSkin(new HTMLScrollPaneSkin(scrollPane));
 
             return scrollPane;
-        }
-
-        public static void main(String[] args) {
-            launch(args);
         }
 }
