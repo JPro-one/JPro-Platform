@@ -99,7 +99,7 @@ object LinkUtil {
     class ExtendNodeWithLink(node: Node) {
       def setNewLink(link: String, text: Option[String], pushState: Boolean, external: Boolean): Unit = {
         if (link != null && !isValidLink(link)) {
-          logger.debug("Warning, link is not valid: " + link)
+          logger.warn("Warning, link is not valid: " + link)
         }
         this.pushState = pushState
         this.external = external
@@ -136,7 +136,7 @@ object LinkUtil {
 
       def setNewLink(link: String, text: Option[String], pushState: Boolean, external: Boolean): Unit = {
         if (link != null && !isValidLink(link)) {
-          logger.debug("Warning, link is not valid: " + link)
+          logger.warn("Warning, link is not valid: " + link)
         }
 
         this.pushState = pushState
