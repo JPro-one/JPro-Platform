@@ -141,7 +141,7 @@ object AppCrawler {
             }
           } catch {
             case ex: Throwable =>
-              logger.debug(s"Error crawling page: $crawlNext", ex)
+              logger.error(s"Error crawling page: $crawlNext", ex)
               deadLinks += crawlNext
           }
         case null =>
