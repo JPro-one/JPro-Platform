@@ -2,10 +2,13 @@ package one.jpro.platform.routing.sessionmanager
 
 import com.jpro.webapi.WebAPI
 import one.jpro.platform.routing.{Redirect, Response, RouteNode, View}
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 
 
 class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends SessionManager { THIS =>
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   val container = new StackPane
   webApp <++ container
@@ -103,7 +106,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
   def start(): Unit = {
     gotoFullEncodedURL(webAPI.getBrowserURL, false, false)
-    println("registering popstate")
+    logger.debug("registering popstate")
     webAPI.registerJavaFunction("popstatejava", (s: String) => {
       gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""), false)
     })

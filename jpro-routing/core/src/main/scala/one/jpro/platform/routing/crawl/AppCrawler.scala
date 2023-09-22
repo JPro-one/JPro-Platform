@@ -2,6 +2,7 @@ package one.jpro.platform.routing.crawl
 
 import one.jpro.platform.routing.sessionmanager.DummySessionManager
 import one.jpro.platform.routing.{Redirect, RouteNode, SessionManagerContext, View}
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
@@ -11,6 +12,8 @@ import java.util.function.Supplier
 import scala.collection.JavaConverters._
 
 object AppCrawler {
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   case class LinkInfo(url: String, description: String)
 
   case class ImageInfo(url: String, description: String)
@@ -137,10 +140,9 @@ object AppCrawler {
               }
             }
           } catch {
-            case e: Throwable =>
-              println("Error crawling page: " + crawlNext)
+            case ex: Throwable =>
+              logger.error(s"Error crawling page: $crawlNext", ex)
               deadLinks += crawlNext
-              e.printStackTrace()
           }
         case null =>
           deadLinks += crawlNext

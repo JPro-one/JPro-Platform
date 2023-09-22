@@ -7,11 +7,14 @@ import one.jpro.platform.routing.filter.container.ContainerFilter
 import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.scenicview.ScenicView
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
 
 object DevFilter {
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   object DevFilterContainerFactory extends RouteUtils.SFXContainerFactory {
 
@@ -26,7 +29,7 @@ object DevFilter {
       @Bind var report:JMemoryBuddyLive.Report = JMemoryBuddyLive.getReport
       request --> updateReport
       def updateReport(): Unit = {
-        println("Calling GC (DevFilter)")
+        logger.debug("Calling GC (DevFilter)")
         System.gc()
         report = JMemoryBuddyLive.getReport
       }

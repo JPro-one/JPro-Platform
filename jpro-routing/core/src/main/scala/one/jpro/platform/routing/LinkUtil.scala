@@ -10,6 +10,7 @@ import simplefx.util.Predef._
 import java.net.{URI, URLEncoder}
 import javafx.collections.ObservableList
 import one.jpro.platform.routing.sessionmanager.SessionManager
+import org.slf4j.{Logger, LoggerFactory}
 
 object LinkUtil {
 
@@ -91,11 +92,14 @@ object LinkUtil {
   }
 
   private object LinkDesktop {
+
+    private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+
     @extension
     class ExtendNodeWithLink(node: Node) {
       def setNewLink(link: String, text: Option[String], pushState: Boolean, external: Boolean): Unit = {
         if (link != null && !isValidLink(link)) {
-          println("Warning, link is not valid: " + link)
+          logger.warn("Warning, link is not valid: " + link)
         }
         this.pushState = pushState
         this.external = external
@@ -125,12 +129,14 @@ object LinkUtil {
 
   private object LinkJPro {
 
+    private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+
     @extension
     class ExtendNodeWithLink(node: Node) {
 
       def setNewLink(link: String, text: Option[String], pushState: Boolean, external: Boolean): Unit = {
         if (link != null && !isValidLink(link)) {
-          println("Warning, link is not valid: " + link)
+          logger.warn("Warning, link is not valid: " + link)
         }
 
         this.pushState = pushState

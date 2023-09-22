@@ -1,11 +1,14 @@
 package one.jpro.platform.routing.filter.container
 
 import one.jpro.platform.routing.{Filter, Request, View}
+import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 
 import java.util.function.Supplier
 
 object ContainerFilter {
+
+  private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   private val factoryKey = new Object()
   def create(supplier: Supplier[Container]): Filter = {
@@ -34,13 +37,13 @@ object ContainerFilter {
     var container: Node = null
     val request2: Request = {
       val oldContentV = request.oldContent.get()
-      println("oldContentV = " + oldContentV)
+      logger.debug(s"oldContentV = $oldContentV")
       if (oldContentV != null && containerLogic.isContainer(oldContentV)) {
-        println("Found old container")
+        logger.debug(s"Found old container")
         container = oldContentV
         request.mapContent(x => containerLogic.getContent(container))
       } else {
-        println("No old container")
+        logger.debug(s"No old container")
         request
       }
     }

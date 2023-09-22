@@ -1,13 +1,14 @@
 module one.jpro.platform.routing.core {
     requires transitive javafx.controls;
+    requires transitive org.slf4j;
 
     requires transitive de.sandec.jnodes;
+    requires transitive jpro.webapi;
     requires transitive simplefx.core;
     requires transitive simplefx.extended;
     requires transitive simplefx.wrapping;
     requires transitive simplefx.utility;
     requires transitive scala.library;
-    requires transitive jpro.webapi;
 
     exports one.jpro.platform.routing;
     exports one.jpro.platform.routing.crawl;
