@@ -1,4 +1,4 @@
-package one.jpro.platform.sessionmanager;
+package one.jpro.platform.sessions;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableMap;
