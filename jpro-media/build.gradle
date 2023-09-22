@@ -12,6 +12,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testImplementation "org.testfx:testfx-junit5:$TESTFX_VERSION"
     testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
+    testRuntimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8'
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
