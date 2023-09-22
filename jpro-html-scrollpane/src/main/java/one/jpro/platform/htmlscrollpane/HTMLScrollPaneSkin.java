@@ -29,17 +29,28 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
     private static final Logger logger = LoggerFactory.getLogger(HTMLScrollPaneSkin.class);
 
-    StackPane viewContent;
-    HTMLView htmlView;
-    Node cssBridgeTarget;
+    final StackPane viewContent;
+    final HTMLView htmlView;
+    final Node cssBridgeTarget;
+    final String attributes;
     Pane htmlViewContent;
     ChangeListener<Number> widthListener;
-    String attributes;
 
+    /**
+     * Creates a new instance with the given ScrollPane control.
+     *
+     * @param control the ScrollPane control to be associated with the skin
+     */
     public HTMLScrollPaneSkin(ScrollPane control) {
         this(control, "");
     }
 
+    /**
+     * Creates a new instance of HTMLScrollPaneSkin with the given ScrollPane control and attributes.
+     *
+     * @param control    the ScrollPane control to be associated with the skin
+     * @param attributes a string containing any additional attributes
+     */
     public HTMLScrollPaneSkin(ScrollPane control, String attributes) {
         super(control);
 
@@ -91,6 +102,11 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         });
     }
 
+    /**
+     * Sets up the HTMLView for the given WebAPI.
+     *
+     * @param webapi the WebAPI to be associated with the HTMLView
+     */
     public void setupHTMLView(WebAPI webapi) {
         // DO CSS BRIDGE
         PopupControl contentPage = new PopupControl();
@@ -221,6 +237,11 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         }
     }
 
+    /**
+     * Workaround method to remove the parent reference of a Node's peer using reflection.
+     *
+     * @param node the Node whose peer's parent reference needs to be removed
+     */
     public static void workaroundRemovePeerParent(Node node) {
         // set cssBridgeTarget.peer.parent to null with reflection
         // It's important to use getDeclaredField, because the field is private
@@ -240,6 +261,11 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         }
     }
 
+    /**
+     * Workaround method to clear the newEventTargets list of the mouseHandler in a Scene using reflection.
+     *
+     * @param scene the Scene whose mouseHandler's newEventTargets list needs to be cleared
+     */
     public static void workaroundClearNewEventTargets(Scene scene) {
         // Clear scene.mouseHandler.newEventTargets with reflection
         // It's important to use getDeclaredField, because the field is private
@@ -262,6 +288,11 @@ public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
         }
     }
 
+    /**
+     * Workaround method to set the ownerWindow of a Window to null using reflection.
+     *
+     * @param window the Window whose ownerWindow needs to be set to null
+     */
     public static void workaroundOwnerWindow(Window window) {
         // Set ownerWindow to null with reflection
         // It's important to use getDeclaredField, because the field is private
