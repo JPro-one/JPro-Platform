@@ -9,7 +9,9 @@ import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MarkdownView extends VBox {
 
@@ -18,16 +20,21 @@ public class MarkdownView extends VBox {
     public MarkdownView(String mdString) {
         this.mdString.set(mdString);
         this.mdString.addListener((p,o,n) -> updateContent());
-        getStylesheets().add("/one/jpro/platform/mdfx/mdfx.css");
+        Optional.ofNullable(MarkdownView.class.getResource("/one/jpro/platform/mdfx/mdfx.css"))
+                .ifPresent(cssResource -> getStylesheets().add(cssResource.toExternalForm()));
         getDefaultStylesheets().forEach(s -> getStylesheets().add(s));
         updateContent();
     }
+
     public MarkdownView() {
         this("");
     }
 
     protected List<String> getDefaultStylesheets() {
-        return List.of("/one/jpro/platform/mdfx/mdfx-default.css");
+        final var defaultStylesheets = new ArrayList<String>();
+        Optional.ofNullable(MarkdownView.class.getResource("/one/jpro/platform/mdfx/mdfx-default.css"))
+                .ifPresent(cssResource -> defaultStylesheets.add(cssResource.toExternalForm()));
+        return defaultStylesheets;
     }
 
     private void updateContent() {
