@@ -1,6 +1,5 @@
 package one.jpro.platform.mdfx.example;
 
-import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -38,7 +37,6 @@ public class MarkdownViewSample extends Application {
     public void start(Stage stage) {
         stage.setTitle("JPro Markdown View");
         Scene scene = new Scene(createRoot(stage), 1000,600);
-        scene.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
         stage.setScene(scene);
         stage.show();
     }
