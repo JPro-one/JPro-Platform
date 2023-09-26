@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+
+        maven {
+            url "https://sandec.jfrog.io/artifactory/repo"
+        }
+    }
+
+    dependencies {
+        classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
+        classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
+        classpath "com.javafxensemble.website:ensemble-gradle-plugin:$ENSEMBLE_GRADLE_PLUGIN_VERSION"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'ensemble'
+
+dependencies {
+    compileOnly project(":ensemble:samples")
+}
+
+ensemble {
+    log = true
+    includeProject("jpro-samples", project(":ensemble:samples"))
+}
+
+afterEvaluate {
+    println("jpro.localJVMArgs: " + jpro.localJVMArgs)
+}

@@ -1,0 +1,12 @@
+{
+  "samples": [
+    {
+      "category": "jpro-mdfx",
+      "name": "MarkdownViewSample",
+      "desc": "A simple markdown view sample.",
+      "project": "jpro-platform",
+      "preview": "/jpro-mdfx-example-preview.png",
+      "classname": "one.jpro.platform.mdfx.example.MarkdownViewSample"
+    }
+  ]
+}
