@@ -1,14 +1,12 @@
-package one.jpro.platform.openlink;
+package one.jpro.platform.internal.openlink;
 
-import javafx.stage.Stage;
-import one.jpro.platform.openlink.util.PlatformUtils;
+import one.jpro.platform.internal.openlink.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
 
 /**
  * Launches the default browser of the platform as a separate application process. The browser

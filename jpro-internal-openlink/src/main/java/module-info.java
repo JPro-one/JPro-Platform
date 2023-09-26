@@ -8,6 +8,6 @@ module one.jpro.platform.openlink {
     requires org.jetbrains.annotations;
     requires org.slf4j;
 
-    exports one.jpro.platform.openlink;
-    exports one.jpro.platform.openlink.util;
+    exports one.jpro.platform.internal.openlink;
+    exports one.jpro.platform.internal.openlink.util;
 }

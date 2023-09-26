@@ -1,4 +1,4 @@
-package one.jpro.platform.openlink.util;
+package one.jpro.platform.internal.openlink.util;
 
 /**
  * Platform utilities.
