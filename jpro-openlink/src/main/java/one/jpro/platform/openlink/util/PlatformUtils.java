@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.utils;
+package one.jpro.platform.openlink.util;
 
 /**
  * Platform utilities.
