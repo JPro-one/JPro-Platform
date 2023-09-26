@@ -10,7 +10,7 @@ import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
 
-import java.awt.Desktop
+import one.jpro.platform.internal.openlink.OpenLink
 import java.net.URI
 import java.util.function.Consumer
 
@@ -115,6 +115,6 @@ object SessionManager {
 
   def setExternalLinkImpl(f: Consumer[String]): Unit = externalLinkImpl = f
   var externalLinkImpl: Consumer[String] = { url =>
-    Desktop.getDesktop.browse(URI.create(url))
+    OpenLink.openURL(url)
   }
 }
