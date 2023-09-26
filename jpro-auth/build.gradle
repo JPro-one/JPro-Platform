@@ -15,6 +15,7 @@ repositories {
 }
 
 dependencies {
+    implementation project(":internal:openlink")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "com.auth0:java-jwt:$AUTH0_JAVAJWT_VERSION"
     implementation "com.auth0:jwks-rsa:$AUTH0_JWKSRSA_VERSION"

@@ -1,24 +1,19 @@
 package one.jpro.platform.routing
 
-import com.jpro.webapi.{HTMLView, WebAPI}
+import com.jpro.webapi.WebAPI
 import simplefx.core._
 import simplefx.all._
-import simplefx.experimental._
-import simplefx.util.ReflectionUtil._
 import simplefx.util.Predef._
 
-import java.net.{URI, URLEncoder}
-import javafx.collections.ObservableList
+import java.net.URI
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import org.slf4j.{Logger, LoggerFactory}
 
 object LinkUtil {
 
   private var openLinkExternalFun: String => Unit = { link =>
-    // Open link with awt
-    import java.awt.Desktop
-    import java.net.URI
-    Desktop.getDesktop.browse(new URI(link))
+    import one.jpro.platform.internal.openlink.OpenLink
+    OpenLink.openURL(link)
   }
   def setOpenLinkExternalFun(x: String => Unit): Unit = {
     openLinkExternalFun = x
