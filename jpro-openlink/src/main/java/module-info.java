@@ -5,7 +5,6 @@
  */
 module one.jpro.platform.openlink {
     requires javafx.controls;
-    requires jpro.webapi;
     requires org.jetbrains.annotations;
     requires org.slf4j;
 
