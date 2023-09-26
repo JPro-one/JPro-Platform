@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.utils;
+package one.jpro.platform.internal.openlink.util;
 
 /**
  * Platform utilities.
@@ -17,9 +17,14 @@ public class PlatformUtils {
     private static final boolean LINUX = os.startsWith("Linux") && !ANDROID;
     private static final boolean IOS = os.startsWith("iOS");
 
+    public static boolean isDesktop() {
+        return isWindows() || isMac() || isLinux();
+    }
 
     /**
      * Returns true if the operating system is a form of Windows.
+     *
+     * @return true if operating system is Windows, false otherwise.
      */
     public static boolean isWindows(){
         return WINDOWS;
@@ -27,6 +32,8 @@ public class PlatformUtils {
 
     /**
      * Returns true if the operating system is a form of macOS.
+     *
+     * @return true if operating system is macOS, false otherwise.
      */
     public static boolean isMac(){
         return MAC;
@@ -34,6 +41,8 @@ public class PlatformUtils {
 
     /**
      * Returns true if the operating system is a form of Linux.
+     *
+     * @return true if operating system is Linux, false otherwise.
      */
     public static boolean isLinux() {
         return LINUX;
@@ -41,17 +50,26 @@ public class PlatformUtils {
 
     /**
      * Returns true if the platform is embedded.
+     *
+     * @return true if the platform is embedded, false otherwise.
      */
     public static boolean isEmbedded() {
         return embedded;
     }
 
+    /**
+     * Returns true if the platform is Android.
+     *
+     * @return true if the platform is Android, false otherwise.
+     */
     public static boolean isAndroid() {
         return ANDROID;
     }
 
     /**
-     * Returns true if the operating system is iOS
+     * Returns true if the operating system is iOS.
+     *
+     * @return true if the operating system is iOS, false otherwise.
      */
     public static boolean isIOS(){
         return IOS;

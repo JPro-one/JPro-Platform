@@ -9,6 +9,7 @@ module one.jpro.platform.routing.core {
     requires transitive simplefx.wrapping;
     requires transitive simplefx.utility;
     requires transitive scala.library;
+    requires transitive one.jpro.platform.internal.openlink;
 
     exports one.jpro.platform.routing;
     exports one.jpro.platform.routing.crawl;

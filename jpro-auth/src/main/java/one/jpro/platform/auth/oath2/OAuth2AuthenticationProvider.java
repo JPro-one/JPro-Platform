@@ -94,7 +94,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
         log.debug("Authorize URL: {}", authorizeUrl);
-        httpServer.openURL(URI.create(authorizeUrl));
+        httpServer.openURL(URI.create(authorizeUrl).toString());
         return authorizeUrl;
     }
 
