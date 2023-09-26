@@ -3,7 +3,7 @@
  *
  * @author Besmir Beqiri
  */
-module one.jpro.platform.openlink {
+module one.jpro.platform.internal.openlink {
     requires javafx.controls;
     requires org.jetbrains.annotations;
     requires org.slf4j;
