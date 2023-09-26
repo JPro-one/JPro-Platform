@@ -35,7 +35,6 @@ public final class HttpServerImpl implements HttpServer {
 
     private static Stage stage;
     private static HttpOptions httpOptions;
-    private static final OpenLink openLink = new OpenLink();
 
     private static final class SingletonHolder {
         private static final HttpServerImpl INSTANCE = initAuthServer();
@@ -255,6 +254,6 @@ public final class HttpServerImpl implements HttpServer {
 
     @Override
     public void openURL(@NotNull String url) {
-        openLink.openURL(url);
+        OpenLink.openURL(url);
     }
 }

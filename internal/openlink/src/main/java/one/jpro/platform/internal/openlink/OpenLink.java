@@ -14,16 +14,16 @@ import java.net.URL;
  *
  * @author Besmir Beqiri
  */
-public final class OpenLink {
+public interface OpenLink {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpenLink.class);
+    Logger logger = LoggerFactory.getLogger(OpenLink.class);
 
     /**
      * Opens the given URL in the browser.
      *
      * @param url the URL to open
      */
-    public void openURL(@NotNull URL url) {
+    static void openURL(@NotNull URL url) {
         openURL(url.toString());
     }
 
@@ -32,7 +32,7 @@ public final class OpenLink {
      *
      * @param url the URL string to open
      */
-    public void openURL(@NotNull String url) {
+    static void openURL(@NotNull String url) {
         try {
             if (PlatformUtils.isMac()) {
                 Runtime.getRuntime().exec("open " + url);
@@ -43,6 +43,7 @@ public final class OpenLink {
             }
         } catch (IOException ex) {
             logger.error("Unable to open the browser!", ex);
+            throw new UnsupportedOperationException("Unable to open the browser!", ex);
         }
     }
 }

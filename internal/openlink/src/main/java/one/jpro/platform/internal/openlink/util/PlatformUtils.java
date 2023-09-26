@@ -17,6 +17,9 @@ public class PlatformUtils {
     private static final boolean LINUX = os.startsWith("Linux") && !ANDROID;
     private static final boolean IOS = os.startsWith("iOS");
 
+    public static boolean isDesktop() {
+        return isWindows() || isMac() || isLinux();
+    }
 
     /**
      * Returns true if the operating system is a form of Windows.
