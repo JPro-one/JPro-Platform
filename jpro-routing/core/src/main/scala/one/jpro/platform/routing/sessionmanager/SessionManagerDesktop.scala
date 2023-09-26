@@ -56,15 +56,15 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     }
   }
   val container = new StackPane()
-    val scrollpane: ScrollPane = if(System.getProperty("routing.scrollpane") != null) {
+  val scrollpane: ScrollPane = if(System.getProperty("routing.scrollpane") != null) {
     ReflectionUtil.callNew(System.getProperty("routing.scrollpane"))().asInstanceOf[ScrollPane]
   } else new ScrollPane() {
-    scrollpane.fitToWidth = true
-    scrollpane.content <-- container
-    scrollpane.fitToHeight <-- isFullscreen
-    scrollpane.style = "-fx-padding: 0;"
-    scrollpane.background = Background.EMPTY
-    scrollpane.vbarPolicy <-- (if(isFullscreen) ScrollPane.ScrollBarPolicy.NEVER else ScrollPane.ScrollBarPolicy.AS_NEEDED)
+    this.fitToWidth = true
+    this.content <-- container
+    this.fitToHeight <-- isFullscreen
+    this.style = "-fx-padding: 0;"
+    this.background = Background.EMPTY
+    this.vbarPolicy <-- (if(isFullscreen) ScrollPane.ScrollBarPolicy.NEVER else ScrollPane.ScrollBarPolicy.AS_NEEDED)
   }
 
   webApp <++ scrollpane
