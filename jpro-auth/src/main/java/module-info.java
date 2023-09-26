@@ -12,7 +12,7 @@ module one.jpro.platform.auth {
     requires jwks.rsa;
     requires org.slf4j;
     requires com.auth0.jwt;
-    requires one.jpro.platform.openlink;
+    requires one.jpro.platform.internal.openlink;
 
     opens one.jpro.platform.auth;
     exports one.jpro.platform.auth;

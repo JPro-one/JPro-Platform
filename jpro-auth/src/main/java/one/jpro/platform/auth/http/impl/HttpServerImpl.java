@@ -6,7 +6,7 @@ import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpServerException;
 import one.jpro.platform.auth.http.HttpStatus;
-import one.jpro.platform.openlink.OpenLink;
+import one.jpro.platform.internal.openlink.OpenLink;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +35,7 @@ public final class HttpServerImpl implements HttpServer {
 
     private static Stage stage;
     private static HttpOptions httpOptions;
-
-    private static OpenLink openLink;
+    private static final OpenLink openLink = new OpenLink();
 
     private static final class SingletonHolder {
         private static final HttpServerImpl INSTANCE = initAuthServer();
@@ -67,7 +66,6 @@ public final class HttpServerImpl implements HttpServer {
 
     public static HttpServerImpl getInstance(Stage stage) throws HttpServerException {
         HttpServerImpl.stage = stage;
-        HttpServerImpl.openLink = OpenLink.create(stage);
         return SingletonHolder.getInstance();
     }
 

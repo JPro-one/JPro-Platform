@@ -4,7 +4,6 @@ import com.jpro.webapi.WebAPI;
 import one.jpro.platform.auth.http.HttpServer;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URL;
 import java.net.URI;
 import java.util.Objects;
 
