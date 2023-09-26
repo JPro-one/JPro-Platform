@@ -4,6 +4,7 @@ import com.jpro.webapi.WebAPI;
 import one.jpro.platform.auth.http.HttpServer;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.net.URI;
 import java.util.Objects;
 
@@ -58,7 +59,7 @@ public class JProServerImpl implements HttpServer {
     }
 
     @Override
-    public void openURL(@NotNull URI uri) {
-        webAPI.openURL(uri.toString());
+    public void openURL(@NotNull String url) {
+        webAPI.openURL(url);
     }
 }

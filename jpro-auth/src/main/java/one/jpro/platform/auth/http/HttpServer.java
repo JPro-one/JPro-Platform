@@ -7,7 +7,7 @@ import one.jpro.platform.auth.http.impl.JProServerImpl;
 import one.jpro.platform.auth.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -152,9 +152,9 @@ public interface HttpServer extends AutoCloseable {
     }
 
     /**
-     * Opens the given URI in the browser.
+     * Opens the given URL string in the browser.
      *
-     * @param uri the URI to open
+     * @param url the URL string to open
      */
-    void openURL(@NotNull URI uri);
+    void openURL(@NotNull String url);
 }

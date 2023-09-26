@@ -6,7 +6,7 @@ import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpServerException;
 import one.jpro.platform.auth.http.HttpStatus;
-import one.jpro.platform.auth.utils.PlatformUtils;
+import one.jpro.platform.openlink.OpenLink;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
-import java.net.URI;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -36,6 +35,8 @@ public final class HttpServerImpl implements HttpServer {
 
     private static Stage stage;
     private static HttpOptions httpOptions;
+
+    private static OpenLink openLink;
 
     private static final class SingletonHolder {
         private static final HttpServerImpl INSTANCE = initAuthServer();
@@ -66,6 +67,7 @@ public final class HttpServerImpl implements HttpServer {
 
     public static HttpServerImpl getInstance(Stage stage) throws HttpServerException {
         HttpServerImpl.stage = stage;
+        HttpServerImpl.openLink = OpenLink.create(stage);
         return SingletonHolder.getInstance();
     }
 
@@ -254,17 +256,7 @@ public final class HttpServerImpl implements HttpServer {
     }
 
     @Override
-    public void openURL(@NotNull URI uri) {
-        try {
-            if (PlatformUtils.isMac()) {
-                Runtime.getRuntime().exec("open " + uri);
-            } else if (PlatformUtils.isWindows()) {
-                Runtime.getRuntime().exec("start \"" + uri + "\"");
-            } else if (PlatformUtils.isLinux()) {
-                Runtime.getRuntime().exec("xdg-open " + uri);
-            }
-        } catch (IOException ex) {
-            log.error("Unable to open the browser!", ex);
-        }
+    public void openURL(@NotNull String url) {
+        openLink.openURL(url);
     }
 }
