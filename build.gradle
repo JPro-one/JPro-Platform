@@ -80,8 +80,11 @@ configure([project("tree-showing"), project("jpro-auth"), project("jpro-image-ma
         groupId "one.jpro.platform"
         version JPRO_PLATFORM_VERSION
 
-        if (project.projectDir.parent.contains('jpro-routing')) {
+        def projectParentPathname = project.projectDir.parent
+        if (projectParentPathname.contains('jpro-routing')) {
           artifactId "jpro-routing-" + project.name
+        } else if (projectParentPathname.contains('internal')) {
+          artifactId "jpro-internal-" + project.name
         } else {
           artifactId project.name
         }
