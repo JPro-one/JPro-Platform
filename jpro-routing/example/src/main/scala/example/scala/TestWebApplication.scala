@@ -38,7 +38,6 @@ class MyApp(stage: Stage) extends RouteNode(stage) {
       .and(get("/1600", (r) => new ManyNodes(1600)))
       .and(get("/3200", (r) => new ManyNodes(3200)))
       .and(get("/6400", (r) => new ManyNodes(6400)))
-
       .and(get("/it's\" tricky", (r) => new MainView))
       .and(get("/it's\" tricky", (r) => new MainView))
       .filter(DevFilter.create)
@@ -223,12 +222,14 @@ class ManyNodes(size: Int) extends Page {
   def description = "desc ManyNodes"
 
   lazy val content = new VBox {
-    spacing = 10
 
     this <++ new Label("ManyNodes " + size) { font = new Font(60)}
 
-    (1 to size).foreach { i =>
-      this <++ new Label("Node " + i) { font = new Font(15)}
+    this <++ new VBox {
+      spacing = 10
+      this.children = (1 to size).map { i =>
+        new Label("Node " + i) { font = new Font(15)}
+      }.toList
     }
   }
 }
