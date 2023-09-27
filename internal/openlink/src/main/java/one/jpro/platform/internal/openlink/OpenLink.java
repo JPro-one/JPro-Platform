@@ -2,8 +2,6 @@ package one.jpro.platform.internal.openlink;
 
 import one.jpro.platform.internal.openlink.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -15,8 +13,6 @@ import java.net.URL;
  * @author Besmir Beqiri
  */
 public interface OpenLink {
-
-    Logger logger = LoggerFactory.getLogger(OpenLink.class);
 
     /**
      * Opens the given URL in the browser.
@@ -42,7 +38,6 @@ public interface OpenLink {
                 Runtime.getRuntime().exec("xdg-open " + url);
             }
         } catch (IOException ex) {
-            logger.error("Unable to open the browser!", ex);
             throw new UnsupportedOperationException("Unable to open the browser!", ex);
         }
     }
