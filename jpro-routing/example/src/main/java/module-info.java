@@ -17,4 +17,5 @@ module one.jpro.routing.example {
     exports example.filters;
     exports example.login;
     exports example.popup;
+    exports example.scala;
 }

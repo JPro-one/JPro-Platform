@@ -3,6 +3,7 @@ package example.colors;
 
 import one.jpro.platform.routing.*;
 import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.dev.StatisticsFilter;
 import one.jpro.platform.routing.filter.container.ContainerFilter;
 import example.filters.SimpleContainer;
 import example.filters.SimpleHamburgerMenu;
@@ -51,6 +52,7 @@ public class ColorsApp extends RouteApp {
             ).filter(Filters.FullscreenFilter(true))
             .filter(RouteUtils.sideTransitionFilter(1))
             .filter(DevFilter.create())
+            .filter(StatisticsFilter.create())
             .filter(ContainerFilter.create(() -> new SimpleContainer()))
             .filter(ContainerFilter.create(() -> new SimpleHamburgerMenu(List.of(
                     new SimpleHamburgerMenu.Link("Green", "/green"),
