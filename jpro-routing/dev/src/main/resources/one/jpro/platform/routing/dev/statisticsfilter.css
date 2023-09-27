@@ -1,0 +1,41 @@
+.statisticsfilter-hbox {
+    -fx-alignment: center;
+    -fx-padding: 6;
+    -fx-spacing: 16;
+}
+
+.statisticsfilter-statbox {
+     -fx-alignment: left;
+     -fx-padding: 6;
+     //-fx-background-color: lightblue;
+     // lighter blue
+        -fx-background-color: #e6f3ff;
+     -fx-background-radius: 6;
+}
+
+.statisticsfilter-statbox-labels {
+    -fx-alignment: center-right;
+}
+.statisticsfilter-statbox-labels .label {
+    -fx-font-size: 12px;
+    -fx-text-alignment: right;
+}
+
+.statisticsfilter-statbox-values {
+    -fx-padding: 0 8  0 8;
+    -fx-alignment: center-right;
+}
+.statisticsfilter-statbox-values .label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: right;
+}
+
+.statisticsfilter-statbox-units {
+    -fx-alignment: center-right;
+}
+.statisticsfilter-statbox-units .label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: right;
+}
