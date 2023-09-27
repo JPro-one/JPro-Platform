@@ -35,30 +35,20 @@ object StatisticsFilter {
 
         styleClass <++ "statisticsfilter-hbox"
 
+        var webAPIData: WebAPIData = null
+
+        if (WebAPI.isBrowser) {
+          WebAPI.getWebAPI(this, (webAPI: WebAPI) => {
+            webAPIData = new WebAPIData(webAPI)
+            setupContent()
+          })
+        } else {
+          setupContent()
+        }
+
         @Bind var loadTimeFX = (0 s)
         @Bind var loadTimeJS = (0 s)
 
-        request --> {
-          if(WebAPI.isBrowser) {
-            webAPIData.createdBeforeRequest := webAPIData.nodesCreated
-          }
-
-          val t1 = systemTime
-          nextFrame --> {
-            val t2 = systemTime
-            val t = t2 - t1
-            loadTimeFX := t
-            if(WebAPI.isBrowser) {
-              webAPIData.webAPI.executeScriptWithListener("1", r => {
-                val t3 = systemTime
-                val t = t3 - t2
-                loadTimeJS := t
-              })
-            }
-          }
-        }
-
-        var webAPIData: WebAPIData = null
         class WebAPIData(val webAPI: WebAPI) {
           val instanceInfo = webAPI.getInstanceInfo
 
@@ -76,58 +66,95 @@ object StatisticsFilter {
           @Bind val createdSinceRequest = <--(nodesCreated - createdBeforeRequest)
         }
 
-        if(WebAPI.isBrowser) {
-          WebAPI.getWebAPI(this, (webAPI: WebAPI) => {
-            webAPIData = new WebAPIData(webAPI)
-            setupContent()
-          })
-        } else {
-          setupContent()
-        }
-
 
         def setupContent(): Unit = {
+          request --> {
+            if (WebAPI.isBrowser) {
+              webAPIData.createdBeforeRequest := webAPIData.nodesCreated
+            }
 
-          def toSizeString(x: Int): (String, String) = {
+            val t1 = systemTime
+            nextFrame --> {
+              val t2 = systemTime
+              val t = t2 - t1
+              loadTimeFX := t
+              if (WebAPI.isBrowser) {
+                webAPIData.webAPI.executeScriptWithListener("1", r => {
+                  val t3 = systemTime
+                  val t = t3 - t2
+                  loadTimeJS := t
+                })
+              }
+            }
+          }
+
+          def toFileSizeString(x: Int): (String, String) = {
             val kb = x / 1024
             val mb = kb / 1024
-            if (mb > 5) (mb.toString, "MB")
-            else if (kb > 50) (kb.toString, "KB")
-            else (x.toString, "B")
+            if (mb > 5) (formatInt(mb), "MB")
+            else if (kb > 50) (formatInt(kb), "KB")
+            else (formatInt(x), "B")
+          }
+
+          def toTimeString(x: Time): (String, String) = {
+            val ms = x div millisecond
+            (ms.toString, "ms")
+          }
+          def formatInt(x: Int): String = {
+            val s = x.toString
+            val l = s.length
+            if(l > 3) {
+              s.substring(0,l-3) + "." + s.substring(l-3,l)
+            } else {
+              s
+            }
           }
 
           if(WebAPI.isBrowser) {
-            this <++ new StatBox {
+            this <++ new StatBox(true) {
               labels <++ new Label("sent: ")
               values <++ new Label() {
-                text <-- toSizeString(webAPIData.dataSent.toInt)._1
+                text <-- toFileSizeString(webAPIData.dataSent.toInt)._1
               }
               units <++ new Label() {
-                text <-- toSizeString(webAPIData.dataSent.toInt)._2
+                text <-- toFileSizeString(webAPIData.dataSent.toInt)._2
               }
 
               labels <++ new Label("received: ")
               values <++ new Label() {
-                text <-- toSizeString(webAPIData.dataReceived.toInt)._1
+                text <-- toFileSizeString(webAPIData.dataReceived.toInt)._1
               }
               units <++ new Label() {
-                text <-- toSizeString(webAPIData.dataReceived.toInt)._2
+                text <-- toFileSizeString(webAPIData.dataReceived.toInt)._2
               }
             }
-            this <++ new Label() {
-              text <-- ("Latency: " + webAPIData.latency + " ms")
+            //this <++ new Label() {
+            //  text <-- ("Latency: " + webAPIData.latency + " ms")
+            //}
+
+            this <++ new StatBox() {
+              labels <++ new Label("Latency: ")
+              values <++ new Label() {
+                text <-- ("" + webAPIData.latency)
+              }
             }
           }
 
-          this <++ new StatBox {
+          this <++ new StatBox(true) {
             labels <++ new Label("loadTimeFX: ")
             values <++ new Label() {
-              text <-- ("" + loadTimeFX)
+              text <-- ("" + toTimeString(loadTimeFX)._1)
+            }
+            units <++ new Label() {
+              text <-- ("" + toTimeString(loadTimeFX)._2)
             }
             if(WebAPI.isBrowser) {
               labels <++ new Label("loadTimeJS: ")
               values <++ new Label() {
-                text <-- ("" + loadTimeJS)
+                text <-- ("" + toTimeString(loadTimeJS)._1)
+              }
+              units <++ new Label() {
+                text <-- ("" + toTimeString(loadTimeJS)._2)
               }
             }
           }
@@ -144,19 +171,19 @@ object StatisticsFilter {
               }
             }
           }
-          this <++ new StatBox {
+          this <++ new StatBox() {
             labels <++ new Label("Nodes: ")
             values <++ new Label() {
-              text <-- ("" + CONTAINER.treeSize)
+              text <-- ("" + formatInt(CONTAINER.treeSize))
             }
             labels <++ new Label("visible Nodes: ")
             values <++ new Label() {
-              text <-- ("" + CONTAINER.visibleTreeSize)
+              text <-- ("" + formatInt(CONTAINER.visibleTreeSize))
             }
           }
         }
       }
-      class StatBox extends HBox {
+      class StatBox(addUnits: Boolean = false) extends HBox {
         styleClass <++ "statisticsfilter-statbox"
 
         val labels = new VBox {
@@ -171,7 +198,9 @@ object StatisticsFilter {
 
         this <++ labels
         this <++ values
-        this <++ units
+        if(addUnits) {
+          this <++ units
+        }
       }
       this <++ new StackPane {
         pickOnBounds = false
