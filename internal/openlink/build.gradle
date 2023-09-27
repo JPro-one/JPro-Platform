@@ -1,3 +1,8 @@
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 dependencies {
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
