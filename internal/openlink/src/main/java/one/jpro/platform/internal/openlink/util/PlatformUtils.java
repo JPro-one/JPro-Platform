@@ -17,6 +17,11 @@ public class PlatformUtils {
     private static final boolean LINUX = os.startsWith("Linux") && !ANDROID;
     private static final boolean IOS = os.startsWith("iOS");
 
+    /**
+     * Checks if the current system is a desktop platform.
+     *
+     * @return <code>true</code> if the current system is a desktop platform, <code>false</code> otherwise.
+     */
     public static boolean isDesktop() {
         return isWindows() || isMac() || isLinux();
     }
@@ -24,7 +29,7 @@ public class PlatformUtils {
     /**
      * Returns true if the operating system is a form of Windows.
      *
-     * @return true if operating system is Windows, false otherwise.
+     * @return <code>true</code> if operating system is Windows, <code>false</code> otherwise.
      */
     public static boolean isWindows(){
         return WINDOWS;
@@ -33,7 +38,7 @@ public class PlatformUtils {
     /**
      * Returns true if the operating system is a form of macOS.
      *
-     * @return true if operating system is macOS, false otherwise.
+     * @return <code>true</code> if operating system is macOS, <code>false</code> otherwise.
      */
     public static boolean isMac(){
         return MAC;
@@ -42,7 +47,7 @@ public class PlatformUtils {
     /**
      * Returns true if the operating system is a form of Linux.
      *
-     * @return true if operating system is Linux, false otherwise.
+     * @return <code>true</code> if operating system is Linux, <code>false</code> otherwise.
      */
     public static boolean isLinux() {
         return LINUX;
@@ -51,7 +56,7 @@ public class PlatformUtils {
     /**
      * Returns true if the platform is embedded.
      *
-     * @return true if the platform is embedded, false otherwise.
+     * @return <code>true</code> if the platform is embedded, <code>false</code> otherwise.
      */
     public static boolean isEmbedded() {
         return embedded;
@@ -60,7 +65,7 @@ public class PlatformUtils {
     /**
      * Returns true if the platform is Android.
      *
-     * @return true if the platform is Android, false otherwise.
+     * @return <code>true</code> if the platform is Android, <code>false</code> otherwise.
      */
     public static boolean isAndroid() {
         return ANDROID;
@@ -69,7 +74,7 @@ public class PlatformUtils {
     /**
      * Returns true if the operating system is iOS.
      *
-     * @return true if the operating system is iOS, false otherwise.
+     * @return <code>true</code> if the operating system is iOS, <code>false</code> otherwise.
      */
     public static boolean isIOS(){
         return IOS;
@@ -81,7 +86,7 @@ public class PlatformUtils {
      * value.
      *
      * @param value The value to test against.
-     * @return false if the version number cannot be parsed as a float,
+     * @return <code>false</code> if the version number cannot be parsed as a float,
      *         otherwise the comparison against value.
      */
     private static boolean versionNumberGreaterThanOrEqualTo(float value) {
