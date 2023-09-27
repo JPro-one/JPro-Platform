@@ -33,7 +33,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
       case view: View =>
         val oldView = this.view
         this.view = view
-        view.sessionManager = this
+        view.setSessionManager(this)
         view.url = url
 
         isFullscreen = view.fullscreen
@@ -41,7 +41,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
         scrollpane.vvalue = 0.0
         if(oldView != null && oldView != view) {
           oldView.onClose()
-          oldView.sessionManager = null
+          oldView.setSessionManager(null)
           markViewCollectable(oldView, view)
         }
         THIS.view = view

@@ -23,7 +23,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
   webAPI.addInstanceCloseListener(() => {
     THIS.view.onClose()
-    THIS.view.sessionManager = null
+    THIS.view.setSessionManager(null)
     markViewCollectable(THIS.view)
   })
 
@@ -39,7 +39,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
         }
       case view: View =>
         this.url = url
-        view.sessionManager = this
+        view.setSessionManager(this)
         view.url = url
 
         view.isMobile = webAPI.isMobile
@@ -47,7 +47,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
         container.children = List(view.realContent)
         if(THIS.view != null && THIS.view != view) {
           THIS.view.onClose()
-          THIS.view.sessionManager = null
+          THIS.view.setSessionManager(null)
           markViewCollectable(THIS.view, view)
         }
         THIS.view = view

@@ -6,6 +6,7 @@ import one.jpro.platform.routing.LinkUtil._
 import one.jpro.platform.routing.RouteUtils._
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import one.jpro.platform.routing._
+import one.jpro.platform.routing.dev.{DevFilter, StatisticsFilter}
 import org.controlsfx.control.PopOver
 import simplefx.all._
 import simplefx.core._
@@ -30,8 +31,18 @@ class MyApp(stage: Stage) extends RouteNode(stage) {
       .and(get("/leak", (r) => new LeakingPage))
       .and(get("/collect", (r) => new CollectingPage))
       .and(get("/jmemorybuddy", (r) => new JMemoryBuddyPage))
+      .and(get("/100", (r) => new ManyNodes(100)))
+      .and(get("/200", (r) => new ManyNodes(200)))
+      .and(get("/400", (r) => new ManyNodes(400)))
+      .and(get("/800", (r) => new ManyNodes(800)))
+      .and(get("/1600", (r) => new ManyNodes(1600)))
+      .and(get("/3200", (r) => new ManyNodes(3200)))
+      .and(get("/6400", (r) => new ManyNodes(6400)))
+
       .and(get("/it's\" tricky", (r) => new MainView))
       .and(get("/it's\" tricky", (r) => new MainView))
+      .filter(DevFilter.create)
+      .filter(StatisticsFilter.create)
   )
 
  // addTransition{ case (null,view2,true ) => PageTransition.InstantTransition }
@@ -57,6 +68,13 @@ class Header(view: View, sessionManager: SessionManager) extends HBox {
   //this <++ new HeaderLink("dead"    , "/as df" )
   this <++ new HeaderLink("green"   , "/green" )
   this <++ new HeaderLink("pdf"     , "/pdf" )
+  this <++ new HeaderLink("100"     , "/100" )
+  this <++ new HeaderLink("200"     , "/200" )
+  this <++ new HeaderLink("400"     , "/400" )
+  this <++ new HeaderLink("800"     , "/800" )
+  this <++ new HeaderLink("1600"    , "/1600" )
+  this <++ new HeaderLink("3200"    , "/3200" )
+  this <++ new HeaderLink("6400"    , "/6400" )
   this <++ new HeaderLink("leak"    , "/leak" )
   this <++ new HeaderLink("collect"    , "/collect" )
   this <++ new HeaderLink("jmemorybuddy"    , "/jmemorybuddy" )
@@ -72,7 +90,8 @@ class Header(view: View, sessionManager: SessionManager) extends HBox {
     setLink(this, "/?6", Some("/?6"))
     setLink(this, "/?7", Some("/?7"))
   }
-
+}
+class Header2(view: View, sessionManager: SessionManager) extends HBox {
   this <++ new Label(view.url)
 
   this <++ new Button("Backward") {
@@ -106,17 +125,17 @@ trait Page extends View { view =>
   // Cousing leak? style = "-fx-background-color: white;"
     //  transform = Scale(1.3,1.3)
       spacing = 10
-      this <++ new Header(view, sessionManager)
+      this <++ new Header(view, getSessionManager)
+      this <++ new Header2(view, getSessionManager)
       val theContent = content
       javafx.scene.layout.VBox.setVgrow(theContent,Priority.ALWAYS)
       this <++ theContent
-      this <++ new Footer(sessionManager)
-      //this <++ new Header(sessionManager)
+      this <++ new Footer(getSessionManager)
     }
   }
 
   override def handleURL(x: String): Boolean = {
-    println("handleURL called: " + x);
+    println("handleURL called: " + x)
     return false;
   }
 }
@@ -198,10 +217,26 @@ class MainView extends Page {
   }
 }
 
+class ManyNodes(size: Int) extends Page {
+  def title = "ManyNodes " + size
+
+  def description = "desc ManyNodes"
+
+  lazy val content = new VBox {
+    spacing = 10
+
+    this <++ new Label("ManyNodes " + size) { font = new Font(60)}
+
+    (1 to size).foreach { i =>
+      this <++ new Label("Node " + i) { font = new Font(15)}
+    }
+  }
+}
+
 class SubView extends Page {
   def title = "SubView"
   def description = "desc Sub"
-  override def fullscreen=true
+  override def fullscreen=false
 
   lazy val content = new VBox {
     this <++ new Label("SUBVIEW") { font = new Font(60); padding = Insets(100)}

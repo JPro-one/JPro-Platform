@@ -9,7 +9,13 @@ abstract class View extends Response { THIS =>
   def description: String
   var url: String = null
   var isMobile: Boolean = false
-  var sessionManager: SessionManager = null
+
+  private var sessionManager: SessionManager = null
+  def getSessionManager: SessionManager = sessionManager
+  def setSessionManager(x: SessionManager): Unit = {
+    sessionManager = x
+  }
+
   lazy val realContent: Node = content
   protected def content: Node
   def saveScrollPosition = true
@@ -33,6 +39,11 @@ abstract class View extends Response { THIS =>
     override def content: all.Node = f(THIS.realContent)
 
     override def fullscreen: Boolean = THIS.fullscreen
+
+    override def setSessionManager(x: SessionManager): Unit = {
+      super.setSessionManager(x)
+      THIS.setSessionManager(x)
+    }
 
     override def subView(): View = THIS
   }
