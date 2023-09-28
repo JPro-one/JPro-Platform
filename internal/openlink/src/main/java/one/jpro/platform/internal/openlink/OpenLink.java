@@ -41,7 +41,8 @@ public interface OpenLink {
             try {
                 List<String> command =
                         PlatformUtils.isMac() ? List.of("open", url) :
-                                PlatformUtils.isWindows() ? List.of("start", url) : List.of("xdg-open", url);
+                                PlatformUtils.isWindows() ? List.of("rundll32", "url.dll,FileProtocolHandler", url) :
+                                        List.of("xdg-open", url);
                 logger.debug("Opening URL with command {}", command);
                 Runtime.getRuntime().exec(command.toArray(String[]::new));
             } catch (IOException ex) {

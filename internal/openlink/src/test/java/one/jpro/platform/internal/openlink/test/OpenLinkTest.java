@@ -52,7 +52,7 @@ public class OpenLinkTest {
 
         OpenLink.openURL(URI.create("http://www.example.com").toURL());
 
-        verify(runtime).exec(new String[] {"start", "http://www.example.com"});
+        verify(runtime).exec(new String[] {"rundll32","url.dll,FileProtocolHandler", "http://www.example.com"});
     }
 
     @Test
