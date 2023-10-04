@@ -11,7 +11,7 @@ abstract class View extends Response { THIS =>
   var isMobile: Boolean = false
 
   private var sessionManager: SessionManager = null
-  def getSessionManager: SessionManager = sessionManager
+  def getSessionManager(): SessionManager = sessionManager
   def setSessionManager(x: SessionManager): Unit = {
     sessionManager = x
   }

@@ -19,6 +19,7 @@ import one.jpro.platform.auth.oath2.OAuth2Credentials;
 import one.jpro.platform.auth.oath2.OAuth2Options;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.dev.StatisticsFilter;
 import simplefx.experimental.parts.FXFuture;
 
 import java.io.PrintWriter;
@@ -103,6 +104,7 @@ public class LoginApp extends BaseAuthApp {
                                 .and(getNode("/microsoft", (r) -> providerDiscoveryView(microsoftAuth)))
                                 .and(getNode("/keycloak", (r) -> providerDiscoveryView(keycloakAuth)))))
                 .filter(DevFilter.create())
+                .filter(StatisticsFilter.create())
                 .filter(oauth2(googleAuth, googleCredentials, this::setUser, this::setError))
                 .filter(oauth2(microsoftAuth, microsoftCredentials, this::setUser, this::setError))
                 .filter(oauth2(keycloakAuth, keycloakCredentials, this::setUser, this::setError));
@@ -201,7 +203,7 @@ public class LoginApp extends BaseAuthApp {
                                     + getAuthProviderName(authProvider).toLowerCase());
                             return provider;
                         })
-                        .recover(throwable -> {
+                        .exceptionally(throwable -> {
                             setError(throwable);
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
                             return null;
@@ -251,7 +253,7 @@ public class LoginApp extends BaseAuthApp {
                             gotoPage(headerLabel, "/user/introspect-token");
                             return json;
                         })
-                        .recover(throwable -> {
+                        .exceptionally(throwable -> {
                             setError(throwable);
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
                             return null;
@@ -272,7 +274,7 @@ public class LoginApp extends BaseAuthApp {
                             gotoPage(headerLabel, "/user/refresh-token");
                             return newUser;
                         })
-                        .recover(throwable -> {
+                        .exceptionally(throwable -> {
                             setError(throwable);
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
                             return null;
@@ -303,7 +305,7 @@ public class LoginApp extends BaseAuthApp {
                                 gotoPage(headerLabel, "/user/revoke-token");
                                 return unused;
                             })
-                            .recover(throwable -> {
+                            .exceptionally(throwable -> {
                                 setError(throwable);
                                 gotoPage(headerLabel, AUTH_ERROR_PATH);
                                 return null;
@@ -335,7 +337,7 @@ public class LoginApp extends BaseAuthApp {
                                 gotoPage(headerLabel, "/user/user-info");
                                 return json;
                             })
-                            .recover(throwable -> {
+                            .exceptionally(throwable -> {
                                 setError(throwable);
                                 gotoPage(headerLabel, AUTH_ERROR_PATH);
                                 return null;
@@ -366,7 +368,7 @@ public class LoginApp extends BaseAuthApp {
                                 gotoPage(headerLabel, "/user/logout");
                                 return unused;
                             })
-                            .recover(throwable -> {
+                            .exceptionally(throwable -> {
                                 setError(throwable);
                                 gotoPage(headerLabel, AUTH_ERROR_PATH);
                                 return null;
