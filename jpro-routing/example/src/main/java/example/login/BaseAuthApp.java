@@ -312,7 +312,7 @@ public abstract class BaseAuthApp extends RouteApp {
                             userConsumer.accept(user);
                             return route.apply(request);
                         })
-                        .flatRecover(ex -> {
+                        .flatExceptionally(ex -> {
                             errorConsumer.accept(ex);
                             return route.apply(request);
                         });
@@ -352,7 +352,7 @@ public abstract class BaseAuthApp extends RouteApp {
                             userConsumer.accept(user);
                             return route.apply(request);
                         })
-                        .flatRecover(ex -> {
+                        .flatExceptionally(ex -> {
                             errorConsumer.accept(ex);
                             return route.apply(request);
                         });
