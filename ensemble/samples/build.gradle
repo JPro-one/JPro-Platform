@@ -8,6 +8,7 @@ repositories {
 }
 
 dependencies {
+    implementation project(":jpro-html-scrollpane:example")
     implementation project(":jpro-mdfx:example")
 }
 
