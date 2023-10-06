@@ -1,7 +1,5 @@
 package example.login;
 
-import atlantafx.base.theme.PrimerLight;
-import one.jpro.platform.mdfx.MarkdownView;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -17,6 +15,7 @@ import one.jpro.platform.auth.authentication.User;
 import one.jpro.platform.auth.oath2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.oath2.OAuth2Credentials;
 import one.jpro.platform.auth.oath2.OAuth2Options;
+import one.jpro.platform.mdfx.MarkdownView;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.dev.StatisticsFilter;
@@ -45,7 +44,7 @@ public class LoginApp extends BaseAuthApp {
         Optional.ofNullable(LoginApp.class.getResource("/style.css"))
                 .map(URL::toExternalForm)
                 .ifPresent(css -> getScene().getStylesheets().add(css));
-        getScene().setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+//        getScene().setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         // Google Auth provider
         final var googleAuth = AuthAPI.googleAuth()
