@@ -24,7 +24,7 @@ mainClassName = 'one.jpro.platform.media.example.MediaPlayerSample'
 
 javafx {
     version = "$JAVAFX_VERSION"
-    modules = ['javafx.controls', 'javafx.media']
+    modules = ['javafx.controls', 'javafx.swing', 'javafx.media']
 }
 
 run {
