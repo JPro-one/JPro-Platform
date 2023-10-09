@@ -1,125 +1,125 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 buildscript {
-  repositories {
-    gradlePluginPortal()
-    maven {
-        url "https://sandec.jfrog.io/artifactory/repo"
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url "https://sandec.jfrog.io/artifactory/repo"
+        }
     }
-  }
 
-  dependencies {
-    classpath "com.google.gradle:osdetector-gradle-plugin:$OSDETECTOR_PLUGIN_VERSION"
-    classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
-    classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
-  }
+    dependencies {
+        classpath "com.google.gradle:osdetector-gradle-plugin:$OSDETECTOR_PLUGIN_VERSION"
+        classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
+        classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
+    }
 }
 
 subprojects {
-  apply plugin: 'java'
+    apply plugin: 'java'
 
-  java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
-
-  repositories {
-    mavenCentral()
-    maven {
-      url "https://sandec.jfrog.io/artifactory/repo"
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-  }
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://sandec.jfrog.io/artifactory/repo"
+        }
+    }
 }
 
-configure(subprojects.findAll {it.name != 'example'}) {
-  apply plugin: 'java-library'
-  apply plugin: 'org.openjfx.javafxplugin'
+configure(subprojects.findAll { it.name != 'example' }) {
+    apply plugin: 'java-library'
+    apply plugin: 'org.openjfx.javafxplugin'
 
-  javafx {
-    version = "$JAVAFX_VERSION"
-    configurations = ["compileOnly", "testImplementation"]
-    modules = [ 'javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing','javafx.web' ]
-  }
-
-  dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter:$JUNIT_VERSION"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-    testImplementation "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
-  }
-
-  test {
-    useJUnitPlatform()
-
-    testLogging {
-      events "passed", "skipped", "failed"
-      showStandardStreams = true
-      showExceptions true
-      showCauses true
-      showStackTraces true
-      exceptionFormat TestExceptionFormat.FULL
+    javafx {
+        version = "$JAVAFX_VERSION"
+        configurations = ["compileOnly", "testImplementation"]
+        modules = ['javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web']
     }
-  }
+
+    dependencies {
+        testImplementation "org.junit.jupiter:junit-jupiter:$JUNIT_VERSION"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+        testImplementation "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+    }
+
+    test {
+        useJUnitPlatform()
+
+        testLogging {
+            events "passed", "skipped", "failed"
+            showStandardStreams = true
+            showExceptions true
+            showCauses true
+            showStackTraces true
+            exceptionFormat TestExceptionFormat.FULL
+        }
+    }
 }
 
 configure([project("jpro-sessions")]) {
-  dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
-  }
+    dependencies {
+        implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+        implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
+    }
 }
 
 configure([project("tree-showing"), project("jpro-auth"), project("jpro-image-manager"), project("jpro-mdfx"),
            project("jpro-media"), project("jpro-sessions"), project("jpro-html-scrollpane"), project("freeze-detector"),
            project("jpro-routing:core"), project("jpro-routing:dev"), project("jpro-routing:popup"), project("internal:openlink")]) {
-  apply plugin: 'maven-publish'
+    apply plugin: 'maven-publish'
 
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from components.java
-        groupId "one.jpro.platform"
-        version JPRO_PLATFORM_VERSION
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                groupId "one.jpro.platform"
+                version JPRO_PLATFORM_VERSION
 
-        def projectParentPathname = project.projectDir.parent
-        if (projectParentPathname.contains('jpro-routing')) {
-          artifactId "jpro-routing-" + project.name
-        } else if (projectParentPathname.contains('internal')) {
-          artifactId "jpro-internal-" + project.name
-        } else {
-          artifactId project.name
-        }
+                def projectParentPathname = project.projectDir.parent
+                if (projectParentPathname.contains('jpro-routing')) {
+                    artifactId "jpro-routing-" + project.name
+                } else if (projectParentPathname.contains('internal')) {
+                    artifactId "jpro-internal-" + project.name
+                } else {
+                    artifactId project.name
+                }
 
-        pom {
-          licenses {
-            license {
-              name = 'Apache License, Version 2.0'
-              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                pom {
+                    licenses {
+                        license {
+                            name = 'Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
+                        developerConnection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
+                        url = "https://github.com/JPro-one/jpro-platform/tree/main/$project.name"
+                    }
+                }
             }
-          }
-
-          scm {
-            connection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
-            developerConnection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
-            url = "https://github.com/JPro-one/jpro-platform/tree/main/$project.name"
-          }
         }
-      }
-    }
 
-    java {
-      withSourcesJar()
-      withJavadocJar()
-    }
-
-    repositories {
-      maven {
-        name = "artifactory"
-        url = "https://sandec.jfrog.io/artifactory/repo"
-        credentials {
-          username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
-          password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
+        java {
+            withSourcesJar()
+            withJavadocJar()
         }
-      }
+
+        repositories {
+            maven {
+                name = "artifactory"
+                url = "https://sandec.jfrog.io/artifactory/repo"
+                credentials {
+                    username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
+                    password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
+                }
+            }
+        }
     }
-  }
 }
