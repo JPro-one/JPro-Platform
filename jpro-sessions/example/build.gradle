@@ -1,5 +1,7 @@
-apply plugin: 'org.openjfx.javafxplugin'
-apply plugin: 'jpro-gradle-plugin'
+plugins {
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
+}
 
 dependencies {
     implementation(project(":jpro-sessions"))

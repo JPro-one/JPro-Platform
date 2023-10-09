@@ -1,9 +1,8 @@
 plugins {
     id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
 }
-
-apply plugin: 'org.openjfx.javafxplugin'
-apply plugin: 'jpro-gradle-plugin'
 
 dependencies {
     implementation project(":jpro-media")
