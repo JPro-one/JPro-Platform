@@ -1,7 +1,3 @@
-plugins {
-    id 'java-library'
-}
-
 dependencies {
     implementation project(":internal:openlink")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"

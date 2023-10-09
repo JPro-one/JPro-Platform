@@ -1,6 +1,3 @@
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-
 dependencies {
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"

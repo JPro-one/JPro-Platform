@@ -38,8 +38,6 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 }
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
-  apply plugin: 'java-library'
-
   dependencies {
     api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     api "SANDEC:jnodes:$JNODES_VERSION"
