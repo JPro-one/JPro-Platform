@@ -21,31 +21,32 @@ public class TestTreeShowing {
     public static void startJavaFX() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.startup(latch::countDown);
-
         latch.await();
     }
 
     @Test
-    public void simpleTest() { inFX(() -> {
-        Parent node = new Group();
-        BooleanProperty prop = TreeShowing.treeShowing(node);
-        Assertions.assertFalse(prop.get());
-    });}
+    public void simpleTest() {
+        inFX(() -> {
+            Parent node = new Group();
+            BooleanProperty prop = TreeShowing.treeShowing(node);
+            Assertions.assertFalse(prop.get());
+        });
+    }
 
     @Test
-    public void memoryTest1() { inFX(() -> {
-        JMemoryBuddy.memoryTest(checker -> {
+    public void memoryTest1() {
+        inFX(() -> JMemoryBuddy.memoryTest(checker -> {
             Parent node = new Group();
             BooleanProperty prop = TreeShowing.treeShowing(node);
 
             checker.assertCollectable(node);
             checker.assertCollectable(prop);
-        });
-    });}
+        }));
+    }
 
     @Test
-    public void memoryTest2() { inFX(() -> {
-        JMemoryBuddy.memoryTest(checker -> {
+    public void memoryTest2() {
+        inFX(() -> JMemoryBuddy.memoryTest(checker -> {
             Parent node = new Group();
             BooleanProperty prop = TreeShowing.treeShowing(node);
             Scene scene = new Scene(node);
@@ -59,33 +60,32 @@ public class TestTreeShowing {
             checker.setAsReferenced(stage);
             checker.assertCollectable(node);
             checker.assertCollectable(prop);
-        });
-    });}
+        }));
+    }
 
 
     @Test
     public void memoryTest3() {
-        JMemoryBuddy.memoryTest(checker -> {
-            inFX(() -> {
-                Parent node = new Group();
-                BooleanProperty prop = TreeShowing.treeShowing(node);
-                Scene scene = new Scene(node);
-                Stage stage = new Stage();
-                stage.setScene(scene);
-                stage.show();
+        JMemoryBuddy.memoryTest(checker ->
+                inFX(() -> {
+                    Parent node = new Group();
+                    BooleanProperty prop = TreeShowing.treeShowing(node);
+                    Scene scene = new Scene(node);
+                    Stage stage = new Stage();
+                    stage.setScene(scene);
+                    stage.show();
 
-                Assertions.assertTrue(prop.get());
-                scene.setRoot(new Group());
-                stage.close();
+                    Assertions.assertTrue(prop.get());
+                    scene.setRoot(new Group());
+                    stage.close();
 
-                Assertions.assertFalse(prop.get());
+                    Assertions.assertFalse(prop.get());
 
-                checker.setAsReferenced(node);
-                checker.assertCollectable(scene);
-                //checker.setAsReferenced(stage);
-                checker.assertCollectable(stage);
-            });
-        });
+                    checker.setAsReferenced(node);
+                    checker.assertCollectable(scene);
+                    //checker.setAsReferenced(stage);
+                    checker.assertCollectable(stage);
+                }));
     }
 
     public void inFX(Runnable r) {
@@ -102,7 +102,7 @@ public class TestTreeShowing {
         });
         try {
             l.await();
-            if(ex.get() != null) {
+            if (ex.get() != null) {
                 throw new RuntimeException(ex.get());
             }
         } catch (Exception e) {
