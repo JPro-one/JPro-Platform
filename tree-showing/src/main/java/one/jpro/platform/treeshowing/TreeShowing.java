@@ -8,15 +8,17 @@ import javafx.scene.Scene;
 import javafx.stage.Window;
 
 public class TreeShowing {
-    private static Object KEY_TREE_SHOWING = new Object();
+    private static final Object KEY_TREE_SHOWING = new Object();
+
     public static BooleanProperty treeShowing(Node node) {
         BooleanProperty prop = (BooleanProperty) node.getProperties().get(KEY_TREE_SHOWING);
-        if(prop == null) {
+        if (prop == null) {
             prop = new TreeShowingProperty(node);
             node.getProperties().put(KEY_TREE_SHOWING, prop);
         }
         return prop;
     }
+
     public static boolean isTreeShowing(Node node) {
         return node.getScene() != null &&
                 node.getScene().getWindow() != null &&
@@ -34,8 +36,8 @@ public class TreeShowing {
             Runnable updateValue = () -> {
                 Scene myScene = node.getScene();
                 set(myScene != null &&
-                    myScene.getWindow() != null &&
-                    myScene.getWindow().isShowing());
+                        myScene.getWindow() != null &&
+                        myScene.getWindow().isShowing());
             };
 
             ChangeListener<Boolean> updateVisibleListener = (p, o, value) -> updateValue.run();
@@ -44,13 +46,13 @@ public class TreeShowing {
                 Scene scene = node.getScene();
                 Window changedWindow = scene == null ? null : scene.getWindow();
 
-                if(window != null) {
+                if (window != null) {
                     window.showingProperty().removeListener(updateVisibleListener);
                 }
                 window = changedWindow;
-                if(changedWindow != null) {
+                if (changedWindow != null) {
                     changedWindow.showingProperty().addListener(updateVisibleListener);
-                    updateVisibleListener.changed(null,null, changedWindow.isShowing());
+                    updateVisibleListener.changed(null, null, changedWindow.isShowing());
                 } else {
                     updateValue.run();
                 }
@@ -58,21 +60,21 @@ public class TreeShowing {
 
             ChangeListener<Scene> updateSceneListener = (p, o, ignore) -> {
                 Scene changedScene = node.getScene();
-                if(scene != null) {
+                if (scene != null) {
                     scene.windowProperty().removeListener(updateWindowListener);
                 }
                 scene = changedScene;
-                if(changedScene != null) {
+                if (changedScene != null) {
                     changedScene.windowProperty().addListener(updateWindowListener);
-                    updateWindowListener.changed(null,null, changedScene.getWindow());
+                    updateWindowListener.changed(null, null, changedScene.getWindow());
                 } else {
-                    updateWindowListener.changed(null,null,null);
+                    updateWindowListener.changed(null, null, null);
                     updateValue.run();
                 }
             };
 
             node.sceneProperty().addListener(updateSceneListener);
-            updateSceneListener.changed(null,null,node.getScene());
+            updateSceneListener.changed(null, null, node.getScene());
         }
     }
 }
