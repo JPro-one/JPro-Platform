@@ -10,6 +10,7 @@ repositories {
 dependencies {
     implementation project(":jpro-html-scrollpane:example")
     implementation project(":jpro-mdfx:example")
+    implementation project(":jpro-media:example")
 }
 
 javafx {
