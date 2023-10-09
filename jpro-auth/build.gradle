@@ -1,7 +1,5 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
-    id 'org.openjfx.javafxplugin'
 }
 
 group = 'one.jpro'
