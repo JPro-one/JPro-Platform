@@ -17,3 +17,5 @@ include "jpro-html-scrollpane:example"
 include "tree-showing"
 include "freeze-detector"
 include "example"
+
+rootProject.name = "jpro-platform"
