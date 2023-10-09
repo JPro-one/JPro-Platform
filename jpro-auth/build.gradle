@@ -2,16 +2,6 @@ plugins {
     id 'java-library'
 }
 
-group = 'one.jpro'
-version = "$JPRO_PLATFORM_VERSION"
-
-repositories {
-    mavenCentral()
-    maven {
-        url "https://sandec.jfrog.io/artifactory/repo"
-    }
-}
-
 dependencies {
     implementation project(":internal:openlink")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
