@@ -206,7 +206,7 @@ public final class WebMediaPlayer extends BaseMediaPlayer implements WebMediaEng
     @Override
     ReadOnlyObjectWrapper<MediaSource> mediaSourcePropertyImpl() {
         if (mediaSource == null) {
-            mediaSource = new ReadOnlyObjectWrapper<>(this, "source") {
+            mediaSource = new ReadOnlyObjectWrapper<>(this, "mediaSource") {
                 @Override
                 protected void invalidated() {
                     if (getStatus() != Status.DISPOSED) {
