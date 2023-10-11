@@ -348,4 +348,4 @@ public class MediaRecorderApplication extends Application {
 }
 ```
 ### More examples
-For more examples, please take a look at the [JPro Media Examples](https://github.com/JPro-one/jpro-utils/tree/master/example/src/main/java/one/jpro/example/media/).
+For more examples, please take a look at the [JPro Media Examples](https://github.com/JPro-one/jpro-platform/tree/main/jpro-media/example/src/main/java/one/jpro/platform/media/example).
