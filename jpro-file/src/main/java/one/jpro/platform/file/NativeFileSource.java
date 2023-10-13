@@ -1,11 +1,13 @@
 package one.jpro.platform.file;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Java file source.
@@ -79,5 +81,27 @@ public final class NativeFileSource extends FileSource<File> {
             uploadedFile = new ReadOnlyObjectWrapper<>(this, "uploadedFile");
         }
         return uploadedFile;
+    }
+
+    @Override
+    public void uploadFile() {
+        final Runnable runnable = () -> {
+            setProgress(1.0);
+            setUploadedFile(getPlatformFile());
+        };
+
+        if (Platform.isFxApplicationThread()) {
+            runnable.run();
+        } else {
+            Platform.runLater(runnable);
+        }
+    }
+
+    @Override
+    public CompletableFuture<File> uploadFileAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            uploadFile();
+            return getPlatformFile();
+        });
     }
 }

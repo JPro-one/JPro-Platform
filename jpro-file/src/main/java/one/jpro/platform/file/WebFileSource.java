@@ -5,6 +5,7 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Web file source.
@@ -50,5 +51,15 @@ public final class WebFileSource extends FileSource<WebAPI.JSFile> {
     @Override
     public ReadOnlyObjectProperty<File> uploadedFileProperty() {
         return getPlatformFile().uploadedFileProperty();
+    }
+
+    @Override
+    public void uploadFile() {
+        getPlatformFile().uploadFile();
+    }
+
+    @Override
+    public CompletableFuture<File> uploadFileAsync() {
+        return getPlatformFile().getUploadedFileFuture();
     }
 }

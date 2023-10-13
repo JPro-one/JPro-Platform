@@ -3,6 +3,7 @@ package one.jpro.platform.file;
 import javafx.beans.property.*;
 
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * File source.
@@ -76,4 +77,8 @@ public sealed abstract class FileSource<T> permits NativeFileSource, WebFileSour
     public abstract File getUploadedFile();
 
     public abstract ReadOnlyObjectProperty<File> uploadedFileProperty();
+
+    public abstract void uploadFile();
+
+    public abstract CompletableFuture<File> uploadFileAsync();
 }
