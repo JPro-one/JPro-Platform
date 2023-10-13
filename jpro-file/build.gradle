@@ -1,0 +1,5 @@
+dependencies {
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
