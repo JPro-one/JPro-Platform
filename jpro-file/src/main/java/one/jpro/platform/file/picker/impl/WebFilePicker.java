@@ -7,10 +7,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.picker.FilePicker;
@@ -32,16 +29,7 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
     public WebFilePicker(Node node) {
         super(node);
 
-        //
-        VBox filesVBox = new VBox();
-        filesVBox.getStyleClass().add("mf-files");
-        ScrollPane filesScrollPane = new ScrollPane(filesVBox);
-        filesScrollPane.setFitToWidth(true);
-        StackPane filesContainer = new StackPane(filesScrollPane);
-        filesContainer.getStyleClass().add("mf-files-container");
-        //
-
-        multiFileUploader = WebAPI.makeMultiFileUploadNodeStatic(filesContainer);
+        multiFileUploader = WebAPI.makeMultiFileUploadNodeStatic(node);
         multiFileUploader.setSelectFileOnClick(true);
 
         extensionListFiltersListener = change -> {
