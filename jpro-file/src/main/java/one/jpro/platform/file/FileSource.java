@@ -1,9 +1,8 @@
 package one.jpro.platform.file;
 
-import javafx.beans.property.ReadOnlyLongProperty;
-import javafx.beans.property.ReadOnlyLongWrapper;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.*;
+
+import java.io.File;
 
 /**
  * File source.
@@ -69,4 +68,12 @@ public sealed abstract class FileSource<T> permits NativeFileSource, WebFileSour
         }
         return objectURLProperty.getReadOnlyProperty();
     }
+
+    public abstract double getProgress();
+
+    public abstract ReadOnlyDoubleProperty progressProperty();
+
+    public abstract File getUploadedFile();
+
+    public abstract ReadOnlyObjectProperty<File> uploadedFileProperty();
 }

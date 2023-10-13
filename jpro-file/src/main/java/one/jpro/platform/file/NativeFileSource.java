@@ -1,5 +1,10 @@
 package one.jpro.platform.file;
 
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+
 import java.io.File;
 
 /**
@@ -26,5 +31,53 @@ public final class NativeFileSource extends FileSource<File> {
     @Override
     String _getObjectURL() {
         return getPlatformFile().toURI().toString();
+    }
+
+    // progress property
+    private ReadOnlyDoubleWrapper progress;
+
+    @Override
+    public double getProgress() {
+        return progress == null ? 0.0 : progress.get();
+    }
+
+    private void setProgress(double value) {
+        progressPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyDoubleProperty progressProperty() {
+        return progressPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyDoubleWrapper progressPropertyImpl() {
+        if (progress == null) {
+            progress = new ReadOnlyDoubleWrapper(this, "progress", 0.0);
+        }
+        return progress;
+    }
+
+    // uploadedFile property
+    private ReadOnlyObjectWrapper<File> uploadedFile;
+
+    @Override
+    public File getUploadedFile() {
+        return (uploadedFile == null) ? null : getPlatformFile();
+    }
+
+    private void setUploadedFile(File value) {
+        uploadedFilePropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<File> uploadedFileProperty() {
+        return uploadedFilePropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<File> uploadedFilePropertyImpl() {
+        if (uploadedFile == null) {
+            uploadedFile = new ReadOnlyObjectWrapper<>(this, "uploadedFile");
+        }
+        return uploadedFile;
     }
 }
