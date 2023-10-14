@@ -7,6 +7,7 @@ import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.picker.FilePicker;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * {@link FilePicker} implementation for the desktop/mobile.
+ * {@link FilePicker} implementation for JavaFX on the desktop/mobile.
  *
  * @author Besmir Beqiri
  */
@@ -50,8 +51,26 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
         weakExtensionListFiltersListener = new WeakListChangeListener<>(extensionListFiltersListener);
         getExtensionFilters().addListener(weakExtensionListFiltersListener);
 
+        // Define the action that should be performed when the user clicks on the node.
         node.setOnMouseClicked(mouseEvent -> {
-
+            Window window = node.getScene().getWindow();
+            if (multiple) {
+                List<File> files = fileChooser.showOpenMultipleDialog(window);
+                if (files != null && !files.isEmpty()) {
+                    Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
+                    if (onFilesSelectedConsumer != null) {
+                        onFilesSelectedConsumer.accept(files.stream().map(NativeFileSource::new).toList());
+                    }
+                }
+            } else {
+                File file = fileChooser.showOpenDialog(window);
+                if (file != null) {
+                    Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
+                    if (onFilesSelectedConsumer != null) {
+                        onFilesSelectedConsumer.accept(List.of(new NativeFileSource(file)));
+                    }
+                }
+            }
         });
     }
 
