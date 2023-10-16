@@ -5,7 +5,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
@@ -31,25 +30,6 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
 
         multiFileUploader = WebAPI.makeMultiFileUploadNodeStatic(node);
         multiFileUploader.setSelectFileOnClick(true);
-
-        extensionListFiltersListener = change -> {
-            while (change.next()) {
-                if (change.wasAdded()) {
-                    for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
-                        extensionFilter.extensions().forEach(multiFileUploader.supportedExtensions()::add);
-                    }
-                } else if (change.wasRemoved()) {
-                    for (ExtensionFilter extensionFilter : change.getRemoved()) {
-                        multiFileUploader.supportedExtensions().removeAll(extensionFilter.extensions());
-                    }
-                }
-            }
-        };
-
-        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        weakExtensionListFiltersListener = new WeakListChangeListener<>(extensionListFiltersListener);
-        getExtensionFilters().addListener(weakExtensionListFiltersListener);
     }
 
     // title property
@@ -97,7 +77,24 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
     @Override
     public ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
         if (selectedExtensionFilter == null) {
-            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter");
+            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {
+
+                @Override
+                protected void invalidated() {
+                    final ExtensionFilter selectedExtensionFilter = get();
+                    multiFileUploader.supportedExtensions().clear();
+                    if (selectedExtensionFilter != null) {
+                        selectedExtensionFilter.extensions().stream()
+                                .map(ext -> {
+                                    if (ext.startsWith("*")) {
+                                        ext = ext.substring(1);
+                                    }
+                                    return ext;
+                                }) // remove the leading
+                                .forEach(multiFileUploader.supportedExtensions()::add);
+                    }
+                }
+            };
         }
         return selectedExtensionFilter;
     }

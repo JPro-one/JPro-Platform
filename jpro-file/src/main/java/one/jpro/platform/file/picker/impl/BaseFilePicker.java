@@ -2,9 +2,7 @@ package one.jpro.platform.file.picker.impl;
 
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
@@ -19,10 +17,6 @@ import one.jpro.platform.file.picker.FilePicker;
 abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> {
 
     private final Node node;
-
-    ListChangeListener<ExtensionFilter> extensionListFiltersListener;
-
-    WeakListChangeListener<ExtensionFilter> weakExtensionListFiltersListener;
 
     public BaseFilePicker(Node node) {
         this.node = node;
