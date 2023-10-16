@@ -105,21 +105,6 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
     }
 
     @Override
-    public String getInitialFileName() {
-        return fileChooser.getInitialFileName();
-    }
-
-    @Override
-    public void setInitialFileName(final String value) {
-        fileChooser.setInitialFileName(value);
-    }
-
-    @Override
-    public ObjectProperty<String> initialFileNameProperty() {
-        return fileChooser.initialFileNameProperty();
-    }
-
-    @Override
     public ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
         if (selectedExtensionFilter == null) {
             selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {

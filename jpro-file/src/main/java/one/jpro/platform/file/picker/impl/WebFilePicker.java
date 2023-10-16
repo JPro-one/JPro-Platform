@@ -94,27 +94,6 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
         return initialDirectory;
     }
 
-    // --- initialFileName property
-    private ObjectProperty<String> initialFileName;
-
-    @Override
-    public String getInitialFileName() {
-        return (initialFileName != null) ? initialFileName.get() : null;
-    }
-
-    @Override
-    public void setInitialFileName(final String value) {
-        initialFileNameProperty().set(value);
-    }
-
-    @Override
-    public ObjectProperty<String> initialFileNameProperty() {
-        if (initialFileName == null) {
-            initialFileName = new SimpleObjectProperty<>(this, "initialFileName");
-        }
-        return initialFileName;
-    }
-
     @Override
     public ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
         if (selectedExtensionFilter == null) {

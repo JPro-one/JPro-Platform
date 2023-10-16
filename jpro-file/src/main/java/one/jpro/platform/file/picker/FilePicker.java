@@ -85,32 +85,6 @@ public interface FilePicker<F extends FileSource<?>> {
      */
     ObjectProperty<File> initialDirectoryProperty();
 
-    /**
-     * The initial file name for the displayed dialog.
-     *
-     * @return the file name as a string
-     */
-    String getInitialFileName();
-
-    /**
-     * Sets the initial file name for the displayed dialog.
-     *
-     * @param value the file name
-     */
-    void setInitialFileName(final String value);
-
-    /**
-     * The initial file name for the displayed dialog.
-     * <p>
-     * This property is used mostly in the displayed file save dialogs as the
-     * initial file name for the file being saved. If set for a file open
-     * dialog it will have any impact on the displayed dialog only if the
-     * corresponding platform provides support for such property in its
-     * file open dialogs.
-     * </p>
-     */
-    ObjectProperty<String> initialFileNameProperty();
-
     double getProgress();
 
     ReadOnlyDoubleProperty progressProperty();
