@@ -128,8 +128,11 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
                 protected void invalidated() {
                     final ExtensionFilter filter = get();
                     if (filter != null) {
-                        fileChooser.setSelectedExtensionFilter(
-                                new FileChooser.ExtensionFilter(filter.description(), filter.extensions()));
+                        final FileChooser.ExtensionFilter selectedExtensionFilter = fileChooser.getExtensionFilters().stream()
+                                .filter(extensionFilter -> extensionFilter.getExtensions().equals(filter.extensions()))
+                                .findFirst()
+                                .orElse(null);
+                        fileChooser.setSelectedExtensionFilter(selectedExtensionFilter);
                     } else {
                         fileChooser.setSelectedExtensionFilter(null);
                     }
