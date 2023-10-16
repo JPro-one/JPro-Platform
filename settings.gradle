@@ -1,5 +1,6 @@
 include "jpro-auth"
 include "jpro-file"
+include "jpro-file:example"
 include "jpro-image-manager"
 include "jpro-mdfx"
 include "jpro-mdfx:example"

@@ -1,0 +1,9 @@
+.controls-box {
+    -fx-spacing: 8;
+}
+
+.root-pane {
+    -fx-spacing: 12;
+    -fx-alignment: center;
+    -fx-padding: 12;
+}
