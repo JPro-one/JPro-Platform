@@ -15,6 +15,7 @@ import one.jpro.platform.file.picker.impl.WebFilePicker;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
  *
  * @author Besmir Beqiri
  */
-public interface FilePicker<FS extends FileSource<?>> {
+public interface FilePicker<F extends FileSource<?>> {
 
     int INDEFINITE = -1;
 
@@ -33,9 +34,11 @@ public interface FilePicker<FS extends FileSource<?>> {
      * the browser than a desktop version is returned.
      *
      * @param node the owner node of the file picker
+     * @throws NullPointerException if the node is null
      * @return a {@link FilePicker} object.
      */
-    static FilePicker create(Node node) {
+    static FilePicker<? extends FileSource<?>> create(Node node) {
+        Objects.requireNonNull(node, "node must not be null");
         if (WebAPI.isBrowser()) {
             return new WebFilePicker(node);
         }
@@ -108,10 +111,6 @@ public interface FilePicker<FS extends FileSource<?>> {
      */
     ObjectProperty<String> initialFileNameProperty();
 
-    /**
-     * The progress of uploading the file.
-     * When the value is 1.0, then the upload is finished.
-     */
     double getProgress();
 
     ReadOnlyDoubleProperty progressProperty();
@@ -183,21 +182,21 @@ public interface FilePicker<FS extends FileSource<?>> {
      *
      * @return the handler
      */
-    Consumer<List<FS>> getOnFilesSelected();
+    Consumer<List<F>> getOnFilesSelected();
 
     /**
      * Sets the handler to be called when the user selects files.
      *
      * @param value the handler
      */
-    void setOnFilesSelected(Consumer<List<FS>> value);
+    void setOnFilesSelected(Consumer<List<F>> value);
 
     /**
      * Defines the handler to be called when the user selects files.
      * The handler returns the selected files or {@code null} if
      * no file has been selected.
      */
-    ObjectProperty<Consumer<List<FS>>> onFilesSelectedProperty();
+    ObjectProperty<Consumer<List<F>>> onFilesSelectedProperty();
 
     long getMaxFileUploadSize();
 

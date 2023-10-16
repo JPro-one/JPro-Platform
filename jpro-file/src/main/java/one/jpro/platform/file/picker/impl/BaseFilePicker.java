@@ -16,7 +16,7 @@ import one.jpro.platform.file.picker.FilePicker;
  *
  * @author Besmir Beqiri
  */
-abstract class BaseFilePicker<FS extends FileSource<?>> implements FilePicker<FS> {
+abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> {
 
     private final Node node;
 
