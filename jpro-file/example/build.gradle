@@ -17,7 +17,7 @@ javafx {
     modules = ['javafx.controls', 'javafx.swing', 'javafx.media']
 }
 
-mainClassName = 'one.jpro.platform.file.example.FileHandlerSample'
+mainClassName = 'one.jpro.platform.file.example.FilePickerSample'
 
 application {
     mainClass = "$mainClassName"

@@ -17,11 +17,11 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
- * This class represents a sample application that handles file operations.
+ * This class represents a sample application for file picker operations.
  *
  * @author Besmir Beqiri
  */
-public class FileHandlerSample extends Application {
+public class FilePickerSample extends Application {
 
     private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("TEXT files", "*.txt", "*.srt", "*.md", "*.csv");
     private static final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", "*.mp3", "*.wav", "*.ogg");
@@ -33,12 +33,12 @@ public class FileHandlerSample extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("JPro File Handler");
+        stage.setTitle("JPro File Picker");
         Scene scene = new Scene(createRoot(stage), 1140, 640);
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
-        Optional.ofNullable(FileHandlerSample.class.getResource("css/main.css"))
+        Optional.ofNullable(FilePickerSample.class.getResource("css/file_picker.css"))
                 .map(URL::toExternalForm)
                 .ifPresent(scene.getStylesheets()::add);
         stage.setScene(scene);
@@ -46,25 +46,29 @@ public class FileHandlerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-//        final FilePicker<?> filePicker = filePickerFromTablePlaceHolder();
-        final FilePicker<?> filePicker = filePickerFromImportButton();
+//        final var filePicker = filePickerFromTablePlaceHolder();
+        final var filePicker = filePickerFromImportButton();
         filePicker.getExtensionFilters().addAll(textExtensionFilter,
                 audioExtensionFilter, videoExtensionFilter, imageExtensionFilter);
         filePicker.setSelectedExtensionFilter(audioExtensionFilter);
         filePicker.setOnFilesSelected(fileSources -> fileTableView.getItems().addAll(fileSources));
 
+        BorderPane rootPane = new BorderPane(fileTableView);
+        rootPane.getStyleClass().add("root-pane");
+
         CheckBox multipleCheckBox = new CheckBox("Multiple");
-        multipleCheckBox.setOnAction(event -> filePicker.setSelectionMode(multipleCheckBox.isSelected() ?
+        multipleCheckBox.setOnAction(event ->
+                filePicker.setSelectionMode(multipleCheckBox.isSelected() ?
                 SelectionMode.MULTIPLE : SelectionMode.SINGLE));
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Button clearButton = new Button("Clear");
         clearButton.setOnAction(event -> fileTableView.getItems().clear());
+
         HBox controlsBox = new HBox(multipleCheckBox, spacer, importButton, clearButton);
         controlsBox.getStyleClass().add("controls-box");
-        VBox rootPane = new VBox(controlsBox, fileTableView);
-        rootPane.getStyleClass().add("root-pane");
-        VBox.setVgrow(fileTableView, Priority.ALWAYS);
+        rootPane.setTop(controlsBox);
+
         return rootPane;
     }
 
@@ -74,7 +78,7 @@ public class FileHandlerSample extends Application {
     }
 
     private FilePicker<?> filePickerFromTablePlaceHolder() {
-        final var clickOnMeLabel = new Label("Click on me to open the file picker");
+        Label clickOnMeLabel = new Label("Click on me to open the file picker!");
         StackPane tablePlaceHolder = new StackPane(clickOnMeLabel);
         fileTableView.setPlaceholder(tablePlaceHolder);
         return FilePicker.create(tablePlaceHolder);
