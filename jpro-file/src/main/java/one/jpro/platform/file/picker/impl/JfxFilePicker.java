@@ -27,7 +27,6 @@ import java.util.function.Consumer;
 public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
 
     private final FileChooser fileChooser = new FileChooser();
-    private boolean multiple = false;
     private List<NativeFileSource> nativeFileSources = List.of();
     private final ListChangeListener<ExtensionFilter> extensionListFiltersListener = change -> {
         while (change.next()) {
@@ -62,7 +61,7 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
         // Define the action that should be performed when the user clicks on the node.
         node.setOnMouseClicked(mouseEvent -> {
             Window window = node.getScene().getWindow();
-            if (multiple) {
+            if (getSelectionMode() == SelectionMode.MULTIPLE) {
                 final List<File> files = fileChooser.showOpenMultipleDialog(window);
                 if (files != null && !files.isEmpty()) {
                     // Create a list of native file sources from the selected files.
@@ -154,14 +153,7 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
     @Override
     public ObjectProperty<SelectionMode> selectionModeProperty() {
         if (selectionMode == null) {
-            selectionMode = new SimpleObjectProperty<>(this, "selectionMode", SelectionMode.SINGLE) {
-
-                @Override
-                protected void invalidated() {
-                    final SelectionMode selectionMode = get();
-                    multiple = selectionMode == SelectionMode.MULTIPLE;
-                }
-            };
+            selectionMode = new SimpleObjectProperty<>(this, "selectionMode", SelectionMode.SINGLE);
         }
         return selectionMode;
     }
