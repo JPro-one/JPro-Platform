@@ -70,7 +70,7 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
         return extensionFilters;
     }
 
-    // selected extension property
+    // selected extension filter property
     ObjectProperty<ExtensionFilter> selectedExtensionFilter;
 
     @Override

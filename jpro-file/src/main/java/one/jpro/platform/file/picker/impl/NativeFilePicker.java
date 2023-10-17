@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Represents a {@link FilePicker} implementation for JavaFX applications.
- * This class extends the {@link BaseFilePicker} class and specializes it
- * for selecting files from the native file system.
+ * Represents a {@link FilePicker} implementation for JavaFX desktop/mobile
+ * applications. This class extends the {@link BaseFilePicker} class and
+ * specializes it for selecting files from the native file system.
  *
  * @author Besmir Beqiri
  */
-public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
+public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
 
     private final FileChooser fileChooser = new FileChooser();
     private List<NativeFileSource> nativeFileSources = List.of();
@@ -51,7 +51,7 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
      *
      * @param node The node associated with this file picker.
      */
-    public JfxFilePicker(Node node) {
+    public NativeFilePicker(Node node) {
         super(node);
 
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,

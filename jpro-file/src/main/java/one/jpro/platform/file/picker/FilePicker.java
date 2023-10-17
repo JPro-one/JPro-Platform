@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
-import one.jpro.platform.file.picker.impl.JfxFilePicker;
+import one.jpro.platform.file.picker.impl.NativeFilePicker;
 import one.jpro.platform.file.picker.impl.WebFilePicker;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public interface FilePicker<F extends FileSource<?>> {
         if (WebAPI.isBrowser()) {
             return new WebFilePicker(node);
         }
-        return new JfxFilePicker(node);
+        return new NativeFilePicker(node);
     }
 
     /**
