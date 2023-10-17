@@ -19,8 +19,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * FilePicker interface.
+ * A file picker interface for selecting and interacting with files.
+ * The {@link FilePicker} interface provides methods and properties
+ * to customize the file picker UI, set initial directory, handle
+ * file selection events, and more.
  *
+ * @param <F> the type of file source
  * @author Besmir Beqiri
  */
 public interface FilePicker<F extends FileSource<?>> {
@@ -33,9 +37,9 @@ public interface FilePicker<F extends FileSource<?>> {
      * picker is returned. If the application is not running inside
      * the browser than a desktop version is returned.
      *
-     * @param node the owner node of the file picker
-     * @throws NullPointerException if the node is null
+     * @param node the associated node for this file picker
      * @return a {@link FilePicker} object.
+     * @throws NullPointerException if the node is null
      */
     static FilePicker<? extends FileSource<?>> create(Node node) {
         Objects.requireNonNull(node, "node must not be null");
@@ -45,6 +49,11 @@ public interface FilePicker<F extends FileSource<?>> {
         return new JfxFilePicker(node);
     }
 
+    /**
+     * Returns the associated node for this file picker.
+     *
+     * @return the associated node for this file picker.
+     */
     Node getNode();
 
     /**
@@ -81,7 +90,7 @@ public interface FilePicker<F extends FileSource<?>> {
     void setInitialDirectory(File value);
 
     /**
-     * The initial directory for the displayed file dialog.
+     * Defines the initial directory for the displayed file dialog.
      */
     ObjectProperty<File> initialDirectoryProperty();
 
@@ -135,13 +144,21 @@ public interface FilePicker<F extends FileSource<?>> {
     ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty();
 
     /**
-     * Gets the selection mode of the file chooser.
+     * Returns the selection mode of the file picker.
+     * The selection mode determines how the file dialog allows the user to select files.
+     * <p>
      * The default value is {@link SelectionMode#SINGLE}.
+     *
+     * @return the selection mode of the file dialog
      */
     SelectionMode getSelectionMode();
 
     /**
      * Sets the selection mode of the file chooser.
+     *
+     * @param value The selection mode to be set. This should be one of the values
+     *              defined in the SelectionMode enumeration. Possible values are
+     *              {@link SelectionMode#SINGLE} or {@link SelectionMode#MULTIPLE}.
      */
     void setSelectionMode(SelectionMode value);
 
@@ -172,9 +189,22 @@ public interface FilePicker<F extends FileSource<?>> {
      */
     ObjectProperty<Consumer<List<F>>> onFilesSelectedProperty();
 
+    /**
+     * Returns the maximum file upload size allowed.
+     *
+     * @return the maximum file upload size in bytes
+     */
     long getMaxFileUploadSize();
 
+    /**
+     * Sets the maximum file upload size allowed.
+     *
+     * @param value the maximum file upload size in bytes to be set
+     */
     void setMaxFileUploadSize(long value);
 
+    /**
+     * Defines the maximum file upload size allowed.
+     */
     LongProperty maxFileUploadSizeProperty();
 }

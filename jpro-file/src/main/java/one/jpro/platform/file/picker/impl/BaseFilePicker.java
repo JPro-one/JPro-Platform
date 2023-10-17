@@ -10,15 +10,22 @@ import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.picker.FilePicker;
 
 /**
- * Base {@link FilePicker} implementation.
+ * The BaseFilePicker class is an abstract class that implements the FilePicker interface.
+ * It provides a base implementation for common functionality shared by different file picker implementations.
  *
+ * @param <F> the type of FileSource used by the file picker
  * @author Besmir Beqiri
  */
 abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> {
 
     private final Node node;
 
-    public BaseFilePicker(Node node) {
+    /**
+     * Constructs a new instance of BaseFilePicker with the specified Node.
+     *
+     * @param node the node to which the file picker should be attached
+     */
+    BaseFilePicker(Node node) {
         this.node = node;
     }
 
@@ -51,18 +58,15 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
         return progress;
     }
 
-    /**
-     * Specifies the extension filters used in the displayed file dialog.
-     */
     private final ObservableList<ExtensionFilter> extensionFilters = FXCollections.observableArrayList();
-
-    // selected extension property
-    ObjectProperty<ExtensionFilter> selectedExtensionFilter;
 
     @Override
     public final ObservableList<ExtensionFilter> getExtensionFilters() {
         return extensionFilters;
     }
+
+    // selected extension property
+    ObjectProperty<ExtensionFilter> selectedExtensionFilter;
 
     @Override
     public final ExtensionFilter getSelectedExtensionFilter() {

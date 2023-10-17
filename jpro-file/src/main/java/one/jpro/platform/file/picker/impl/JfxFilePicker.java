@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * {@link FilePicker} implementation for JavaFX on the desktop/mobile.
+ * Represents a {@link FilePicker} implementation for JavaFX applications.
+ * This class extends the {@link BaseFilePicker} class and specializes it
+ * for selecting files from the native file system.
  *
  * @author Besmir Beqiri
  */
@@ -44,6 +46,11 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
     private final WeakListChangeListener<ExtensionFilter> weakExtensionListFiltersListener =
             new WeakListChangeListener<>(extensionListFiltersListener);
 
+    /**
+     * Initializes a new instance associated with the specified node.
+     *
+     * @param node The node associated with this file picker.
+     */
     public JfxFilePicker(Node node) {
         super(node);
 

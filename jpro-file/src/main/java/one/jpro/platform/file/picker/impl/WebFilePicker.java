@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * {@link FilePicker} implementation for the web.
+ * Represents a {@link FilePicker} implementation for JavaFX applications
+ * running on the web via JPro server. This class extends the {@link BaseFilePicker}
+ * class and specializes it for web files.
  *
  * @author Besmir Beqiri
  */
@@ -25,6 +27,11 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
 
     private final WebAPI.MultiFileUploader multiFileUploader;
 
+    /**
+     * Initializes a new instance associated with the specified node.
+     *
+     * @param node The node associated with this file picker.
+     */
     public WebFilePicker(Node node) {
         super(node);
 
