@@ -94,9 +94,17 @@ public interface FilePicker<F extends FileSource<?>> {
      */
     ObjectProperty<File> initialDirectoryProperty();
 
-    double getProgress();
+    /**
+     * Returns the overall progress of the upload operation performed on all selected files.
+     *
+     * @return the upload progress value from [0.0 to 1.0]
+     */
+    double getUploadProgress();
 
-    ReadOnlyDoubleProperty progressProperty();
+    /**
+     * Defines the overall progress of the upload operation performed on all selected files.
+     */
+    ReadOnlyDoubleProperty uploadProgressProperty();
 
     /**
      * Gets the extension filters used in the displayed file dialog. Only

@@ -1,5 +1,6 @@
 package one.jpro.platform.file.picker.impl;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,6 +9,8 @@ import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.picker.FilePicker;
+
+import java.util.List;
 
 /**
  * The BaseFilePicker class is an abstract class that implements the FilePicker interface.
@@ -38,20 +41,20 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
     private ReadOnlyDoubleWrapper progress;
 
     @Override
-    public final double getProgress() {
+    public final double getUploadProgress() {
         return progress == null ? 0.0 : progress.get();
     }
 
-    final void setProgress(double value) {
-        progressPropertyImpl().set(value);
+    final void setUploadProgress(double value) {
+        uploadProgressPropertyImpl().set(value);
     }
 
     @Override
-    public final ReadOnlyDoubleProperty progressProperty() {
-        return progressPropertyImpl().getReadOnlyProperty();
+    public final ReadOnlyDoubleProperty uploadProgressProperty() {
+        return uploadProgressPropertyImpl().getReadOnlyProperty();
     }
 
-    private ReadOnlyDoubleWrapper progressPropertyImpl() {
+    final ReadOnlyDoubleWrapper uploadProgressPropertyImpl() {
         if (progress == null) {
             progress = new ReadOnlyDoubleWrapper(this, "progress", 0.0);
         }
@@ -110,5 +113,16 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
             maxFileUploadSize = new SimpleLongProperty(this, "maxFileUploadSize", INDEFINITE);
         }
         return maxFileUploadSize;
+    }
+
+    void updateTotalProgress(final List<? extends FileSource<?>> fileSources) {
+        uploadProgressPropertyImpl().unbind();
+        uploadProgressPropertyImpl().bind(Bindings.createDoubleBinding(() ->
+                        fileSources.stream()
+                                .mapToDouble(FileSource::getProgress)
+                                .reduce(0.0, Double::sum) / fileSources.size(),
+                fileSources.stream()
+                        .map(FileSource::progressProperty)
+                        .toList().toArray(new ReadOnlyDoubleProperty[fileSources.size()])));
     }
 }

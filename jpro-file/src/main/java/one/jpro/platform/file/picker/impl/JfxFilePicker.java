@@ -28,6 +28,7 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
 
     private final FileChooser fileChooser = new FileChooser();
     private boolean multiple = false;
+    private List<NativeFileSource> nativeFileSources = List.of();
     private final ListChangeListener<ExtensionFilter> extensionListFiltersListener = change -> {
         while (change.next()) {
             if (change.wasAdded()) {
@@ -62,19 +63,35 @@ public final class JfxFilePicker extends BaseFilePicker<NativeFileSource> {
         node.setOnMouseClicked(mouseEvent -> {
             Window window = node.getScene().getWindow();
             if (multiple) {
-                List<File> files = fileChooser.showOpenMultipleDialog(window);
+                final List<File> files = fileChooser.showOpenMultipleDialog(window);
                 if (files != null && !files.isEmpty()) {
+                    // Create a list of native file sources from the selected files.
+                    nativeFileSources = files.stream().map(NativeFileSource::new).toList();
+
+                    // Calculate and update the total progress value of this file picker
+                    // to the progress properties of the native file sources.
+                    updateTotalProgress(nativeFileSources);
+
+                    // Invoke the onFilesSelected consumer.
                     Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
-                        onFilesSelectedConsumer.accept(files.stream().map(NativeFileSource::new).toList());
+                        onFilesSelectedConsumer.accept(nativeFileSources);
                     }
                 }
             } else {
-                File file = fileChooser.showOpenDialog(window);
+                final File file = fileChooser.showOpenDialog(window);
                 if (file != null) {
+                    // Create a list of native file sources from the selected file.
+                    nativeFileSources = List.of(new NativeFileSource(file));
+
+                    // Calculate and update the total progress value of this file picker
+                    // to the progress property of the native file source.
+                    updateTotalProgress(nativeFileSources);
+
+                    // Invoke the onFilesSelected consumer.
                     Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
-                        onFilesSelectedConsumer.accept(List.of(new NativeFileSource(file)));
+                        onFilesSelectedConsumer.accept(nativeFileSources);
                     }
                 }
             }

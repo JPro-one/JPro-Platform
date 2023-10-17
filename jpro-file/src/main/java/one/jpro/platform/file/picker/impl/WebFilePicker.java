@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
 
     private final WebAPI.MultiFileUploader multiFileUploader;
+    private List<WebFileSource> webFileSources = List.of();
 
     /**
      * Initializes a new instance associated with the specified node.
@@ -141,12 +142,20 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
 
                 @Override
                 protected void invalidated() {
-                    final Consumer<List<WebFileSource>> onFilesSelected = get();
-                    multiFileUploader.setOnFilesSelected(onFilesSelected == null ? null : jsFiles -> {
-                        if (jsFiles == null) return;
-                        List<WebFileSource> files = new ArrayList<>(jsFiles.size());
-                        jsFiles.stream().map(WebFileSource::new).forEach(files::add);
-                        onFilesSelected.accept(files);
+                    final Consumer<List<WebFileSource>> onFilesSelectedConsumer = get();
+                    multiFileUploader.setOnFilesSelected(onFilesSelectedConsumer == null ? null : jsFiles -> {
+                        if (jsFiles != null) {
+                            // Create a list of web file sources from the selected files.
+                            webFileSources = new ArrayList<>(jsFiles.size());
+                            jsFiles.stream().map(WebFileSource::new).forEach(webFileSources::add);
+
+                            // Calculate and update the total progress value of this file picker
+                            // to the progress properties of the native file sources.
+                            updateTotalProgress(webFileSources);
+
+                            // Invoke the onFilesSelected consumer.
+                            onFilesSelectedConsumer.accept(webFileSources);
+                        }
                     });
                 }
             };
