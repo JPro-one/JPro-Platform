@@ -1,7 +1,6 @@
 package one.jpro.platform.file.picker;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.StringProperty;
@@ -28,8 +27,6 @@ import java.util.function.Consumer;
  * @author Besmir Beqiri
  */
 public interface FilePicker<F extends FileSource<?>> {
-
-    int INDEFINITE = -1;
 
     /**
      * Creates a file picker. If the application is running in a
@@ -196,23 +193,4 @@ public interface FilePicker<F extends FileSource<?>> {
      * no file has been selected.
      */
     ObjectProperty<Consumer<List<F>>> onFilesSelectedProperty();
-
-    /**
-     * Returns the maximum file upload size allowed.
-     *
-     * @return the maximum file upload size in bytes
-     */
-    long getMaxFileUploadSize();
-
-    /**
-     * Sets the maximum file upload size allowed.
-     *
-     * @param value the maximum file upload size in bytes to be set
-     */
-    void setMaxFileUploadSize(long value);
-
-    /**
-     * Defines the maximum file upload size allowed.
-     */
-    LongProperty maxFileUploadSizeProperty();
 }

@@ -1,7 +1,9 @@
 package one.jpro.platform.file.picker.impl;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -92,27 +94,6 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
     @Override
     public final void setSelectionMode(final SelectionMode value) {
         selectionModeProperty().setValue(value);
-    }
-
-    // max file upload size property
-    private LongProperty maxFileUploadSize;
-
-    @Override
-    public long getMaxFileUploadSize() {
-        return maxFileUploadSize == null ? INDEFINITE : maxFileUploadSize.get();
-    }
-
-    @Override
-    public void setMaxFileUploadSize(long value) {
-        maxFileUploadSizeProperty().setValue(value);
-    }
-
-    @Override
-    public LongProperty maxFileUploadSizeProperty() {
-        if (maxFileUploadSize == null) {
-            maxFileUploadSize = new SimpleLongProperty(this, "maxFileUploadSize", INDEFINITE);
-        }
-        return maxFileUploadSize;
     }
 
     void updateTotalProgress(final List<? extends FileSource<?>> fileSources) {
