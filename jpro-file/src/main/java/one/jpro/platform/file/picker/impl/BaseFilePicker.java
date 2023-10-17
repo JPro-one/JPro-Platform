@@ -37,12 +37,12 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
         return node;
     }
 
-    // progress property
-    private ReadOnlyDoubleWrapper progress;
+    // upload progress property
+    private ReadOnlyDoubleWrapper uploadProgress;
 
     @Override
     public final double getUploadProgress() {
-        return progress == null ? 0.0 : progress.get();
+        return uploadProgress == null ? 0.0 : uploadProgress.get();
     }
 
     final void setUploadProgress(double value) {
@@ -55,10 +55,10 @@ abstract class BaseFilePicker<F extends FileSource<?>> implements FilePicker<F> 
     }
 
     final ReadOnlyDoubleWrapper uploadProgressPropertyImpl() {
-        if (progress == null) {
-            progress = new ReadOnlyDoubleWrapper(this, "progress", 0.0);
+        if (uploadProgress == null) {
+            uploadProgress = new ReadOnlyDoubleWrapper(this, "uploadProgress", 0.0);
         }
-        return progress;
+        return uploadProgress;
     }
 
     private final ObservableList<ExtensionFilter> extensionFilters = FXCollections.observableArrayList();
