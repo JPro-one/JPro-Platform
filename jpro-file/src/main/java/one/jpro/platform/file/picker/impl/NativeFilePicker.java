@@ -67,10 +67,6 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
                     // Create a list of native file sources from the selected files.
                     nativeFileSources = files.stream().map(NativeFileSource::new).toList();
 
-                    // Calculate and update the total progress value of this file picker
-                    // to the progress properties of the native file sources.
-                    updateTotalProgress(nativeFileSources);
-
                     // Invoke the onFilesSelected consumer.
                     Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
@@ -82,10 +78,6 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
                 if (file != null) {
                     // Create a list of native file sources from the selected file.
                     nativeFileSources = List.of(new NativeFileSource(file));
-
-                    // Calculate and update the total progress value of this file picker
-                    // to the progress property of the native file source.
-                    updateTotalProgress(nativeFileSources);
 
                     // Invoke the onFilesSelected consumer.
                     Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();

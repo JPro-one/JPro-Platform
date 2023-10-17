@@ -2,7 +2,6 @@ package one.jpro.platform.file.picker;
 
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -23,7 +22,7 @@ import java.util.function.Consumer;
  * to customize the file picker UI, set initial directory, handle
  * file selection events, and more.
  *
- * @param <F> the type of file source
+ * @param <F> the type of the file source
  * @author Besmir Beqiri
  */
 public interface FilePicker<F extends FileSource<?>> {
@@ -90,18 +89,6 @@ public interface FilePicker<F extends FileSource<?>> {
      * Defines the initial directory for the displayed file dialog.
      */
     ObjectProperty<File> initialDirectoryProperty();
-
-    /**
-     * Returns the overall progress of the upload operation performed on all selected files.
-     *
-     * @return the upload progress value from [0.0 to 1.0]
-     */
-    double getUploadProgress();
-
-    /**
-     * Defines the overall progress of the upload operation performed on all selected files.
-     */
-    ReadOnlyDoubleProperty uploadProgressProperty();
 
     /**
      * Gets the extension filters used in the displayed file dialog. Only

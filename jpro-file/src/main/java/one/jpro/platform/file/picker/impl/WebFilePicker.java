@@ -149,10 +149,6 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
                             webFileSources = new ArrayList<>(jsFiles.size());
                             jsFiles.stream().map(WebFileSource::new).forEach(webFileSources::add);
 
-                            // Calculate and update the total progress value of this file picker
-                            // to the progress properties of the native file sources.
-                            updateTotalProgress(webFileSources);
-
                             // Invoke the onFilesSelected consumer.
                             onFilesSelectedConsumer.accept(webFileSources);
                         }
