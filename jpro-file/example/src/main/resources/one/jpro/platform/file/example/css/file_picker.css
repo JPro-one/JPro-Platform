@@ -3,6 +3,10 @@
     -fx-padding: 0 0 8 0;
 }
 
+.placeholder-pane {
+    -fx-background-color: -color-accent-subtle;
+}
+
 .root-pane {
     -fx-padding: 12;
 }

@@ -28,13 +28,10 @@ public class FilePickerSample extends Application {
     private static final ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", "*.mp4", "*.avi", "*.mkv");
     private static final ExtensionFilter imageExtensionFilter = ExtensionFilter.of("Image files", "*.png", "*.jpg", "*.jpeg");
 
-    private final FileTableView fileTableView = new FileTableView();
-    private final Button importButton = new Button("Import");
-
     @Override
     public void start(Stage stage) {
         stage.setTitle("JPro File Picker");
-        Scene scene = new Scene(createRoot(stage), 1140, 640);
+        var scene = new Scene(createRoot(stage), 1140, 640);
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
@@ -46,41 +43,34 @@ public class FilePickerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-//        final var filePicker = filePickerFromTablePlaceHolder();
-        final var filePicker = filePickerFromImportButton();
+        Label clickOnMeLabel = new Label("Click on me to open the file picker!");
+        var placeholderPane = new StackPane(clickOnMeLabel);
+        placeholderPane.getStyleClass().add("placeholder-pane");
+        var fileTableView = new FileTableView();
+        fileTableView.setPlaceholder(placeholderPane);
+
+        var filePicker = FilePicker.create(placeholderPane);
         filePicker.getExtensionFilters().addAll(textExtensionFilter,
                 audioExtensionFilter, videoExtensionFilter, imageExtensionFilter);
         filePicker.setSelectedExtensionFilter(audioExtensionFilter);
         filePicker.setOnFilesSelected(fileSources -> fileTableView.getItems().addAll(fileSources));
 
-        BorderPane rootPane = new BorderPane(fileTableView);
+        var rootPane = new BorderPane(fileTableView);
         rootPane.getStyleClass().add("root-pane");
 
-        CheckBox multipleCheckBox = new CheckBox("Multiple");
+        var multipleCheckBox = new CheckBox("Multiple");
         multipleCheckBox.setOnAction(event ->
                 filePicker.setSelectionMode(multipleCheckBox.isSelected() ?
                 SelectionMode.MULTIPLE : SelectionMode.SINGLE));
-        Region spacer = new Region();
+        var spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button clearButton = new Button("Clear");
+        var clearButton = new Button("Clear");
         clearButton.setOnAction(event -> fileTableView.getItems().clear());
 
-        HBox controlsBox = new HBox(multipleCheckBox, spacer, importButton, clearButton);
+        var controlsBox = new HBox(multipleCheckBox, spacer, clearButton);
         controlsBox.getStyleClass().add("controls-box");
         rootPane.setTop(controlsBox);
 
         return rootPane;
-    }
-
-    private FilePicker<?> filePickerFromImportButton() {
-        importButton.setDefaultButton(true);
-        return FilePicker.create(importButton);
-    }
-
-    private FilePicker<?> filePickerFromTablePlaceHolder() {
-        Label clickOnMeLabel = new Label("Click on me to open the file picker!");
-        StackPane tablePlaceHolder = new StackPane(clickOnMeLabel);
-        fileTableView.setPlaceholder(tablePlaceHolder);
-        return FilePicker.create(tablePlaceHolder);
     }
 }
