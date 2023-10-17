@@ -1,5 +1,5 @@
 /**
- * Module descriptor for JPro File Manager module.
+ * Module descriptor for JPro File module.
  *
  * @author Besmir Beqiri
  */
@@ -10,4 +10,5 @@ module one.jpro.platform.file {
 
     exports one.jpro.platform.file;
     exports one.jpro.platform.file.picker;
+    exports one.jpro.platform.file.dropper;
 }
