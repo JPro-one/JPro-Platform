@@ -1,4 +1,4 @@
-package one.jpro.platform.file.example.picker;
+package one.jpro.platform.file.example.upload;
 
 import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
@@ -21,7 +21,7 @@ import java.util.Optional;
  *
  * @author Besmir Beqiri
  */
-public class FilePickerSample extends Application {
+public class FileUploaderSample extends Application {
 
     private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
     private static final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", ".mp3", ".wav", ".ogg");
@@ -35,7 +35,7 @@ public class FilePickerSample extends Application {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
-        Optional.ofNullable(FilePickerSample.class.getResource("/one/jpro/platform/file/example/css/file_picker.css"))
+        Optional.ofNullable(FileUploaderSample.class.getResource("/one/jpro/platform/file/example/css/file_picker.css"))
                 .map(URL::toExternalForm)
                 .ifPresent(scene.getStylesheets()::add);
         stage.setScene(scene);

@@ -11,6 +11,6 @@ module one.jpro.platform.file.example {
     requires atlantafx.base;
     requires org.slf4j;
 
-    exports one.jpro.platform.file.example.dropper;
-    exports one.jpro.platform.file.example.picker;
+    exports one.jpro.platform.file.example.editor;
+    exports one.jpro.platform.file.example.upload;
 }

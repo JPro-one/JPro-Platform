@@ -1,4 +1,4 @@
-package one.jpro.platform.file.example.dropper;
+package one.jpro.platform.file.example.editor;
 
 import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
@@ -27,9 +27,9 @@ import java.util.Optional;
  *
  * @author Besmir Beqiri
  */
-public class FileDropperSample extends Application {
+public class TextEditorSample extends Application {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileDropperSample.class);
+    private static final Logger logger = LoggerFactory.getLogger(TextEditorSample.class);
 
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
     private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
@@ -41,7 +41,7 @@ public class FileDropperSample extends Application {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
-        Optional.ofNullable(FileDropperSample.class.getResource("/one/jpro/platform/file/example/css/file_dropper.css"))
+        Optional.ofNullable(TextEditorSample.class.getResource("/one/jpro/platform/file/example/css/file_dropper.css"))
                 .map(URL::toExternalForm)
                 .ifPresent(scene.getStylesheets()::add);
         stage.setScene(scene);
@@ -52,6 +52,7 @@ public class FileDropperSample extends Application {
         Label dropLabel = new Label("Drop here text files only!");
         StackPane dropPane = new StackPane(dropLabel);
         dropPane.getStyleClass().add("drop-pane");
+
         final var fileDropper = FileDropper.create(dropPane);
         fileDropper.setExtensionFilter(textExtensionFilter);
         fileDropper.filesDragOverProperty().addListener(observable ->
@@ -69,7 +70,6 @@ public class FileDropperSample extends Application {
         Button openButton = new Button("Open");
         openButton.setDefaultButton(true);
         final var filePicker = FilePicker.create(openButton);
-        filePicker.setTitle("Open text files");
         filePicker.getExtensionFilters().add(textExtensionFilter);
         filePicker.setSelectedExtensionFilter(textExtensionFilter);
         filePicker.setOnFilesSelected(fileSources -> {

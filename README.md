@@ -86,14 +86,24 @@ dependencies {
 ```
 
 #### Lunch the examples
-- As desktop application
-```shell
-./gradlew jpro-file:example:run
-```
-- As JPro application
-```shell
-./gradlew jpro-file:example:jproRun
-```
+* As desktop application
+1) Run the text editor sample 
+   ```shell
+   ./gradlew jpro-file:example:run -Psample=text-editor
+   ```
+2) Run the file uploader sample 
+   ```shell
+   ./gradlew jpro-file:example:run -Psample=file-uploader
+   ```
+* As JPro application
+1) Run the text editor sample
+   ```shell
+   ./gradlew jpro-file:example:jproRun -Psample=text-editor
+   ```
+2) Run the file uploader sample
+   ```shell
+   ./gradlew jpro-file:example:jproRun -Psample=file-uploader
+   ```
 
 ## JPro Image Manager
 This library makes very easy to manage the process of loading and caching images, allowing efficient retrieval 

@@ -1,4 +1,4 @@
-package one.jpro.platform.file.example.picker;
+package one.jpro.platform.file.example.upload;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
