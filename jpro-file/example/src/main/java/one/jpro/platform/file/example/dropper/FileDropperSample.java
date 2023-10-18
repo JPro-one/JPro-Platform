@@ -1,4 +1,4 @@
-package one.jpro.platform.file.example;
+package one.jpro.platform.file.example.dropper;
 
 import atlantafx.base.theme.CupertinoLight;
 import javafx.application.Application;
@@ -32,7 +32,7 @@ public class FileDropperSample extends Application {
     private static final Logger logger = LoggerFactory.getLogger(FileDropperSample.class);
 
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
-    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("TEXT files", ".txt", ".srt", ".md", ".csv");
+    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
 
     @Override
     public void start(Stage stage) {
@@ -41,7 +41,7 @@ public class FileDropperSample extends Application {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
-        Optional.ofNullable(FileDropperSample.class.getResource("css/file_dropper.css"))
+        Optional.ofNullable(FileDropperSample.class.getResource("/one/jpro/platform/file/example/css/file_dropper.css"))
                 .map(URL::toExternalForm)
                 .ifPresent(scene.getStylesheets()::add);
         stage.setScene(scene);

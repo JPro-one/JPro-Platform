@@ -1,4 +1,4 @@
-package one.jpro.platform.file.example;
+package one.jpro.platform.file.example.picker;
 
 import atlantafx.base.theme.Styles;
 import javafx.scene.control.ContentDisplay;

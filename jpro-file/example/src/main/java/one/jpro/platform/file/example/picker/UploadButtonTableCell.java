@@ -1,4 +1,4 @@
-package one.jpro.platform.file.example;
+package one.jpro.platform.file.example.picker;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
