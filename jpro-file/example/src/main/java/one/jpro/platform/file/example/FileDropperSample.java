@@ -32,7 +32,7 @@ public class FileDropperSample extends Application {
     private static final Logger logger = LoggerFactory.getLogger(FileDropperSample.class);
 
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
-    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("TEXT files", "*.txt", "*.srt", "*.md", "*.csv");
+    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("TEXT files", ".txt", ".srt", ".md", ".csv");
 
     @Override
     public void start(Stage stage) {

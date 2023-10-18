@@ -46,13 +46,6 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
                 List<File> files = dragEvent.getDragboard().getFiles().stream()
                         .filter(file -> extensionFilter != null && extensionFilter.extensions().stream()
-                                .map(ext -> {
-                                    if (ext.startsWith("*")) {
-                                        return ext.substring(1);
-                                    } else {
-                                        return ext;
-                                    }
-                                })
                                 .anyMatch(extension -> file.getName().endsWith(extension)))
                         .toList();
 
@@ -119,13 +112,6 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
         final ExtensionFilter extensionFilter = getExtensionFilter();
         return extensionFilter == null || files.stream()
                 .anyMatch(file -> extensionFilter.extensions().stream()
-                        .map(ext -> {
-                            if (ext.startsWith("*")) {
-                                return ext.substring(1);
-                            } else {
-                                return ext;
-                            }
-                        })
                         .anyMatch(extension -> file.getName().endsWith(extension)));
     }
 }

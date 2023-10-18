@@ -92,13 +92,7 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
                     final ExtensionFilter selectedExtensionFilter = get();
                     multiFileUploader.supportedExtensions().clear();
                     if (selectedExtensionFilter != null) {
-                        selectedExtensionFilter.extensions().stream()
-                                .map(ext -> {
-                                    if (ext.startsWith("*")) {
-                                        ext = ext.substring(1);
-                                    }
-                                    return ext;
-                                }) // remove the leading
+                        selectedExtensionFilter.extensions()
                                 .forEach(multiFileUploader.supportedExtensions()::add);
                     }
                 }

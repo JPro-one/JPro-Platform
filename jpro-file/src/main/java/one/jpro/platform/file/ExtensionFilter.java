@@ -15,7 +15,7 @@ import java.util.List;
  */
 public record ExtensionFilter(String description, List<String> extensions) {
 
-    public static final ExtensionFilter ANY = new ExtensionFilter("All Files", List.of("*"));
+    public static final ExtensionFilter ANY = new ExtensionFilter("All Files", List.of(".*"));
 
     /**
      * Compact constructor for {@code ExtensionFilter}.
@@ -76,6 +76,10 @@ public record ExtensionFilter(String description, List<String> extensions) {
 
             if (extension.isEmpty()) {
                 throw new IllegalArgumentException("Extension must not be empty");
+            }
+
+            if (extension.startsWith("*")) {
+                throw new IllegalArgumentException("Extension with regex is not supported");
             }
         }
     }

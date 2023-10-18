@@ -23,10 +23,10 @@ import java.util.Optional;
  */
 public class FilePickerSample extends Application {
 
-    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("TEXT files", "*.txt", "*.srt", "*.md", "*.csv");
-    private static final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", "*.mp3", "*.wav", "*.ogg");
-    private static final ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", "*.mp4", "*.avi", "*.mkv");
-    private static final ExtensionFilter imageExtensionFilter = ExtensionFilter.of("Image files", "*.png", "*.jpg", "*.jpeg");
+    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("TEXT files", ".txt", ".srt", ".md", ".csv");
+    private static final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", ".mp3", ".wav", ".ogg");
+    private static final ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", ".mp4", ".avi", ".mkv");
+    private static final ExtensionFilter imageExtensionFilter = ExtensionFilter.of("Image files", ".png", ".jpg", ".jpeg");
 
     @Override
     public void start(Stage stage) {

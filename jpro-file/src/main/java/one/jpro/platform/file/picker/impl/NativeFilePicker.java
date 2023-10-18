@@ -33,7 +33,8 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
             if (change.wasAdded()) {
                 for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
                     fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-                            extensionFilter.description(), extensionFilter.extensions()));
+                            extensionFilter.description(), extensionFilter.extensions().stream()
+                            .map(ext -> "*" + ext).toList()));
                 }
             } else if (change.wasRemoved()) {
                 for (ExtensionFilter extensionFilter : change.getRemoved()) {
@@ -129,7 +130,7 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
                     final ExtensionFilter filter = get();
                     if (filter != null) {
                         final FileChooser.ExtensionFilter selectedExtensionFilter = fileChooser.getExtensionFilters().stream()
-                                .filter(extensionFilter -> extensionFilter.getExtensions().equals(filter.extensions()))
+                                .filter(extensionFilter -> extensionFilter.getDescription().equals(filter.description()))
                                 .findFirst()
                                 .orElse(null);
                         fileChooser.setSelectedExtensionFilter(selectedExtensionFilter);
