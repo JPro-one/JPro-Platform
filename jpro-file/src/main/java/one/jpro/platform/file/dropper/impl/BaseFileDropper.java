@@ -15,7 +15,7 @@ import one.jpro.platform.file.dropper.FileDropper;
  * @param <F> the type of FileSource used by the file dropper
  * @author Besmir Beqiri
  */
-abstract class BaseFileDropper<F extends FileSource<?>> implements FileDropper<F> {
+abstract class BaseFileDropper<F extends FileSource> implements FileDropper<F> {
 
     private final Node node;
 

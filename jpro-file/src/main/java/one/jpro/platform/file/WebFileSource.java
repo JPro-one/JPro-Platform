@@ -12,10 +12,15 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Besmir Beqiri
  */
-public final class WebFileSource extends FileSource<WebAPI.JSFile> {
+public final class WebFileSource extends FileSource {
 
     public WebFileSource(WebAPI.JSFile jsFile) {
         super(jsFile);
+    }
+
+    @Override
+    public WebAPI.JSFile getPlatformFile() {
+        return (WebAPI.JSFile) super.getPlatformFile();
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * @param <F> the type of the file source
  * @author Besmir Beqiri
  */
-public interface FilePicker<F extends FileSource<?>> {
+public interface FilePicker<F extends FileSource> {
 
     /**
      * Creates a file picker. If the application is running in a
@@ -37,7 +37,7 @@ public interface FilePicker<F extends FileSource<?>> {
      * @return a {@link FilePicker} object.
      * @throws NullPointerException if the node is null
      */
-    static FilePicker<? extends FileSource<?>> create(Node node) {
+    static FilePicker<? extends FileSource> create(Node node) {
         Objects.requireNonNull(node, "node must not be null");
         if (WebAPI.isBrowser()) {
             return new WebFilePicker(node);

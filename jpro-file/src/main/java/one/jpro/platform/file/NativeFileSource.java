@@ -14,10 +14,15 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Besmir Beqiri
  */
-public final class NativeFileSource extends FileSource<File> {
+public final class NativeFileSource extends FileSource {
 
     public NativeFileSource(final File file) {
         super(file);
+    }
+
+    @Override
+    public File getPlatformFile() {
+        return (File) super.getPlatformFile();
     }
 
     @Override

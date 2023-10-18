@@ -49,7 +49,7 @@ public class FileDropperSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-        Label dropLabel = new Label("Drop text files only!");
+        Label dropLabel = new Label("Drop here text files only!");
         StackPane dropPane = new StackPane(dropLabel);
         dropPane.getStyleClass().add("drop-pane");
         final var fileDropper = FileDropper.create(dropPane);
@@ -69,6 +69,7 @@ public class FileDropperSample extends Application {
         Button openButton = new Button("Open");
         openButton.setDefaultButton(true);
         final var filePicker = FilePicker.create(openButton);
+        filePicker.setTitle("Open text files");
         filePicker.getExtensionFilters().add(textExtensionFilter);
         filePicker.setSelectedExtensionFilter(textExtensionFilter);
         filePicker.setOnFilesSelected(fileSources -> {
@@ -93,7 +94,7 @@ public class FileDropperSample extends Application {
         return rootPane;
     }
 
-    private void appendFilesContent(List<? extends FileSource<?>> fileSources, TextArea textArea) {
+    private void appendFilesContent(List<? extends FileSource> fileSources, TextArea textArea) {
         final StringBuilder content = new StringBuilder();
         fileSources.forEach(fileSource -> fileSource.uploadFileAsync().thenAcceptAsync(file -> {
             try {

@@ -13,7 +13,7 @@ import org.apache.commons.io.FileUtils;
  * @param <S> The type of the TableView source
  * @author Besmir Beqiri
  */
-public class FileSizeTableCell<S extends FileSource<?>> extends TableCell<S, Long> {
+public class FileSizeTableCell<S extends FileSource> extends TableCell<S, Long> {
 
     public FileSizeTableCell() {
         setTextAlignment(TextAlignment.RIGHT);

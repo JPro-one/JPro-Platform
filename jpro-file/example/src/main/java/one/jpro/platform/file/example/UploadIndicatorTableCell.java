@@ -14,7 +14,7 @@ import one.jpro.platform.file.FileSource;
  * @param <S> The type of the TableView items.
  * @author Besmir Beqiri
  */
-public class UploadIndicatorTableCell<S extends FileSource<?>> extends TableCell<S, Double> {
+public class UploadIndicatorTableCell<S extends FileSource> extends TableCell<S, Double> {
 
     private final ProgressBar progressBar;
 

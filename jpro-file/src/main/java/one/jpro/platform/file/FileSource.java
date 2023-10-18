@@ -10,16 +10,16 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Besmir Beqiri
  */
-public sealed abstract class FileSource<T> permits NativeFileSource, WebFileSource {
+public sealed abstract class FileSource permits NativeFileSource, WebFileSource {
 
-    private final T platformBlob;
+    private final Object platformFile;
 
-    public FileSource(T platformBlob) {
-        this.platformBlob = platformBlob;
+    public FileSource(Object platformFile) {
+        this.platformFile = platformFile;
     }
 
-    public final T getPlatformFile() {
-        return platformBlob;
+    public Object getPlatformFile() {
+        return platformFile;
     }
 
     abstract String _getName();

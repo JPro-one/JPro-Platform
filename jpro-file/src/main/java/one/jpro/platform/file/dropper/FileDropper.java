@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  * @param <F> the type of the file source
  * @author Besmir Beqiri
  */
-public interface FileDropper<F extends FileSource<?>> {
+public interface FileDropper<F extends FileSource> {
 
     /**
      * Creates a file dropper. If the application is running in a
@@ -34,7 +34,7 @@ public interface FileDropper<F extends FileSource<?>> {
      * @throws NullPointerException if the node is null
      * @return a {@link FileDropper} object.
      */
-    static FileDropper<?> create(Node node) {
+    static FileDropper<? extends FileSource> create(Node node) {
         Objects.requireNonNull(node, "node must not be null");
         if (WebAPI.isBrowser()) {
             return new WebFileDropper(node);

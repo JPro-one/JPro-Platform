@@ -15,7 +15,7 @@ import java.io.File;
  * @param <S> The type of the TableView items.
  * @author Besmir Beqiri
  */
-public class UploadButtonTableCell<S extends FileSource<?>> extends TableCell<S, File> {
+public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, File> {
 
     private final Button startUploadButton = new Button("Start upload");
 
