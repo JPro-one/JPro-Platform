@@ -111,38 +111,6 @@ public sealed abstract class FileSource permits NativeFileSource, WebFileSource 
     }
 
     /**
-     * Abstract method to get the object URL of the file.
-     * To be implemented by subclasses.
-     *
-     * @return the object URL of the file
-     */
-    abstract String _getObjectURL();
-
-    // objectURL property
-    private ReadOnlyStringWrapper objectURLProperty;
-
-    /**
-     * Returns the object URL of the file.
-     *
-     * @return the object URL of the file
-     */
-    public final String getObjectURL() {
-        return objectURLProperty == null ? _getObjectURL() : objectURLProperty.get();
-    }
-
-    /**
-     * Returns the object URL property of the file.
-     *
-     * @return the ReadOnlyStringProperty for object URL
-     */
-    public final ReadOnlyStringProperty objectURLProperty() {
-        if (objectURLProperty == null) {
-            objectURLProperty = new ReadOnlyStringWrapper(this, "objectURL", _getObjectURL());
-        }
-        return objectURLProperty.getReadOnlyProperty();
-    }
-
-    /**
      * Gets the current upload progress.
      *
      * @return the current upload progress as a double value between 0.0 and 1.0

@@ -34,11 +34,6 @@ public final class WebFileSource extends FileSource {
     }
 
     @Override
-    String _getObjectURL() {
-        return getPlatformFile().getObjectURL().getName();
-    }
-
-    @Override
     public double getProgress() {
         return getPlatformFile().getProgress();
     }

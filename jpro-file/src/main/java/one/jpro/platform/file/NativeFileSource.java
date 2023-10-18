@@ -35,11 +35,6 @@ public final class NativeFileSource extends FileSource {
         return getPlatformFile().length();
     }
 
-    @Override
-    String _getObjectURL() {
-        return getPlatformFile().toURI().toString();
-    }
-
     // progress property
     private ReadOnlyDoubleWrapper progress;
 
