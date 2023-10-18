@@ -15,6 +15,8 @@ import java.util.List;
  */
 public record ExtensionFilter(String description, List<String> extensions) {
 
+    public static final ExtensionFilter ANY = new ExtensionFilter("All Files", List.of("*"));
+
     /**
      * Compact constructor for {@code ExtensionFilter}.
      *
