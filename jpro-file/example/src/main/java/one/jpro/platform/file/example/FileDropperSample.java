@@ -21,7 +21,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This class represents a sample application for file dropper operations.
@@ -67,12 +66,6 @@ public class FileDropperSample extends Application {
             rootPane.setCenter(textArea);
         });
 
-        CheckBox multipleCheckBox = new CheckBox("Multiple");
-        multipleCheckBox.setOnAction(event ->
-                fileDropper.setSelectionMode(multipleCheckBox.isSelected() ?
-                SelectionMode.MULTIPLE : SelectionMode.SINGLE));
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
         Button openButton = new Button("Open");
         openButton.setDefaultButton(true);
         final var filePicker = FilePicker.create(openButton);
@@ -82,6 +75,14 @@ public class FileDropperSample extends Application {
             appendFilesContent(fileSources, textArea);
             rootPane.setCenter(textArea);
         });
+
+        CheckBox multipleCheckBox = new CheckBox("Multiple");
+        fileDropper.selectionModeProperty().bind(multipleCheckBox.selectedProperty().map(selected ->
+                selected ? SelectionMode.MULTIPLE : SelectionMode.SINGLE));
+        filePicker.selectionModeProperty().bind(multipleCheckBox.selectedProperty().map(selected ->
+                selected ? SelectionMode.MULTIPLE : SelectionMode.SINGLE));
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
         Button clearButton = new Button("Clear");
         clearButton.setOnAction(event -> rootPane.setCenter(dropPane));
 
@@ -93,17 +94,16 @@ public class FileDropperSample extends Application {
     }
 
     private void appendFilesContent(List<? extends FileSource<?>> fileSources, TextArea textArea) {
-        fileSources.forEach(fileSource -> fileSource.uploadFileAsync().thenApplyAsync(file -> {
+        final StringBuilder content = new StringBuilder();
+        fileSources.forEach(fileSource -> fileSource.uploadFileAsync().thenAcceptAsync(file -> {
             try {
-                final StringBuilder content = new StringBuilder();
                 String fileContent = new String(Files.readAllBytes(file.toPath()));
                 content.append(fileContent);
                 content.append("\n===============================================\n");
-                return content;
+                Platform.runLater(() -> textArea.setText(content.toString()));
             } catch (IOException ex) {
                 logger.error("Error reading file: " + ex.getMessage(), ex);
-                return CompletableFuture.completedFuture(ex);
             }
-        }).thenAcceptAsync(content -> Platform.runLater(() -> textArea.setText(content.toString()))));
+        }));
     }
 }

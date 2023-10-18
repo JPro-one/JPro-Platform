@@ -44,30 +44,29 @@ public class FilePickerSample extends Application {
 
     public Parent createRoot(Stage stage) {
         Label clickOnMeLabel = new Label("Click on me to open the file picker!");
-        var placeholderPane = new StackPane(clickOnMeLabel);
+        StackPane placeholderPane = new StackPane(clickOnMeLabel);
         placeholderPane.getStyleClass().add("placeholder-pane");
-        var fileTableView = new FileTableView();
+        FileTableView fileTableView = new FileTableView();
         fileTableView.setPlaceholder(placeholderPane);
 
-        var filePicker = FilePicker.create(placeholderPane);
+        final var filePicker = FilePicker.create(placeholderPane);
         filePicker.getExtensionFilters().addAll(textExtensionFilter,
                 audioExtensionFilter, videoExtensionFilter, imageExtensionFilter);
         filePicker.setSelectedExtensionFilter(audioExtensionFilter);
         filePicker.setOnFilesSelected(fileSources -> fileTableView.getItems().addAll(fileSources));
 
-        var rootPane = new BorderPane(fileTableView);
+        BorderPane rootPane = new BorderPane(fileTableView);
         rootPane.getStyleClass().add("root-pane");
 
-        var multipleCheckBox = new CheckBox("Multiple");
-        multipleCheckBox.setOnAction(event ->
-                filePicker.setSelectionMode(multipleCheckBox.isSelected() ?
-                SelectionMode.MULTIPLE : SelectionMode.SINGLE));
-        var spacer = new Region();
+        CheckBox multipleCheckBox = new CheckBox("Multiple");
+        filePicker.selectionModeProperty().bind(multipleCheckBox.selectedProperty().map(selected ->
+                selected ? SelectionMode.MULTIPLE : SelectionMode.SINGLE));
+        Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        var clearButton = new Button("Clear");
+        Button clearButton = new Button("Clear");
         clearButton.setOnAction(event -> fileTableView.getItems().clear());
 
-        var controlsBox = new HBox(multipleCheckBox, spacer, clearButton);
+        HBox controlsBox = new HBox(multipleCheckBox, spacer, clearButton);
         controlsBox.getStyleClass().add("controls-box");
         rootPane.setTop(controlsBox);
 
