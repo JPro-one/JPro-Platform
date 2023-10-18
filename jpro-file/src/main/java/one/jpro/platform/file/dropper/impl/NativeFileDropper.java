@@ -5,6 +5,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.input.TransferMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.NativeFileSource;
@@ -28,7 +29,7 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
         super(node);
 
         node.setOnDragOver(dragEvent -> {
-            final List<File> files = dragEvent.getDragboard().getFiles();
+            List<File> files = dragEvent.getDragboard().getFiles();
             if (files != null && !files.isEmpty()) {
                 if (hasSupportedExtension(files)) {
                     dragEvent.acceptTransferModes(TransferMode.ANY);
@@ -37,12 +38,13 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
             }
         });
 
+        // reset files drag over value when drag event ends
         node.setOnDragExited(dragEvent -> setFilesDragOver(false));
 
         node.setOnDragDropped(dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
-                final List<File> files = dragEvent.getDragboard().getFiles().stream()
+                List<File> files = dragEvent.getDragboard().getFiles().stream()
                         .filter(file -> extensionFilter != null && extensionFilter.extensions().stream()
                                 .map(ext -> {
                                     if (ext.startsWith("*")) {
@@ -55,6 +57,10 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
                         .toList();
 
                 if (!files.isEmpty()) {
+                    // if single selection mode, then only allow one file, the first one
+                    if (getSelectionMode() == SelectionMode.SINGLE) {
+                        files = List.of(files.get(0));
+                    }
                     Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
                         onFilesSelectedConsumer.accept(files.stream().map(NativeFileSource::new).toList());
