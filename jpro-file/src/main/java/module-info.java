@@ -11,4 +11,5 @@ module one.jpro.platform.file {
     exports one.jpro.platform.file;
     exports one.jpro.platform.file.picker;
     exports one.jpro.platform.file.dropper;
+    exports one.jpro.platform.file.util;
 }

@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.dropper.FileDropper;
+import one.jpro.platform.file.util.NodeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,8 @@ public final class WebFileDropper extends BaseFileDropper<WebFileSource> {
     public WebFileDropper(Node node) {
         super(node);
 
-        multiFileUploader = WebAPI.makeMultiFileUploadNodeStatic(node);
+        multiFileUploader = NodeUtils.getPropertyValue(node, NodeUtils.MULTI_FILE_UPLOADER_KEY,
+                WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnDrop(true);
     }
 

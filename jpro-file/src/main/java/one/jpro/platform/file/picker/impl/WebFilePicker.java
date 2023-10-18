@@ -10,6 +10,7 @@ import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.picker.FilePicker;
+import one.jpro.platform.file.util.NodeUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,7 +37,8 @@ public final class WebFilePicker extends BaseFilePicker<WebFileSource> {
     public WebFilePicker(Node node) {
         super(node);
 
-        multiFileUploader = WebAPI.makeMultiFileUploadNodeStatic(node);
+        multiFileUploader = NodeUtils.getPropertyValue(node, NodeUtils.MULTI_FILE_UPLOADER_KEY,
+                WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnClick(true);
     }
 
