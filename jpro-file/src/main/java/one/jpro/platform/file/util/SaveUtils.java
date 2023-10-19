@@ -29,9 +29,9 @@ public interface SaveUtils {
      * @param fileName    The initial file name.
      * @param fileType    The file type (extension) of the file to save.
      * @param saveFunction The function to be called to save the file. This function takes a File parameter
-     *                    representing the file to save and returns a CompletableFuture<File> that will
+     *                    representing the file to save and returns a {@link CompletableFuture<File>} that will
      *                    complete with the saved file.
-     * @return A CompletableFuture<File> that will complete with the saved file if the user selects a file
+     * @return A {@link CompletableFuture<File>} that will complete with the saved file if the user selects a file
      *         to save, or fail with a NullPointerException if the user cancels the save operation.
      */
     static CompletableFuture<File> saveAs(Stage stage, String fileName, String fileType,
@@ -63,9 +63,9 @@ public interface SaveUtils {
      * @param fileName     The name of the file to be downloaded.
      * @param fileType     The file type (extension) of the file to be downloaded.
      * @param saveFunction The function to be called to save the file. This function takes a File parameter
-     *                     representing the file to save and returns a CompletableFuture<File> that will
+     *                     representing the file to save and returns a {@link CompletableFuture<File>} that will
      *                     complete with the saved file.
-     * @return A CompletableFuture<File> that will complete with the downloaded file if the download is successful,
+     * @return A {@link CompletableFuture<File>} that will complete with the downloaded file if the download is successful,
      *         or fail with an exception if the download fails or if the operation is not supported in the current environment.
      * @throws UnsupportedOperationException If the download operation is not supported in the current environment.
      */

@@ -37,9 +37,9 @@ import java.util.function.Function;
 /**
  * This class serves as sample of a text editor application that enables users to
  * open, edit, and save text files.
- * </p>
+ * <p>
  *
- * <h3>Functionalities:</h3>
+ * Functionalities:
  * <ul>
  *     <li>FileDropper: Allows users to open text files by dragging and dropping them onto a designated area.</li>
  *     <li>File Picker: Provides an "Open" button that triggers a file picker dialog for selecting text files.</li>
