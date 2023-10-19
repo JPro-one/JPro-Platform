@@ -31,15 +31,22 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
         node.setOnDragOver(dragEvent -> {
             List<File> files = dragEvent.getDragboard().getFiles();
             if (files != null && !files.isEmpty()) {
+                setFilesDragOver(true);
                 if (hasSupportedExtension(files)) {
-                    dragEvent.acceptTransferModes(TransferMode.ANY);
-                    setFilesDragOver(true);
+                    setFilesDragOverSupported(true);
+                    dragEvent.acceptTransferModes(TransferMode.COPY);
+                } else {
+                    setFilesDragOverSupported(false);
+                    dragEvent.acceptTransferModes(TransferMode.NONE);
                 }
             }
         });
 
         // reset files drag over value when drag event ends
-        node.setOnDragExited(dragEvent -> setFilesDragOver(false));
+        node.setOnDragExited(dragEvent -> {
+            setFilesDragOver(false);
+            setFilesDragOverSupported(false);
+        });
 
         node.setOnDragDropped(dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
@@ -106,12 +113,5 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
             onFilesSelected = new SimpleObjectProperty<>(this, "onFilesSelected");
         }
         return onFilesSelected;
-    }
-
-    private boolean hasSupportedExtension(List<File> files) {
-        final ExtensionFilter extensionFilter = getExtensionFilter();
-        return extensionFilter == null || files.stream()
-                .anyMatch(file -> extensionFilter.extensions().stream()
-                        .anyMatch(extension -> file.getName().endsWith(extension)));
     }
 }
