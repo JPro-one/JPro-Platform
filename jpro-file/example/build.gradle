@@ -8,6 +8,8 @@ dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    implementation "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
+    implementation "org.kordamp.ikonli:ikonli-material2-pack:$IKONLI_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }

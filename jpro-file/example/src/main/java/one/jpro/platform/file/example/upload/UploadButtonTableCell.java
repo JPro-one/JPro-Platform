@@ -1,6 +1,7 @@
 package one.jpro.platform.file.example.upload;
 
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
@@ -21,6 +22,7 @@ public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, Fi
 
     public UploadButtonTableCell() {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        setAlignment(Pos.CENTER);
 
         startUploadButton.setOnAction(event -> {
             final var selectedItem = getTableView().getItems().get(getIndex());

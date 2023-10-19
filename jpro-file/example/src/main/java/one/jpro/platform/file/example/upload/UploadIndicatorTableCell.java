@@ -1,6 +1,7 @@
 package one.jpro.platform.file.example.upload;
 
 import atlantafx.base.theme.Styles;
+import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableCell;
@@ -20,6 +21,7 @@ public class UploadIndicatorTableCell<S extends FileSource> extends TableCell<S,
 
     public UploadIndicatorTableCell() {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        setAlignment(Pos.CENTER);
         progressBar = new ProgressBar();
         progressBar.getStyleClass().add(Styles.MEDIUM);
     }

@@ -1,6 +1,7 @@
 package one.jpro.platform.file.example.editor;
 
 import atlantafx.base.theme.CupertinoLight;
+import atlantafx.base.theme.Styles;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
@@ -9,10 +10,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.dropper.FileDropper;
 import one.jpro.platform.file.picker.FilePicker;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material2.Material2AL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +71,7 @@ public class TextEditorSample extends Application {
             rootPane.setCenter(textArea);
         });
 
-        Button openButton = new Button("Open");
+        Button openButton = new Button("Open", new FontIcon(Material2AL.FOLDER_OPEN));
         openButton.setDefaultButton(true);
         final var filePicker = FilePicker.create(openButton);
         filePicker.getExtensionFilters().add(textExtensionFilter);
@@ -77,17 +81,21 @@ public class TextEditorSample extends Application {
             rootPane.setCenter(textArea);
         });
 
-        CheckBox multipleCheckBox = new CheckBox("Multiple");
-        fileDropper.selectionModeProperty().bind(multipleCheckBox.selectedProperty().map(selected ->
-                selected ? SelectionMode.MULTIPLE : SelectionMode.SINGLE));
-        filePicker.selectionModeProperty().bind(multipleCheckBox.selectedProperty().map(selected ->
-                selected ? SelectionMode.MULTIPLE : SelectionMode.SINGLE));
+        ChoiceBox<SelectionMode> selectionModeComboBox = new ChoiceBox<>();
+        selectionModeComboBox.getItems().addAll(SelectionMode.SINGLE, SelectionMode.MULTIPLE);
+        selectionModeComboBox.getSelectionModel().select(SelectionMode.SINGLE);
+        selectionModeComboBox.setConverter(selectionModeStringConverter);
+        fileDropper.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
+        filePicker.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button clearButton = new Button("Clear");
+        Button clearButton = new Button("Clear", new FontIcon(Material2AL.CLEAR));
+        clearButton.getStyleClass().add(Styles.DANGER);
         clearButton.setOnAction(event -> rootPane.setCenter(dropPane));
 
-        HBox controlsBox = new HBox(multipleCheckBox, spacer, openButton, clearButton);
+        Label selectionModeLabel = new Label("Selection Mode:");
+        HBox controlsBox = new HBox(selectionModeLabel, selectionModeComboBox, spacer, openButton, clearButton);
         controlsBox.getStyleClass().add("controls-box");
         rootPane.setTop(controlsBox);
 
@@ -100,11 +108,24 @@ public class TextEditorSample extends Application {
             try {
                 String fileContent = new String(Files.readAllBytes(file.toPath()));
                 content.append(fileContent);
-                content.append("\n===============================================\n");
+                content.append("\n=================================================================================\n");
                 Platform.runLater(() -> textArea.setText(content.toString()));
             } catch (IOException ex) {
                 logger.error("Error reading file: " + ex.getMessage(), ex);
             }
         }));
     }
+
+    private final StringConverter<SelectionMode> selectionModeStringConverter = new StringConverter<>() {
+
+        @Override
+        public String toString(SelectionMode selectionMode) {
+            return selectionMode == SelectionMode.MULTIPLE ? "Multiple" : "Single";
+        }
+
+        @Override
+        public SelectionMode fromString(String string) {
+            return "Multiple".equals(string) ? SelectionMode.MULTIPLE : SelectionMode.SINGLE;
+        }
+    };
 }
