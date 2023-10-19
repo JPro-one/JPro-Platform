@@ -15,6 +15,11 @@
 }
 
 .drop-pane:files-drag-over {
+    -fx-border-color: FireBrick;
+    -fx-background-color: IndianRed;
+}
+
+.drop-pane:files-drag-over:supported {
     -fx-border-color: ForestGreen;
     -fx-background-color: LightGreen;
 }
