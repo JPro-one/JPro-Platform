@@ -19,9 +19,13 @@ public class UploadIndicatorTableCell<S extends FileSource> extends TableCell<S,
 
     private final ProgressBar progressBar;
 
+    /**
+     * Constructs a custom table cell that displays the upload progress bar.
+     */
     public UploadIndicatorTableCell() {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setAlignment(Pos.CENTER);
+
         progressBar = new ProgressBar();
         progressBar.getStyleClass().add(Styles.MEDIUM);
     }

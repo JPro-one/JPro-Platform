@@ -18,12 +18,18 @@ import java.io.File;
  */
 public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, File> {
 
-    private final Button startUploadButton = new Button("Start upload");
+    private final Button startUploadButton;
 
+    /**
+     * Constructs a custom table cell containing an upload button, that when is clicked,
+     * the selected item's uploadFileAsync() method is called to asynchronously to upload a file.
+     * Once the upload is completed, the button's text is updated to "Completed" and it is disabled.
+     */
     public UploadButtonTableCell() {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setAlignment(Pos.CENTER);
 
+        startUploadButton = new Button("Start upload");
         startUploadButton.setOnAction(event -> {
             final var selectedItem = getTableView().getItems().get(getIndex());
             if (selectedItem != null) {

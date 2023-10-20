@@ -15,6 +15,9 @@ import org.apache.commons.io.FileUtils;
  */
 public class FileSizeTableCell<S extends FileSource> extends TableCell<S, Long> {
 
+    /**
+     * Constructs a custom table cell for displaying file size information in a table cell.
+     */
     public FileSizeTableCell() {
         setTextAlignment(TextAlignment.RIGHT);
         setContentDisplay(ContentDisplay.TEXT_ONLY);

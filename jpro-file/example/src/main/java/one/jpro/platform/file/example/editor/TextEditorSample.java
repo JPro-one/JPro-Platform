@@ -35,8 +35,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
- * This class serves as sample of a text editor application that enables users to
- * open, edit, and save text files.
+ * This class serves as sample of a text editor application that enables
+ * users to open, edit, and save text files. They can either drag and drop
+ * files onto the application or select them via a file picker dialog.
  * <p>
  *
  * Functionalities:
@@ -50,8 +51,9 @@ import java.util.function.Function;
  * </ul>
  *
  * @author Besmir Beqiri
+ * @see FileDropper
+ * @see FilePicker
  */
-
 public class TextEditorSample extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TextEditorSample.class);
@@ -154,6 +156,12 @@ public class TextEditorSample extends Application {
         return rootPane;
     }
 
+    /**
+     * Appends the content of the given list of files to the provided TextArea.
+     *
+     * @param fileSources List of selected files.
+     * @param textArea TextArea to update.
+     */
     private void appendFilesContent(List<? extends FileSource> fileSources, TextArea textArea) {
         final StringBuilder content = new StringBuilder();
         fileSources.forEach(fileSource -> fileSource.uploadFileAsync().thenAcceptAsync(file -> {
@@ -168,6 +176,12 @@ public class TextEditorSample extends Application {
         }));
     }
 
+    /**
+     * Saves the content of a TextArea to the provided file.
+     *
+     * @param textArea the {@link TextArea} containing the content to save.
+     * @return A function accepting a File, saving its contents, and returning a {@link CompletableFuture}.
+     */
     private Function<File, CompletableFuture<File>> saveToFile(TextArea textArea) {
         return file -> CompletableFuture.supplyAsync(() -> {
             try (FileOutputStream fos = new FileOutputStream(file)) {
@@ -179,6 +193,9 @@ public class TextEditorSample extends Application {
         });
     }
 
+    /**
+     * A StringConverter for converting SelectionMode enums to String representation and vice versa.
+     */
     private final StringConverter<SelectionMode> selectionModeStringConverter = new StringConverter<>() {
 
         @Override

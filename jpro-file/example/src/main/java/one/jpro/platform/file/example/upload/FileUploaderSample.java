@@ -6,10 +6,7 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -22,16 +19,25 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
- * This class represents a sample application for file picker operations.
+ * {@code FileUploaderSample} is an application that demonstrates the use of a file picker
+ * to select and manage files for upload. It employs the JPro {@link FilePicker}
+ * class to handle the file selection functionality and incorporates a {@link TableView}
+ * to display the selected files.
+ *
+ * <p>
+ * The application allows the user to choose files based on various file extension filters.
+ * It also provides options to clear the selected files and to set the selection mode (single or multiple).
  *
  * @author Besmir Beqiri
+ * @see FilePicker
+ * @see ExtensionFilter
  */
-public class FileUploaderSample extends Application {
+public final class FileUploaderSample extends Application {
 
-    private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
-    private static final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", ".mp3", ".wav", ".ogg");
-    private static final ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", ".mp4", ".avi", ".mkv");
-    private static final ExtensionFilter imageExtensionFilter = ExtensionFilter.of("Image files", ".png", ".jpg", ".jpeg");
+    private final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
+    private final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", ".mp3", ".wav", ".ogg");
+    private final ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", ".mp4", ".avi", ".mkv");
+    private final ExtensionFilter imageExtensionFilter = ExtensionFilter.of("Image files", ".png", ".jpg", ".jpeg");
 
     @Override
     public void start(Stage stage) {
@@ -47,6 +53,12 @@ public class FileUploaderSample extends Application {
         stage.show();
     }
 
+    /**
+     * Creates the root UI component of the application.
+     *
+     * @param stage the primary stage for this JavaFX application
+     * @return the root UI component
+     */
     public Parent createRoot(Stage stage) {
         FileTableView fileTableView = new FileTableView();
         Label clickOnMeLabel = new Label("Click on me to open the file picker!");
@@ -84,6 +96,9 @@ public class FileUploaderSample extends Application {
         return rootPane;
     }
 
+    /**
+     * A StringConverter for converting between a SelectionMode and its textual representation.
+     */
     private final StringConverter<SelectionMode> selectionModeStringConverter = new StringConverter<>() {
 
         @Override
