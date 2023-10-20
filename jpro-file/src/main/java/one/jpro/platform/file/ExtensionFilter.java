@@ -28,11 +28,23 @@ public record ExtensionFilter(String description, List<String> extensions) {
     }
 
     /**
+     * Constructor for {@code ExtensionFilter} with a single extension.
+     *
+     * @param description the description of the filter
+     * @param extension   the extension to filter
+     *
+     * @throws NullPointerException     if the description or the extension are {@code null}
+     * @throws IllegalArgumentException if the description or the extension are empty
+     */
+    public ExtensionFilter(String description, String extension) {
+        this(description, List.of(extension));
+    }
+
+    /**
      * Creates an {@code ExtensionFilter} with the specified description
      * and the file name extensions.
      * <p>
-     * File name extension should be specified in the {@code *.<extension>}
-     * format.
+     * File name extension should be specified in the {@code *.<extension>} format.
      *
      * @param description the textual description for the filter
      * @param extensions an array of the accepted file name extensions
@@ -42,6 +54,22 @@ public record ExtensionFilter(String description, List<String> extensions) {
      */
     public static ExtensionFilter of(String description, String... extensions) {
         return new ExtensionFilter(description, List.of(extensions));
+    }
+
+    /**
+     * Creates an {@code ExtensionFilter} with the specified description
+     * and the file name extension.
+     * <p>
+     * File name extension should be specified in the {@code *.<extension>} format.
+     *
+     * @param description the textual description for the filter
+     * @param extension the accepted file name extension
+     * @throws NullPointerException if the description or the extension is {@code null}
+     * @throws IllegalArgumentException if the description or the extension is empty
+     * @return the created {@code ExtensionFilter}
+     */
+    public static ExtensionFilter of(String description, String extension) {
+        return new ExtensionFilter(description, extension);
     }
 
     /**
