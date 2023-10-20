@@ -12,18 +12,41 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
- * Save/download utilities.
+ * Provides utility methods for saving and downloading files.
  *
  * @author Besmir Beqiri
  */
 public interface SaveUtils {
 
     /**
+     * Saves a file using the provided save function.
+     * This method should be used only for desktop/native applications.
+     *
+     * @param fileToSave the file to be saved
+     * @param fileType   the file extension to be appended to the file name if it does not already have it
+     * @param saveFunction the save function to be used to save the file
+     * @return a CompletableFuture representing the asynchronous operation of saving the file
+     * @throws NullPointerException if the fileToSave parameter is null
+     */
+    static CompletableFuture<File> save(File fileToSave, String fileType,
+                                        Function<File, CompletableFuture<File>> saveFunction) {
+        Objects.requireNonNull(fileToSave, "File to save to cannot be null");
+
+        String filePath = fileToSave.getAbsolutePath();
+        if (!filePath.endsWith(fileType)) {
+            fileToSave = new File(filePath + fileType);
+        }
+        return saveFunction.apply(fileToSave);
+    }
+
+    /**
      * Saves a file with the given name and type using the provided save function.
+     * This method should be used only for desktop/native applications.
      *
      * @param stage       The stage where the save dialog will be shown.
      * @param fileName    The initial file name.
@@ -71,9 +94,9 @@ public interface SaveUtils {
      */
     static CompletableFuture<File> download(Stage stage, String fileName, String fileType,
                          Function<File, CompletableFuture<File>> saveFunction) {
-        final Logger logger = LoggerFactory.getLogger(SaveUtils.class);
         if (WebAPI.isBrowser()) {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
+            final Logger logger = LoggerFactory.getLogger(SaveUtils.class);
             try {
                 File tempFile = File.createTempFile(fileName, fileType);
                 return saveFunction.apply(tempFile).thenCompose(file -> {
