@@ -9,6 +9,8 @@ import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.picker.FilePicker;
 
+import java.util.Objects;
+
 /**
  * This is an abstract class that implements the {@link FilePicker} interface.
  * It provides a base implementation for common functionality shared by different file picker implementations.
@@ -26,7 +28,7 @@ abstract class BaseFilePicker<F extends FileSource> implements FilePicker<F> {
      * @param node the node to which the file picker should be attached
      */
     BaseFilePicker(Node node) {
-        this.node = node;
+        this.node = Objects.requireNonNull(node, "node must not be null");
     }
 
     @Override

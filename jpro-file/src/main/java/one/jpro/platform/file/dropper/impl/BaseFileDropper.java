@@ -12,6 +12,7 @@ import one.jpro.platform.file.dropper.FileDropper;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This is an abstract class that implements the {@link FileDropper} interface.
@@ -25,7 +26,7 @@ abstract class BaseFileDropper<F extends FileSource> implements FileDropper<F> {
     private final Node node;
 
     public BaseFileDropper(Node node) {
-        this.node = node;
+        this.node = Objects.requireNonNull(node, "node must not be null");
     }
 
     public Node getNode() {
