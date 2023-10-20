@@ -4,6 +4,7 @@ import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.WebFileSource;
@@ -93,5 +94,12 @@ public class WebFileDropper extends BaseFileDropper<WebFileSource> {
     @Override
     public final ReadOnlyBooleanProperty filesDragOverProperty() {
         return multiFileUploader.fileDragOverProperty();
+    }
+
+    /**
+     * Returns the MIME types of the files which are currently dragged above the node.
+     */
+    public final ObservableList<String> getFilesDragOverTypes() {
+        return multiFileUploader.getFilesDragOverTypes();
     }
 }
