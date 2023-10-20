@@ -118,21 +118,4 @@ public interface FileDropper<F extends FileSource> {
      * Defines the property for the files drag over state.
      */
     ReadOnlyBooleanProperty filesDragOverProperty();
-
-    /**
-     * Returns a boolean value indicating whether the files drag over are supported,
-     * meaning their file extension must match the extension filter.
-     *
-     * @return true if the files drag over is supported, false otherwise
-     */
-    boolean isFilesDragOverSupported();
-
-    /**
-     * Defines the property indicating whether the files drag over are supported,
-     * meaning their file extension must match the extension filter.
-     * <p>
-     * The returned property is read-only and represents the supported state of files drag over.
-     * Any changes to the files drag over supported state will be reflected in this property.
-     */
-    ReadOnlyBooleanProperty filesDragOverSupportedProperty();
 }

@@ -27,24 +27,18 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
         super(node);
 
         node.setOnDragOver(dragEvent -> {
-            List<File> files = dragEvent.getDragboard().getFiles();
-            if (files != null && !files.isEmpty()) {
-                setFilesDragOver(true);
+            if (dragEvent.getDragboard().hasFiles()) {
+                List<File> files = dragEvent.getDragboard().getFiles();
                 if (hasSupportedExtension(files)) {
-                    setFilesDragOverSupported(true);
                     dragEvent.acceptTransferModes(TransferMode.COPY);
                 } else {
-                    setFilesDragOverSupported(false);
                     dragEvent.acceptTransferModes(TransferMode.NONE);
                 }
             }
         });
 
-        // reset files drag over value when drag event ends
-        node.setOnDragExited(dragEvent -> {
-            setFilesDragOver(false);
-            setFilesDragOverSupported(false);
-        });
+        node.setOnDragEntered(dragEvent -> setFilesDragOver(true));
+        node.setOnDragExited(dragEvent -> setFilesDragOver(false));
 
         node.setOnDragDropped(dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {

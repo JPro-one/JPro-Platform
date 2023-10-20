@@ -1,8 +1,6 @@
 package one.jpro.platform.file.dropper;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
@@ -72,30 +70,6 @@ abstract class BaseFileDropper<F extends FileSource> implements FileDropper<F> {
             selectionMode = new SimpleObjectProperty<>(this, "selectionMode", SelectionMode.SINGLE);
         }
         return selectionMode;
-    }
-
-    // files drag over supported property
-    private ReadOnlyBooleanWrapper filesDragOverSupported;
-
-    @Override
-    public boolean isFilesDragOverSupported() {
-        return (filesDragOverSupported != null) && filesDragOverSupported.get();
-    }
-
-    void setFilesDragOverSupported(boolean value) {
-        filesSupportedPropertyImpl().set(value);
-    }
-
-    @Override
-    public ReadOnlyBooleanProperty filesDragOverSupportedProperty() {
-        return filesSupportedPropertyImpl().getReadOnlyProperty();
-    }
-
-    private ReadOnlyBooleanWrapper filesSupportedPropertyImpl() {
-        if (filesDragOverSupported == null) {
-            filesDragOverSupported = new ReadOnlyBooleanWrapper(this, "filesDragOverSupported", false);
-        }
-        return filesDragOverSupported;
     }
 
     boolean hasSupportedExtension(List<File> files) {
