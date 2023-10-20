@@ -1,14 +1,12 @@
-package one.jpro.platform.file.dropper.impl;
+package one.jpro.platform.file.dropper;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.WebFileSource;
-import one.jpro.platform.file.dropper.FileDropper;
 import one.jpro.platform.file.util.NodeUtils;
 
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import java.util.function.Consumer;
  *
  * @author Besmir Beqiri
  */
-public final class WebFileDropper extends BaseFileDropper<WebFileSource> {
+public class WebFileDropper extends BaseFileDropper<WebFileSource> {
 
     private final WebAPI.MultiFileUploader multiFileUploader;
     private List<WebFileSource> webFileSources = List.of();
@@ -36,7 +34,7 @@ public final class WebFileDropper extends BaseFileDropper<WebFileSource> {
     }
 
     @Override
-    public ObjectProperty<SelectionMode> selectionModeProperty() {
+    public final ObjectProperty<SelectionMode> selectionModeProperty() {
         if (selectionMode == null) {
             selectionMode = new SimpleObjectProperty<>(this, "selectionMode", SelectionMode.SINGLE) {
 
@@ -93,7 +91,7 @@ public final class WebFileDropper extends BaseFileDropper<WebFileSource> {
     }
 
     @Override
-    public ReadOnlyBooleanProperty filesDragOverProperty() {
+    public final ReadOnlyBooleanProperty filesDragOverProperty() {
         return multiFileUploader.fileDragOverProperty();
     }
 }

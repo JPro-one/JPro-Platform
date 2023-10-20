@@ -7,8 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
-import one.jpro.platform.file.dropper.impl.NativeFileDropper;
-import one.jpro.platform.file.dropper.impl.WebFileDropper;
 
 import java.util.List;
 import java.util.Objects;

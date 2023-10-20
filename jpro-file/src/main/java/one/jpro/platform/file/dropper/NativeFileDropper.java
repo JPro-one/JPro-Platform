@@ -1,4 +1,4 @@
-package one.jpro.platform.file.dropper.impl;
+package one.jpro.platform.file.dropper;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -9,12 +9,10 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.input.TransferMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.NativeFileSource;
-import one.jpro.platform.file.dropper.FileDropper;
 
 import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
-
 
 /**
  * Represents a {@link FileDropper} implementation for JavaFX desktop/mobile
@@ -70,6 +68,27 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
         });
     }
 
+    // on files selected property
+    ObjectProperty<Consumer<List<NativeFileSource>>> onFilesSelected;
+
+    @Override
+    public Consumer<List<NativeFileSource>> getOnFilesSelected() {
+        return onFilesSelected == null ? null : onFilesSelected.get();
+    }
+
+    @Override
+    public void setOnFilesSelected(Consumer<List<NativeFileSource>> value) {
+        onFilesSelectedProperty().setValue(value);
+    }
+
+    @Override
+    public ObjectProperty<Consumer<List<NativeFileSource>>> onFilesSelectedProperty() {
+        if (onFilesSelected == null) {
+            onFilesSelected = new SimpleObjectProperty<>(this, "onFilesSelected");
+        }
+        return onFilesSelected;
+    }
+
     // files drag over property
     private ReadOnlyBooleanWrapper filesDragOver;
 
@@ -92,26 +111,5 @@ public final class NativeFileDropper extends BaseFileDropper<NativeFileSource> {
             filesDragOver = new ReadOnlyBooleanWrapper(this, "filesDragOver", false);
         }
         return filesDragOver;
-    }
-
-    // on files selected property
-    ObjectProperty<Consumer<List<NativeFileSource>>> onFilesSelected;
-
-    @Override
-    public Consumer<List<NativeFileSource>> getOnFilesSelected() {
-        return onFilesSelected == null ? null : onFilesSelected.get();
-    }
-
-    @Override
-    public void setOnFilesSelected(Consumer<List<NativeFileSource>> value) {
-        onFilesSelectedProperty().setValue(value);
-    }
-
-    @Override
-    public ObjectProperty<Consumer<List<NativeFileSource>>> onFilesSelectedProperty() {
-        if (onFilesSelected == null) {
-            onFilesSelected = new SimpleObjectProperty<>(this, "onFilesSelected");
-        }
-        return onFilesSelected;
     }
 }
