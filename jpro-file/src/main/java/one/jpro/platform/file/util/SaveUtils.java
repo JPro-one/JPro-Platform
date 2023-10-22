@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -97,28 +96,33 @@ public interface SaveUtils {
         if (WebAPI.isBrowser()) {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             final Logger logger = LoggerFactory.getLogger(SaveUtils.class);
-            try {
-                File tempFile = File.createTempFile(fileName, fileType);
-                return saveFunction.apply(tempFile).thenCompose(file -> {
-                    try {
-                        final URL fileUrl = tempFile.toURI().toURL();
-                        Platform.runLater(() -> webAPI.downloadURL(fileUrl, tempFile::delete));
-                        return CompletableFuture.completedFuture(file);
-                    } catch (MalformedURLException ex) {
-                        return CompletableFuture.failedFuture(ex);
-                    }
-                }).exceptionallyCompose(ex -> {
-                    if (!tempFile.delete()) {
-                        logger.warn("Could not delete temporary file {}", tempFile.getAbsolutePath());
-                    }
-                    logger.error("Error while downloading file", ex);
+            final File tempFile = createTempFile(fileName, fileType);
+            return saveFunction.apply(tempFile).thenCompose(file -> {
+                try {
+                    final URL fileUrl = file.toURI().toURL();
+                    Platform.runLater(() -> webAPI.downloadURL(fileUrl, file::delete));
+                    return CompletableFuture.completedFuture(file);
+                } catch (IOException ex) {
                     return CompletableFuture.failedFuture(ex);
-                });
-            } catch (IOException ex) {
+                }
+            }).exceptionallyCompose(ex -> {
+                if (!tempFile.delete()) {
+                    logger.warn("Could not delete temporary file {}", tempFile.getAbsolutePath());
+                }
+                logger.error("Error while downloading file", ex);
                 return CompletableFuture.failedFuture(ex);
-            }
+            });
         } else {
             throw new UnsupportedOperationException("Download is only supported in the browser");
         }
+    }
+
+    static File createTempFile(String fileName, String fileType) {
+        // Get user home directory
+        final File tempDir = new File(System.getProperty("user.home") + "/.jpro/tmp");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        return new File(tempDir, fileName + fileType);
     }
 }
