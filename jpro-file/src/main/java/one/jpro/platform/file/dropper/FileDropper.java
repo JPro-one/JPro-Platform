@@ -2,25 +2,24 @@ package one.jpro.platform.file.dropper;
 
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
-import one.jpro.platform.file.FileSource;
+import one.jpro.platform.file.MultipleFileSelector;
+import one.jpro.platform.file.event.FileDragEvent;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * This interface represents a file dropper that allows users to select and drop files.
  * The implementation of this interface depends on whether the application is running
  * in a browser via JPro server or outside the browser as a desktop application.
  *
- * @param <F> the type of the file source
  * @author Besmir Beqiri
  */
-public interface FileDropper<F extends FileSource> {
+public interface FileDropper extends MultipleFileSelector, EventTarget {
 
     /**
      * Creates a file dropper. If the application is running in a
@@ -29,10 +28,10 @@ public interface FileDropper<F extends FileSource> {
      * the browser than a desktop version is returned.
      *
      * @param node the action node for this file dropper
-     * @throws NullPointerException if the node is null
      * @return a {@link FileDropper} object.
+     * @throws NullPointerException if the node is null
      */
-    static FileDropper<? extends FileSource> create(Node node) {
+    static FileDropper create(Node node) {
         Objects.requireNonNull(node, "node must not be null");
         if (WebAPI.isBrowser()) {
             return new WebFileDropper(node);
@@ -85,37 +84,44 @@ public interface FileDropper<F extends FileSource> {
     ObjectProperty<SelectionMode> selectionModeProperty();
 
     /**
-     * Gets the handler to be called when the user selects files.
+     * Retrieves the event handler to be called when file dragging gesture enters
+     * the target node.
      *
-     * @return the handler
+     * @return the event handler or <code>null</code>.
      */
-    Consumer<List<F>> getOnFilesSelected();
+    EventHandler<FileDragEvent> getOnDragEntered();
 
     /**
-     * Sets the handler to be called when the user selects files.
+     * Sets the event handler to be called when file dragging gesture enters
+     * the target node.
      *
-     * @param value the handler
+     * @param value the event handler or <code>null</code>.
      */
-    void setOnFilesSelected(Consumer<List<F>> value);
+    void setOnDragEntered(EventHandler<FileDragEvent> value);
 
     /**
-     * Defines the handler to be called when the user selects files.
-     * The handler returns the selected files or {@code null} if
-     * no file has been selected.
+     * Event handler invoked when file dragging gesture enters the target node.
      */
-    ObjectProperty<Consumer<List<F>>> onFilesSelectedProperty();
+    ObjectProperty<EventHandler<FileDragEvent>> onDragEnteredProperty();
 
     /**
-     * Returns a boolean value indicating if files are currently being dragged
-     * over the target node.
+     * Retrieves the event handler to be called when file dragging gesture exits
+     * the target node.
      *
-     * @return {@code true} if files are currently being dragged over the target node,
-     *         {@code false} otherwise.
+     * @return the event handler or <code>null</code>.
      */
-    boolean isFilesDragOver();
+    EventHandler<FileDragEvent> getOnDragExited();
 
     /**
-     * Defines the property for the files drag over state.
+     * Sets the event handler to be called when file dragging gesture enters
+     * the target node.
+     *
+     * @param value the event handler or <code>null</code>.
      */
-    ReadOnlyBooleanProperty filesDragOverProperty();
+    void setOnDragExited(EventHandler<FileDragEvent> value);
+
+    /**
+     * Event handler invoked when file dragging gesture exits the target node.
+     */
+    ObjectProperty<EventHandler<FileDragEvent>> onDragExitedProperty();
 }

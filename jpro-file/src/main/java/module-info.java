@@ -10,7 +10,8 @@ module one.jpro.platform.file {
     requires org.slf4j;
 
     exports one.jpro.platform.file;
-    exports one.jpro.platform.file.picker;
     exports one.jpro.platform.file.dropper;
+    exports one.jpro.platform.file.event;
+    exports one.jpro.platform.file.picker;
     exports one.jpro.platform.file.util;
 }

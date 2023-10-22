@@ -4,3 +4,33 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
+
+compileJava {
+    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"]
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs = [
+            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
+    ]
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        exceptionFormat "full"
+    }
+}
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        version = true
+        author = true
+        addMultilineStringsOption("-add-exports").setValue([
+                "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
+        ])
+//        addStringOption('Xdoclint:none', '-quiet')
+    }
+}
