@@ -1,49 +1,19 @@
 package one.jpro.platform.file.picker;
 
-import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
-import one.jpro.platform.file.FileSource;
-import one.jpro.platform.file.picker.impl.NativeFilePicker;
-import one.jpro.platform.file.picker.impl.WebFilePicker;
 
 import java.io.File;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * A file picker interface for selecting and interacting with files.
- * The {@link FilePicker} interface provides methods and properties
- * to customize the file picker UI, set initial directory, handle
- * file selection events, and more.
  *
- * @param <F> the type of the file source
  * @author Besmir Beqiri
  */
-public interface FilePicker<F extends FileSource> {
-
-    /**
-     * Creates a file picker. If the application is running in a
-     * browser via JPro server, then a web version of the file
-     * picker is returned. If the application is not running inside
-     * the browser than a desktop version is returned.
-     *
-     * @param node the associated node for this file picker
-     * @return a {@link FilePicker} object.
-     * @throws NullPointerException if the node is null
-     */
-    static FilePicker<? extends FileSource> create(Node node) {
-        Objects.requireNonNull(node, "node must not be null");
-        if (WebAPI.isBrowser()) {
-            return new WebFilePicker(node);
-        }
-        return new NativeFilePicker(node);
-    }
+public interface FilePicker {
 
     /**
      * Returns the associated node for this file picker.
@@ -70,6 +40,32 @@ public interface FilePicker<F extends FileSource> {
      * The title of the displayed file dialog.
      */
     StringProperty titleProperty();
+
+    /**
+     * The initial file name for the displayed dialog.
+     *
+     * @return the file name as a string
+     */
+    String getInitialFileName();
+
+    /**
+     * Sets the initial file name for the displayed dialog.
+     *
+     * @param value the file name
+     */
+    void setInitialFileName(final String value);
+
+    /**
+     * The initial file name for the displayed dialog.
+     * <p>
+     * This property is used mostly in the displayed file save dialogs as the
+     * initial file name for the file being saved. If set for a file open
+     * dialog it will have any impact on the displayed dialog only if the
+     * corresponding platform provides support for such property in its
+     * file open dialogs.
+     * </p>
+     */
+    StringProperty initialFileNameProperty();
 
     /**
      * The initial directory for the displayed file dialog.
@@ -134,50 +130,4 @@ public interface FilePicker<F extends FileSource> {
      * match the user-selected extension filter from the dialog.
      */
     ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty();
-
-    /**
-     * Returns the selection mode of the file picker.
-     * The selection mode determines how the file dialog allows the user to select files.
-     * <p>
-     * The default value is {@link SelectionMode#SINGLE}.
-     *
-     * @return the selection mode of the file dialog
-     */
-    SelectionMode getSelectionMode();
-
-    /**
-     * Sets the selection mode of the file chooser.
-     *
-     * @param value The selection mode to be set. This should be one of the values
-     *              defined in the SelectionMode enumeration. Possible values are
-     *              {@link SelectionMode#SINGLE} or {@link SelectionMode#MULTIPLE}.
-     */
-    void setSelectionMode(SelectionMode value);
-
-    /**
-     * Defines the selection mode of the file chooser.
-     * The default value is {@link SelectionMode#SINGLE}.
-     */
-    ObjectProperty<SelectionMode> selectionModeProperty();
-
-    /**
-     * Gets the handler to be called when the user selects files.
-     *
-     * @return the handler
-     */
-    Consumer<List<F>> getOnFilesSelected();
-
-    /**
-     * Sets the handler to be called when the user selects files.
-     *
-     * @param value the handler
-     */
-    void setOnFilesSelected(Consumer<List<F>> value);
-
-    /**
-     * Defines the handler to be called when the user selects files.
-     * The handler returns the selected files or {@code null} if
-     * no file has been selected.
-     */
-    ObjectProperty<Consumer<List<F>>> onFilesSelectedProperty();
 }

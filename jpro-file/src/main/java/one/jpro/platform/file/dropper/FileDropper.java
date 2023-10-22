@@ -5,7 +5,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.Node;
-import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.MultipleFileSelector;
 import one.jpro.platform.file.event.FileDragEvent;
@@ -65,23 +64,6 @@ public interface FileDropper extends MultipleFileSelector, EventTarget {
      * Defines the property for the extension filter.
      */
     ObjectProperty<ExtensionFilter> extensionFilterProperty();
-
-    /**
-     * Gets the selection mode of the file dropper.
-     * The default value is {@link SelectionMode#SINGLE}.
-     */
-    SelectionMode getSelectionMode();
-
-    /**
-     * Sets the selection mode of the file dropper.
-     */
-    void setSelectionMode(SelectionMode value);
-
-    /**
-     * Defines the selection mode of the file dropper.
-     * The default value is {@link SelectionMode#SINGLE}.
-     */
-    ObjectProperty<SelectionMode> selectionModeProperty();
 
     /**
      * Retrieves the event handler to be called when file dragging gesture enters

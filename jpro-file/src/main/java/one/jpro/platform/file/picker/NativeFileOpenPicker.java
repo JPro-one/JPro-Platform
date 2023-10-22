@@ -1,7 +1,8 @@
-package one.jpro.platform.file.picker.impl;
+package one.jpro.platform.file.picker;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
@@ -10,21 +11,21 @@ import javafx.scene.control.SelectionMode;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import one.jpro.platform.file.ExtensionFilter;
+import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
-import one.jpro.platform.file.picker.FilePicker;
 
 import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Represents a {@link FilePicker} implementation for JavaFX desktop/mobile
- * applications. This class extends the {@link BaseFilePicker} class and
- * specializes it for selecting files from the native file system.
+ * Represents a {@link FileOpenPicker} implementation for JavaFX desktop/mobile
+ * applications. This class specializes for selecting and opening files from
+ * the native file system.
  *
  * @author Besmir Beqiri
  */
-public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
+public class NativeFileOpenPicker extends BaseFileOpenPicker {
 
     private final FileChooser fileChooser = new FileChooser();
     private List<NativeFileSource> nativeFileSources = List.of();
@@ -44,20 +45,18 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
             }
         }
     };
-    private final WeakListChangeListener<ExtensionFilter> weakExtensionListFiltersListener =
-            new WeakListChangeListener<>(extensionListFiltersListener);
 
     /**
      * Initializes a new instance associated with the specified node.
      *
      * @param node The node associated with this file picker.
      */
-    public NativeFilePicker(Node node) {
+    public NativeFileOpenPicker(Node node) {
         super(node);
 
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(weakExtensionListFiltersListener);
+        getExtensionFilters().addListener(new WeakListChangeListener<>(extensionListFiltersListener));
 
         // Define the action that should be performed when the user clicks on the node.
         node.setOnMouseClicked(mouseEvent -> {
@@ -69,7 +68,7 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
                     nativeFileSources = files.stream().map(NativeFileSource::new).toList();
 
                     // Invoke the onFilesSelected consumer.
-                    Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
+                    Consumer<List<? extends FileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
                         onFilesSelectedConsumer.accept(nativeFileSources);
                     }
@@ -81,7 +80,7 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
                     nativeFileSources = List.of(new NativeFileSource(file));
 
                     // Invoke the onFilesSelected consumer.
-                    Consumer<List<NativeFileSource>> onFilesSelectedConsumer = getOnFilesSelected();
+                    Consumer<List<? extends FileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
                         onFilesSelectedConsumer.accept(nativeFileSources);
                     }
@@ -91,37 +90,56 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
     }
 
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return fileChooser.getTitle();
     }
 
     @Override
-    public void setTitle(final String value) {
+    public final void setTitle(final String value) {
         fileChooser.setTitle(value);
     }
 
     @Override
-    public StringProperty titleProperty() {
+    public final StringProperty titleProperty() {
         return fileChooser.titleProperty();
     }
 
     @Override
-    public File getInitialDirectory() {
+    public final String getInitialFileName() {
+        return fileChooser.getInitialFileName();
+    }
+
+    @Override
+    public final void setInitialFileName(final String value) {
+        fileChooser.setInitialFileName(value);
+    }
+
+    @Override
+    public final StringProperty initialFileNameProperty() {
+        if (initialFileName == null) {
+            initialFileName = new SimpleStringProperty(this, "initialFileName", getInitialFileName());
+            fileChooser.initialFileNameProperty().bind(initialFileName);
+        }
+        return initialFileName;
+    }
+
+    @Override
+    public final File getInitialDirectory() {
         return fileChooser.getInitialDirectory();
     }
 
     @Override
-    public void setInitialDirectory(final File value) {
+    public final void setInitialDirectory(final File value) {
         fileChooser.setInitialDirectory(value);
     }
 
     @Override
-    public ObjectProperty<File> initialDirectoryProperty() {
+    public final ObjectProperty<File> initialDirectoryProperty() {
         return fileChooser.initialDirectoryProperty();
     }
 
     @Override
-    public ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
+    public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
         if (selectedExtensionFilter == null) {
             selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {
 
@@ -144,31 +162,10 @@ public final class NativeFilePicker extends BaseFilePicker<NativeFileSource> {
     }
 
     @Override
-    public ObjectProperty<SelectionMode> selectionModeProperty() {
+    public final ObjectProperty<SelectionMode> selectionModeProperty() {
         if (selectionMode == null) {
             selectionMode = new SimpleObjectProperty<>(this, "selectionMode", SelectionMode.SINGLE);
         }
         return selectionMode;
-    }
-
-    // on files selected property
-    ObjectProperty<Consumer<List<NativeFileSource>>> onFilesSelected;
-
-    @Override
-    public Consumer<List<NativeFileSource>> getOnFilesSelected() {
-        return onFilesSelected == null ? null : onFilesSelected.get();
-    }
-
-    @Override
-    public void setOnFilesSelected(Consumer<List<NativeFileSource>> value) {
-        onFilesSelectedProperty().setValue(value);
-    }
-
-    @Override
-    public ObjectProperty<Consumer<List<NativeFileSource>>> onFilesSelectedProperty() {
-        if (onFilesSelected == null) {
-            onFilesSelected = new SimpleObjectProperty<>(this, "onFilesSelected");
-        }
-        return onFilesSelected;
     }
 }
