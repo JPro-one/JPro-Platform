@@ -11,7 +11,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import one.jpro.platform.file.ExtensionFilter;
-import one.jpro.platform.file.picker.FilePicker;
+import one.jpro.platform.file.picker.FileOpenPicker;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2AL;
 
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 /**
  * {@code FileUploaderSample} is an application that demonstrates the use of a file picker
- * to select and manage files for upload. It employs the JPro {@link FilePicker}
+ * to select and manage files for upload. It employs the JPro {@link FileOpenPicker}
  * class to handle the file selection functionality and incorporates a {@link TableView}
  * to display the selected files.
  *
@@ -29,7 +29,7 @@ import java.util.Optional;
  * It also provides options to clear the selected files and to set the selection mode (single or multiple).
  *
  * @author Besmir Beqiri
- * @see FilePicker
+ * @see FileOpenPicker
  * @see ExtensionFilter
  */
 public final class FileUploaderSample extends Application {
@@ -66,11 +66,11 @@ public final class FileUploaderSample extends Application {
         placeholderPane.getStyleClass().add("placeholder-pane");
         fileTableView.setPlaceholder(placeholderPane);
 
-        final var filePicker = FilePicker.create(placeholderPane);
-        filePicker.getExtensionFilters().addAll(textExtensionFilter,
+        FileOpenPicker fileOpenPicker = FileOpenPicker.create(placeholderPane);
+        fileOpenPicker.getExtensionFilters().addAll(textExtensionFilter,
                 audioExtensionFilter, videoExtensionFilter, imageExtensionFilter);
-        filePicker.setSelectedExtensionFilter(videoExtensionFilter);
-        filePicker.setOnFilesSelected(fileSources -> fileTableView.getItems().addAll(fileSources));
+        fileOpenPicker.setSelectedExtensionFilter(videoExtensionFilter);
+        fileOpenPicker.setOnFilesSelected(fileSources -> fileTableView.getItems().addAll(fileSources));
 
         BorderPane rootPane = new BorderPane(fileTableView);
         rootPane.getStyleClass().add("root-pane");
@@ -79,7 +79,7 @@ public final class FileUploaderSample extends Application {
         selectionModeComboBox.getItems().addAll(SelectionMode.SINGLE, SelectionMode.MULTIPLE);
         selectionModeComboBox.getSelectionModel().select(SelectionMode.SINGLE);
         selectionModeComboBox.setConverter(selectionModeStringConverter);
-        filePicker.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
+        fileOpenPicker.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);

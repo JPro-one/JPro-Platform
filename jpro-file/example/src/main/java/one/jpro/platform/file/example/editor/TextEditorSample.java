@@ -1,22 +1,22 @@
 package one.jpro.platform.file.example.editor;
 
 import atlantafx.base.theme.CupertinoLight;
-import atlantafx.base.theme.Styles;
 import com.jpro.webapi.WebAPI;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.dropper.FileDropper;
-import one.jpro.platform.file.picker.FilePicker;
-import one.jpro.platform.file.util.SaveUtils;
+import one.jpro.platform.file.picker.FileOpenPicker;
+import one.jpro.platform.file.picker.FileSavePicker;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2AL;
 import org.kordamp.ikonli.material2.Material2MZ;
@@ -30,7 +30,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -39,29 +38,25 @@ import java.util.function.Function;
  * users to open, edit, and save text files. They can either drag and drop
  * files onto the application or select them via a file picker dialog.
  * <p>
- *
+ * <p>
  * Functionalities:
  * <ul>
  *     <li>FileDropper: Allows users to open text files by dragging and dropping them onto a designated area.</li>
- *     <li>File Picker: Provides an "Open" button that triggers a file picker dialog for selecting text files.</li>
- *     <li>Multi-File Support: Enables users to open either a single file or multiple files simultaneously.</li>
- *     <li>Text Area: Displays the contents of the opened text files in a text area for editing.</li>
+ *     <li>FilePicker: Provides an "Open" button that triggers a file picker dialog for selecting text files.</li>
+ *     <li>TextArea: Displays the contents of the opened text files in a text area for editing.</li>
  *     <li>Save Feature: Allows users to save the edited content back to a file.</li>
- *     <li>Reset: Provides an option to clear the text area, reverting it to the initial state.</li>
  * </ul>
  *
  * @author Besmir Beqiri
  * @see FileDropper
- * @see FilePicker
+ * @see FileOpenPicker
  */
 public class TextEditorSample extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TextEditorSample.class);
 
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
-    private static final PseudoClass SUPPORTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("supported");
     private final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
-    private final Random random = new Random();
     private File lastSavedFile;
 
     @Override
@@ -79,101 +74,80 @@ public class TextEditorSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-        Label dropLabel = new Label("Drop here text files only!");
+        Label dropLabel = new Label("Open or drop " + textExtensionFilter.description().toLowerCase() + " here!");
         StackPane dropPane = new StackPane(dropLabel);
         dropPane.getStyleClass().add("drop-pane");
 
-        final var fileDropper = FileDropper.create(dropPane);
-        fileDropper.setExtensionFilter(textExtensionFilter);
-        fileDropper.filesDragOverProperty().addListener(observable ->
-                dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS,
-                        fileDropper.isFilesDragOver()));
-        fileDropper.filesDragOverSupportedProperty().addListener(observable ->
-                dropPane.pseudoClassStateChanged(SUPPORTED_PSEUDO_CLASS,
-                        fileDropper.isFilesDragOverSupported()));
-
-        BorderPane rootPane = new BorderPane(dropPane);
-        rootPane.getStyleClass().add("root-pane");
         TextArea textArea = new TextArea();
+        StackPane contentPane = new StackPane(textArea, dropPane);
+
+        FileDropper fileDropper = FileDropper.create(contentPane);
+        fileDropper.setExtensionFilter(textExtensionFilter);
+        fileDropper.setOnDragEntered(event -> {
+            dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, true);
+            contentPane.getChildren().setAll(textArea, dropPane);
+        });
+        fileDropper.setOnDragExited(event ->
+                dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, false));
         fileDropper.setOnFilesSelected(fileSources -> {
-            appendFilesContent(fileSources, textArea);
-            rootPane.setCenter(textArea);
+            openFile(fileSources, textArea);
+            contentPane.getChildren().setAll(textArea);
         });
 
         Button openButton = new Button("Open", new FontIcon(Material2AL.FOLDER_OPEN));
         openButton.setDefaultButton(true);
-        final var filePicker = FilePicker.create(openButton);
-        filePicker.getExtensionFilters().add(textExtensionFilter);
-        filePicker.setSelectedExtensionFilter(textExtensionFilter);
-        filePicker.setOnFilesSelected(fileSources -> {
-            appendFilesContent(fileSources, textArea);
-            rootPane.setCenter(textArea);
-        });
-
-        ChoiceBox<SelectionMode> selectionModeComboBox = new ChoiceBox<>();
-        selectionModeComboBox.getItems().addAll(SelectionMode.SINGLE, SelectionMode.MULTIPLE);
-        selectionModeComboBox.getSelectionModel().select(SelectionMode.SINGLE);
-        selectionModeComboBox.setConverter(selectionModeStringConverter);
-        fileDropper.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
-        filePicker.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
+        FileOpenPicker fileOpenPicker = FileOpenPicker.create(openButton);
+        fileOpenPicker.getExtensionFilters().add(textExtensionFilter);
+        fileOpenPicker.setSelectedExtensionFilter(textExtensionFilter);
+        fileOpenPicker.setOnFilesSelected(fileSources -> openFile(fileSources, textArea));
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button clearButton = new Button("Clear", new FontIcon(Material2AL.CLEAR));
-        clearButton.getStyleClass().add(Styles.DANGER);
-        clearButton.disableProperty().bind(textArea.textProperty().isEmpty());
-        clearButton.setOnAction(event -> {
-            rootPane.setCenter(dropPane);
-            textArea.clear();
-        });
-
-        Label selectionModeLabel = new Label("Selection Mode:");
-        HBox controlsBox = new HBox(selectionModeLabel, selectionModeComboBox, spacer, openButton);
+        HBox controlsBox = new HBox(openButton, spacer);
         controlsBox.getStyleClass().add("controls-box");
 
+        final Button retriveButton;
         if (WebAPI.isBrowser()) {
-            Button downloadButton = new Button("Download", new FontIcon(Material2AL.CLOUD_DOWNLOAD));
-            downloadButton.disableProperty().bind(textArea.textProperty().isEmpty());
-            downloadButton.setOnAction(event ->
-                    SaveUtils.download(stage, "subtitle_", ".srt", saveToFile(textArea)));
-            controlsBox.getChildren().addAll(downloadButton, clearButton);
+            retriveButton = new Button("Download", new FontIcon(Material2AL.CLOUD_DOWNLOAD));
+            controlsBox.getChildren().add(retriveButton);
         } else {
             Button saveButton = new Button("Save", new FontIcon(Material2MZ.SAVE_ALT));
             saveButton.disableProperty().bind(textArea.textProperty().isEmpty());
-            saveButton.setOnAction(event -> Optional.ofNullable(lastSavedFile)
-                    .map(saveToFile(textArea))
-                    .orElseGet(() -> SaveUtils.saveAs(stage, "subtitle_" + random.nextInt(),
-                            ".srt", saveToFile(textArea)))
-                    .thenAccept(file -> lastSavedFile = file));
-            Button saveAsButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
-            saveAsButton.disableProperty().bind(textArea.textProperty().isEmpty());
-            saveAsButton.setOnAction(event -> SaveUtils.saveAs(stage, "subtitle_" + random.nextInt(),
-                    ".srt", saveToFile(textArea)).thenAccept(file -> lastSavedFile = file));
-            controlsBox.getChildren().addAll(saveButton, saveAsButton, clearButton);
+            saveButton.setOnAction(event -> saveToFile(textArea).apply(lastSavedFile));
+            retriveButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
+            controlsBox.getChildren().addAll(saveButton, retriveButton);
         }
+        retriveButton.disableProperty().bind(textArea.textProperty().isEmpty());
+        FileSavePicker fileSavePicker = FileSavePicker.create(retriveButton);
+        fileSavePicker.setInitialFileName("subtitle");
+        fileSavePicker.setSelectedExtensionFilter(ExtensionFilter.of("Subtitle format (.srt)", ".srt"));
+        fileSavePicker.setOnFileSelected(file -> saveToFile(textArea).apply(file)
+                .thenApply(saveToFile -> lastSavedFile = saveToFile));
 
+        BorderPane rootPane = new BorderPane(contentPane);
+        rootPane.getStyleClass().add("root-pane");
         rootPane.setTop(controlsBox);
         return rootPane;
     }
 
     /**
-     * Appends the content of the given list of files to the provided TextArea.
+     * Opens a file and sets the content of the file to the specified TextArea.
      *
-     * @param fileSources List of selected files.
-     * @param textArea TextArea to update.
+     * @param fileSources a list of FileSources that represent the files to be opened
+     * @param textArea    the TextArea where the content of the file will be displayed
      */
-    private void appendFilesContent(List<? extends FileSource> fileSources, TextArea textArea) {
-        final StringBuilder content = new StringBuilder();
-        fileSources.forEach(fileSource -> fileSource.uploadFileAsync().thenAcceptAsync(file -> {
-            try {
-                String fileContent = new String(Files.readAllBytes(file.toPath()));
-                content.append(fileContent);
-                content.append("\n=================================================================================\n");
-                Platform.runLater(() -> textArea.setText(content.toString()));
-            } catch (IOException ex) {
-                logger.error("Error reading file: " + ex.getMessage(), ex);
-            }
-        }));
+    private void openFile(List<? extends FileSource> fileSources, TextArea textArea) {
+        fileSources.stream().findFirst().ifPresentOrElse(fileSource ->
+                fileSource.uploadFileAsync().thenCompose(file -> {
+                    try {
+                        final String fileContent = new String(Files.readAllBytes(file.toPath()));
+                        Platform.runLater(() -> textArea.setText(fileContent));
+                        return CompletableFuture.completedFuture(file);
+                    } catch (IOException ex) {
+                        logger.error("Error reading file: " + ex.getMessage(), ex);
+                        return CompletableFuture.failedFuture(ex);
+                    }
+                }).thenApply(file -> lastSavedFile = file), () -> logger.warn("No file selected"));
     }
 
     /**
@@ -192,20 +166,4 @@ public class TextEditorSample extends Application {
             return file;
         });
     }
-
-    /**
-     * A StringConverter for converting SelectionMode enums to String representation and vice versa.
-     */
-    private final StringConverter<SelectionMode> selectionModeStringConverter = new StringConverter<>() {
-
-        @Override
-        public String toString(SelectionMode selectionMode) {
-            return selectionMode == SelectionMode.MULTIPLE ? "Multiple" : "Single";
-        }
-
-        @Override
-        public SelectionMode fromString(String string) {
-            return "Multiple".equals(string) ? SelectionMode.MULTIPLE : SelectionMode.SINGLE;
-        }
-    };
 }
