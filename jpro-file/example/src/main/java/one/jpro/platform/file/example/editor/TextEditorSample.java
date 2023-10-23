@@ -61,20 +61,19 @@ public class TextEditorSample extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("JPro File Dropper");
+        stage.setTitle("JPro Text Editor");
         Scene scene = new Scene(createRoot(stage), 1140, 640);
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
-        Optional.ofNullable(TextEditorSample.class.getResource("/one/jpro/platform/file/example/css/file_dropper.css"))
-                .map(URL::toExternalForm)
-                .ifPresent(scene.getStylesheets()::add);
+        scene.getStylesheets().add(TextEditorSample.class
+                .getResource("/one/jpro/platform/file/example/css/text_editor.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
     }
 
     public Parent createRoot(Stage stage) {
-        Label dropLabel = new Label("Open or drop " + textExtensionFilter.description().toLowerCase() + " here!");
+        Label dropLabel = new Label("Drop " + textExtensionFilter.description().toLowerCase() + " here!");
         StackPane dropPane = new StackPane(dropLabel);
         dropPane.getStyleClass().add("drop-pane");
 
@@ -94,8 +93,14 @@ public class TextEditorSample extends Application {
             contentPane.getChildren().setAll(textArea);
         });
 
+        Button newButton = new Button("New", new FontIcon(Material2AL.INSERT_DRIVE_FILE));
+        newButton.setDefaultButton(true);
+        newButton.setOnAction(event -> {
+            textArea.clear();
+            contentPane.getChildren().setAll(textArea);
+        });
+
         Button openButton = new Button("Open", new FontIcon(Material2AL.FOLDER_OPEN));
-        openButton.setDefaultButton(true);
         FileOpenPicker fileOpenPicker = FileOpenPicker.create(openButton);
         fileOpenPicker.setSelectedExtensionFilter(textExtensionFilter);
         fileOpenPicker.setOnFilesSelected(fileSources -> {
@@ -105,22 +110,23 @@ public class TextEditorSample extends Application {
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox controlsBox = new HBox(openButton, spacer);
+        HBox controlsBox = new HBox(newButton, openButton, spacer);
         controlsBox.getStyleClass().add("controls-box");
 
-        final Button retrieveButton;
+        final Button saveAsButton;
         if (WebAPI.isBrowser()) {
-            retrieveButton = new Button("Download", new FontIcon(Material2AL.CLOUD_DOWNLOAD));
-            controlsBox.getChildren().add(retrieveButton);
+            saveAsButton = new Button("Download", new FontIcon(Material2AL.CLOUD_DOWNLOAD));
+            controlsBox.getChildren().add(saveAsButton);
         } else {
             Button saveButton = new Button("Save", new FontIcon(Material2MZ.SAVE_ALT));
             saveButton.disableProperty().bind(textArea.textProperty().isEmpty());
             saveButton.setOnAction(event -> saveToFile(textArea).apply(lastSavedFile));
-            retrieveButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
-            controlsBox.getChildren().addAll(saveButton, retrieveButton);
+            saveAsButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
+            controlsBox.getChildren().addAll(saveButton, saveAsButton);
         }
-        retrieveButton.disableProperty().bind(textArea.textProperty().isEmpty());
-        FileSavePicker fileSavePicker = FileSavePicker.create(retrieveButton);
+        saveAsButton.disableProperty().bind(textArea.textProperty().isEmpty());
+
+        FileSavePicker fileSavePicker = FileSavePicker.create(saveAsButton);
         fileSavePicker.setInitialFileName("subtitle");
         fileSavePicker.setSelectedExtensionFilter(ExtensionFilter.of("Subtitle format (.srt)", ".srt"));
         fileSavePicker.setOnFileSelected(file -> saveToFile(textArea).apply(file)
