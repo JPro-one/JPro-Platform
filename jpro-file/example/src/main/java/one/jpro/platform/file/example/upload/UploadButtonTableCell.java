@@ -1,6 +1,5 @@
 package one.jpro.platform.file.example.upload;
 
-import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -29,17 +28,12 @@ public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, Fi
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setAlignment(Pos.CENTER);
 
-        startUploadButton = new Button("Start upload");
+        startUploadButton = new Button();
         startUploadButton.setOnAction(event -> {
             final var selectedItem = getTableView().getItems().get(getIndex());
             if (selectedItem != null) {
                 // start the upload asynchronously
-                selectedItem.uploadFileAsync().thenAccept(file ->
-                        // update the button text when the upload is completed
-                        Platform.runLater(() -> {
-                            startUploadButton.setDisable(true);
-                            startUploadButton.setText("Completed");
-                        }));
+                selectedItem.uploadFileAsync();
             }
         });
     }
@@ -52,6 +46,13 @@ public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, Fi
             setGraphic(null);
         } else {
             setGraphic(startUploadButton);
+            if (file == null) {
+                startUploadButton.setText("Start upload");
+                startUploadButton.setDisable(false);
+            } else {
+                startUploadButton.setText("Completed");
+                startUploadButton.setDisable(true);
+            }
         }
     }
 }
