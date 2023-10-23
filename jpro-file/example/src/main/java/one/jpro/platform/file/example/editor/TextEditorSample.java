@@ -108,19 +108,19 @@ public class TextEditorSample extends Application {
         HBox controlsBox = new HBox(openButton, spacer);
         controlsBox.getStyleClass().add("controls-box");
 
-        final Button retriveButton;
+        final Button retrieveButton;
         if (WebAPI.isBrowser()) {
-            retriveButton = new Button("Download", new FontIcon(Material2AL.CLOUD_DOWNLOAD));
-            controlsBox.getChildren().add(retriveButton);
+            retrieveButton = new Button("Download", new FontIcon(Material2AL.CLOUD_DOWNLOAD));
+            controlsBox.getChildren().add(retrieveButton);
         } else {
             Button saveButton = new Button("Save", new FontIcon(Material2MZ.SAVE_ALT));
             saveButton.disableProperty().bind(textArea.textProperty().isEmpty());
             saveButton.setOnAction(event -> saveToFile(textArea).apply(lastSavedFile));
-            retriveButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
-            controlsBox.getChildren().addAll(saveButton, retriveButton);
+            retrieveButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
+            controlsBox.getChildren().addAll(saveButton, retrieveButton);
         }
-        retriveButton.disableProperty().bind(textArea.textProperty().isEmpty());
-        FileSavePicker fileSavePicker = FileSavePicker.create(retriveButton);
+        retrieveButton.disableProperty().bind(textArea.textProperty().isEmpty());
+        FileSavePicker fileSavePicker = FileSavePicker.create(retrieveButton);
         fileSavePicker.setInitialFileName("subtitle");
         fileSavePicker.setSelectedExtensionFilter(ExtensionFilter.of("Subtitle format (.srt)", ".srt"));
         fileSavePicker.setOnFileSelected(file -> saveToFile(textArea).apply(file)
