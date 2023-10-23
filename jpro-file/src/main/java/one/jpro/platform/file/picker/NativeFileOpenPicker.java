@@ -146,13 +146,27 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
 
                 @Override
                 protected void invalidated() {
-                    final ExtensionFilter filter = get();
-                    if (filter != null) {
-                        final FileChooser.ExtensionFilter selectedExtensionFilter = fileChooser.getExtensionFilters().stream()
-                                .filter(extensionFilter -> extensionFilter.getDescription().equals(filter.description()))
-                                .findFirst()
-                                .orElse(null);
-                        fileChooser.setSelectedExtensionFilter(selectedExtensionFilter);
+                    final ExtensionFilter selectedExtensionFilter = get();
+                    if (selectedExtensionFilter != null) {
+                        // check if the extension filter is already added to the file chooser
+                        final var optionalExtensionFilter = fileChooser.getExtensionFilters().stream()
+                                .filter(extensionFilter -> extensionFilter.getDescription()
+                                        .equals(selectedExtensionFilter.description()))
+                                .findFirst();
+                        if (optionalExtensionFilter.isPresent()) {
+                            fileChooser.setSelectedExtensionFilter(optionalExtensionFilter.get());
+                        } else {
+                            // add the extension filter which will automatically add the extension
+                            // filter to the file chooser due to the registered listener
+                            getExtensionFilters().add(selectedExtensionFilter);
+
+                            // Retrieve the extension filter from the file chooser and set it as
+                            // the selected extension filter
+                            fileChooser.getExtensionFilters().stream()
+                                    .filter(extensionFilter -> extensionFilter.getDescription()
+                                            .equals(selectedExtensionFilter.description()))
+                                    .findFirst().ifPresent(fileChooser::setSelectedExtensionFilter);
+                        }
                     } else {
                         fileChooser.setSelectedExtensionFilter(null);
                     }
