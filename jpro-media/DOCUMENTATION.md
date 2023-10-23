@@ -37,7 +37,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'one.jpro.platform:jpro-media:0.2.6-SNAPSHOT'
+    implementation 'one.jpro.platform:jpro-media:0.2.7-SNAPSHOT'
     runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
 
     // use compileOnly configuration when running/deploying with JPro, 
@@ -73,7 +73,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
     <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-media</artifactId>
-        <version>0.2.6-SNAPSHOT</version>
+        <version>0.2.7-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>org.bytedeco</groupId>
@@ -348,4 +348,4 @@ public class MediaRecorderApplication extends Application {
 }
 ```
 ### More examples
-For more examples, please take a look at the [JPro Media Examples](https://github.com/JPro-one/jpro-utils/tree/master/example/src/main/java/one/jpro/example/media/).
+For more examples, please take a look at the [JPro Media Examples](https://github.com/JPro-one/jpro-platform/tree/main/jpro-media/example/src/main/java/one/jpro/platform/media/example).

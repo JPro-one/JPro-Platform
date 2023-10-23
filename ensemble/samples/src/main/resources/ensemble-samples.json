@@ -1,0 +1,26 @@
+{
+  "samples": [
+    {
+      "category": "jpro-html-scrollpane",
+      "name": "HTMLScrollPaneSample",
+      "desc": "An html scrollpane sample.",
+      "project": "jpro-platform",
+      "classname": "one.jpro.platform.htmlscrollpane.example.HTMLScrollPaneSample"
+    },
+    {
+      "category": "jpro-mdfx",
+      "name": "MarkdownViewSample",
+      "desc": "A simple markdown view sample.",
+      "project": "jpro-platform",
+      "classname": "one.jpro.platform.mdfx.example.MarkdownViewSample"
+    },
+    {
+      "category": "jpro-media",
+      "name": "MediaPlayerSample",
+      "desc": "A simple media player sample.",
+      "project": "jpro-platform",
+      "preview": "MediaPlayerSample.png",
+      "classname": "one.jpro.platform.media.example.MediaPlayerSample"
+    }
+  ]
+}
