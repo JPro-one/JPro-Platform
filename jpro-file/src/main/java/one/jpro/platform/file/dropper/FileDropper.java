@@ -2,6 +2,7 @@ package one.jpro.platform.file.dropper;
 
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.Node;
@@ -106,4 +107,18 @@ public interface FileDropper extends MultipleFileSelector, EventTarget {
      * Event handler invoked when file dragging gesture exits the target node.
      */
     ObjectProperty<EventHandler<FileDragEvent>> onDragExitedProperty();
+
+    /**
+     * Returns a boolean value indicating if files are currently being dragged
+     * over the target node.
+     *
+     * @return {@code true} if files are currently being dragged over the target node,
+     *         {@code false} otherwise.
+     */
+    boolean isFilesDragOver();
+
+    /**
+     * Defines the property for the files drag over state.
+     */
+    ReadOnlyBooleanProperty filesDragOverProperty();
 }

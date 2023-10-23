@@ -1,5 +1,7 @@
 package one.jpro.platform.file.dropper;
 
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
@@ -32,8 +34,10 @@ public class NativeFileDropper extends BaseFileDropper {
                 List<File> files = dragEvent.getDragboard().getFiles();
                 if (hasSupportedExtension(files)) {
                     dragEvent.acceptTransferModes(TransferMode.COPY);
+                    setFilesDragOver(true);
                 } else {
                     dragEvent.acceptTransferModes(TransferMode.NONE);
+                    setFilesDragOver(false);
                 }
             }
         });
@@ -70,5 +74,29 @@ public class NativeFileDropper extends BaseFileDropper {
                 }
             }
         });
+    }
+
+    // files drag over property
+    private ReadOnlyBooleanWrapper filesDragOver;
+
+    @Override
+    public boolean isFilesDragOver() {
+        return (filesDragOver != null) && filesDragOver.get();
+    }
+
+    void setFilesDragOver(boolean value) {
+        filesDragOverPropertyImpl().set(value);
+    }
+
+    @Override
+    public ReadOnlyBooleanProperty filesDragOverProperty() {
+        return filesDragOverPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyBooleanWrapper filesDragOverPropertyImpl() {
+        if (filesDragOver == null) {
+            filesDragOver = new ReadOnlyBooleanWrapper(this, "filesDragOver", false);
+        }
+        return filesDragOver;
     }
 }

@@ -4,6 +4,7 @@ import com.jpro.webapi.WebAPI;
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -98,6 +99,16 @@ public class WebFileDropper extends BaseFileDropper {
             };
         }
         return onFilesSelected;
+    }
+
+    @Override
+    public final boolean isFilesDragOver() {
+        return multiFileUploader.getFileDragOver();
+    }
+
+    @Override
+    public final ReadOnlyBooleanProperty filesDragOverProperty() {
+        return multiFileUploader.fileDragOverProperty();
     }
 
     /**
