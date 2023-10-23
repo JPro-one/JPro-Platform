@@ -97,9 +97,11 @@ public class TextEditorSample extends Application {
         Button openButton = new Button("Open", new FontIcon(Material2AL.FOLDER_OPEN));
         openButton.setDefaultButton(true);
         FileOpenPicker fileOpenPicker = FileOpenPicker.create(openButton);
-        fileOpenPicker.getExtensionFilters().add(textExtensionFilter);
         fileOpenPicker.setSelectedExtensionFilter(textExtensionFilter);
-        fileOpenPicker.setOnFilesSelected(fileSources -> openFile(fileSources, textArea));
+        fileOpenPicker.setOnFilesSelected(fileSources -> {
+            openFile(fileSources, textArea);
+            contentPane.getChildren().setAll(textArea);
+        });
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
