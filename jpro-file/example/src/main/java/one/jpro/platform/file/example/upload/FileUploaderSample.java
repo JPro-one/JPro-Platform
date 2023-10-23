@@ -23,21 +23,15 @@ import java.util.Optional;
  * to select and manage files for upload. It employs the JPro {@link FileOpenPicker}
  * class to handle the file selection functionality and incorporates a {@link TableView}
  * to display the selected files.
- *
  * <p>
- * The application allows the user to choose files based on various file extension filters.
- * It also provides options to clear the selected files and to set the selection mode (single or multiple).
+ * The application provides options to clear the selected files and to set the selection
+ * mode (single or multiple).
  *
  * @author Besmir Beqiri
  * @see FileOpenPicker
  * @see ExtensionFilter
  */
 public final class FileUploaderSample extends Application {
-
-    private final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
-    private final ExtensionFilter audioExtensionFilter = ExtensionFilter.of("Audio files", ".mp3", ".wav", ".ogg");
-    private final ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", ".mp4", ".avi", ".mkv");
-    private final ExtensionFilter imageExtensionFilter = ExtensionFilter.of("Image files", ".png", ".jpg", ".jpeg");
 
     @Override
     public void start(Stage stage) {
@@ -46,9 +40,8 @@ public final class FileUploaderSample extends Application {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
-        Optional.ofNullable(FileUploaderSample.class.getResource("/one/jpro/platform/file/example/css/file_picker.css"))
-                .map(URL::toExternalForm)
-                .ifPresent(scene.getStylesheets()::add);
+        scene.getStylesheets().add(FileUploaderSample.class
+                .getResource("/one/jpro/platform/file/example/css/file_picker.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
     }
@@ -67,9 +60,6 @@ public final class FileUploaderSample extends Application {
         fileTableView.setPlaceholder(placeholderPane);
 
         FileOpenPicker fileOpenPicker = FileOpenPicker.create(placeholderPane);
-        fileOpenPicker.getExtensionFilters().addAll(textExtensionFilter,
-                audioExtensionFilter, videoExtensionFilter, imageExtensionFilter);
-        fileOpenPicker.setSelectedExtensionFilter(videoExtensionFilter);
         fileOpenPicker.setOnFilesSelected(fileSources -> fileTableView.getItems().addAll(fileSources));
 
         BorderPane rootPane = new BorderPane(fileTableView);
@@ -77,7 +67,7 @@ public final class FileUploaderSample extends Application {
 
         ChoiceBox<SelectionMode> selectionModeComboBox = new ChoiceBox<>();
         selectionModeComboBox.getItems().addAll(SelectionMode.SINGLE, SelectionMode.MULTIPLE);
-        selectionModeComboBox.getSelectionModel().select(SelectionMode.SINGLE);
+        selectionModeComboBox.getSelectionModel().select(SelectionMode.MULTIPLE);
         selectionModeComboBox.setConverter(selectionModeStringConverter);
         fileOpenPicker.selectionModeProperty().bind(selectionModeComboBox.valueProperty());
 
