@@ -21,6 +21,11 @@ import java.util.Map;
     public static final DataFormat FILE = new DataFormat("application/x-java-file");
 
     /**
+     * Represents a List of Files.
+     */
+    public static final DataFormat FILES = new DataFormat("application/x-java-files");
+
+    /**
      * Represents a List of File sources.
      */
     public static final DataFormat FILE_SOURCES = new DataFormat("application/x-java-file-source-list");
@@ -80,6 +85,28 @@ import java.util.Map;
      */
     public final File getFile() {
         return (File) data.get(FILE);
+    }
+
+    /**
+     * Gets whether a List of Files has been registered as data.
+     *
+     * @return true if <code>hasData(DataTransfer.FILES)</code> returns true, false otherwise
+     */
+    public final boolean hasFiles() {
+        return hasData(DataTransfer.FILES);
+    }
+
+    /**
+     * Gets the List of {@link File} which had previously been registered.
+     * This is equivalent to invoking <code>getData(DataTransfer.FILES)</code>.
+     * If no such entry exists, null is returned.
+     *
+     * @return The List of Files associated with {@link DataTransfer#FILES}, or null if
+     * there is none.
+     */
+    @SuppressWarnings("unchecked")
+    public final List<File> getFiles() {
+        return (List<File>) data.get(DataTransfer.FILES);
     }
 
     /**

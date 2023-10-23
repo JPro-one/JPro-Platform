@@ -7,6 +7,7 @@ import javafx.scene.input.TransferMode;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
+import one.jpro.platform.file.event.DataTransfer;
 import one.jpro.platform.file.event.FileDragEvent;
 
 import java.io.File;
@@ -36,8 +37,15 @@ public class NativeFileDropper extends BaseFileDropper {
             }
         });
 
-        node.setOnDragEntered(dragEvent -> Event.fireEvent(NativeFileDropper.this,
-                new FileDragEvent(NativeFileDropper.this, getNode(), FileDragEvent.FILE_DRAG_ENTERED)));
+        node.setOnDragEntered(dragEvent -> {
+            FileDragEvent fileDragEvent = new FileDragEvent(NativeFileDropper.this,
+                    getNode(), FileDragEvent.FILE_DRAG_ENTERED);
+            if (dragEvent.getDragboard().hasFiles()) {
+                List<File> files = dragEvent.getDragboard().getFiles();
+                fileDragEvent.getDataTransfer().putData(DataTransfer.FILES, files);
+            }
+            Event.fireEvent(NativeFileDropper.this, fileDragEvent);
+        });
         node.setOnDragExited(dragEvent -> Event.fireEvent(NativeFileDropper.this,
                 new FileDragEvent(NativeFileDropper.this, getNode(), FileDragEvent.FILE_DRAG_EXITED)));
 
