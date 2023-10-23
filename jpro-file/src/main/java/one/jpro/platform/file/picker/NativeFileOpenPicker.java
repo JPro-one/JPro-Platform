@@ -8,6 +8,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import one.jpro.platform.file.ExtensionFilter;
@@ -59,7 +60,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         getExtensionFilters().addListener(new WeakListChangeListener<>(extensionListFiltersListener));
 
         // Define the action that should be performed when the user clicks on the node.
-        node.setOnMouseClicked(mouseEvent -> {
+        node.addEventHandler(MouseEvent.MOUSE_CLICKED, actionEvent -> {
             Window window = node.getScene().getWindow();
             if (getSelectionMode() == SelectionMode.MULTIPLE) {
                 final List<File> files = fileChooser.showOpenMultipleDialog(window);
