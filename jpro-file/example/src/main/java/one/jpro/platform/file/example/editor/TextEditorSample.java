@@ -4,6 +4,8 @@ import atlantafx.base.theme.CupertinoLight;
 import com.jpro.webapi.WebAPI;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -55,11 +57,9 @@ import java.util.function.Function;
 public class TextEditorSample extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(TextEditorSample.class);
-
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
     private static final ExtensionFilter textExtensionFilter = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
-    private File lastOpenedFile;
-    private FileSavePicker fileSavePicker;
+    private final ObjectProperty<File> lastOpenedFile = new SimpleObjectProperty<>(this, "lastOpenedFile");
 
     @Override
     public void start(Stage stage) {
@@ -122,16 +122,18 @@ public class TextEditorSample extends Application {
         } else {
             Button saveButton = new Button("Save", new FontIcon(Material2MZ.SAVE_ALT));
             saveButton.disableProperty().bind(textArea.textProperty().isEmpty());
-            saveButton.setOnAction(event -> saveToFile(textArea).apply(lastOpenedFile));
+            saveButton.setOnAction(event -> saveToFile(textArea).apply(lastOpenedFile.get()));
             saveAsButton = new Button("Save As", new FontIcon(Material2MZ.SAVE));
             controlsBox.getChildren().addAll(saveButton, saveAsButton);
         }
         saveAsButton.disableProperty().bind(textArea.textProperty().isEmpty());
 
-        fileSavePicker = FileSavePicker.create(saveAsButton);
+        FileSavePicker fileSavePicker = FileSavePicker.create(saveAsButton);
+        fileSavePicker.initialFileNameProperty().bind(lastOpenedFile.map(file ->
+                FilenameUtils.getName(file.getName())).orElse("subtitle"));
+        fileSavePicker.initialDirectoryProperty().bind(lastOpenedFile.map(File::getParentFile));
         fileSavePicker.setSelectedExtensionFilter(ExtensionFilter.of("Subtitle format (.srt)", ".srt"));
-        fileSavePicker.setOnFileSelected(file -> saveToFile(textArea).apply(file)
-                .thenApply(saveToFile -> lastOpenedFile = saveToFile));
+        fileSavePicker.setOnFileSelected(file -> saveToFile(textArea).apply(file));
 
         BorderPane rootPane = new BorderPane(contentPane);
         rootPane.getStyleClass().add("root-pane");
@@ -147,19 +149,20 @@ public class TextEditorSample extends Application {
      */
     private void openFile(List<? extends FileSource> fileSources, TextArea textArea) {
         fileSources.stream().findFirst().ifPresentOrElse(fileSource -> fileSource.uploadFileAsync()
-                        .thenCompose(file -> {
-                            try {
-                                final String fileContent = new String(Files.readAllBytes(file.toPath()));
-                                Platform.runLater(() -> textArea.setText(fileContent));
-                                return CompletableFuture.completedFuture(file);
-                            } catch (IOException ex) {
-                                logger.error("Error reading file: " + ex.getMessage(), ex);
-                                return CompletableFuture.failedFuture(ex);
-                            }
-                        }).thenApply(file -> lastOpenedFile = file)
-                        .thenAccept(file -> fileSavePicker.setInitialFileName(
-                                FilenameUtils.getBaseName(file.getName()))),
-                () -> logger.warn("No file selected"));
+                .thenCompose(file -> {
+                    try {
+                        final String fileContent = new String(Files.readAllBytes(file.toPath()));
+                        Platform.runLater(() -> textArea.setText(fileContent));
+                        return CompletableFuture.completedFuture(file);
+                    } catch (IOException ex) {
+                        logger.error("Error reading file: " + ex.getMessage(), ex);
+                        return CompletableFuture.failedFuture(ex);
+                    }
+                }).thenApply(file -> {
+                    // Set the last opened file
+                    lastOpenedFile.set(file);
+                    return file;
+                }), () -> logger.warn("No file selected"));
     }
 
     /**
@@ -175,6 +178,7 @@ public class TextEditorSample extends Application {
             } catch (IOException ex) {
                 logger.error("Error writing file: " + ex.getMessage(), ex);
             }
+            lastOpenedFile.set(file);
             return file;
         });
     }

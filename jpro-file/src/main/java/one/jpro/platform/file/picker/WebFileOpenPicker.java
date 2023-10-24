@@ -65,16 +65,6 @@ public class WebFileOpenPicker extends BaseFileOpenPicker {
 
     // initial file name property
     @Override
-    public final String getInitialFileName() {
-        return (initialFileName == null) ? null : initialFileName.get();
-    }
-
-    @Override
-    public final void setInitialFileName(String value) {
-        initialFileNameProperty().set(value);
-    }
-
-    @Override
     public final StringProperty initialFileNameProperty() {
         if (initialFileName == null) {
             initialFileName = new SimpleStringProperty(this, "initialFileName");

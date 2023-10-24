@@ -35,6 +35,16 @@ abstract class BaseFilePicker implements FilePicker {
     // initial file name property
     StringProperty initialFileName;
 
+    @Override
+    public final String getInitialFileName() {
+        return (initialFileName == null) ? null : initialFileName.get();
+    }
+
+    @Override
+    public final void setInitialFileName(final String value) {
+        initialFileNameProperty().setValue(value);
+    }
+
     private final ObservableList<ExtensionFilter> extensionFilters = FXCollections.observableArrayList();
 
     @Override

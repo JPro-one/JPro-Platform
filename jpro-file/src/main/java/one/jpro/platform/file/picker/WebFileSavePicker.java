@@ -56,16 +56,6 @@ public class WebFileSavePicker extends BaseFileSavePicker {
 
     // initial file name property
     @Override
-    public final String getInitialFileName() {
-        return (initialFileName == null) ? null : initialFileName.get();
-    }
-
-    @Override
-    public final void setInitialFileName(String value) {
-        initialFileNameProperty().set(value);
-    }
-
-    @Override
     public final StringProperty initialFileNameProperty() {
         if (initialFileName == null) {
             initialFileName = new SimpleStringProperty(this, "initialFileName");
@@ -104,7 +94,7 @@ public class WebFileSavePicker extends BaseFileSavePicker {
 
     @Override
     final void showDialog() {
-        final String fileName = getInitialFileName() == null ? "file_" : getInitialFileName();
+        final String fileName = getInitialFileName() == null ? "filename" : getInitialFileName();
         final ExtensionFilter fileExtension = getSelectedExtensionFilter();
         final String fileType = fileExtension == null ? "" : fileExtension.extensions().get(0);
         final Function<File, CompletableFuture<File>> onFileSelected = getOnFileSelected();

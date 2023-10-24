@@ -106,19 +106,9 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
     }
 
     @Override
-    public final String getInitialFileName() {
-        return fileChooser.getInitialFileName();
-    }
-
-    @Override
-    public final void setInitialFileName(final String value) {
-        fileChooser.setInitialFileName(value);
-    }
-
-    @Override
     public final StringProperty initialFileNameProperty() {
         if (initialFileName == null) {
-            initialFileName = new SimpleStringProperty(this, "initialFileName", getInitialFileName());
+            initialFileName = new SimpleStringProperty(this, "initialFileName");
             fileChooser.initialFileNameProperty().bind(initialFileName);
         }
         return initialFileName;
