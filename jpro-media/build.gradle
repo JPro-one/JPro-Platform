@@ -38,6 +38,16 @@ test {
     onlyIf { !Boolean.getBoolean("ciTest") }
 }
 
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+
+    doLast {
+        println("Renamed README.md to DOCUMENTATION.md")
+    }
+}
+
 javadoc {
     options {
         encoding = 'UTF-8'
@@ -50,11 +60,13 @@ javadoc {
     }
 }
 
+javadocJar.dependsOn renameReadme
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             // Add README.md as an artifact named DOCUMENTATION.md
-            artifact(source: file('build/tmp/DOCUMENTATION.md')) {
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
                 classifier 'documentation'
                 extension 'md'
             }
@@ -77,12 +89,3 @@ publishing {
         }
     }
 }
-
-tasks.register('renameReadme', Copy) {
-    from layout.projectDirectory
-    include 'README.md'
-    into layout.buildDirectory.dir('tmp')
-    rename 'README.md', 'DOCUMENTATION.md'
-}
-
-publish.mustRunAfter('renameReadme')
