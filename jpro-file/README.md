@@ -1,12 +1,17 @@
 # JPro File
-The main purpose of this module is to handle file related features (like open, save and drag & drop) independently of the running platform, either desktop/mobile or on the web via `JPro`.
-These are the major components currently implemented to fulfil these requirements:
+A library for handling file related operations (like open, save and drag & drop) independently of the running platform,
+either desktop/mobile or on the web via `JPro`. These are the major components currently implemented to fulfil these
+requirements:
 
-- `FileOpenPicker`: Allows the users to browse and select files from their file system via a dialog. We can specify file extension filters to guide users in choosing the right type of files and enable single or multiple file selections. Once the user confirm their choice, a provided callback handler is invoked for further processing.
+- `FileOpenPicker`: Allows the users to browse and select files from their file system via a dialog. We can specify
+file extension filters to guide users in choosing the right type of files and enable single or multiple file selections.
+Once the user confirm their choice, a provided callback handler is invoked for further processing.
 
     * Key Features
-        1. **File extension filtering**: The picker allows to specify an array or list of acceptable file extensions, making it easier for users to find the type of files they want to select.
-        2. **Multiple File Selection**: Depending on the application needs, we can configure the picker to allow users to select either a single file or multiple files.
+        1. **File extension filtering**: The picker allows to specify an array or list of acceptable file extensions,
+        making it easier for users to find the type of files they want to select.
+        2. **Multiple File Selection**: Depending on the application needs, we can configure the picker to allow users
+        to select either a single file or multiple files.
         3. **Callback Handler**: Once the user selects the file(s), a provided handler function is invoked.
 
     * Usage Example
@@ -20,12 +25,17 @@ These are the major components currently implemented to fulfil these requirement
       fileOpenPicker.setSelectionMode(SelectionMode.MULTIPLE);
       fileOpenPicker.setOnFilesSelected(fileSources -> openFiles(fileSources));
       ```
-- `FileSavePicker`: Assists the user in saving files to their file system. We can set supported file types, default file names and starting directories. A callback handler is invoked to specify the saving tasks upon the successfully selected file. For the `Web` implementation this picker acts as a file downloader.
+- `FileSavePicker`: Assists the user in saving files to their file system. We can set supported file types, default
+file names and starting directories. A callback handler is invoked to specify the saving tasks upon the successfully
+selected file. For the `Web` implementation this picker acts as a file downloader.
 
     * Key Features
-        1. **File Type Support**: We can specify which file types are supported for saving, guiding the user to choose an appropriate file extension.
-        2. **Default File Name & Location**: The picker allows us to set a default file name and starting directory, making it convenient for the user.
-        3. **Callback Handler**: Upon successful file choosing, a handler function is triggered, enabling us to execute the saving tasks.
+        1. **File Type Support**: We can specify which file types are supported for saving, guiding the user to choose
+        an appropriate file extension.
+        2. **Default File Name & Location**: The picker allows us to set a default file name and starting directory,
+        making it convenient for the user.
+        3. **Callback Handler**: Upon successful file choosing, a handler function is triggered, enabling us to execute
+        the saving tasks.
 
     * Usage Example
 
@@ -36,13 +46,19 @@ These are the major components currently implemented to fulfil these requirement
       fileSavePicker.setOnFileSelected(file -> saveTask().apply(file));
       ```
 
-- `FileDropper`: A file dropper provide handlers for mouse drag & dropping events in order to drop file into a defined area. It supports file extension filtering and can handle single or multiple files. Once files are successfully dropped, a specified callback handler is invoked for further processing.
+- `FileDropper`: A file dropper provide handlers for mouse drag & dropping events in order to drop file into a defined
+area. It supports file extension filtering and can handle single or multiple files. Once files are successfully dropped,
+a specified callback handler is invoked for further processing.
 
     * Key Features
-        1. **File Extension Filtering**: We can set a list of acceptable file extensions, ensuring that only relevant files can be dropped into the specified node.
-        2. **Multiple File Support**: The dropper can be configured to accept single or multiple files, providing flexibility for various use-cases.
-        3. **Visual Feedback**: A specified node can be styled and configured to provide visual cues when a file is being dragged over it, or when an incompatible file type is attempted.
-        4. **Callback Handler**: Upon successful file(s) drop, a handler function we provided is invoked, allowing us to define how these files should be processed.
+        1. **File Extension Filtering**: We can set a list of acceptable file extensions, ensuring that only relevant
+        files can be dropped into the specified node.
+        2. **Multiple File Support**: The dropper can be configured to accept single or multiple files, providing 
+        flexibility for various use-cases.
+        3. **Visual Feedback**: A specified node can be styled and configured to provide visual cues when a file is
+        being dragged over it, or when an incompatible file type is attempted.
+        4. **Callback Handler**: Upon successful file(s) drop, a handler function we provided is invoked, allowing us
+        to define how these files should be processed.
 
     * Usage Example
 

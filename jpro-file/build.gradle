@@ -41,7 +41,7 @@ publishing {
             pom {
                 packaging = 'jar'
                 name = 'JPro File'
-                description = 'A library for handling file related opearations in JavaFX applications ' +
+                description = 'A library for handling file related operations in JavaFX applications ' +
                         'running natively and via JPro server.'
                 url = 'https://www.jpro.one'
 
