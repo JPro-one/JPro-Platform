@@ -38,16 +38,6 @@ test {
     onlyIf { !Boolean.getBoolean("ciTest") }
 }
 
-tasks.register('renameReadme', Copy) {
-    from 'README.md'
-    into layout.buildDirectory.dir('docs')
-    rename 'README.md', 'DOCUMENTATION.md'
-
-    doLast {
-        println("Renamed README.md to DOCUMENTATION.md")
-    }
-}
-
 javadoc {
     options {
         encoding = 'UTF-8'
@@ -59,8 +49,6 @@ javadoc {
         addStringOption('Xdoclint:none', '-quiet')
     }
 }
-
-javadocJar.dependsOn renameReadme
 
 publishing {
     publications {
@@ -89,3 +77,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
