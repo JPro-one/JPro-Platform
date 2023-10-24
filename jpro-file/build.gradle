@@ -34,3 +34,25 @@ javadoc {
 //        addStringOption('Xdoclint:none', '-quiet')
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                packaging = 'jar'
+                name = 'JPro File'
+                description = 'A library for handling file related opearations in JavaFX applications ' +
+                        'running natively and via JPro server.'
+                url = 'https://www.jpro.one'
+
+                developers {
+                    developer {
+                        id = 'besidev'
+                        name = 'Besmir Beqiri'
+                        email = 'bb@sandec.de'
+                    }
+                }
+            }
+        }
+    }
+}
