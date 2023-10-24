@@ -38,6 +38,12 @@ javadoc {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            // Add README.md as an artifact named DOCUMENTATION.md
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'documentation'
+                extension 'md'
+            }
+
             pom {
                 packaging = 'jar'
                 name = 'JPro File'
@@ -56,3 +62,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
