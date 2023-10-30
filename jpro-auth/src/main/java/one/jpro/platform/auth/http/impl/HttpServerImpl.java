@@ -237,8 +237,7 @@ public final class HttpServerImpl implements HttpServer {
         int port = -1;
         try {
             final SocketAddress localAddress = serverSocketChannel.getLocalAddress();
-            if (localAddress instanceof InetSocketAddress) {
-                final InetSocketAddress socketAddress = (InetSocketAddress) serverSocketChannel.getLocalAddress();
+            if (localAddress instanceof InetSocketAddress socketAddress) {
                 port = socketAddress.getPort();
             }
         } catch (IOException ex) {

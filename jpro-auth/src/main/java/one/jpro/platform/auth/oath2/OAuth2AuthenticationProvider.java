@@ -108,8 +108,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     @NotNull
     public CompletableFuture<User> authenticate(@NotNull final Credentials credentials) {
         try {
-            if (credentials instanceof UsernamePasswordCredentials) {
-                UsernamePasswordCredentials usernamePasswordCredentials = (UsernamePasswordCredentials) credentials;
+            if (credentials instanceof UsernamePasswordCredentials usernamePasswordCredentials) {
                 // validate
                 usernamePasswordCredentials.validate(null);
 
@@ -124,8 +123,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             // if the credentials already contain a token, then validate it to confirm
             // that it can be reused, otherwise, based on the configured flow, request
             // a new token from the authority provider
-            if (credentials instanceof TokenCredentials) {
-                TokenCredentials tokenCredentials = (TokenCredentials) credentials;
+            if (credentials instanceof TokenCredentials tokenCredentials) {
                 tokenCredentials.validate(null);
 
                 // credentials already contain a token, validate it
