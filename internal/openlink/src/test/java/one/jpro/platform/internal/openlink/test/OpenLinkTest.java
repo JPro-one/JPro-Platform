@@ -8,7 +8,6 @@ import org.mockito.Mock;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 
 import static org.mockito.Mockito.*;
 
