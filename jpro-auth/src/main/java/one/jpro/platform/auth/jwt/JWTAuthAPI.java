@@ -90,7 +90,7 @@ public class JWTAuthAPI {
                                                           @NotNull final String path,
                                                           @Nullable final JSONObject headers,
                                                           @NotNull String payload) {
-        if (path == null || path.length() == 0) {
+        if (path == null || path.isEmpty()) {
             // and this can happen as it is a config option that is dependent on the provider
             return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid path"));
         }
@@ -128,7 +128,7 @@ public class JWTAuthAPI {
                 .thenCompose(response -> {
                     // read the body regardless
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                        if (response.body() == null || response.body().length() == 0) {
+                        if (response.body() == null || response.body().isEmpty()) {
                             return CompletableFuture.failedFuture(
                                     new RuntimeException("Status code: " + response.statusCode()));
                         } else {

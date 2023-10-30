@@ -7,7 +7,6 @@ import one.jpro.platform.auth.http.impl.JProServerImpl;
 import one.jpro.platform.auth.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URL;
 import java.util.*;
 
 /**
