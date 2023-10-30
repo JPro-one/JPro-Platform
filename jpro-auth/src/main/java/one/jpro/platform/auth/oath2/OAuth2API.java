@@ -147,7 +147,7 @@ public class OAuth2API {
 
         return fetch(HttpMethod.POST, options.getTokenPath(), headers, payload)
                 .thenCompose(response -> {
-                    if (response.body() == null || response.body().length() == 0) {
+                    if (response.body() == null || response.body().isEmpty()) {
                         return CompletableFuture.failedFuture(new RuntimeException("No Body"));
                     }
 
@@ -203,7 +203,7 @@ public class OAuth2API {
 
         return fetch(HttpMethod.POST, options.getIntrospectionPath(), headers, payload)
                 .thenCompose(response -> {
-                    if (response.body() == null || response.body().length() == 0) {
+                    if (response.body() == null || response.body().isEmpty()) {
                         return CompletableFuture.failedFuture(new RuntimeException("No Body"));
                     }
 
@@ -335,7 +335,7 @@ public class OAuth2API {
 
         return fetch(HttpMethod.GET, options.getJwkPath(), headers, null)
                 .thenCompose(response -> {
-                    if (response.body() == null || response.body().length() == 0) {
+                    if (response.body() == null || response.body().isEmpty()) {
                         return CompletableFuture.failedFuture(new RuntimeException("No Body"));
                     }
 
@@ -623,7 +623,7 @@ public class OAuth2API {
      */
     private CompletableFuture<HttpResponse<String>> fetch(HttpMethod method, String path,
                                                           JSONObject headers, String payload) {
-        if (path == null || path.length() == 0) {
+        if (path == null || path.isEmpty()) {
             // and this can happen as it is a config option that is dependent on the provider
             return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid path"));
         }
@@ -675,7 +675,7 @@ public class OAuth2API {
                 .thenCompose(response -> {
                     // read the body regardless
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                        if (response.body() == null || response.body().length() == 0) {
+                        if (response.body() == null || response.body().isEmpty()) {
                             return CompletableFuture.failedFuture(
                                     new RuntimeException("Status code: " + response.statusCode()));
                         } else {

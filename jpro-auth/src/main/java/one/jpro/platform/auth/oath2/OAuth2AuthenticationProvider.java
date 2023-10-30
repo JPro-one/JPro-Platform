@@ -29,7 +29,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * Base class for creating an OAuth2 authentication provider.
@@ -532,7 +531,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 throw new IllegalStateException("User audience is null or empty");
             }
 
-            if (audience.length() > 0) {
+            if (!audience.isEmpty()) {
                 if (idToken || jwtOptions.getAudience() == null) {
                     // In reference to: https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
                     // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at
@@ -546,7 +545,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 } else {
                     final List<String> audList = audience.toList().stream()
                             .map(Object::toString)
-                            .collect(Collectors.toList());
+                            .toList();
                     for (String aud : jwtOptions.getAudience()) {
                         if (!audList.contains(aud)) {
                             throw new IllegalStateException("Invalid JWT audience, expected: " + aud +
@@ -579,7 +578,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     // If the ID Token contains multiple audiences, the Client SHOULD verify that an azp Claim is present.
                     final List<String> audList = audience.toList().stream()
                             .map(Object::toString)
-                            .collect(Collectors.toList());
+                            .toList();
                     if (audList.contains(json.getString("azp"))) {
                         throw new IllegalStateException("ID token with multiple audiences, " +
                                 "doesn't contain the azp Claim value");
