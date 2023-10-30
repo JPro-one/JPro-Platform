@@ -58,7 +58,7 @@ public class JProServerImpl implements HttpServer {
     }
 
     @Override
-    public void openURL(@NotNull String url) {
+    public void openURL(@NotNull final String url) {
         webAPI.openURL(url);
     }
 }

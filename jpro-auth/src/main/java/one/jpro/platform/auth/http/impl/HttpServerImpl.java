@@ -37,9 +37,9 @@ public final class HttpServerImpl implements HttpServer {
     private static HttpOptions httpOptions;
 
     private static final class SingletonHolder {
-        private static final HttpServerImpl INSTANCE = initAuthServer();
+        private static final HttpServerImpl INSTANCE = initHttpServer();
 
-        private static HttpServerImpl initAuthServer() {
+        private static HttpServerImpl initHttpServer() {
             try {
                 return new HttpServerImpl(stage, httpOptions == null ? new HttpOptions() : httpOptions);
             } catch (IOException ex) {
@@ -54,9 +54,9 @@ public final class HttpServerImpl implements HttpServer {
         }
 
         /**
-         * Get singleton AuthServer.
+         * Get singleton HTTP server.
          *
-         * @return AuthServer singleton.
+         * @return HTTP server singleton.
          */
         public static HttpServerImpl getInstance() {
             return SingletonHolder.INSTANCE;
@@ -97,12 +97,12 @@ public final class HttpServerImpl implements HttpServer {
     private final Thread thread;
 
     /**
-     * Creates authorization server.
+     * Creates HTTP server.
      *
      * @param options the HTTP options
      * @throws IOException if an error occurs
      */
-    private HttpServerImpl(Stage stage, HttpOptions options) throws IOException {
+    private HttpServerImpl(final Stage stage, final HttpOptions options) throws IOException {
         this.options = options;
 
         // Create a default response
@@ -175,7 +175,7 @@ public final class HttpServerImpl implements HttpServer {
         start();
     }
 
-    private byte[] getResourceAsBytes(@NotNull String name) throws IOException {
+    private byte[] getResourceAsBytes(@NotNull final String name) throws IOException {
         try (InputStream is = HttpServer.class.getResourceAsStream(name)) {
             if (is != null) {
                 return is.readAllBytes();
@@ -252,7 +252,7 @@ public final class HttpServerImpl implements HttpServer {
     }
 
     @Override
-    public void openURL(@NotNull String url) {
+    public void openURL(@NotNull final String url) {
         OpenLink.openURL(url);
     }
 }
