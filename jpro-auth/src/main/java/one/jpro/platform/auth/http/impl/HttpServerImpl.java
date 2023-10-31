@@ -129,7 +129,7 @@ public final class HttpServerImpl implements HttpServer {
             log.debug("Request version: {}", request.version());
             log.debug("Request headers: {}", request.headers());
             log.debug("Response status: {}", response.status());
-            log.debug("Request body: {}", new String(request.body()));
+            log.debug("Response body: {}", new String(response.body()));
             log.debug("***************************************************************************");
 
             callback.accept(response);

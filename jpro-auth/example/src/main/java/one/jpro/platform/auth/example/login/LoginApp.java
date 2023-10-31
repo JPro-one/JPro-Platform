@@ -1,5 +1,6 @@
-package example.login;
+package one.jpro.platform.auth.example.login;
 
+import atlantafx.base.theme.CupertinoLight;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -41,10 +42,11 @@ public class LoginApp extends BaseAuthApp {
 
     @Override
     public Route createRoute() {
-        Optional.ofNullable(LoginApp.class.getResource("/style.css"))
+        Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
-                .ifPresent(css -> getScene().getStylesheets().add(css));
-//        getScene().setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+                .ifPresent(getScene()::setUserAgentStylesheet);
+        getScene().getStylesheets().add(LoginApp.class
+                .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
         // Google Auth provider
         final var googleAuth = AuthAPI.googleAuth()
@@ -190,7 +192,8 @@ public class LoginApp extends BaseAuthApp {
 
         final var signInBox = createButtonWithDescription(
                 "Sign in with the selected authentication provider.", "Sign In",
-                event -> authProvider.authorizeUrl(authCredentials));
+                event -> authProvider.authorizeUrl(authCredentials,
+                        httpServer -> gotoPage(headerLabel, httpServer.getFullRequestedURL())));
 
         final var discoveryBox = createButtonWithDescription(
                 "The OpenID Connect Discovery provides a client with configuration details.",

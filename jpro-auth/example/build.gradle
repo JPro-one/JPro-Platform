@@ -1,0 +1,28 @@
+plugins {
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
+}
+
+dependencies {
+    implementation project(':jpro-auth')
+    implementation project(':jpro-mdfx')
+    implementation project(':jpro-routing:core')
+    implementation project(':jpro-routing:dev')
+
+    implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
+    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+    implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+javafx {
+    version = "$JAVAFX_VERSION"
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web']
+}
+
+mainClassName = 'one.jpro.platform.auth.example.login.LoginApp'
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = moduleName
+}
