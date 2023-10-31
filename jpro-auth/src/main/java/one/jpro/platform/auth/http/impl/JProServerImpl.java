@@ -42,7 +42,8 @@ public class JProServerImpl implements HttpServer {
     public String getServerHost() {
         final String serverName = webAPI.getServer();
         final int idx = serverName.indexOf(':');
-        return (idx >= 0) ? serverName.substring(0, idx) : serverName;
+        final String host = (idx >= 0) ? serverName.substring(0, idx) : serverName;
+        return host.replace("localhost", "127.0.0.1");
     }
 
     @Override
@@ -54,7 +55,7 @@ public class JProServerImpl implements HttpServer {
 
     @Override
     public String getFullRequestedURL() {
-        return URI.create(webAPI.getBrowserURL()).toString();
+        return URI.create(webAPI.getBrowserURL().replace("localhost", "127.0.0.1")).toString();
     }
 
     @Override
