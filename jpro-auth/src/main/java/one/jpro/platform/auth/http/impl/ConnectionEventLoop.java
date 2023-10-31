@@ -253,7 +253,7 @@ class ConnectionEventLoop {
                 headers.add(new Header(HEADER_CONNECTION, KEEP_ALIVE));
             }
             if (!response.hasHeader(HEADER_CONTENT_LENGTH)) {
-                headers.add(new Header(HEADER_CONTENT_LENGTH, Integer.toString(response.getBody().length)));
+                headers.add(new Header(HEADER_CONTENT_LENGTH, Integer.toString(response.body().length)));
             }
             writeBuffer = ByteBuffer.wrap(response.serialize(version, headers));
             log.trace("Response ready in connection with id: {} and num_bytes: {}", id, writeBuffer.remaining());

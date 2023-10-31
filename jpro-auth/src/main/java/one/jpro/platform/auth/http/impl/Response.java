@@ -3,11 +3,16 @@ package one.jpro.platform.auth.http.impl;
 import java.util.List;
 
 /**
- * Represents an HTTP response.
+ * Represents an HTTP response object with the specified status, reason, headers, and body.
+ *
+ * @param status  the status code of the response
+ * @param reason  the reason phrase of the response
+ * @param headers the headers of the response
+ * @param body    the body of the response
  *
  * @author Besmir Beqiri
  */
-final class Response {
+record Response(int status, String reason, List<Header> headers, byte[] body) {
 
     /**
      * The byte array representing the ": " separator.
@@ -23,62 +28,6 @@ final class Response {
      * The byte array representing the carriage return and line feed.
      */
     static final byte[] CRLF = "\r\n".getBytes();
-
-    private final int status;
-    private final String reason;
-    private final List<Header> headers;
-    private final byte[] body;
-
-    /**
-     * Constructs a new Response object with the specified status, reason, headers, and body.
-     *
-     * @param status  the status code of the response
-     * @param reason  the reason phrase of the response
-     * @param headers the headers of the response
-     * @param body    the body of the response
-     */
-    public Response(int status, String reason, List<Header> headers, byte[] body) {
-        this.status = status;
-        this.reason = reason;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    /**
-     * Returns the status code of the response.
-     *
-     * @return the status code
-     */
-    public int getStatus() {
-        return status;
-    }
-
-    /**
-     * Returns the reason phrase of the response.
-     *
-     * @return the reason phrase
-     */
-    public String getReason() {
-        return reason;
-    }
-
-    /**
-     * Returns the headers of the response.
-     *
-     * @return the headers
-     */
-    public List<Header> getHeaders() {
-        return headers;
-    }
-
-    /**
-     * Returns the body of the response.
-     *
-     * @return the body
-     */
-    public byte[] getBody() {
-        return body;
-    }
 
     /**
      * Checks if the response has a header with the specified name.

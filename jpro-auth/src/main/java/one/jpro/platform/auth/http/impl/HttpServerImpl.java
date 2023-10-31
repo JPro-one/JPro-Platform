@@ -7,6 +7,7 @@ import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpServerException;
 import one.jpro.platform.auth.http.HttpStatus;
 import one.jpro.platform.internal.openlink.OpenLink;
+import one.jpro.platform.routing.LinkUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
+import java.net.URI;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -125,7 +127,7 @@ public final class HttpServerImpl implements HttpServer {
             log.debug("Request method: {}", request.method());
             log.debug("Request version: {}", request.version());
             log.debug("Request headers: {}", request.headers());
-            log.debug("Response status: {}", response.getStatus());
+            log.debug("Response status: {}", response.status());
 //            log.debug("Request body: {}", new String(request.body()));
             log.debug("***************************************************************************");
 
