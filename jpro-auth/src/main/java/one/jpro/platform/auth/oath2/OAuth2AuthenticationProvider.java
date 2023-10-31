@@ -29,6 +29,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * Base class for creating an OAuth2 authentication provider.
@@ -89,11 +90,25 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @param credentials the credentials to authenticate
      * @return the url to be used to authorize the user.
      */
+    @Deprecated
     public String authorizeUrl(OAuth2Credentials credentials) {
+        return authorizeUrl(credentials, null);
+    }
+
+    /**
+     * The client sends the end-user's browser to the authorization endpoint.
+     * This endpoint is where the user signs in and grants access.
+     * End-user interaction is required.
+     *
+     * @param credentials the credentials to authenticate
+     * @param callback the callback for handling the HTTP server response
+     * @return the url to be used to authorize the user.
+     */
+    public String authorizeUrl(OAuth2Credentials credentials, Consumer<HttpServer> callback) {
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
         log.debug("Authorize URL: {}", authorizeUrl);
-        httpServer.openURL(URI.create(authorizeUrl).toString());
+        httpServer.openURL(authorizeUrl, callback);
         return authorizeUrl;
     }
 

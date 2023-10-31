@@ -6,8 +6,10 @@ import one.jpro.platform.auth.http.impl.HttpServerImpl;
 import one.jpro.platform.auth.http.impl.JProServerImpl;
 import one.jpro.platform.auth.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Http server interface.
@@ -168,6 +170,7 @@ public interface HttpServer extends AutoCloseable {
      * Opens the given URL string in the browser.
      *
      * @param url the URL string to open
+     * @param callback the callback to be called when the URL is opened
      */
-    void openURL(@NotNull String url);
+    void openURL(@NotNull String url, @Nullable Consumer<HttpServer> callback);
 }

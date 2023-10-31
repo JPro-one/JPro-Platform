@@ -7,8 +7,8 @@ import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpServerException;
 import one.jpro.platform.auth.http.HttpStatus;
 import one.jpro.platform.internal.openlink.OpenLink;
-import one.jpro.platform.routing.LinkUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +24,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * Implementation of the {@link HttpServer} interface when running
@@ -97,6 +98,7 @@ public final class HttpServerImpl implements HttpServer {
     private final ServerSocketChannel serverSocketChannel;
     private final List<ConnectionEventLoop> connectionEventLoops;
     private final Thread thread;
+    private Consumer<HttpServer> openURLCallback;
 
     /**
      * Creates HTTP server.
@@ -122,13 +124,12 @@ public final class HttpServerImpl implements HttpServer {
             log.debug("Server port: {}", getServerPort());
             log.debug("Full requested URL: {}", getFullRequestedURL());
             log.debug("Parameters: {}", getParameters());
-            log.debug("Request hashCode = {}", HttpServerImpl.this.hashCode());
             log.debug("Request URI: {}", request.uri());
             log.debug("Request method: {}", request.method());
             log.debug("Request version: {}", request.version());
             log.debug("Request headers: {}", request.headers());
             log.debug("Response status: {}", response.status());
-//            log.debug("Request body: {}", new String(request.body()));
+            log.debug("Request body: {}", new String(request.body()));
             log.debug("***************************************************************************");
 
             callback.accept(response);
@@ -136,7 +137,9 @@ public final class HttpServerImpl implements HttpServer {
             if (stage != null && stage.isShowing()) {
                 Platform.runLater(() -> {
                     this.uri = request.uri();
-                    openURL(getFullRequestedURL());
+                    if (openURLCallback != null) {
+                        openURLCallback.accept(this);
+                    }
                     stage.toFront();
                 });
             }
@@ -253,7 +256,8 @@ public final class HttpServerImpl implements HttpServer {
     }
 
     @Override
-    public void openURL(@NotNull final String url) {
-        OpenLink.openURL(url);
+    public void openURL(@NotNull final String url, @Nullable final Consumer<HttpServer> callback) {
+        this.openURLCallback = callback;
+        OpenLink.openURL(URI.create(url).toString());
     }
 }
