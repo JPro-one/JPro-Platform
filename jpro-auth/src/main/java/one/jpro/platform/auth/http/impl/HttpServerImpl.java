@@ -134,8 +134,7 @@ public final class HttpServerImpl implements HttpServer {
             if (stage != null && stage.isShowing()) {
                 Platform.runLater(() -> {
                     this.uri = request.uri();
-                    System.out.println("URI: " + this.uri);
-                    // TODO: trigger the browser to open the URL, or add handler to the response
+                    openURL(getFullRequestedURL());
                     stage.toFront();
                 });
             }
