@@ -85,7 +85,9 @@ public class TokenCredentials implements Credentials {
      * @param user the user object
      */
     public TokenCredentials(@NotNull final User user) {
-        this(user.toJSON().optJSONObject(Authentication.KEY_ATTRIBUTES).optJSONObject("auth"));
+        this(user.toJSON().optJSONObject(Authentication.KEY_ATTRIBUTES)
+                .optJSONObject("auth", new JSONObject())
+                .optJSONObject("accessToken"));
     }
 
     @NotNull
