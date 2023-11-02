@@ -12,9 +12,11 @@ abstract class RouteApp extends Application {
   private var _stage: Stage = null
   private var routeNode: RouteNode = null
   private var _scene: Scene = null
+  private var _sessionManager: SessionManager = null
   def stageStyle(): StageStyle = StageStyle.DECORATED
   def getStage(): Stage = _stage
   def getScene(): Scene = _scene
+  def getSessionManager(): SessionManager = _sessionManager
   def getRouteNode(): RouteNode = routeNode
   def getWebAPI(): WebAPI = if(WebAPI.isBrowser) WebAPI.getWebAPI(getStage()) else null
 
@@ -30,7 +32,8 @@ abstract class RouteApp extends Application {
     stage.setScene(_scene)
     routeNode.setRoute(createRoute())
     stage.show()
-    routeNode.start(SessionManager.getDefault(routeNode, stage))
+    _sessionManager = SessionManager.getDefault(routeNode, stage)
+    routeNode.start(_sessionManager)
   }
 
   def createRoute(): Route

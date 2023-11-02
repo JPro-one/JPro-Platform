@@ -77,6 +77,9 @@ object LinkUtil {
   def gotoPage(node: Node, url: String) = {
     LinkUtil.getSessionManager(node).gotoURL(url)
   }
+  def gotoPage(sessionManager: SessionManager, url: String): Unit = {
+    sessionManager.gotoURL(url)
+  }
   def getCurrentPage(node: Node): String = {
     LinkUtil.getSessionManager(node).url
   }
