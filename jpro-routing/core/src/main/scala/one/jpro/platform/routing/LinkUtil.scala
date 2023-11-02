@@ -56,7 +56,7 @@ object LinkUtil {
     setLink(node,url,None, true)
   }
   def setExternalLink(node: Node, url: String, text: String): Unit = {
-    setLink(node,url,Some(text), true)
+    setLink(node,url,Option(text), true)
   }
   def setLinkInternalPush(node: Node, url: String, text: Option[String] = None, external: Boolean = false) = {
     node.cursor = javafx.scene.Cursor.HAND
