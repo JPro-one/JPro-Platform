@@ -209,6 +209,9 @@ object LinkUtil {
 
 
   private def setLinkSimple(url: String, text: Option[String], pushState: Boolean, external: Boolean)(theNode: Node) = {
+    if(url == null) {
+      throw new NullPointerException("url was null")
+    }
     if(!WebAPI.isBrowser) {
       import LinkDesktop._
       theNode.setNewLink(url,text,pushState,
