@@ -80,12 +80,11 @@ configure(project(':jpro-routing:example')) {
   apply plugin: 'org.openjfx.javafxplugin'
   apply plugin: 'jpro-gradle-plugin'
 
-//  mainClassName = "example.scala.TestWebApplication"
-//  mainClassName = "example.scala.TestExtensions"
-//  mainClassName = "example.scala.ColorTransitionApp"
-//  mainClassName = "example.colors.ColorsApp"
-//  mainClassName = "example.popup.PopupApp"
-  mainClassName = "example.login.LoginApp"
+//mainClassName = "example.scala.TestWebApplication"
+//mainClassName = "example.scala.TestExtensions"
+//mainClassName = "example.scala.ColorTransitionApp"
+mainClassName = "example.colors.ColorsApp"
+//mainClassName = "example.popup.PopupApp"
 
   application {
     mainClass = "$mainClassName"
@@ -93,15 +92,12 @@ configure(project(':jpro-routing:example')) {
   }
 
   dependencies {
-    implementation project(':jpro-auth')
-    implementation project(':jpro-mdfx')
     implementation project(':jpro-routing:core')
     implementation project(':jpro-routing:dev')
     implementation project(':jpro-routing:popup')
 
     implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
     implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
-    implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
   }
 

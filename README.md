@@ -26,7 +26,8 @@ significant savings in development time, resources, and costs.
 ____
 
 To use them, you need the following repository:
-For Maven:
+- For Maven:
+
 ```xml
 <repositories>
   <repository>
@@ -35,11 +36,26 @@ For Maven:
   </repository>
 </repositories>
 ```
+- For Gradle:
 
 ```groovy
-  maven {
-    url "https://sandec.jfrog.io/artifactory/repo"
-  }
+repositories {
+    maven {
+        url "https://sandec.jfrog.io/artifactory/repo"
+    }
+}
+```
+
+## Lunch the examples
+The [example](https://github.com/JPro-one/jpro-platform/blob/main/example/src/main/java/one/jpro/platform/example/Main.java)
+subproject holds different examples from the other modules. To run it, you can use the following command:
+* As web application via JPro server
+```shell
+./gradlew example:jproRun
+```
+* As desktop application
+```shell
+./gradlew example:run
 ```
 
 ## JPro Auth
@@ -129,7 +145,7 @@ dependencies {
 }
 ```
 
-## JPro Media
+## [JPro Media](https://github.com/JPro-one/jpro-platform/tree/main/jpro-media)
 This library is designed for audio and video playback and recording within JavaFX applications.
 It seamlessly operates on both desktop and mobile devices, as well as in web browsers via **JPro**, 
 all while utilizing the same codebase.

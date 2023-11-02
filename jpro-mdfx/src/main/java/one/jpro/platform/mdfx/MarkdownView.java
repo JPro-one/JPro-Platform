@@ -1,13 +1,13 @@
 package one.jpro.platform.mdfx;
 
-import one.jpro.platform.mdfx.impl.AdaptiveImage;
-import one.jpro.platform.mdfx.impl.MDFXNodeHelper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import one.jpro.platform.mdfx.impl.AdaptiveImage;
+import one.jpro.platform.mdfx.impl.MDFXNodeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class MarkdownView extends VBox {
         this.mdString.addListener((p,o,n) -> updateContent());
         Optional.ofNullable(MarkdownView.class.getResource("/one/jpro/platform/mdfx/mdfx.css"))
                 .ifPresent(cssResource -> getStylesheets().add(cssResource.toExternalForm()));
-        getDefaultStylesheets().forEach(s -> getStylesheets().add(s));
+        getDefaultStylesheets().forEach(getStylesheets()::add);
         updateContent();
     }
 

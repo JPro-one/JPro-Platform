@@ -152,9 +152,8 @@ public final class AuthUtils {
         }
 
         String description;
-        var error = json.get("error");
-        if (error instanceof JSONObject) {
-            description = ((JSONObject) error).getString("message");
+        if (json.get("error") instanceof JSONObject error) {
+            description = error.getString("message");
         } else {
             description = json.optString("error_description", json.getString("error"));
         }

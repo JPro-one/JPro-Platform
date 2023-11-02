@@ -29,7 +29,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 /**
  * Base class for creating an OAuth2 authentication provider.
@@ -90,11 +90,25 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @param credentials the credentials to authenticate
      * @return the url to be used to authorize the user.
      */
+    @Deprecated
     public String authorizeUrl(OAuth2Credentials credentials) {
+        return authorizeUrl(credentials, null);
+    }
+
+    /**
+     * The client sends the end-user's browser to the authorization endpoint.
+     * This endpoint is where the user signs in and grants access.
+     * End-user interaction is required.
+     *
+     * @param credentials the credentials to authenticate
+     * @param callback the callback for handling the HTTP server response
+     * @return the url to be used to authorize the user.
+     */
+    public String authorizeUrl(OAuth2Credentials credentials, Consumer<HttpServer> callback) {
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
         log.debug("Authorize URL: {}", authorizeUrl);
-        httpServer.openURL(URI.create(authorizeUrl).toString());
+        httpServer.openURL(authorizeUrl, callback);
         return authorizeUrl;
     }
 
@@ -108,8 +122,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     @NotNull
     public CompletableFuture<User> authenticate(@NotNull final Credentials credentials) {
         try {
-            if (credentials instanceof UsernamePasswordCredentials) {
-                UsernamePasswordCredentials usernamePasswordCredentials = (UsernamePasswordCredentials) credentials;
+            if (credentials instanceof UsernamePasswordCredentials usernamePasswordCredentials) {
                 // validate
                 usernamePasswordCredentials.validate(null);
 
@@ -124,8 +137,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             // if the credentials already contain a token, then validate it to confirm
             // that it can be reused, otherwise, based on the configured flow, request
             // a new token from the authority provider
-            if (credentials instanceof TokenCredentials) {
-                TokenCredentials tokenCredentials = (TokenCredentials) credentials;
+            if (credentials instanceof TokenCredentials tokenCredentials) {
                 tokenCredentials.validate(null);
 
                 // credentials already contain a token, validate it
@@ -534,7 +546,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 throw new IllegalStateException("User audience is null or empty");
             }
 
-            if (audience.length() > 0) {
+            if (!audience.isEmpty()) {
                 if (idToken || jwtOptions.getAudience() == null) {
                     // In reference to: https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
                     // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at
@@ -548,7 +560,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 } else {
                     final List<String> audList = audience.toList().stream()
                             .map(Object::toString)
-                            .collect(Collectors.toList());
+                            .toList();
                     for (String aud : jwtOptions.getAudience()) {
                         if (!audList.contains(aud)) {
                             throw new IllegalStateException("Invalid JWT audience, expected: " + aud +
@@ -581,7 +593,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     // If the ID Token contains multiple audiences, the Client SHOULD verify that an azp Claim is present.
                     final List<String> audList = audience.toList().stream()
                             .map(Object::toString)
-                            .collect(Collectors.toList());
+                            .toList();
                     if (audList.contains(json.getString("azp"))) {
                         throw new IllegalStateException("ID token with multiple audiences, " +
                                 "doesn't contain the azp Claim value");

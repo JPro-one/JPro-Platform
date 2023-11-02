@@ -1,7 +1,7 @@
 .devfilter-hbox,
 .devfilter-vbox {
     -fx-alignment: center;
-    -fx-padding: 6;
+    -fx-padding: 6 0 6 0;
     -fx-spacing: 16;
 }
 

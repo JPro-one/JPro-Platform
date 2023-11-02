@@ -5,7 +5,7 @@
  */
 open module one.jpro.platform.routing.dev {
     requires transitive javafx.controls;
-    requires one.jpro.platform.routing.core;
+    requires transitive one.jpro.platform.routing.core;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.evaicons;
     requires org.kordamp.ikonli.ionicons4;

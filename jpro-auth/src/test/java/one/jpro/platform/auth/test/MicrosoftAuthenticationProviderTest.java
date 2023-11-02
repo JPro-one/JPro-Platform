@@ -37,8 +37,8 @@ public class MicrosoftAuthenticationProviderTest {
 
     @Test
     public void autoConfigViaOpenIDConnectDiscoveryService() throws ExecutionException, InterruptedException {
-        try (HttpServer authServer = HttpServer.create()) {
-            MicrosoftAuthenticationProvider.discover(authServer, new OAuth2Options()
+        try (HttpServer httpServer = HttpServer.create()) {
+            MicrosoftAuthenticationProvider.discover(httpServer, new OAuth2Options()
                             .setClientId("clientId")
                             .setTenant("common"))
                     .thenAccept(provider -> {

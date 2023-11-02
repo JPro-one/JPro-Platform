@@ -6,9 +6,10 @@ import one.jpro.platform.auth.http.impl.HttpServerImpl;
 import one.jpro.platform.auth.http.impl.JProServerImpl;
 import one.jpro.platform.auth.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.net.URL;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Http server interface.
@@ -32,19 +33,33 @@ public interface HttpServer extends AutoCloseable {
      * Creates a http server. If the application is running
      * in a browser via JPro server, then a wrapper over JPro is returned.
      * If the application is not running inside the browser,
-     * then a local http server is created and returned.
+     * then a local http server is created.
      *
      * @param stage the application stage
      * @return the HTTP server instance
      * @throws HttpServerException if an error occurs
      */
     static HttpServer create(Stage stage) throws HttpServerException {
+        return create(stage, new HttpOptions());
+    }
+
+    /**
+     * Creates a http server. If the application is running
+     * in a browser via JPro server, then a wrapper over JPro is returned.
+     * If the application is not running inside the browser,
+     * then a local http server is created.
+     *
+     * @param stage the application stage
+     * @param httpOptions the options for configuring the HTTP server
+     * @return the HTTP server instance
+     */
+    static HttpServer create(Stage stage, HttpOptions httpOptions) throws HttpServerException {
         if (WebAPI.isBrowser() && stage != null) {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new JProServerImpl(webAPI);
         }
 
-        return HttpServerImpl.getInstance(stage);
+        return HttpServerImpl.getInstance(stage, httpOptions);
     }
 
     /**
@@ -155,6 +170,7 @@ public interface HttpServer extends AutoCloseable {
      * Opens the given URL string in the browser.
      *
      * @param url the URL string to open
+     * @param callback the callback to be called when the URL is opened
      */
-    void openURL(@NotNull String url);
+    void openURL(@NotNull String url, @Nullable Consumer<HttpServer> callback);
 }
