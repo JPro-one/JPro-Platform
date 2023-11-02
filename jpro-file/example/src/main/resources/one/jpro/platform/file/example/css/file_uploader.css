@@ -1,0 +1,19 @@
+.controls-box {
+    -fx-spacing: 8;
+    -fx-padding: 0 0 8 0;
+    -fx-alignment: center;
+}
+
+.progress-box {
+    -fx-spacing: 8;
+    -fx-padding: 8 0 0 0;
+    -fx-alignment: center;
+}
+
+.placeholder-pane {
+    -fx-background-color: LightGrey;
+}
+
+.root-pane {
+    -fx-padding: 12;
+}

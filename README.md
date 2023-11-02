@@ -80,6 +80,47 @@ dependencies {
 }
 ```
 
+## JPro File
+This library provides a simple way to pick, drop, upload and download files in **JPro/JavaFX** applications.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-file</artifactId>
+    <version>0.2.7-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-file:0.2.7-SNAPSHOT")
+}
+```
+
+#### Lunch the examples
+* As desktop application
+1) Run the text editor sample 
+   ```shell
+   ./gradlew jpro-file:example:run -Psample=text-editor
+   ```
+2) Run the file uploader sample 
+   ```shell
+   ./gradlew jpro-file:example:run -Psample=file-uploader
+   ```
+* As JPro application
+1) Run the text editor sample
+   ```shell
+   ./gradlew jpro-file:example:jproRun -Psample=text-editor
+   ```
+2) Run the file uploader sample
+   ```shell
+   ./gradlew jpro-file:example:jproRun -Psample=file-uploader
+   ```
+
 ## JPro Image Manager
 This library makes very easy to manage the process of loading and caching images, allowing efficient retrieval 
 and processing in **JPro/JavaFX** applications. It allows you to load images from the classpath, the file system, 

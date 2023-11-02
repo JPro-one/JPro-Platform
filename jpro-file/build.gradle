@@ -1,0 +1,72 @@
+dependencies {
+    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
+    implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+compileJava {
+    options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"]
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs = [
+            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
+    ]
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        exceptionFormat "full"
+    }
+}
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        version = true
+        author = true
+        addMultilineStringsOption("-add-exports").setValue([
+                "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
+        ])
+//        addStringOption('Xdoclint:none', '-quiet')
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // Add README.md as an artifact named DOCUMENTATION.md
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'documentation'
+                extension 'md'
+            }
+
+            pom {
+                packaging = 'jar'
+                name = 'JPro File'
+                description = 'A library for handling file related operations in JavaFX applications ' +
+                        'running natively and via JPro server.'
+                url = 'https://www.jpro.one'
+
+                developers {
+                    developer {
+                        id = 'besidev'
+                        name = 'Besmir Beqiri'
+                        email = 'bb@sandec.de'
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme

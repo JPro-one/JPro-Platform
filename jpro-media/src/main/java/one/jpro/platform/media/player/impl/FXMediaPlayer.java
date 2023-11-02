@@ -120,7 +120,7 @@ public final class FXMediaPlayer extends BaseMediaPlayer {
 
     ReadOnlyObjectWrapper<MediaSource> mediaSourcePropertyImpl() {
         if (mediaSource == null) {
-            mediaSource = new ReadOnlyObjectWrapper<>(this, "source");
+            mediaSource = new ReadOnlyObjectWrapper<>(this, "mediaSource");
         }
         return mediaSource;
     }

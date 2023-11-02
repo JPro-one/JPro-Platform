@@ -1,0 +1,24 @@
+.controls-box {
+    -fx-spacing: 8;
+    -fx-padding: 0 0 8 0;
+    -fx-alignment: center;
+}
+
+.drop-pane {
+    -fx-border-color: Gray;
+    -fx-border-width: 1;
+    -fx-border-style: dashed;
+    -fx-border-radius: 8;
+    -fx-background-color: LightGray;
+    -fx-background-radius: 8;
+}
+
+.drop-pane:files-drag-over {
+    -fx-border-color: ForestGreen;
+    -fx-background-color: LightGreen;
+    -fx-opacity: 0.5;
+}
+
+.root-pane {
+    -fx-padding: 12;
+}
