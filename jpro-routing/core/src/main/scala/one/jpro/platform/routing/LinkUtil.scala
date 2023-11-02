@@ -212,6 +212,9 @@ object LinkUtil {
     if(url == null) {
       throw new NullPointerException("url was null")
     }
+    if(text == Some(null)) {
+      throw new NullPointerException("text was provided but null")
+    }
     if(!WebAPI.isBrowser) {
       import LinkDesktop._
       theNode.setNewLink(url,text,pushState,
