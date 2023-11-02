@@ -73,19 +73,42 @@ public enum HttpStatus {
     private final int code;
     private final String message;
 
+    /**
+     * Initializes a new instance of the HttpStatus enum class.
+     *
+     * @param code    The HTTP status code.
+     * @param message The HTTP status message.
+     */
     HttpStatus(int code, String message) {
         this.code = code;
         this.message = message;
     }
 
+    /**
+     * Returns the HTTP status code.
+     *
+     * @return the HTTP status code number.
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * Returns the HTTP status message.
+     *
+     * @return the HTTP status message.
+     */
     public String getMessage() {
         return message;
     }
 
+    /**
+     * Returns the HttpStatus that corresponds to the given code.
+     *
+     * @param code the HTTP status code.
+     * @return the HttpStatus instance that corresponds to the given code,
+     * {@link HttpStatus#UNKNOWN} otherwise.
+     */
     public static HttpStatus fromCode(int code) {
         for (HttpStatus status : values()) {
             if (status.code == code) {

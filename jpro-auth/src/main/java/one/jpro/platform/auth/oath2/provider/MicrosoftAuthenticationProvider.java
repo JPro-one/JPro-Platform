@@ -15,15 +15,27 @@ import java.util.concurrent.CompletableFuture;
  */
 public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvider {
 
+    /**
+     * The common tenant identifier for Microsoft OAuth2.
+     */
     public static final String COMMON_TENANT = "common";
+
+    /**
+     * The consumers tenant identifier for Microsoft OAuth2.
+     */
     public static final String CONSUMERS_TENANT = "consumers";
+
+    /**
+     * The organizations tenant identifier for Microsoft OAuth2.
+     */
     public static final String ORGANIZATIONS_TENANT = "organizations";
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Microsoft.
      *
-     * @param httpServer the HTTP server
-     * @param options    custom OAuth2 options
+     * @param httpServer the HTTP server that will be used for making authentication requests.
+     * @param options    the custom set of OAuth2 options which include configuration like
+     *                   client ID, client secret, scopes, and other OAuth2 parameters.
      */
     public MicrosoftAuthenticationProvider(HttpServer httpServer, OAuth2Options options) {
         super(httpServer, options);
@@ -32,10 +44,10 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Microsoft.
      *
-     * @param httpServer   the HTTP server
-     * @param clientId     the client id given to you by Microsoft
-     * @param clientSecret the client secret given to you by Microsoft
-     * @param tenant       the guid of your application
+     * @param httpServer   the HTTP server that will be used for making authentication requests.
+     * @param clientId     the client ID issued by Microsoft for your application.
+     * @param clientSecret the client secret issued by Microsoft for securing your application.
+     * @param tenant       the GUID or tenant ID that represents your application's directory.
      */
     public MicrosoftAuthenticationProvider(HttpServer httpServer, String clientId, String clientSecret, String tenant) {
         super(httpServer, new OAuth2Options()
