@@ -22,7 +22,7 @@ public class AuthenticationServerTest {
 
     @Test
     public void testHttpServer() throws IOException, InterruptedException {
-        try (HttpServer httpServer = HttpServer.create()) {
+        try (HttpServer httpServer = TestHttpServer.create()) {
             var requestUri = URI.create("http://"
                     + httpServer.getServerHost() + ":"
                     + httpServer.getServerPort() + "/auth?foo&bar=HTTP/1.1");

@@ -19,7 +19,7 @@ public class MicrosoftAuthenticationProviderTest {
 
     @Test
     public void configWithClientIdAndClientSecretAndTenant() {
-        try (HttpServer httpServer = HttpServer.create()) {
+        try (HttpServer httpServer = TestHttpServer.create()) {
             MicrosoftAuthenticationProvider provider = new MicrosoftAuthenticationProvider(httpServer,
                     "clientId", "clientSecret",
                     MicrosoftAuthenticationProvider.COMMON_TENANT);
@@ -37,7 +37,7 @@ public class MicrosoftAuthenticationProviderTest {
 
     @Test
     public void autoConfigViaOpenIDConnectDiscoveryService() throws ExecutionException, InterruptedException {
-        try (HttpServer httpServer = HttpServer.create()) {
+        try (HttpServer httpServer = TestHttpServer.create()) {
             MicrosoftAuthenticationProvider.discover(httpServer, new OAuth2Options()
                             .setClientId("clientId")
                             .setTenant("common"))

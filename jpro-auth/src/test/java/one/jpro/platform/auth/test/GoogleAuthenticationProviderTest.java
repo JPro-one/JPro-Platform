@@ -19,7 +19,7 @@ public class GoogleAuthenticationProviderTest {
 
     @Test
     public void configWithClientIdAndClientSecret() {
-        try (HttpServer httpServer = HttpServer.create()) {
+        try (HttpServer httpServer = TestHttpServer.create()) {
             GoogleAuthenticationProvider provider =
                     new GoogleAuthenticationProvider(httpServer, "clientId", "clientSecret");
             OAuth2Options options = provider.getOptions();
@@ -36,7 +36,7 @@ public class GoogleAuthenticationProviderTest {
 
     @Test
     public void autoConfigViaOpenIDConnectDiscoveryService() throws ExecutionException, InterruptedException {
-        try (HttpServer httpServer = HttpServer.create()) {
+        try (HttpServer httpServer = TestHttpServer.create()) {
             GoogleAuthenticationProvider.discover(httpServer, new OAuth2Options().setClientId("clientId"))
                     .thenAccept(provider -> {
                         OAuth2Options options = provider.getOptions();
