@@ -9,6 +9,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import javafx.stage.Stage;
 import one.jpro.platform.auth.authentication.*;
 import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpServer;
@@ -46,6 +47,16 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     private final OAuth2Options options;
     @NotNull
     private final OAuth2API api;
+
+    /**
+     * Creates a OAuth2 authentication provider.
+     *
+     * @param stage   the JavaFX application stage
+     * @param options the OAuth2 options
+     */
+    public OAuth2AuthenticationProvider(@NotNull final Stage stage, @NotNull final OAuth2Options options) {
+        this(HttpServer.create(stage), options);
+    }
 
     /**
      * Creates a OAuth2 authentication provider.
