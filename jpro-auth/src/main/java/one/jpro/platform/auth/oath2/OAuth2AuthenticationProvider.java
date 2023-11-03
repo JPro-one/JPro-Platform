@@ -9,7 +9,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import javafx.stage.Stage;
 import one.jpro.platform.auth.authentication.*;
 import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpServer;
@@ -29,7 +28,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 /**
  * Base class for creating an OAuth2 authentication provider.
@@ -48,16 +46,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     private final OAuth2Options options;
     @NotNull
     private final OAuth2API api;
-
-    /**
-     * Creates a OAuth2 authentication provider.
-     *
-     * @param stage   the JavaFX application stage
-     * @param options the OAuth2 options
-     */
-    public OAuth2AuthenticationProvider(@NotNull final Stage stage, @NotNull final OAuth2Options options) {
-        this(HttpServer.create(stage), options);
-    }
 
     /**
      * Creates a OAuth2 authentication provider.
@@ -88,28 +76,15 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * End-user interaction is required.
      *
      * @param credentials the credentials to authenticate
-     * @return the url to be used to authorize the user.
+     * @return a {@link CompletableFuture} that will complete with the authorization URL
+     *         once the HTTP server is ready to handle the callback, or with an exception
+     *         if an error occurs during the process.
      */
-    @Deprecated
-    public String authorizeUrl(OAuth2Credentials credentials) {
-        return authorizeUrl(credentials, null);
-    }
-
-    /**
-     * The client sends the end-user's browser to the authorization endpoint.
-     * This endpoint is where the user signs in and grants access.
-     * End-user interaction is required.
-     *
-     * @param credentials the credentials to authenticate
-     * @param callback the callback for handling the HTTP server response
-     * @return the url to be used to authorize the user.
-     */
-    public String authorizeUrl(OAuth2Credentials credentials, Consumer<HttpServer> callback) {
+    public CompletableFuture<String> authorizeUrl(OAuth2Credentials credentials) {
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
         log.debug("Authorize URL: {}", authorizeUrl);
-        httpServer.openURL(authorizeUrl, callback);
-        return authorizeUrl;
+        return httpServer.openURL(authorizeUrl);
     }
 
     /**

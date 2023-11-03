@@ -8,7 +8,6 @@ import one.jpro.platform.auth.http.HttpServerException;
 import one.jpro.platform.auth.http.HttpStatus;
 import one.jpro.platform.internal.openlink.OpenLink;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +21,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 /**
  * Implementation of the {@link HttpServer} interface when running
@@ -66,11 +65,6 @@ public final class HttpServerImpl implements HttpServer {
         }
     }
 
-    public static HttpServerImpl getInstance(Stage stage) throws HttpServerException {
-        HttpServerImpl.stage = stage;
-        return SingletonHolder.getInstance();
-    }
-
     public static HttpServerImpl getInstance(Stage stage, HttpOptions httpOptions) throws HttpServerException {
         HttpServerImpl.stage = stage;
         HttpServerImpl.httpOptions = httpOptions;
@@ -97,8 +91,8 @@ public final class HttpServerImpl implements HttpServer {
     private final AtomicBoolean stop;
     private final ServerSocketChannel serverSocketChannel;
     private final List<ConnectionEventLoop> connectionEventLoops;
+    private final CompletableFuture<String> serverResponseFuture = new CompletableFuture<>();
     private final Thread thread;
-    private Consumer<HttpServer> openURLCallback;
 
     /**
      * Creates HTTP server.
@@ -106,7 +100,7 @@ public final class HttpServerImpl implements HttpServer {
      * @param options the HTTP options
      * @throws IOException if an error occurs
      */
-    private HttpServerImpl(final Stage stage, final HttpOptions options) throws IOException {
+    private HttpServerImpl(@NotNull final Stage stage, @NotNull final HttpOptions options) throws IOException {
         this.options = options;
 
         // Create a default response
@@ -134,15 +128,8 @@ public final class HttpServerImpl implements HttpServer {
 
             callback.accept(response);
 
-            if (stage != null && stage.isShowing()) {
-                Platform.runLater(() -> {
-                    this.uri = request.uri();
-                    if (openURLCallback != null) {
-                        openURLCallback.accept(this);
-                    }
-                    stage.toFront();
-                });
-            }
+            this.uri = request.uri();
+            serverResponseFuture.complete(uri);
         };
 
         // Shutdown hook
@@ -256,8 +243,14 @@ public final class HttpServerImpl implements HttpServer {
     }
 
     @Override
-    public void openURL(@NotNull final String url, @Nullable final Consumer<HttpServer> callback) {
-        this.openURLCallback = callback;
-        OpenLink.openURL(URI.create(url).toString());
+    public CompletableFuture<String> openURL(@NotNull final String url) {
+        return CompletableFuture.runAsync(() -> OpenLink.openURL(URI.create(url).toString()))
+                .thenCombine(serverResponseFuture, (result1, result2) -> result2)
+                .thenApplyAsync(result -> {
+                    if (stage != null && stage.isShowing()) {
+                        Platform.runLater(stage::toFront);
+                    }
+                    return result;
+                });
     }
 }
