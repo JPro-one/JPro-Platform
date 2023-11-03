@@ -1,5 +1,7 @@
 package one.jpro.platform.auth.http.impl;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.function.Consumer;
 
 /**
@@ -18,5 +20,5 @@ interface Handler {
      * asynchronously in a background thread.
      * The provided callback object has a reference to internal connection state.
      */
-    void handle(Request request, Consumer<Response> callback);
+    void handle(@NotNull Request request, @NotNull Consumer<Response> callback);
 }
