@@ -28,7 +28,7 @@ public class OAuth2Credentials implements Credentials {
     private OAuth2Flow flow;
     private String nonce;
 
-    private String completeRedirectUri;
+    private String normalizedRedirectUri;
 
     /**
      * Default constructor.
@@ -133,10 +133,10 @@ public class OAuth2Credentials implements Credentials {
      * @return the normalized redirected uri
      */
     private String getNormalizedRedirectUri() {
-        if (completeRedirectUri == null) {
+        if (normalizedRedirectUri == null) {
             return redirectUri;
         }
-        return completeRedirectUri;
+        return normalizedRedirectUri;
     }
 
     /**
@@ -144,7 +144,7 @@ public class OAuth2Credentials implements Credentials {
      * This method is used internally.
      */
     OAuth2Credentials setNormalizedRedirectUri(String completeRedirectUri) {
-        this.completeRedirectUri = completeRedirectUri;
+        this.normalizedRedirectUri = completeRedirectUri;
         return this;
     }
 
