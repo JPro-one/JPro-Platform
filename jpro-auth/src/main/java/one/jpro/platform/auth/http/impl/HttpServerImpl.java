@@ -8,6 +8,7 @@ import one.jpro.platform.auth.http.HttpServerException;
 import one.jpro.platform.auth.http.HttpStatus;
 import one.jpro.platform.internal.openlink.OpenLink;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,42 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class HttpServerImpl implements HttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(HttpServerImpl.class);
-
-    private static Stage stage;
-    private static HttpOptions httpOptions;
-
-    private static final class SingletonHolder {
-        private static final HttpServerImpl INSTANCE = initHttpServer();
-
-        private static HttpServerImpl initHttpServer() {
-            try {
-                return new HttpServerImpl(stage, httpOptions == null ? new HttpOptions() : httpOptions);
-            } catch (IOException ex) {
-                throw new HttpServerException(ex.getMessage(), ex);
-            }
-        }
-
-        /**
-         * Prevent instantiation.
-         */
-        private SingletonHolder() {
-        }
-
-        /**
-         * Get singleton HTTP server.
-         *
-         * @return HTTP server singleton.
-         */
-        public static HttpServerImpl getInstance() {
-            return SingletonHolder.INSTANCE;
-        }
-    }
-
-    public static HttpServerImpl getInstance(Stage stage, HttpOptions httpOptions) throws HttpServerException {
-        HttpServerImpl.stage = stage;
-        HttpServerImpl.httpOptions = httpOptions;
-        return SingletonHolder.getInstance();
-    }
 
     /**
      * Common header for the MIME Content-Type
@@ -86,6 +52,9 @@ public final class HttpServerImpl implements HttpServer {
 
     private String uri;
 
+    @Nullable
+    private final Stage stage;
+    @NotNull
     private final HttpOptions options;
     private final Selector selector;
     private final AtomicBoolean stop;
@@ -100,8 +69,9 @@ public final class HttpServerImpl implements HttpServer {
      * @param options the HTTP options
      * @throws IOException if an error occurs
      */
-    private HttpServerImpl(@NotNull final Stage stage, @NotNull final HttpOptions options) throws IOException {
-        this.options = options;
+    public HttpServerImpl(@Nullable final Stage stage, @NotNull final HttpOptions options) throws IOException {
+        this.stage = stage;
+        this.options = Objects.requireNonNull(options, "Http options cannot be null");
 
         // Create a default response
         final Response response = new Response(
@@ -127,8 +97,6 @@ public final class HttpServerImpl implements HttpServer {
             log.debug("***************************************************************************");
 
             callback.accept(response);
-
-            this.uri = request.uri();
             serverResponseFuture.complete(uri);
         };
 

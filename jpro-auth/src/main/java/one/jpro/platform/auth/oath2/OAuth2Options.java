@@ -36,6 +36,7 @@ public class OAuth2Options implements Options {
     private static final String SCOPE_SEPARATOR = " ";
     private static final boolean VERIFY_TOKEN = true;
     private static final boolean VALIDATE_ISSUER = true;
+    private static final boolean USE_LOOPBACK_IP_ADDRESS = false;
     private static final long JWK_DEFAULT_AGE = -1L; // seconds of JWK default age (-1 means no rotation)
     private static final Pattern TENANT_PATTERN = Pattern.compile("\\{(tenant|tenantid|realm)}");
 
@@ -60,6 +61,7 @@ public class OAuth2Options implements Options {
     private boolean verifyToken;
     // this is an openid-connect extension
     private boolean validateIssuer;
+    private boolean useLoopbackIpAddress;
     private String logoutPath;
     private String userInfoPath;
     // extra parameters to be added while requesting the user info
@@ -95,6 +97,7 @@ public class OAuth2Options implements Options {
         flow = FLOW;
         verifyToken = VERIFY_TOKEN;
         validateIssuer = VALIDATE_ISSUER;
+        useLoopbackIpAddress = USE_LOOPBACK_IP_ADDRESS;
         authorizationPath = AUTHORIZATION_PATH;
         tokenPath = TOKEN_PATH;
         revocationPath = REVOCATION_PATH;
@@ -460,6 +463,15 @@ public class OAuth2Options implements Options {
 
     public OAuth2Options setValidateIssuer(boolean validateIssuer) {
         this.validateIssuer = validateIssuer;
+        return this;
+    }
+
+    public boolean isUseLoopbackIpAddress() {
+        return useLoopbackIpAddress;
+    }
+
+    public OAuth2Options setUseLoopbackIpAddress(boolean useLoopbackIpAddress) {
+        this.useLoopbackIpAddress = useLoopbackIpAddress;
         return this;
     }
 

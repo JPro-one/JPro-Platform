@@ -6,7 +6,9 @@ import one.jpro.platform.auth.http.impl.HttpServerImpl;
 import one.jpro.platform.auth.http.impl.JProServerImpl;
 import one.jpro.platform.auth.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,14 +29,17 @@ public interface HttpServer extends AutoCloseable {
      * @return the HTTP server instance
      * @throws HttpServerException if an error occurs
      */
-    static HttpServer create(Stage stage) throws HttpServerException {
+    static HttpServer create(@Nullable final Stage stage) throws HttpServerException {
         if (WebAPI.isBrowser() && stage != null) {
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new JProServerImpl(webAPI);
         }
 
-        final HttpOptions httpOptions = new HttpOptions();
-        return HttpServerImpl.getInstance(stage, httpOptions);
+        try {
+            return new HttpServerImpl(stage, new HttpOptions());
+        } catch (IOException ioe) {
+            throw new HttpServerException(ioe);
+        }
     }
 
     /**

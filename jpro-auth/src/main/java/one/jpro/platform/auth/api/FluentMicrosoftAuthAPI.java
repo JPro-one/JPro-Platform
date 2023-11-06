@@ -1,7 +1,6 @@
 package one.jpro.platform.auth.api;
 
 import javafx.stage.Stage;
-import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.oath2.provider.MicrosoftAuthenticationProvider;
 
 /**
@@ -35,6 +34,6 @@ public class FluentMicrosoftAuthAPI implements FluentMicrosoftAuth {
 
     @Override
     public MicrosoftAuthenticationProvider create(Stage stage) {
-        return new MicrosoftAuthenticationProvider(HttpServer.create(stage), clientId, clientSecret, tenant);
+        return new MicrosoftAuthenticationProvider(stage, clientId, clientSecret, tenant);
     }
 }

@@ -3,7 +3,6 @@ package one.jpro.platform.auth.http;
 import one.jpro.platform.auth.authentication.Options;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
 import java.time.Duration;
 
 /**
@@ -20,7 +19,7 @@ import java.time.Duration;
  */
 public class HttpOptions implements Options {
 
-    public static final String DEFAULT_HOST = InetAddress.getLoopbackAddress().getHostAddress(); // loopback IP address
+    public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 8080;
     public static final boolean DEFAULT_REUSE_ADDR = false;
     public static final boolean DEFAULT_REUSE_PORT = false;

@@ -1,7 +1,11 @@
 package one.jpro.platform.auth.test;
 
+import one.jpro.platform.auth.http.HttpOptions;
 import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.http.HttpServerException;
+import one.jpro.platform.auth.http.impl.HttpServerImpl;
+
+import java.io.IOException;
 
 /**
  * Test HTTP server.
@@ -18,6 +22,12 @@ public interface TestHttpServer {
      * @throws HttpServerException if an error occurs
      */
     static HttpServer create() {
-        return HttpServer.create(null);
+        try {
+            return new HttpServerImpl(null, new HttpOptions()
+                    .setReuseAddr(true)
+                    .setReusePort(true));
+        } catch (IOException ex) {
+            throw new HttpServerException(ex);
+        }
     }
 }
