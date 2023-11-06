@@ -26,7 +26,7 @@ public class AuthenticationServerTest {
             var requestUri = URI.create("http://"
                     + httpServer.getServerHost() + ":"
                     + httpServer.getServerPort() + "/auth?foo&bar=HTTP/1.1");
-            assertEquals(requestUri.toString(), "http://127.0.0.1:8080/auth?foo&bar=HTTP/1.1");
+            assertEquals(requestUri.toString(), "http://localhost:8080/auth?foo&bar=HTTP/1.1");
             var request = HttpRequest.newBuilder()
                     .uri(requestUri)
                     .GET()
@@ -35,24 +35,23 @@ public class AuthenticationServerTest {
 
             assertEquals(HttpStatus.OK, HttpStatus.fromCode(httpResponse.statusCode()));
             assertEquals(HttpMethod.GET, HttpMethod.valueOf(request.method()));
-            assertEquals(URI.create("http://127.0.0.1:8080/auth?foo&bar=HTTP/1.1"), request.uri());
+            assertEquals(URI.create("http://localhost:8080/auth?foo&bar=HTTP/1.1"), request.uri());
             assertEquals("<!DOCTYPE html>\n" +
                     "<html lang=\"en\">\n" +
                     "<head>\n" +
-                    "    <meta charset=\"UTF-8\">\n" +
-                    "    <title>JPro-Auth</title>\n" +
-                    "    <script>\n" +
-                    "        window.open('', '_self', '');\n" +
-                    "        window.close();\n" +
-                    "    </script>\n" +
+                    "    <meta http-equiv=\"Content-Type\" content=\"text/html\" charset=\"UTF-8\">\n" +
+                    "    <title>Authentication</title>\n" +
                     "</head>\n" +
                     "<body>\n" +
-                    "\n" +
+                    "    <div style=\"text-align: center; font-family: sans-serif; margin-top: 20px;\">\n" +
+                    "        <h3>Authentication Successful</h3>\n" +
+                    "        <i>Please close the page.</i>\n" +
+                    "    </div>\n" +
                     "</body>\n" +
                     "</html>", httpResponse.body());
-            assertEquals("{ {content-length=[216], content-type=[text/html]} }",
+            assertEquals("{ {content-length=[350], content-type=[text/html]} }",
                     "{ " + httpResponse.headers().map() + " }");
-            assertEquals("127.0.0.1", httpServer.getServerHost());
+            assertEquals("localhost", httpServer.getServerHost());
             assertEquals(8080, httpServer.getServerPort());
             assertEquals("/auth?foo&bar=HTTP/1.1", httpServer.getFullRequestedURL());
             assertEquals("{bar=HTTP/1.1, foo=}", httpServer.getQueryParams().toString());
