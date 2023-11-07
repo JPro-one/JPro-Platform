@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.net.URI;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -183,7 +183,30 @@ public final class HttpServerImpl implements HttpServer {
     @Override
     public void stop() {
         stop.set(true);
-        log.info("Stopping the server");
+
+        if (serverSocketChannel.isOpen()) {
+            try {
+                serverSocketChannel.close();
+                TimeUnit.MILLISECONDS.sleep(options.getResolution().toMillis());
+            } catch (IOException | InterruptedException ex) {
+                throw new HttpServerException(ex);
+            }
+            log.info("Server stopped on port: {}", getServerPort());
+        }
+
+        if (selector.isOpen()) {
+            try {
+                for (SelectionKey key : selector.keys()) {
+                    final SelectableChannel channel = key.channel();
+                    if (channel.isOpen()) {
+                        channel.close();
+                    }
+                }
+                selector.close();
+            } catch (IOException ex) {
+                throw new HttpServerException(ex);
+            }
+        }
     }
 
     @Override
@@ -193,16 +216,7 @@ public final class HttpServerImpl implements HttpServer {
 
     @Override
     public int getServerPort() {
-        int port = -1;
-        try {
-            final SocketAddress localAddress = serverSocketChannel.getLocalAddress();
-            if (localAddress instanceof InetSocketAddress socketAddress) {
-                port = socketAddress.getPort();
-            }
-        } catch (IOException ex) {
-            throw new HttpServerException(ex.getMessage(), ex);
-        }
-        return port;
+        return options.getPort();
     }
 
     @Override
