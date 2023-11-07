@@ -2,9 +2,9 @@ package one.jpro.platform.auth.oath2;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import javafx.stage.Stage;
 import one.jpro.platform.auth.authentication.AuthenticationException;
 import one.jpro.platform.auth.http.HttpMethod;
-import one.jpro.platform.auth.http.HttpServer;
 import one.jpro.platform.auth.jwt.JWTOptions;
 import one.jpro.platform.auth.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
@@ -53,28 +53,35 @@ public class OAuth2API {
      * @return the url to be used to authorize the user.
      * @see <a href="https://tools.ietf.org/html/rfc6749">https://tools.ietf.org/html/rfc6749</a>
      */
-    public String authorizeURL(OAuth2Credentials credentials) {
-        final JSONObject query = credentials.toJSON();
+    public String authorizeURL(@NotNull final OAuth2Credentials credentials) {
+        final JSONObject query = new JSONObject();
 
         final OAuth2Flow flow;
-        if (query.has("flow") && !query.getString("flow").isBlank()) {
-            flow = OAuth2Flow.getFlow(query.getString("flow"));
+        if (credentials.getFlow() != null) {
+            flow = credentials.getFlow();
         } else {
             flow = options.getFlow();
         }
 
         if (flow == OAuth2Flow.AUTH_CODE) {
             query.put("response_type", "code");
+        } else {
+            throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
         }
-//        else {
-//            throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
-//        }
 
-        if (query.has("scopes")) {
+        final String redirectUri = credentials.getNormalizedRedirectUri();
+        if (redirectUri != null && !redirectUri.isBlank()) {
+            query.put("redirect_uri", redirectUri);
+        }
+
+        if (credentials.getScopes() != null) {
             // scopes have been passed as a list so the provider must generate the correct string for it
-            query.put("scope", query.getJSONArray("scopes").join(options.getScopeSeparator())
-                    .replace("\"", ""));
-            query.remove("scopes");
+            query.put("scope", String.join(options.getScopeSeparator(), credentials.getScopes()));
+        }
+
+        final String state = credentials.getState();
+        if (state != null && !state.isBlank()) {
+            query.put("state", state);
         }
 
         final String clientId = options.getClientId();
@@ -377,12 +384,12 @@ public class OAuth2API {
      * The discovery will use the given site in the configuration options
      * and attempt to load the well-known descriptor.
      *
-     * @param httpServer the HTTP server
+     * @param stage  the JavaFX application stage
      * @param config the initial options, it should contain the site url
      * @return an OAuth2 provider configured with the discovered option values
      * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery</a>
      */
-    public CompletableFuture<OAuth2AuthenticationProvider> discover(final HttpServer httpServer,
+    public CompletableFuture<OAuth2AuthenticationProvider> discover(final Stage stage,
                                                                     final OAuth2Options config) {
         if (config.getSite() == null) {
             CompletableFuture.failedFuture(new RuntimeException("the site url cannot be null"));
@@ -403,7 +410,8 @@ public class OAuth2API {
                 .thenCompose(response -> {
                     if (response.statusCode() != 200) {
                         return CompletableFuture.failedFuture(
-                                new RuntimeException("Bad Response [" + response.statusCode() + "] " + response.body()));
+                                new RuntimeException("Bad Response ["
+                                        + response.statusCode() + "] " + response.body()));
                     }
 
                     if (!AuthUtils.containsValue(response.headers(), "application/json")) {
@@ -416,7 +424,8 @@ public class OAuth2API {
 
                     // some providers return errors as JSON
                     if (json.has("error")) {
-                        return CompletableFuture.failedFuture(new RuntimeException(AuthUtils.extractErrorDescription(json)));
+                        return CompletableFuture.failedFuture(
+                                new RuntimeException(AuthUtils.extractErrorDescription(json)));
                     }
 
                     config.setAuthorizationPath(json.optString("authorization_endpoint", null));
@@ -574,7 +583,7 @@ public class OAuth2API {
                                 config.addSupportedRequestObjectSigningAlgValue((String) requestObjectSigningAlgValue));
                     }
 
-                    return CompletableFuture.completedFuture(new OAuth2AuthenticationProvider(httpServer, config));
+                    return CompletableFuture.completedFuture(new OAuth2AuthenticationProvider(stage, config));
                 });
     }
 
@@ -615,8 +624,8 @@ public class OAuth2API {
     /**
      * Base method to fetch the required information from the OAuth2 provider.
      *
-     * @param method the HTTP method to use
-     * @param path   the path to fetch
+     * @param method  the HTTP method to use
+     * @param path    the path to fetch
      * @param headers the headers to send
      * @param payload the payload to send
      * @return an asynchronous http response wrapped in a completable future
