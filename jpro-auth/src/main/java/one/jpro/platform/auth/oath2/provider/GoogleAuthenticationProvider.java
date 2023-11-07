@@ -1,9 +1,11 @@
 package one.jpro.platform.auth.oath2.provider;
 
-import one.jpro.platform.auth.http.HttpServer;
+import javafx.stage.Stage;
 import one.jpro.platform.auth.oath2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.oath2.OAuth2Flow;
 import one.jpro.platform.auth.oath2.OAuth2Options;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.concurrent.CompletableFuture;
@@ -18,33 +20,35 @@ public class GoogleAuthenticationProvider extends OAuth2AuthenticationProvider {
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Google.
      *
-     * @param httpServer the HTTP server
-     * @param options    custom OAuth2 options
+     * @param stage   the JavaFX application stage
+     * @param options custom OAuth2 options
      */
-    public GoogleAuthenticationProvider(final HttpServer httpServer, final OAuth2Options options) {
-        super(httpServer, options);
+    public GoogleAuthenticationProvider(@Nullable final Stage stage, @NotNull final OAuth2Options options) {
+        super(stage, options);
     }
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Google.
      *
-     * @param httpServer   the HTTP server
+     * @param stage        the JavaFX application stage
      * @param clientId     the client id given to you by Google
      * @param clientSecret the client secret given to you by Google
      */
-    public GoogleAuthenticationProvider(final HttpServer httpServer, final String clientId, final String clientSecret) {
-        super(httpServer, new OAuth2Options()
-            .setFlow(OAuth2Flow.AUTH_CODE)
-            .setClientId(clientId)
-            .setClientSecret(clientSecret)
-            .setSite("https://accounts.google.com")
-            .setTokenPath("https://oauth2.googleapis.com/token")
-            .setAuthorizationPath("/o/oauth2/v2/auth")
-            .setUserInfoPath("https://www.googleapis.com/oauth2/v1/userinfo")
-            .setJwkPath("https://www.googleapis.com/oauth2/v3/certs")
-            .setIntrospectionPath("https://oauth2.googleapis.com/tokeninfo")
-            .setRevocationPath("https://oauth2.googleapis.com/revoke")
-            .setUserInfoParams(new JSONObject().put("alt", "json")));
+    public GoogleAuthenticationProvider(@Nullable final Stage stage,
+                                        @NotNull final String clientId,
+                                        @NotNull final String clientSecret) {
+        super(stage, new OAuth2Options()
+                .setFlow(OAuth2Flow.AUTH_CODE)
+                .setClientId(clientId)
+                .setClientSecret(clientSecret)
+                .setSite("https://accounts.google.com")
+                .setTokenPath("https://oauth2.googleapis.com/token")
+                .setAuthorizationPath("/o/oauth2/v2/auth")
+                .setUserInfoPath("https://www.googleapis.com/oauth2/v1/userinfo")
+                .setJwkPath("https://www.googleapis.com/oauth2/v3/certs")
+                .setIntrospectionPath("https://oauth2.googleapis.com/tokeninfo")
+                .setRevocationPath("https://oauth2.googleapis.com/revoke")
+                .setUserInfoParams(new JSONObject().put("alt", "json")));
     }
 
     /**
@@ -52,15 +56,15 @@ public class GoogleAuthenticationProvider extends OAuth2AuthenticationProvider {
      * site in the configuration options and attempt to load the well-known descriptor. If a site is provided, then
      * it will be used to do the lookup.
      *
-     * @param httpServer the HTTP server
+     * @param stage   the JavaFX application stage
      * @param options custom OAuth2 options
      * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
      */
-    public static CompletableFuture<OAuth2AuthenticationProvider> discover(final HttpServer httpServer,
-                                                                           final OAuth2Options options) {
+    public static CompletableFuture<OAuth2AuthenticationProvider> discover(@Nullable final Stage stage,
+                                                                           @NotNull final OAuth2Options options) {
         final String site = options.getSite() == null ? "https://accounts.google.com" : options.getSite();
 
-        return new GoogleAuthenticationProvider(httpServer,
+        return new GoogleAuthenticationProvider(stage,
                 new OAuth2Options(options)
                         .setSite(site)
                         .setUserInfoParams(new JSONObject().put("alt", "json")))

@@ -1,10 +1,12 @@
 package one.jpro.platform.auth.oath2.provider;
 
-import one.jpro.platform.auth.http.HttpServer;
+import javafx.stage.Stage;
 import one.jpro.platform.auth.jwt.JWTOptions;
 import one.jpro.platform.auth.oath2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.oath2.OAuth2Flow;
 import one.jpro.platform.auth.oath2.OAuth2Options;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -33,24 +35,27 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Microsoft.
      *
-     * @param httpServer the HTTP server that will be used for making authentication requests.
-     * @param options    the custom set of OAuth2 options which include configuration like
-     *                   client ID, client secret, scopes, and other OAuth2 parameters.
+     * @param stage   the JavaFX application stage
+     * @param options the custom set of OAuth2 options which include configuration like
+     *                client ID, client secret, scopes, and other OAuth2 parameters.
      */
-    public MicrosoftAuthenticationProvider(HttpServer httpServer, OAuth2Options options) {
-        super(httpServer, options);
+    public MicrosoftAuthenticationProvider(@Nullable final Stage stage, @NotNull final OAuth2Options options) {
+        super(stage, options);
     }
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Microsoft.
      *
-     * @param httpServer   the HTTP server that will be used for making authentication requests.
+     * @param stage        the JavaFX application stage
      * @param clientId     the client ID issued by Microsoft for your application.
      * @param clientSecret the client secret issued by Microsoft for securing your application.
      * @param tenant       the GUID or tenant ID that represents your application's directory.
      */
-    public MicrosoftAuthenticationProvider(HttpServer httpServer, String clientId, String clientSecret, String tenant) {
-        super(httpServer, new OAuth2Options()
+    public MicrosoftAuthenticationProvider(@Nullable final Stage stage,
+                                           @NotNull final String clientId,
+                                           @NotNull final String clientSecret,
+                                           @NotNull final String tenant) {
+        super(stage, new OAuth2Options()
                 .setFlow(OAuth2Flow.AUTH_CODE)
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
@@ -69,11 +74,11 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
      * site in the configuration options and attempt to load the well-known descriptor. If a site is provided, then
      * it will be used to do the lookup.
      *
-     * @param httpServer the HTTP server
-     * @param options    custom OAuth2 options
+     * @param stage   the JavaFX application stage
+     * @param options custom OAuth2 options
      * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
      */
-    public static CompletableFuture<OAuth2AuthenticationProvider> discover(HttpServer httpServer, OAuth2Options options) {
+    public static CompletableFuture<OAuth2AuthenticationProvider> discover(Stage stage, OAuth2Options options) {
         final String site = options.getSite() == null ?
                 "https://login.microsoftonline.com/{tenant}/v2.0" : options.getSite();
         final JWTOptions jwtOptions = options.getJWTOptions() == null ?
@@ -83,7 +88,7 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
             jwtOptions.setNonceAlgorithm("SHA-256");
         }
 
-        return new MicrosoftAuthenticationProvider(httpServer,
+        return new MicrosoftAuthenticationProvider(stage,
                 new OAuth2Options(options)
                         // Microsoft OpenID does not return the same url where the request was sent to
                         .setValidateIssuer(false)

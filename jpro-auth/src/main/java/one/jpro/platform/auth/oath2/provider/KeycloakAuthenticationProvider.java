@@ -1,10 +1,12 @@
 package one.jpro.platform.auth.oath2.provider;
 
-import one.jpro.platform.auth.http.HttpServer;
+import javafx.stage.Stage;
 import one.jpro.platform.auth.oath2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.oath2.OAuth2Flow;
 import one.jpro.platform.auth.oath2.OAuth2Options;
 import one.jpro.platform.auth.oath2.PubSecKeyOptions;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.concurrent.CompletableFuture;
@@ -19,32 +21,34 @@ public class KeycloakAuthenticationProvider extends OAuth2AuthenticationProvider
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Keycloak.
      *
-     * @param httpServer the HTTP server
+     * @param stage   the JavaFX application stage
      * @param options custom OAuth2 options
      */
-    public KeycloakAuthenticationProvider(final HttpServer httpServer, final OAuth2Options options) {
-        super(httpServer, options);
+    public KeycloakAuthenticationProvider(@Nullable final Stage stage, @NotNull final OAuth2Options options) {
+        super(stage, options);
     }
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Keycloak.
      *
-     * @param httpServer the HTTP server
+     * @param stage  the JavaFX application stage
      * @param config the json configuration exported from Keycloak admin console
      */
-    public KeycloakAuthenticationProvider(final HttpServer httpServer, final JSONObject config) {
-        this(httpServer, OAuth2Flow.AUTH_CODE, config);
+    public KeycloakAuthenticationProvider(@Nullable final Stage stage, @NotNull final JSONObject config) {
+        this(stage, OAuth2Flow.AUTH_CODE, config);
     }
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Keycloak.
      *
-     * @param httpServer the HTTP server
-     * @param flow   the OAuth2 flow to use
+     * @param stage  the JavaFX application stage
+     * @param flow   the OAuth2 flow to use, default value is {@link OAuth2Flow#AUTH_CODE}
      * @param config the JSON configuration exported from Keycloak admin console
      */
-    public KeycloakAuthenticationProvider(final HttpServer httpServer, final OAuth2Flow flow, final JSONObject config) {
-        super(httpServer, configure(flow, config));
+    public KeycloakAuthenticationProvider(@Nullable final Stage stage,
+                                          @Nullable final OAuth2Flow flow,
+                                          @NotNull final JSONObject config) {
+        super(stage, configure(flow, config));
     }
 
     /**
@@ -54,7 +58,7 @@ public class KeycloakAuthenticationProvider extends OAuth2AuthenticationProvider
      * @param config the json configuration exported from Keycloak admin console
      * @return the OAuth2 options
      */
-    private static OAuth2Options configure(final OAuth2Flow flow, final JSONObject config) {
+    private static OAuth2Options configure(@Nullable final OAuth2Flow flow, @NotNull final JSONObject config) {
         final OAuth2Options options = new OAuth2Options();
         options.setFlow(flow);
 
@@ -106,12 +110,12 @@ public class KeycloakAuthenticationProvider extends OAuth2AuthenticationProvider
      * site in the configuration options and attempt to load the well-known descriptor. If a site is provided, then
      * it will be used to do the lookup.
      *
-     * @param httpServer the HTTP server
+     * @param stage   the JavaFX application stage
      * @param options custom OAuth2 options
      * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
      */
-    public static CompletableFuture<OAuth2AuthenticationProvider> discover(final HttpServer httpServer,
-                                                                           final OAuth2Options options) {
-        return new KeycloakAuthenticationProvider(httpServer, options).discover();
+    public static CompletableFuture<OAuth2AuthenticationProvider> discover(@Nullable final Stage stage,
+                                                                           @NotNull final OAuth2Options options) {
+        return new KeycloakAuthenticationProvider(stage, options).discover();
     }
 }
