@@ -27,6 +27,7 @@ public class OAuth2Credentials implements Credentials {
     private List<String> scopes;    // control state
     private OAuth2Flow flow;
     private String nonce;
+    private String state;
 
     private String normalizedRedirectUri;
 
@@ -126,13 +127,21 @@ public class OAuth2Credentials implements Credentials {
         return this;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public OAuth2Credentials setState(String state) {
+        this.state = state;
+        return this;
+    }
+
     /**
      * Returns the normalized version of the redirect uri.
-     * This method is used internally.
      *
      * @return the normalized redirected uri
      */
-    private String getNormalizedRedirectUri() {
+    public String getNormalizedRedirectUri() {
         if (normalizedRedirectUri == null) {
             return redirectUri;
         }
@@ -199,6 +208,7 @@ public class OAuth2Credentials implements Credentials {
                 .filter(jsonArray -> !jsonArray.isEmpty())
                 .ifPresent(jsonArray -> json.put("scopes", jsonArray));
         Optional.ofNullable(getNonce()).ifPresent(nonce -> json.put("nonce", nonce));
+        Optional.ofNullable(getState()).ifPresent(state -> json.put("state", state));
         return json;
     }
 
