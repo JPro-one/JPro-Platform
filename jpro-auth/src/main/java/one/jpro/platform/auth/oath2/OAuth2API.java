@@ -65,9 +65,10 @@ public class OAuth2API {
 
         if (flow == OAuth2Flow.AUTH_CODE) {
             query.put("response_type", "code");
-        } else {
-            throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
         }
+//        else {
+//            throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
+//        }
 
         final String redirectUri = credentials.getNormalizedRedirectUri();
         if (redirectUri != null && !redirectUri.isBlank()) {

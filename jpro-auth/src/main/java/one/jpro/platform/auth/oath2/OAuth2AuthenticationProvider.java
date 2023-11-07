@@ -85,7 +85,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * if an error occurs during the process.
      */
     public CompletableFuture<String> authorizeUrl(OAuth2Credentials credentials) {
-        // Stop any previous http server
+        // Stop any previous running http server
         if (httpServer != null) {
             httpServer.stop();
         }
