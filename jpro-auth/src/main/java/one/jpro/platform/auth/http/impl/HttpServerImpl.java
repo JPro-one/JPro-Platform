@@ -129,9 +129,6 @@ public final class HttpServerImpl implements HttpServer {
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.bind(address, options.getAcceptLength());
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-
-        // start the server
-        start();
     }
 
     private byte[] getResourceAsBytes(@NotNull final String name) throws IOException {
@@ -226,12 +223,14 @@ public final class HttpServerImpl implements HttpServer {
 
     @Override
     public CompletableFuture<String> openURL(@NotNull final String url) {
-        return CompletableFuture.runAsync(() -> OpenLink.openURL(URI.create(url).toString()))
+        return CompletableFuture.runAsync(this::start)
+                .thenRun(() -> OpenLink.openURL(URI.create(url).toString()))
                 .thenCombine(serverResponseFuture, (result1, result2) -> result2)
-                .thenApplyAsync(result -> {
+                .thenApply(result -> {
                     if (stage != null && stage.isShowing()) {
                         Platform.runLater(stage::toFront);
                     }
+                    stop();
                     return result;
                 });
     }

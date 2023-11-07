@@ -23,9 +23,11 @@ public interface TestHttpServer {
      */
     static HttpServer create() {
         try {
-            return new HttpServerImpl(null, new HttpOptions()
+            HttpServer httpServer = new HttpServerImpl(null, new HttpOptions()
                     .setReuseAddr(true)
                     .setReusePort(true));
+            httpServer.start();
+            return httpServer;
         } catch (IOException ex) {
             throw new HttpServerException(ex);
         }
