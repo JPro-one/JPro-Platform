@@ -96,7 +96,7 @@ object DevFilter {
           text <-- ("LayoutCounter: " + layouts.map(_.toString).getOrElse("-"))
         }
         this <++ new Label {
-          text <-- ("Focused: " + scene.focusOwner)
+          text <-- ("Focused: " + (if(scene == null) "" else scene.focusOwner))
         }
         //this <++ new Label() {
         //  text <-- (if(request == null) "-" else "request: " + request)
