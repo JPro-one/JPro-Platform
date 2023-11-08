@@ -117,12 +117,23 @@ public interface SaveUtils {
         }
     }
 
+    /**
+     * Creates a temporary file with the given file name and file type.
+     *
+     * @param fileName The name of the file.
+     * @param fileType The file type (extension) of the file.
+     * @return A {@link File} object representing the created temporary file.
+     */
     static File createTempFile(String fileName, String fileType) {
         // Get user home directory
         final File tempDir = new File(System.getProperty("user.home") + "/.jpro/tmp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
         }
-        return new File(tempDir, fileName + fileType);
+        String fullFileName = fileName;
+        if (!fullFileName.endsWith(fileType)) {
+            fullFileName = fullFileName.substring(0, fullFileName.lastIndexOf('.')) + fileType;
+        }
+        return new File(tempDir, fullFileName);
     }
 }
