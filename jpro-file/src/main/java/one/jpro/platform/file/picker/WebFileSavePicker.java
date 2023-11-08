@@ -8,13 +8,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import one.jpro.platform.file.ExtensionFilter;
-import one.jpro.platform.file.util.SaveUtils;
+import one.jpro.platform.file.FileStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -84,6 +85,38 @@ public class WebFileSavePicker extends BaseFileSavePicker {
         return initialDirectory;
     }
 
+    // temp directory property
+    private ObjectProperty<File> tempDirectory;
+
+    /**
+     * Returns the temporary directory.
+     *
+     * @return the temporary directory as a File object.
+     */
+    public final File getTempDirectory() {
+        return (tempDirectory != null) ? tempDirectory.get() : null;
+    }
+
+    /**
+     * Sets the temporary directory.
+     *
+     * @param value the temporary directory as a File object.
+     */
+    public final void setTempDirectory(final File value) {
+        tempDirectoryProperty().set(value);
+    }
+
+    /**
+     * Retrieves the property that represents the temporary directory
+     * where the files will be saved before offered for downloading.
+     */
+    public final ObjectProperty<File> tempDirectoryProperty() {
+        if (tempDirectory == null) {
+            tempDirectory = new SimpleObjectProperty<>(this, "tempDirectory");
+        }
+        return tempDirectory;
+    }
+
     @Override
     public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
         if (selectedExtensionFilter == null) {
@@ -99,24 +132,29 @@ public class WebFileSavePicker extends BaseFileSavePicker {
         final String fileType = fileExtension == null ? "" : fileExtension.extensions().get(0);
         final Function<File, CompletableFuture<Void>> onFileSelected = getOnFileSelected();
         if (onFileSelected != null) {
-            final File tempFile = SaveUtils.createTempFile(fileName, fileType);
-            onFileSelected.apply(tempFile)
-                    .thenCompose(Void -> {
-                        try {
-                            final URL fileUrl = tempFile.toURI().toURL();
-                            final WebAPI webAPI = WebAPI.getWebAPI(getNode().getScene().getWindow());
-                            Platform.runLater(() -> webAPI.downloadURL(fileUrl, tempFile::delete));
-                            return CompletableFuture.completedFuture(Void);
-                        } catch (IOException ex) {
+            try {
+                final Path tmpDir = getTempDirectory() != null ? getTempDirectory().toPath() : null;
+                final File tempFile = FileStorage.createTempFile(tmpDir, fileName, fileType).toFile();
+                onFileSelected.apply(tempFile)
+                        .thenCompose(nothing -> {
+                            try {
+                                final URL fileUrl = tempFile.toURI().toURL();
+                                final WebAPI webAPI = WebAPI.getWebAPI(getNode().getScene().getWindow());
+                                Platform.runLater(() -> webAPI.downloadURL(fileUrl, tempFile::delete));
+                                return CompletableFuture.completedFuture(nothing);
+                            } catch (IOException ex) {
+                                return CompletableFuture.failedFuture(ex);
+                            }
+                        }).exceptionallyCompose(ex -> {
+                            if (!tempFile.delete()) {
+                                logger.warn("Could not delete temporary file {}", tempFile.getAbsolutePath());
+                            }
+                            logger.error("Error while downloading file", ex);
                             return CompletableFuture.failedFuture(ex);
-                        }
-                    }).exceptionallyCompose(ex -> {
-                        if (!tempFile.delete()) {
-                            logger.warn("Could not delete temporary file {}", tempFile.getAbsolutePath());
-                        }
-                        logger.error("Error while downloading file", ex);
-                        return CompletableFuture.failedFuture(ex);
-                    });
+                        });
+            } catch (IOException ex) {
+                logger.error("Error creating temporary file for download", ex);
+            }
         }
     }
 }
