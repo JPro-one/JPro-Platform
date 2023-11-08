@@ -97,16 +97,16 @@ public class WebFileSavePicker extends BaseFileSavePicker {
         final String fileName = getInitialFileName() == null ? "filename" : getInitialFileName();
         final ExtensionFilter fileExtension = getSelectedExtensionFilter();
         final String fileType = fileExtension == null ? "" : fileExtension.extensions().get(0);
-        final Function<File, CompletableFuture<File>> onFileSelected = getOnFileSelected();
+        final Function<File, CompletableFuture<Void>> onFileSelected = getOnFileSelected();
         if (onFileSelected != null) {
             final File tempFile = SaveUtils.createTempFile(fileName, fileType);
             onFileSelected.apply(tempFile)
-                    .thenCompose(file -> {
+                    .thenCompose(Void -> {
                         try {
-                            final URL fileUrl = file.toURI().toURL();
+                            final URL fileUrl = tempFile.toURI().toURL();
                             final WebAPI webAPI = WebAPI.getWebAPI(getNode().getScene().getWindow());
-                            Platform.runLater(() -> webAPI.downloadURL(fileUrl, file::delete));
-                            return CompletableFuture.completedFuture(file);
+                            Platform.runLater(() -> webAPI.downloadURL(fileUrl, tempFile::delete));
+                            return CompletableFuture.completedFuture(Void);
                         } catch (IOException ex) {
                             return CompletableFuture.failedFuture(ex);
                         }

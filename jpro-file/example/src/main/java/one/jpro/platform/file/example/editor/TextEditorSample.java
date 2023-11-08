@@ -148,7 +148,8 @@ public class TextEditorSample extends Application {
      * @param textArea    the TextArea where the content of the file will be displayed
      */
     private void openFile(List<? extends FileSource> fileSources, TextArea textArea) {
-        fileSources.stream().findFirst().ifPresentOrElse(fileSource -> fileSource.uploadFileAsync()
+        fileSources.stream().findFirst().ifPresentOrElse(fileSource -> // Set the last opened file
+                fileSource.uploadFileAsync()
                 .thenCompose(file -> {
                     try {
                         final String fileContent = new String(Files.readAllBytes(file.toPath()));
@@ -158,11 +159,7 @@ public class TextEditorSample extends Application {
                         logger.error("Error reading file: " + ex.getMessage(), ex);
                         return CompletableFuture.failedFuture(ex);
                     }
-                }).thenApply(file -> {
-                    // Set the last opened file
-                    lastOpenedFile.set(file);
-                    return file;
-                }), () -> logger.warn("No file selected"));
+                }).thenAccept(lastOpenedFile::set), () -> logger.warn("No file selected"));
     }
 
     /**
@@ -171,15 +168,15 @@ public class TextEditorSample extends Application {
      * @param textArea the {@link TextArea} containing the content to save.
      * @return A function accepting a File, saving its contents, and returning a {@link CompletableFuture}.
      */
-    private Function<File, CompletableFuture<File>> saveToFile(TextArea textArea) {
-        return file -> CompletableFuture.supplyAsync(() -> {
+    private Function<File, CompletableFuture<Void>> saveToFile(TextArea textArea) {
+        return file -> CompletableFuture.runAsync(() -> {
             try (FileOutputStream fos = new FileOutputStream(file)) {
                 fos.write(textArea.getText().getBytes());
             } catch (IOException ex) {
                 logger.error("Error writing file: " + ex.getMessage(), ex);
             }
             lastOpenedFile.set(file);
-            return file;
+            System.out.println("Saved file: " + file.getAbsolutePath());
         });
     }
 }

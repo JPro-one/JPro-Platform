@@ -27,20 +27,20 @@ abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePick
     abstract void showDialog();
 
     // on files selected property
-    ObjectProperty<Function<File, CompletableFuture<File>>> onFileSelected;
+    ObjectProperty<Function<File, CompletableFuture<Void>>> onFileSelected;
 
     @Override
-    public final Function<File, CompletableFuture<File>> getOnFileSelected() {
+    public final Function<File, CompletableFuture<Void>> getOnFileSelected() {
         return onFileSelected == null ? null : onFileSelected.get();
     }
 
     @Override
-    public final void setOnFileSelected(Function<File, CompletableFuture<File>> value) {
+    public final void setOnFileSelected(Function<File, CompletableFuture<Void>> value) {
         onFileSelectedProperty().setValue(value);
     }
 
     @Override
-    public final ObjectProperty<Function<File, CompletableFuture<File>>> onFileSelectedProperty() {
+    public final ObjectProperty<Function<File, CompletableFuture<Void>>> onFileSelectedProperty() {
         if (onFileSelected == null) {
             onFileSelected = new SimpleObjectProperty<>(this, "onFileSelected");
         }

@@ -124,7 +124,7 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
         // Show save dialog
         final File saveToFile = fileChooser.showSaveDialog(window);
         if (saveToFile != null) {
-            final Function<File, CompletableFuture<File>> onFileSelected = getOnFileSelected();
+            final Function<File, CompletableFuture<Void>> onFileSelected = getOnFileSelected();
             if (onFileSelected != null) {
                 onFileSelected.apply(saveToFile);
             }

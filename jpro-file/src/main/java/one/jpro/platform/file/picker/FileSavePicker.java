@@ -28,19 +28,19 @@ public interface FileSavePicker extends FilePicker {
      *
      * @return the event handler or <code>null</code>.
      */
-    Function<File, CompletableFuture<File>> getOnFileSelected();
+    Function<File, CompletableFuture<Void>> getOnFileSelected();
 
     /**
      * Sets the handler to be called when the user selects a file.
      *
      * @param value the event handler or <code>null</code>.
      */
-    void setOnFileSelected(Function<File, CompletableFuture<File>> value);
+    void setOnFileSelected(Function<File, CompletableFuture<Void>> value);
 
     /**
      * Defines the handler to be called when the user selects a file.
      * The handler returns the selected files or {@code null} if
      * no file has been selected.
      */
-    ObjectProperty<Function<File, CompletableFuture<File>>> onFileSelectedProperty();
+    ObjectProperty<Function<File, CompletableFuture<Void>>> onFileSelectedProperty();
 }
