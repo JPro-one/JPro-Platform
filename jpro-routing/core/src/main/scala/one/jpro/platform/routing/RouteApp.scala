@@ -30,9 +30,9 @@ abstract class RouteApp extends Application {
 
     _scene = new Scene(root, 1400, 800)
     stage.setScene(_scene)
+    _sessionManager = SessionManager.getDefault(routeNode, stage)
     routeNode.setRoute(createRoute())
     stage.show()
-    _sessionManager = SessionManager.getDefault(routeNode, stage)
     routeNode.start(_sessionManager)
   }
 
