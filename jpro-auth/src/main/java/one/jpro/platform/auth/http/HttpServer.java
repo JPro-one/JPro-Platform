@@ -36,7 +36,7 @@ public interface HttpServer extends AutoCloseable {
         }
 
         try {
-            return new HttpServerImpl(stage, new HttpOptions());
+            return new HttpServerImpl(stage, new HttpOptions().setReuseAddr(true).setReusePort(true));
         } catch (IOException ioe) {
             throw new HttpServerException(ioe);
         }

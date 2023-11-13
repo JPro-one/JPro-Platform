@@ -9,6 +9,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.jpro.webapi.WebAPI;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.authentication.*;
 import one.jpro.platform.auth.http.HttpServer;
@@ -62,6 +63,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         this.options = Objects.requireNonNull(options, "OAuth2 options cannot be null");
         this.api = new OAuth2API(options);
         this.options.validate();
+
+        // Create a new http server
+        this.httpServer = HttpServer.create(stage);
     }
 
     /**
@@ -85,18 +89,20 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * if an error occurs during the process.
      */
     public CompletableFuture<String> authorizeUrl(OAuth2Credentials credentials) {
-        // Stop any previous running http server
-        if (httpServer != null) {
-            httpServer.stop();
-        }
-
-        // Create a new http server
-        httpServer = HttpServer.create(stage);
-
         // Generate the authorization URL and open it in the default browser
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
         log.debug("Authorize URL: {}", authorizeUrl);
+
+        if (!WebAPI.isBrowser()) {
+            if (httpServer != null) {
+                // Stop any previous running local http server
+                httpServer.stop();
+            }
+
+            // Create a new http server
+            httpServer = HttpServer.create(stage);
+        }
         return httpServer.openURL(authorizeUrl);
     }
 

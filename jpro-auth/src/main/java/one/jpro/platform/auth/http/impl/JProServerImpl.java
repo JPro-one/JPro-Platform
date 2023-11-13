@@ -4,7 +4,6 @@ import com.jpro.webapi.WebAPI;
 import one.jpro.platform.auth.http.HttpServer;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URI;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,8 +42,7 @@ public class JProServerImpl implements HttpServer {
     public String getServerHost() {
         final String serverName = webAPI.getServer();
         final int idx = serverName.indexOf(':');
-        final String host = (idx >= 0) ? serverName.substring(0, idx) : serverName;
-        return host.replace("localhost", "127.0.0.1");
+        return  (idx >= 0) ? serverName.substring(0, idx) : serverName;
     }
 
     @Override
@@ -56,11 +54,12 @@ public class JProServerImpl implements HttpServer {
 
     @Override
     public String getFullRequestedURL() {
-        return URI.create(webAPI.getBrowserURL().replace("localhost", "127.0.0.1")).toString();
+        return webAPI.getBrowserURL();
     }
 
     @Override
     public CompletableFuture<String> openURL(@NotNull final String url) {
-        return CompletableFuture.runAsync(() -> webAPI.openURL(url)).thenApplyAsync(null);
+        return CompletableFuture.runAsync(() -> webAPI.openURL(url))
+                .thenCompose(v -> CompletableFuture.completedFuture(null));
     }
 }
