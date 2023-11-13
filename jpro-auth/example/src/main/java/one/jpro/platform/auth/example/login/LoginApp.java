@@ -1,6 +1,7 @@
 package one.jpro.platform.auth.example.login;
 
 import atlantafx.base.theme.CupertinoLight;
+import com.jpro.webapi.WebAPI;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -193,7 +194,12 @@ public class LoginApp extends BaseAuthApp {
         final var signInBox = createButtonWithDescription(
                 "Sign in with the selected authentication provider.", "Sign In",
                 event -> authProvider.authorizeUrl(authCredentials)
-                        .thenAccept(url -> getSessionManager().gotoURL(url)));
+                        .thenAccept(url -> {
+                            // gotoURL call is only needed when running as a desktop app
+                            if (!WebAPI.isBrowser()) {
+                                getSessionManager().gotoURL(url);
+                            }
+                        }));
 
         final var discoveryBox = createButtonWithDescription(
                 "The OpenID Connect Discovery provides a client with configuration details.",
