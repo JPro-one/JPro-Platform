@@ -29,6 +29,14 @@ trait Route {
       }
     }
   }
+  def domain(domain: String, route: Route): Route = and((r: Request) => {
+    println("request domain: " + r.domain)
+    if(r.domain == domain) {
+      route.apply(r)
+    } else {
+      null
+    }
+  })
   def path(path: String, route: Route): Route = and((r: Request) => {
     if(r.path.startsWith(path + "/")) {
       val r2 = r.copy(path = r.path.drop(path.length), directory = r.resolve(path))

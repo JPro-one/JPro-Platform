@@ -9,7 +9,9 @@ import java.net.URI
 
 case class Request (
   url: String,
+  protocol: String,
   domain: String,
+  port: Int,
   origPath: String,
   path: String,
   directory: String,
@@ -59,7 +61,7 @@ object Request {
       a -> b
     }).toMap
     val path = uri.getPath
-    val res = Request(x, uri.getHost,path,path,"/", query,wref_null,wref_null)
+    val res = Request(x, uri.getScheme, uri.getHost, uri.getPort, path,path,"/", query,wref_null,wref_null)
     res
   }
 }
