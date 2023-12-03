@@ -61,13 +61,6 @@ configure(subprojects.findAll { it.name != 'example' }) {
     }
 }
 
-configure([project("jpro-sessions")]) {
-    dependencies {
-        implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-        implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
-    }
-}
-
 configure([project("tree-showing"), project("jpro-auth"), project("jpro-file"), project("jpro-image-manager"),
            project("jpro-mdfx"), project("jpro-media"), project("jpro-sessions"), project("jpro-html-scrollpane"),
            project("freeze-detector"), project("jpro-routing:core"), project("jpro-routing:dev"),
