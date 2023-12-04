@@ -1,0 +1,22 @@
+plugins {
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
+}
+
+//mainClassName = "one.jpro.platform.webrtc.example.simple.WebRTCSimple"
+mainClassName = "one.jpro.platform.webrtc.example.videoroom.VideoRoomApp"
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = moduleName
+}
+
+dependencies {
+    implementation project(':jpro-webrtc')
+    implementation project(':jpro-routing:core')
+}
+
+javafx {
+    version = "$JAVAFX_VERSION"
+    modules = ['javafx.graphics', 'javafx.controls', 'javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web']
+}
