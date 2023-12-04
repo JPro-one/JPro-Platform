@@ -1,0 +1,68 @@
+.page {
+  -fx-background-color: #ffffff;
+  -fx-alignment: center;
+}
+
+.title {
+  -fx-font-size: 20px;
+}
+
+.video-room-page {
+  -fx-alignment: center;
+  -fx-spacing: 16;
+}
+
+.room-name {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+}
+
+.user-name-label {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+}
+.user-name-field {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+  -fx-pref-width: 200;
+  // Cool javafx border
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4;
+}
+.user-name-box {
+  -fx-alignment: center;
+  -fx-spacing: 16;
+}
+
+.other-views {
+  -fx-alignment: center;
+  -fx-spacing: 16;
+}
+
+.video-frame-wrapper {
+  -fx-background-color: #000000;
+  -fx-pref-width: 400;
+  -fx-max-width: 400;
+  -fx-pref-height: 300;
+}
+
+.video-frame-box {
+  -fx-max-width: 400;
+  -fx-alignment: center;
+  -fx-background-color: #ddddff;
+  -fx-background-radius: 16;
+  -fx-padding: 24;
+  -fx-spacing: 16;
+}
+.video-frame-name {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+}
+
+.buttons {
+  -fx-alignment: center;
+  -fx-spacing: 16;
+}
