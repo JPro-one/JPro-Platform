@@ -6,6 +6,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import one.jpro.platform.mdfx.extensions.ImageExtension;
 import one.jpro.platform.mdfx.impl.AdaptiveImage;
 import one.jpro.platform.mdfx.impl.MDFXNodeHelper;
 
@@ -15,9 +16,21 @@ import java.util.Optional;
 
 public class MarkdownView extends VBox {
 
+    private List<ImageExtension> extensions = new ArrayList<>();
+
     private final SimpleStringProperty mdString = new SimpleStringProperty("");
 
     public MarkdownView(String mdString) {
+        this(mdString, defaultExtensions());
+    }
+
+    public MarkdownView(String mdString, List<ImageExtension> extensions) {
+        // Check whether only one extension has the scheme null
+        if(extensions.stream().filter(e -> e.getScheme() == null).count() > 1) {
+            throw new IllegalArgumentException("Only one extension can have a scheme of null");
+        }
+
+        this.extensions = extensions;
         this.mdString.set(mdString);
         this.mdString.addListener((p,o,n) -> updateContent());
         Optional.ofNullable(MarkdownView.class.getResource("/one/jpro/platform/mdfx/mdfx.css"))
@@ -65,6 +78,28 @@ public class MarkdownView extends VBox {
     }
 
     public Node generateImage(String url) {
+        // Let's find an extension with a matching scheme
+        // But be aware, that the url is sometimes relative without a scheme
+
+        var res = extensions.stream()
+                .filter(e -> e.getScheme() != null && url.startsWith(e.getScheme()))
+                .findFirst();
+
+        if(res.isEmpty()) {
+            res = extensions.stream()
+                    .filter(e -> e.getScheme() == null)
+                    .findFirst();
+        }
+
+        return res.get().getFunction().apply(url, this);
+    }
+
+
+    public static List<ImageExtension> defaultExtensions() {
+        return new ArrayList<>(List.of(DEFAULT_IMAGE_EXTENSION));
+    }
+
+    static ImageExtension DEFAULT_IMAGE_EXTENSION = new ImageExtension(null, (url, view) -> {
         if(url.isEmpty()) {
             return new Group();
         } else {
@@ -73,10 +108,9 @@ public class MarkdownView extends VBox {
 
             // The TextFlow does not limit the width of its node based on the available width
             // As a workaround, we bind to the width of the MarkDownView.
-            r.maxWidthProperty().bind(widthProperty());
+            r.maxWidthProperty().bind(view.widthProperty());
 
             return r;
         }
-
-    }
+    });
 }

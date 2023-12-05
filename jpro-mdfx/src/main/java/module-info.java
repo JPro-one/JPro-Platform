@@ -13,7 +13,10 @@ module one.jpro.platform.mdfx {
     requires flexmark.util.sequence;
     requires flexmark.util.data;
     requires flexmark.util.collection;
+    requires one.jpro.platform.youtube;
 
     opens one.jpro.platform.mdfx;
     exports one.jpro.platform.mdfx;
+    exports one.jpro.platform.mdfx.extensions;
+    opens one.jpro.platform.mdfx.extensions;
 }

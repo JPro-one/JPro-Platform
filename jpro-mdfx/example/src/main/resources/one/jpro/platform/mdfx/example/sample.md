@@ -99,3 +99,12 @@ public class HelloWorld {
 >> This is a nested block quote.
 >
 > - Author
+
+
+## Images and extensions
+
+CoPilots favorite music:
+![alt](youtube:dQw4w9WgXcQ)
+
+Some Image:
+![alt](https://www.jpro.one/app/default/resourcesencoded/cp:/1/1/one/jpro/img/landing/DUKE-forward.png)

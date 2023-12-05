@@ -12,7 +12,7 @@ dependencies {
 
 javafx {
     version = "$JAVAFX_VERSION"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.web']
 }
 
 mainClassName = 'one.jpro.platform.mdfx.example.MarkdownViewSample'

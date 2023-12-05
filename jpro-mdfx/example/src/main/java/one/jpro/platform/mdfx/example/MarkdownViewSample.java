@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import one.jpro.platform.mdfx.MarkdownView;
+import one.jpro.platform.mdfx.extensions.YoutubeExtension;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,10 @@ public class MarkdownViewSample extends Application {
                     }
                 });
 
-        final var markdownView = new MarkdownView() {
+        var markdownExtensions = MarkdownView.defaultExtensions();
+        markdownExtensions.add(YoutubeExtension.create());
+
+        final var markdownView = new MarkdownView("", markdownExtensions) {
             @Override
             protected List<String> getDefaultStylesheets() {
                 Optional<String> defaultStylesheet = Optional.ofNullable(getClass().getResource(SAMPLE_CSS))
