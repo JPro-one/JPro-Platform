@@ -6,11 +6,12 @@
 * Improve documentation for the `jpro-media` module.
 
 #### Features
-* Add `jpro-file` module to `JPro Platform`. For more information, navigate to the 
+* Added `jpro-file` module to `JPro Platform`. For more information, navigate to the 
   [jpro-file](https://github.com/JPro-one/JPro-Platform/tree/main/jpro-file#readme) module.
-* Add `jpro-webartc` module to `JPro Platform`. Provides an API to use WebRTC in JPro running application.
-* Add `jpro-youtube` module to `JPro Platform`. Makes easy to embed a YouTube video by simply using `YoutubeNode`.
-* Add `ensemble` module to publish platform examples.
+* Added `jpro-webartc` module to `JPro Platform`. Provides an API to use WebRTC in JPro running application.
+* Added `jpro-youtube` module to `JPro Platform`. Makes easy to embed a YouTube video by simply using `YoutubeNode`.
+* Added `ensemble` module to publish platform examples.
+* Added Image and YouTube extensions to the `jpro-mdfx` module.
 * Added Domain Filters to the `jpro-routing-core` module. This is a simple example on how to use it:
 
 ```java
