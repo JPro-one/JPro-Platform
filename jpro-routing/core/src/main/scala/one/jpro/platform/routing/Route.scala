@@ -30,7 +30,6 @@ trait Route {
     }
   }
   def domain(domain: String, route: Route): Route = and((r: Request) => {
-    println("request domain: " + r.domain)
     if(r.domain == domain) {
       route.apply(r)
     } else {
