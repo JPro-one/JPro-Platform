@@ -300,6 +300,58 @@ dependencies {
 }
 ```
 
+## JPro WebRTC
+This library provides an API to use WebRTC in **JPro/JavaFX** applications. This technology allows for the direct 
+exchange of audio, video, and data between web browsers or devices, facilitating features like video conferencing,
+voice calling, and peer-to-peer file sharing directly in the web browser without requiring additional plugins or 
+software. WebRTC is designed to be versatile and secure, employing end-to-end encryption to ensure privacy and data
+integrity. Its integration into major browsers and its extensive API make it a popular choice for developers building
+real-time communication capabilities into web applications, particularly in contexts where low latency and direct 
+peer-to-peer communication are essential. For a Java and JavaFX developer, WebRTC offers a pathway to integrate 
+real-time communication features into web applications, potentially enhancing user interaction and collaboration
+capabilities.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-webrtc</artifactId>
+    <version>0.2.7-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-webrtc:0.2.7-SNAPSHOT")
+}
+```
+
+## JPro YouTube
+This library makes it easy to embed a YouTube video in your **JPro/JavaFX** applications. It provides a simple API
+to embed the video in a JavaFX node called `YoutubeNode`. The video can be played, paused, stopped, and muted via
+the embedded controls. The video can be played in full-screen mode.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-youtube</artifactId>
+    <version>0.2.7-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-youtube:0.2.7-SNAPSHOT")
+}
+```
+
 ### Usage
 ```
 import one.jpro.platform.sessions.SessionManager;
