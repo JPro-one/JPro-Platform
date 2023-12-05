@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.oath2;
+package one.jpro.platform.auth.oauth2;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;

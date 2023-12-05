@@ -1,7 +1,7 @@
 package one.jpro.platform.auth.api;
 
 import javafx.stage.Stage;
-import one.jpro.platform.auth.oath2.provider.GoogleAuthenticationProvider;
+import one.jpro.platform.auth.oauth2.provider.GoogleAuthenticationProvider;
 
 /**
  * Fluent Google Authentication API.

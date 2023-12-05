@@ -1,10 +1,10 @@
-package one.jpro.platform.auth.oath2.provider;
+package one.jpro.platform.auth.oauth2.provider;
 
 import javafx.stage.Stage;
-import one.jpro.platform.auth.oath2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.oath2.OAuth2Flow;
-import one.jpro.platform.auth.oath2.OAuth2Options;
-import one.jpro.platform.auth.oath2.PubSecKeyOptions;
+import one.jpro.platform.auth.oauth2.OAuth2AuthenticationProvider;
+import one.jpro.platform.auth.oauth2.OAuth2Flow;
+import one.jpro.platform.auth.oauth2.OAuth2Options;
+import one.jpro.platform.auth.oauth2.PubSecKeyOptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;

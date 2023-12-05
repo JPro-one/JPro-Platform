@@ -1,7 +1,7 @@
 package one.jpro.platform.auth.test;
 
-import one.jpro.platform.auth.oath2.OAuth2Options;
-import one.jpro.platform.auth.oath2.provider.GoogleAuthenticationProvider;
+import one.jpro.platform.auth.oauth2.OAuth2Options;
+import one.jpro.platform.auth.oauth2.provider.GoogleAuthenticationProvider;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

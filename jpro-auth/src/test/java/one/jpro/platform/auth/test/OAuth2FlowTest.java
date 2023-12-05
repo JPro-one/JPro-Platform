@@ -1,6 +1,6 @@
 package one.jpro.platform.auth.test;
 
-import one.jpro.platform.auth.oath2.OAuth2Flow;
+import one.jpro.platform.auth.oauth2.OAuth2Flow;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,8 +1,8 @@
 package one.jpro.platform.auth.api;
 
 import javafx.stage.Stage;
-import one.jpro.platform.auth.oath2.OAuth2Flow;
-import one.jpro.platform.auth.oath2.provider.KeycloakAuthenticationProvider;
+import one.jpro.platform.auth.oauth2.OAuth2Flow;
+import one.jpro.platform.auth.oauth2.provider.KeycloakAuthenticationProvider;
 import org.json.JSONObject;
 
 /**

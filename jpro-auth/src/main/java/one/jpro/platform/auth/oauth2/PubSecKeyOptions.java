@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.oath2;
+package one.jpro.platform.auth.oauth2;
 
 import one.jpro.platform.auth.authentication.Options;
 import org.json.JSONObject;
