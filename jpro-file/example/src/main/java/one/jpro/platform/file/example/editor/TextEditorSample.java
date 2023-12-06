@@ -45,14 +45,15 @@ import java.util.function.Function;
  * Functionalities:
  * <ul>
  *     <li>FileDropper: Allows users to open text files by dragging and dropping them onto a designated area.</li>
- *     <li>FilePicker: Provides an "Open" button that triggers a file picker dialog for selecting text files.</li>
+ *     <li>FileOpenPicker: Provides an "Open" button that triggers a file picker dialog for selecting text files.</li>
  *     <li>TextArea: Displays the contents of the opened text files in a text area for editing.</li>
- *     <li>Save Feature: Allows users to save the edited content back to a file.</li>
+ *     <li>FileSavePicker: Allows users to save the edited content back to a file.</li>
  * </ul>
  *
  * @author Besmir Beqiri
  * @see FileDropper
  * @see FileOpenPicker
+ * @see FileSavePicker
  */
 public class TextEditorSample extends Application {
 
