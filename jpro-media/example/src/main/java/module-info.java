@@ -11,6 +11,7 @@ module one.jpro.platform.media.example {
 
     requires jpro.webapi;
     requires one.jpro.platform.media;
+    requires one.jpro.platform.file;
 
 //    requires org.bytedeco.ffmpeg.windows.x86_64;
 //    requires org.bytedeco.opencv.windows.x86_64;

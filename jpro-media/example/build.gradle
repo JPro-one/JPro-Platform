@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation project(":jpro-media")
+    implementation project(":jpro-file")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
 
     implementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"

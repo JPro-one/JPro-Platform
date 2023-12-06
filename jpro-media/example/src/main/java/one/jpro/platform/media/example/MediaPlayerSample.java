@@ -13,6 +13,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.platform.file.ExtensionFilter;
+import one.jpro.platform.file.NativeFileSource;
+import one.jpro.platform.file.WebFileSource;
+import one.jpro.platform.file.picker.FileOpenPicker;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.player.MediaPlayer;
@@ -27,12 +31,26 @@ import java.util.Optional;
  */
 public class MediaPlayerSample extends Application {
 
-    public static final String MEDIA_SOURCE = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    public static final String MEDIA_SOURCE =
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+
+    private static final ExtensionFilter videoExtensionFilter =
+            ExtensionFilter.of("Video files", ".mp4");
+
+    private MediaPlayer mediaPlayer;
+    private MediaView mediaView;
+    private Button playPauseButton;
+    private Button stopButton;
+    private Slider seekSlider;
+    private CheckBox preserveRatioCheckBox;
+    private CheckBox muteCheckBox;
+    private Slider volumeSlider;
+
 
     @Override
     public void start(Stage stage) {
         stage.setTitle("JPro Media Player");
-        Scene scene = new Scene(createRoot(stage), 1140, 640);
+        Scene scene = new Scene(createRoot(stage), 1180, 640);
         Optional.ofNullable(Theme.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(scene::setUserAgentStylesheet);
@@ -41,21 +59,64 @@ public class MediaPlayerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-        // Media player
-        MediaPlayer mediaPlayer = MediaPlayer.create(stage, new MediaSource(MEDIA_SOURCE));
-        MediaView mediaView = MediaView.create(mediaPlayer);
-
         // Controls
-        Button playPauseButton = new Button("Play");
+        mediaView = MediaView.create(stage);
+
+        Button openButton = new Button("Open");
+        playPauseButton = new Button("Play");
         playPauseButton.setDisable(true);
-        Button stopButton = new Button("Stop");
+        stopButton = new Button("Stop");
         stopButton.setDisable(true);
-        Slider seekSlider = new Slider();
+        seekSlider = new Slider();
         seekSlider.setPrefWidth(480);
-        CheckBox preserveRatioCheckBox = new CheckBox("Preserve Ratio");
+        preserveRatioCheckBox = new CheckBox("Preserve Ratio");
+        muteCheckBox = new CheckBox("Mute");
+        volumeSlider = new Slider();
+
+        // Media player
+        createMediaPlayer(stage, new MediaSource(MEDIA_SOURCE));
+
+        // Configure the file open picker
+        FileOpenPicker fileOpenPicker = FileOpenPicker.create(openButton);
+        fileOpenPicker.setSelectedExtensionFilter(videoExtensionFilter);
+        fileOpenPicker.setOnFilesSelected(fileSources -> fileSources.stream().findFirst().ifPresent(fileSource -> {
+            mediaPlayer.stop();
+            if (fileSource instanceof NativeFileSource nativeFileSource) {
+                createMediaPlayer(stage, new MediaSource(nativeFileSource.getPlatformFile()));
+            } else if (fileSource instanceof WebFileSource webFileSource) {
+                createMediaPlayer(stage, new MediaSource(webFileSource.getPlatformFile()));
+            }
+        }));
+
+        // User interface
+        FlowPane controlsPane = new FlowPane(openButton, playPauseButton, stopButton, seekSlider,
+                preserveRatioCheckBox, muteCheckBox, volumeSlider);
+        controlsPane.getStyleClass().add("controls-pane");
+        VBox rootPane = new VBox(mediaView, controlsPane);
+        rootPane.getStyleClass().add("root-pane");
+        VBox.setVgrow(mediaView, Priority.ALWAYS);
+
+        Optional.ofNullable(getClass().getResource("css/media_sample.css"))
+                .map(URL::toExternalForm)
+                .ifPresent(cssResource -> rootPane.getStylesheets().add(cssResource));
+
+        // Stop media player and release resources when we switch views via routing links
+        rootPane.sceneProperty().addListener(observable -> {
+            if (rootPane.getScene() == null) {
+                mediaPlayer.stop();
+            }
+        });
+
+        return rootPane;
+    }
+
+    private void createMediaPlayer(Stage stage, MediaSource mediaSource) {
+        // Media player
+        mediaPlayer = MediaPlayer.create(stage, mediaSource);
+        mediaView.setMediaEngine(mediaPlayer);
+
         preserveRatioCheckBox.setSelected(mediaView.isPreserveRatio());
-        CheckBox muteCheckBox = new CheckBox("Mute");
-        Slider volumeSlider = new Slider(0, 100, mediaPlayer.getVolume() * 100.0);
+        volumeSlider.setValue(mediaPlayer.getVolume() * 100.0);
 
         // Control events
         stopButton.setOnAction(event -> {
@@ -97,6 +158,7 @@ public class MediaPlayerSample extends Application {
             playPauseButton.setOnAction(event2 -> mediaPlayer.play());
             playPauseButton.setDisable(false);
             stopButton.setDisable(false);
+            seekSlider.setValue(mediaPlayer.getCurrentTime().toSeconds());
             seekSlider.setMax(mediaPlayer.getDuration().toSeconds());
             volumeSlider.setValue(mediaPlayer.getVolume() * 100.0);
         });
@@ -117,27 +179,6 @@ public class MediaPlayerSample extends Application {
             playPauseButton.setOnAction(event2 -> mediaPlayer.play());
         });
         mediaPlayer.setOnError(event -> System.out.println(mediaPlayer.getError().toString()));
-
-        // User interface
-        FlowPane controlsPane = new FlowPane(playPauseButton, stopButton, seekSlider,
-                preserveRatioCheckBox, muteCheckBox, volumeSlider);
-        controlsPane.getStyleClass().add("controls-pane");
-        VBox rootPane = new VBox(mediaView, controlsPane);
-        rootPane.getStyleClass().add("root-pane");
-        VBox.setVgrow(mediaView, Priority.ALWAYS);
-
-        Optional.ofNullable(getClass().getResource("css/media_sample.css"))
-                .map(URL::toExternalForm)
-                .ifPresent(cssResource -> rootPane.getStylesheets().add(cssResource));
-
-        // Stop media player and release resources when we switch views via routing links
-        rootPane.sceneProperty().addListener(observable -> {
-            if (rootPane.getScene() == null) {
-                mediaPlayer.stop();
-            }
-        });
-
-        return rootPane;
     }
 
     public static void main(String[] args) {
