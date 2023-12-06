@@ -25,6 +25,14 @@ public class DomainExample extends RouteApp {
 }
 ```
 
+#### Bugfixes
+* In `jpro-media` module, correctly reassign a media engine to the 
+  [WebMediaView](https://github.com/JPro-one/JPro-Platform/blob/main/jpro-media/src/main/java/one/jpro/platform/media/WebMediaView.java) 
+  by calling `setMediaEngine` method when running via JPro.
+* In `jpro-media` module, correctly resize the video element in the
+  [WebMediaView](https://github.com/JPro-one/JPro-Platform/blob/main/jpro-media/src/main/java/one/jpro/platform/media/WebMediaView.java)
+  after calling `setMediaEngine` method when running via JPro.
+
 ### 0.2.6 (September 28, 2023)
 
 #### Improvements

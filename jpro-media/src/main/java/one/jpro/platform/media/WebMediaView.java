@@ -48,27 +48,21 @@ public abstract class WebMediaView extends MediaView {
                         webAPI.executeScript("""
                                 // clear all elements
                                 while ($mediaContainer.firstChild) {
-                                    elem.removeChild(elem.firstChild);
+                                    $mediaContainer.removeChild($mediaContainer.firstChild);
                                 }
                                 // add new element
-                                $mediaContainer.appendChild(%s);
+                                let videoElement = %s;
+                                videoElement.controls = $controls;
+                                $mediaContainer.appendChild(videoElement);
                                 """.replace("$mediaContainer", mediaContainerElement.getName())
+                                .replace("$controls", String.valueOf(isShowControls()))
                                 .formatted(webMediaEngine.getVideoElement().getName()));
+                        updateVideoElementSize(webMediaEngine);
                         if (webMediaEngine instanceof WebMediaRecorder) {
                             webAPI.executeScript("""
                                     %s.play();
                                     """.formatted(webMediaEngine.getVideoElement().getName()));
                         }
-                        webAPI.executeScript("""
-                                %s.width = "%s";
-                                """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
-                        webAPI.executeScript("""
-                                %s.height = "%s";
-                                """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
-                        webAPI.executeScript("""
-                                %s.controls = $controls;
-                                """.formatted(webMediaEngine.getVideoElement().getName())
-                                .replace("$controls", String.valueOf(isShowControls())));
                     }
                 }
             };
@@ -112,11 +106,7 @@ public abstract class WebMediaView extends MediaView {
                 @Override
                 protected void invalidated() {
                     if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
-                        final double fitWidth = get();
-                        webAPI.executeScript("""
-                                %s.width = "%s";
-                                """.formatted(webMediaEngine.getVideoElement().getName(), fitWidth));
-                        log.trace("video width: {}", fitWidth);
+                        updateVideoElementWidth(webMediaEngine);
                     }
                 }
             };
@@ -131,11 +121,7 @@ public abstract class WebMediaView extends MediaView {
                 @Override
                 protected void invalidated() {
                     if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
-                        final double fitHeight = get();
-                        webAPI.executeScript("""
-                                %s.height = "%s";
-                                """.formatted(webMediaEngine.getVideoElement().getName(), fitHeight));
-                        log.trace("video height: " + fitHeight);
+                        updateVideoElementHeight(webMediaEngine);
                     }
                 }
             };
@@ -173,19 +159,39 @@ public abstract class WebMediaView extends MediaView {
     protected void layoutChildren() {
         for (Node child : getManagedChildren()) {
             if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
-                if (getFitWidth() < 0) {
-                    webAPI.executeScript("""
-                            %s.width = "%s";
-                            """.formatted(webMediaEngine.getVideoElement().getName(), getWidth()));
-                }
-                if (getFitHeight() < 0) {
-                    webAPI.executeScript("""
-                            %s.height = "%s";
-                            """.formatted(webMediaEngine.getVideoElement().getName(), getHeight()));
-                }
+                updateVideoElementSize(webMediaEngine);
             }
             layoutInArea(child, 0.0, 0.0, getWidth(), getHeight(),
                     0.0, HPos.CENTER, VPos.CENTER);
         }
+    }
+
+    private void updateVideoElementWidth(WebMediaEngine webMediaEngine) {
+        if (getFitWidth() < 0) {
+            webAPI.executeScript("""
+                    %s.width = "%s";
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getWidth()));
+        } else {
+            webAPI.executeScript("""
+                    %s.width = "%s";
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getFitWidth()));
+        }
+    }
+
+    private void updateVideoElementHeight(WebMediaEngine webMediaEngine) {
+        if (getFitHeight() < 0) {
+            webAPI.executeScript("""
+                    %s.height = "%s";
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getHeight()));
+        } else {
+            webAPI.executeScript("""
+                    %s.height = "%s";
+                    """.formatted(webMediaEngine.getVideoElement().getName(), getFitHeight()));
+        }
+    }
+
+    private void updateVideoElementSize(WebMediaEngine webMediaEngine) {
+        updateVideoElementWidth(webMediaEngine);
+        updateVideoElementHeight(webMediaEngine);
     }
 }
