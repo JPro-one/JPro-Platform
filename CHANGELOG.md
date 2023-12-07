@@ -33,6 +33,10 @@ public class DomainExample extends RouteApp {
   [WebMediaView](https://github.com/JPro-one/JPro-Platform/blob/main/jpro-media/src/main/java/one/jpro/platform/media/WebMediaView.java)
   after calling `setMediaEngine` method when running via JPro.
 
+#### Changes
+* In the `jpro-auth` module, the package named `one.jpro.platform.auth.oath2` was correctly renamed to 
+`one.jpro.platform.auth.oauth2`.
+
 ### 0.2.6 (September 28, 2023)
 
 #### Improvements
