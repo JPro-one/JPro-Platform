@@ -15,6 +15,7 @@ Once the user confirm their choice, a provided callback handler is invoked for f
         3. **Callback Handler**: Once the user selects the file(s), a provided handler function is invoked.
 
     * Usage Example
+
       ```java
       ExtensionFilter textExtensionFilter = ExtensionFilter.of("Subtitle files", ".txt", ".srt", ".vtt");
       ExtensionFilter videoExtensionFilter = ExtensionFilter.of("Video files", ".mp4", ".avi", ".mkv");
@@ -25,6 +26,7 @@ Once the user confirm their choice, a provided callback handler is invoked for f
       fileOpenPicker.setSelectionMode(SelectionMode.MULTIPLE);
       fileOpenPicker.setOnFilesSelected(fileSources -> openFiles(fileSources));
       ```
+
 - `FileSavePicker`: Assists the user in saving files to their file system. We can set supported file types, default
 file names and starting directories. A callback handler is invoked to specify the saving tasks upon the successfully
 selected file. For the `Web` implementation this picker acts as a file downloader.
@@ -71,6 +73,7 @@ a specified callback handler is invoked for further processing.
               dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, false));
       fileDropper.setOnFilesSelected(fileSources -> openFiles(fileSources));
       ```
+
 ### Configuration
 - Gradle
     ```groovy
