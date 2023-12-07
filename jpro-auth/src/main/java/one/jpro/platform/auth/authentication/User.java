@@ -10,8 +10,10 @@ import java.util.stream.Collectors;
 
 /**
  * An implementation of the {@link Authentication} interface to
- * be used on the server side to create authentication objects
- * from user data.
+ * be used on the client side to create authentication objects
+ * from user data. The term client does not imply any particular
+ * implementation characteristics (e.g., whether the application
+ * executes on a server, a desktop, or other devices).
  *
  * @author Besmir Beqiri
  */
