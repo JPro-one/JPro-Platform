@@ -37,7 +37,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'one.jpro.platform:jpro-media:0.2.7'
+    implementation 'one.jpro.platform:jpro-media:0.2.8-SNAPSHOT'
     runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8' // when running on desktop/device only
 
     // use compileOnly configuration when running/deploying with JPro, 
@@ -73,7 +73,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
     <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-media</artifactId>
-        <version>0.2.7</version>
+        <version>0.2.8-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>org.bytedeco</groupId>
