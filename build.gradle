@@ -64,7 +64,8 @@ configure(subprojects.findAll { it.name != 'example' }) {
 configure([project("tree-showing"), project("jpro-auth"), project("jpro-file"), project("jpro-image-manager"),
            project("jpro-mdfx"), project("jpro-media"), project("jpro-sessions"), project("jpro-html-scrollpane"),
            project("freeze-detector"), project("jpro-routing:core"), project("jpro-routing:dev"),
-           project("jpro-routing:popup"), project("internal:openlink")]) {
+           project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
+           project("internal:openlink")]) {
     apply plugin: 'maven-publish'
 
     publishing {
