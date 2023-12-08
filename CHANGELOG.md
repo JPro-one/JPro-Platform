@@ -1,7 +1,7 @@
-### 0.2.7 (TBD)
+### 0.2.7 (December 8, 2023)
 
 #### Improvements
-* Updated JPro to version `2023.3.1`.
+* Updated JPro to version `2023.3.2`.
 * Updated **SimpleFX** to version `3.2.27`.
 * Improve documentation for the `jpro-media` module.
 
