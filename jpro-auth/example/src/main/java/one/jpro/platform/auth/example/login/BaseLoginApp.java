@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  *
  * @author Besmir Beqiri
  */
-public abstract class BaseAuthApp extends RouteApp {
+public abstract class BaseLoginApp extends RouteApp {
 
     static final String GOOGLE_CLIENT_ID = System.getenv("GOOGLE_TEST_CLIENT_ID");
     static final String GOOGLE_CLIENT_SECRET = System.getenv("GOOGLE_TEST_CLIENT_SECRET");
@@ -46,19 +46,16 @@ public abstract class BaseAuthApp extends RouteApp {
     static final String AZURE_CLIENT_SECRET = System.getenv("AZURE_TEST_CLIENT_SECRET");
 //    private static final String AZURE_TENANT = System.getenv("AZURE_TEST_CLIENT_TENANT");
 
-    static final String AUTH_ERROR_PATH = "/auth/error";
-    static final String GOOGLE_PROVIDER_PATH = "/provider/google";
-    static final String MICROSOFT_PROVIDER_PATH = "/provider/microsoft";
-    static final String KEYCLOAK_PROVIDER_PATH = "/provider/keycloak";
+    public static final String AUTH_ERROR_PATH = "/auth/error";
 
     // User property
     private ObjectProperty<User> userProperty;
 
-    final User getUser() {
+    public final User getUser() {
         return userProperty == null ? null : userProperty.get();
     }
 
-    final void setUser(User value) {
+    public final void setUser(User value) {
         userProperty().set(value);
     }
 
@@ -67,7 +64,7 @@ public abstract class BaseAuthApp extends RouteApp {
      *
      * @return the user property
      */
-    final ObjectProperty<User> userProperty() {
+    public final ObjectProperty<User> userProperty() {
         if (userProperty == null) {
             userProperty = new SimpleObjectProperty<>(this, "user");
         }
@@ -77,11 +74,11 @@ public abstract class BaseAuthApp extends RouteApp {
     // Introspection Info property
     private ObjectProperty<JSONObject> introspectionInfoProperty;
 
-    final JSONObject getIntrospectionInfo() {
+    public final JSONObject getIntrospectionInfo() {
         return introspectionInfoProperty == null ? null : introspectionInfoProperty.get();
     }
 
-    final void setIntrospectionInfo(JSONObject value) {
+    public final void setIntrospectionInfo(JSONObject value) {
         introspectionInfoProperty().set(value);
     }
 
@@ -90,7 +87,7 @@ public abstract class BaseAuthApp extends RouteApp {
      *
      * @return the introspection info property
      */
-    final ObjectProperty<JSONObject> introspectionInfoProperty() {
+    public final ObjectProperty<JSONObject> introspectionInfoProperty() {
         if (introspectionInfoProperty == null) {
             introspectionInfoProperty = new SimpleObjectProperty<>(this, "introspectionInfo");
         }
@@ -100,11 +97,11 @@ public abstract class BaseAuthApp extends RouteApp {
     // User info property
     private ObjectProperty<JSONObject> userInfoProperty;
 
-    final JSONObject getUserInfo() {
+    public final JSONObject getUserInfo() {
         return userInfoProperty == null ? null : userInfoProperty.get();
     }
 
-    final void setUserInfo(JSONObject value) {
+    public final void setUserInfo(JSONObject value) {
         userInfoProperty().set(value);
     }
 
@@ -113,7 +110,7 @@ public abstract class BaseAuthApp extends RouteApp {
      *
      * @return the user info property
      */
-    final ObjectProperty<JSONObject> userInfoProperty() {
+    public final ObjectProperty<JSONObject> userInfoProperty() {
         if (userInfoProperty == null) {
             userInfoProperty = new SimpleObjectProperty<>(this, "userInfo");
         }
@@ -123,11 +120,11 @@ public abstract class BaseAuthApp extends RouteApp {
     // Auth provider property
     private ObjectProperty<OAuth2AuthenticationProvider> authProviderProperty;
 
-    final OAuth2AuthenticationProvider getAuthProvider() {
+    public final OAuth2AuthenticationProvider getAuthProvider() {
         return authProviderProperty == null ? null : authProviderProperty.get();
     }
 
-    final void setAuthProvider(OAuth2AuthenticationProvider value) {
+    public final void setAuthProvider(OAuth2AuthenticationProvider value) {
         authProviderProperty().set(value);
     }
 
@@ -136,7 +133,7 @@ public abstract class BaseAuthApp extends RouteApp {
      *
      * @return the auth provider property
      */
-    final ObjectProperty<OAuth2AuthenticationProvider> authProviderProperty() {
+    public final ObjectProperty<OAuth2AuthenticationProvider> authProviderProperty() {
         if (authProviderProperty == null) {
             authProviderProperty = new SimpleObjectProperty<>(this, "authProvider");
         }
@@ -146,11 +143,11 @@ public abstract class BaseAuthApp extends RouteApp {
     // Auth options property
     private ObjectProperty<Options> authOptions;
 
-    final Options getAuthOptions() {
+    public final Options getAuthOptions() {
         return authOptions == null ? null : authOptions.get();
     }
 
-    final void setAuthOptions(Options value) {
+    public final void setAuthOptions(Options value) {
         authOptionsProperty().set(value);
     }
 
@@ -159,7 +156,7 @@ public abstract class BaseAuthApp extends RouteApp {
      *
      * @return the option's property
      */
-    final ObjectProperty<Options> authOptionsProperty() {
+    public final ObjectProperty<Options> authOptionsProperty() {
         if (authOptions == null) {
             authOptions = new SimpleObjectProperty<>(this, "providerOptions");
         }
@@ -169,11 +166,11 @@ public abstract class BaseAuthApp extends RouteApp {
     // Error property
     private ObjectProperty<Throwable> errorProperty;
 
-    final Throwable getError() {
+    public final Throwable getError() {
         return errorProperty == null ? null : errorProperty.get();
     }
 
-    final void setError(Throwable value) {
+    public final void setError(Throwable value) {
         errorProperty().set(value);
     }
 
@@ -182,7 +179,7 @@ public abstract class BaseAuthApp extends RouteApp {
      *
      * @return the error property
      */
-    final ObjectProperty<Throwable> errorProperty() {
+    public final ObjectProperty<Throwable> errorProperty() {
         if (errorProperty == null) {
             errorProperty = new SimpleObjectProperty<>(this, "error");
         }
@@ -195,7 +192,7 @@ public abstract class BaseAuthApp extends RouteApp {
      * @param text the provider name
      * @return a button node
      */
-    Button createAuthProviderButton(String text) {
+    public Button createAuthProviderButton(String text) {
         ImageView iconView = new ImageView();
         iconView.setFitWidth(56);
         iconView.setFitHeight(56);
@@ -208,7 +205,7 @@ public abstract class BaseAuthApp extends RouteApp {
         return loginButton;
     }
 
-    HBox createButtonWithDescription(String description, String buttonText, EventHandler<ActionEvent> action) {
+    public HBox createButtonWithDescription(String description, String buttonText, EventHandler<ActionEvent> action) {
         final var descriptionLabel = new Label(description);
         final var spacer = new Region();
         spacer.setMaxWidth(Double.MAX_VALUE);
@@ -232,11 +229,11 @@ public abstract class BaseAuthApp extends RouteApp {
      * @param json the JSON object
      * @return a formatted string
      */
-    String jsonToMarkdown(JSONObject json) {
+    public String jsonToMarkdown(JSONObject json) {
         return jsonToMarkdown(json, 0);
     }
 
-    String jsonToMarkdown(JSONObject json, int level) {
+    public String jsonToMarkdown(JSONObject json, int level) {
         StringBuilder sb = new StringBuilder("\n");
         for (String key : json.keySet()) {
             final Object value = json.get(key);
@@ -273,7 +270,7 @@ public abstract class BaseAuthApp extends RouteApp {
         return sb.toString();
     }
 
-    String getAuthProviderName(OAuth2AuthenticationProvider authProvider) {
+    public String getAuthProviderName(OAuth2AuthenticationProvider authProvider) {
         String result = "Unknown";
         if (authProvider instanceof GoogleAuthenticationProvider) {
             result = "Google";
