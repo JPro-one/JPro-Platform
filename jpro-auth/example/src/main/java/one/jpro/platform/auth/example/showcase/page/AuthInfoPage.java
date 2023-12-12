@@ -1,9 +1,9 @@
-package one.jpro.platform.auth.example.login.page;
+package one.jpro.platform.auth.example.showcase.page;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.example.login.LoginApp;
+import one.jpro.platform.auth.example.showcase.LoginApp;
 import one.jpro.platform.mdfx.MarkdownView;
 
 /**

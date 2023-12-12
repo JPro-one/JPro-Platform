@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.example.login;
+package one.jpro.platform.auth.example.showcase;
 
 import atlantafx.base.theme.Styles;
 import javafx.beans.property.ObjectProperty;

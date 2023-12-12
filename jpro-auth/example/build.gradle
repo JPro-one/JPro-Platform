@@ -20,7 +20,7 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web']
 }
 
-mainClassName = 'one.jpro.platform.auth.example.login.LoginApp'
+mainClassName = 'one.jpro.platform.auth.example.showcase.LoginApp'
 
 application {
     mainClass = "$mainClassName"

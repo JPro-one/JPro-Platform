@@ -1,8 +1,8 @@
-package one.jpro.platform.auth.example.login;
+package one.jpro.platform.auth.example.showcase;
 
 import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.auth.AuthAPI;
-import one.jpro.platform.auth.example.login.page.*;
+import one.jpro.platform.auth.example.showcase.page.*;
 import one.jpro.platform.auth.oauth2.OAuth2Credentials;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
@@ -16,7 +16,7 @@ import static one.jpro.platform.routing.RouteUtils.getNode;
 import static one.jpro.platform.routing.RouteUtils.redirect;
 
 /**
- * An example application to show how to use the Authorization module in general
+ * A showcase application to show how to use the Authorization module in general
  * combined with the Routing module and various supported authentication providers.
  *
  * @author Besmir Beqiri

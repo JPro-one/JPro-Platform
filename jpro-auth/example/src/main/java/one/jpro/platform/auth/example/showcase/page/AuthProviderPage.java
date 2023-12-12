@@ -1,17 +1,17 @@
-package one.jpro.platform.auth.example.login.page;
+package one.jpro.platform.auth.example.showcase.page;
 
 import com.jpro.webapi.WebAPI;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.example.login.LoginApp;
+import one.jpro.platform.auth.example.showcase.LoginApp;
 import one.jpro.platform.auth.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.oauth2.OAuth2Credentials;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
 
-import static one.jpro.platform.auth.example.login.BaseLoginApp.AUTH_ERROR_PATH;
+import static one.jpro.platform.auth.example.showcase.BaseLoginApp.AUTH_ERROR_PATH;
 import static one.jpro.platform.routing.LinkUtil.gotoPage;
 
 /**

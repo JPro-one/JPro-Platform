@@ -1,17 +1,17 @@
-package one.jpro.platform.auth.example.login.page;
+package one.jpro.platform.auth.example.showcase.page;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.authentication.Authentication;
 import one.jpro.platform.auth.authentication.User;
-import one.jpro.platform.auth.example.login.LoginApp;
+import one.jpro.platform.auth.example.showcase.LoginApp;
 import one.jpro.platform.auth.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.oauth2.OAuth2Options;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
 
-import static one.jpro.platform.auth.example.login.BaseLoginApp.AUTH_ERROR_PATH;
+import static one.jpro.platform.auth.example.showcase.BaseLoginApp.AUTH_ERROR_PATH;
 import static one.jpro.platform.routing.LinkUtil.gotoPage;
 
 /**
@@ -175,6 +175,7 @@ public class SignedInUserPage extends Page {
             final var pane = new VBox(headerLabel, authInfoBox, introspectTokenBox, refreshTokenBox,
                     revokeTokenBox, userInfoBox, logoutBox);
             pane.getStyleClass().add("signed-in-user-pane");
+
             getChildren().add(pane);
         }
     }
