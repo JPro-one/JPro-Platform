@@ -1,12 +1,6 @@
 dependencies {
-    implementation project(":internal:openlink")
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    implementation "com.auth0:java-jwt:$AUTH0_JAVAJWT_VERSION"
-    implementation "com.auth0:jwks-rsa:$AUTH0_JWKSRSA_VERSION"
-    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
-//    api "jakarta.inject:jakarta.inject-api:$JAKARTA_INJECT_VERSION"
-    api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
-    api "org.json:json:$JSON_VERSION"
+    api project(":jpro-auth:core")
+    api project(":jpro-routing:core")
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
@@ -18,8 +12,8 @@ publishing {
         mavenJava(MavenPublication) {
             pom {
                 packaging = 'jar'
-                name = 'JPro Auth Core'
-                description = 'Core library for authenticating and authorizing users.'
+                name = 'JPro Auth Routing'
+                description = 'A library that makes it easy to combine and use the auth and routing functionalities.'
                 url = 'https://www.jpro.one'
 
                 developers {

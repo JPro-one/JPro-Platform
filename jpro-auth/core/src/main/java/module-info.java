@@ -3,18 +3,20 @@
  *
  * @author Besmir Beqiri
  */
-module one.jpro.platform.auth {
+module one.jpro.platform.auth.core {
     requires javafx.graphics;
+    requires org.jetbrains.annotations;
     requires java.net.http;
     requires jpro.webapi;
-    requires org.jetbrains.annotations;
-    requires org.json;
     requires jwks.rsa;
-    requires org.slf4j;
     requires com.auth0.jwt;
     requires one.jpro.platform.internal.openlink;
 
+    requires transitive org.json;
+    requires transitive org.slf4j;
+
     opens one.jpro.platform.auth.core;
+
     exports one.jpro.platform.auth.core;
     exports one.jpro.platform.auth.core.api;
     exports one.jpro.platform.auth.core.authentication;
