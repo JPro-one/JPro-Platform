@@ -125,14 +125,8 @@ public final class AuthFilters {
         return (route) -> (request) -> {
             if (request.path().equals(credentials.getRedirectUri())) {
                 return FXFuture.fromJava(authProvider.authenticate(credentials))
-                        .flatMap(user -> {
-                            userFunction.apply(user);
-                            return route.apply(request);
-                        })
-                        .flatExceptionally(ex -> {
-                            errorFunction.apply(ex);
-                            return route.apply(request);
-                        });
+                        .flatMap(userFunction::apply)
+                        .flatExceptionally(errorFunction::apply);
             } else {
                 return route.apply(request);
             }
