@@ -11,7 +11,7 @@ import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
 
-import static one.jpro.platform.auth.example.showcase.BaseLoginApp.AUTH_ERROR_PATH;
+import static one.jpro.platform.auth.example.showcase.LoginApp.AUTH_ERROR_PATH;
 import static one.jpro.platform.routing.LinkUtil.gotoPage;
 
 /**

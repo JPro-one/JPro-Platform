@@ -37,8 +37,11 @@ public abstract class BaseLoginApp extends RouteApp {
 
     static final String AZURE_CLIENT_ID = System.getenv("AZURE_TEST_CLIENT_ID");
     static final String AZURE_CLIENT_SECRET = System.getenv("AZURE_TEST_CLIENT_SECRET");
-//    private static final String AZURE_TENANT = System.getenv("AZURE_TEST_CLIENT_TENANT");
 
+    static final String KEYCLOAK_CLIENT_ID = System.getenv("KEYCLOAK_TEST_CLIENT_ID");
+    static final String KEYCLOAK_CLIENT_SECRET = System.getenv("KEYCLOAK_TEST_CLIENT_SECRET");
+
+    public static final String USER_CONSOLE_PATH = "/user/console";
     public static final String AUTH_ERROR_PATH = "/auth/error";
 
     // User property

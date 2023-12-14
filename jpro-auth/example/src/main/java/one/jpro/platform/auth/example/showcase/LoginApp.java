@@ -2,8 +2,11 @@ package one.jpro.platform.auth.example.showcase;
 
 import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.auth.core.AuthAPI;
+import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.auth.example.showcase.page.*;
+import one.jpro.platform.auth.routing.AuthFilters;
+import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
@@ -14,7 +17,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-import static one.jpro.platform.auth.routing.AuthFilters.oauth2;
 import static one.jpro.platform.routing.RouteUtils.getNode;
 
 /**
@@ -57,8 +59,8 @@ public class LoginApp extends BaseLoginApp {
         // Keycloak Auth provider
         final var keycloakAuth = AuthAPI.keycloakAuth()
                 .site("http://localhost:8080/realms/{realm}")
-                .clientId("myclient")
-                .clientSecret("5Rx63jCLPmTGhdqNaDDad0mqu5m0aOoN")
+                .clientId(KEYCLOAK_CLIENT_ID)
+                .clientSecret(KEYCLOAK_CLIENT_SECRET)
                 .realm("myrealm")
                 .create(getStage());
 
@@ -88,29 +90,29 @@ public class LoginApp extends BaseLoginApp {
                                 .and(getNode("/keycloak", (r) -> new AuthProviderDiscoveryPage(this, keycloakAuth)))))
                 .filter(DevFilter.create())
                 .filter(StatisticsFilter.create())
-                .filter(oauth2(googleAuth, googleCredentials, user -> {
-                    setUser(user);
-                    setAuthProvider(googleAuth);
-                    return FXFuture.unit(new Redirect("/user/console"));
-                }, error -> {
-                    setError(error);
-                    return FXFuture.unit(new Redirect("/auth/error"));
-                }))
-                .filter(oauth2(microsoftAuth, microsoftCredentials, user -> {
-                    setUser(user);
-                    setAuthProvider(microsoftAuth);
-                    return FXFuture.unit(new Redirect("/user/console"));
-                }, error -> {
-                    setError(error);
-                    return FXFuture.unit(new Redirect("/auth/error"));
-                }))
-                .filter(oauth2(keycloakAuth, keycloakCredentials, user -> {
-                    setUser(user);
-                    setAuthProvider(keycloakAuth);
-                    return FXFuture.unit(new Redirect("/user/console"));
-                }, error -> {
-                    setError(error);
-                    return FXFuture.unit(new Redirect("/auth/error"));
-                }));
+                .filter(oauth2(googleAuth, googleCredentials))
+                .filter(oauth2(microsoftAuth, microsoftCredentials))
+                .filter(oauth2(keycloakAuth, keycloakCredentials));
+    }
+
+    /**
+     * Creates and configures an OAuth2 filter using the provided authentication provider and credentials.
+     * This filter manages the authentication flow, handling both successful authentication and errors.
+     * On successful authentication, it sets the user and authentication provider, and redirects to the user console.
+     * In case of an error, it sets the error details and redirects to the authentication error path.
+     *
+     * @param authProvider The OAuth2 authentication provider used for the authentication process.
+     * @param credentials  The OAuth2 credentials used for authentication.
+     * @return A {@link Filter} object configured for OAuth2 authentication flow.
+     */
+    private Filter oauth2(OAuth2AuthenticationProvider authProvider, OAuth2Credentials credentials) {
+        return AuthFilters.oauth2(authProvider, credentials, user -> {
+            setUser(user);
+            setAuthProvider(authProvider);
+            return FXFuture.unit(new Redirect(USER_CONSOLE_PATH));
+        }, error -> {
+            setError(error);
+            return FXFuture.unit(new Redirect(AUTH_ERROR_PATH));
+        });
     }
 }
