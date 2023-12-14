@@ -9,6 +9,7 @@ dependencies {
     implementation project(':jpro-routing:core')
     implementation project(':jpro-routing:dev')
     implementation project(':jpro-mdfx')
+    implementation project(':jpro-sessions')
 
     implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
     implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
@@ -21,7 +22,8 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web']
 }
 
-mainClassName = 'one.jpro.platform.auth.example.showcase.LoginApp'
+mainClassName = 'one.jpro.platform.auth.example.simple.SimpleApp'
+//mainClassName = 'one.jpro.platform.auth.example.showcase.LoginApp'
 
 application {
     mainClass = "$mainClassName"
