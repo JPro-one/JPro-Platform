@@ -4,10 +4,10 @@ plugins {
 }
 
 dependencies {
-    implementation project(':jpro-auth')
-    implementation project(':jpro-mdfx')
+    implementation project(':jpro-auth:core')
     implementation project(':jpro-routing:core')
     implementation project(':jpro-routing:dev')
+    implementation project(':jpro-mdfx')
 
     implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
     implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"

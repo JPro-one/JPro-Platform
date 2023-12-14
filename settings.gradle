@@ -1,4 +1,4 @@
-include "jpro-auth"
+include "jpro-auth:core"
 include "jpro-auth:example"
 include "jpro-file"
 include "jpro-file:example"

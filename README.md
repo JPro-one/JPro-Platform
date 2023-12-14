@@ -62,12 +62,17 @@ subproject holds different examples from the other modules. To run it, you can u
 Rely on this library to add sophisticated authentication and authorization to your **JPro/JavaFX** applications.
 Finely control access with a degree of customization that can accommodate even the most complex security requirements.
 
+### Auth Core Module
+This library provides core functionality via simple API to authenticate, authorize and manage user roles and attributes
+in order to check whether a user is authorized to access a specific resource. It also provides a JWT (JSON Web Token)
+and OAuth2 (and to some extent OpenID Connect) implementation.
+
 #### Maven configuration
 ```xml
 <dependencies>
   <dependency>
     <groupId>one.jpro.platform</groupId>
-    <artifactId>jpro-auth</artifactId>
+    <artifactId>jpro-auth-core</artifactId>
     <version>0.2.8-SNAPSHOT</version>
   </dependency>
 </dependencies>
@@ -76,7 +81,7 @@ Finely control access with a degree of customization that can accommodate even t
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-auth:0.2.8-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-auth-core:0.2.8-SNAPSHOT")
 }
 ```
 
