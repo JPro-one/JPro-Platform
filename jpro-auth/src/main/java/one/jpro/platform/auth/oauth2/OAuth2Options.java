@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +18,17 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 /**
- * Options describing how an OAuth2 {@link HttpClient} will make connection.
+ * This class represents the configuration options for OAuth2 authentication and authorization.
+ * It encapsulates a variety of settings and parameters that are used during the OAuth2 flow,
+ * including client credentials, token and authorization endpoints, supported response types,
+ * and other custom configurations required for OAuth2 operations.
+ * <p>
+ * Instances of {@code OAuth2Options} can be customized to suit specific OAuth2 workflows,
+ * allowing for the setup of different authentication and authorization schemes, like
+ * authorization code flow, client credentials flow, or implicit flow. It also supports
+ * various advanced configurations such as custom headers, JWT options, and public/secret keys.
+ * To ensure that all necessary OAuth2 parameters are correctly configured, it provides utility
+ * methods to validate and adjust the configurations as needed.
  *
  * @author Besmir Beqiri
  */
@@ -27,7 +36,6 @@ public class OAuth2Options implements Options {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2Options.class);
 
-    // Defaults
     private static final OAuth2Flow FLOW = OAuth2Flow.AUTH_CODE;
     private static final String AUTHORIZATION_PATH = "/oauth/authorize";
     private static final String TOKEN_PATH = "/oauth/token";
@@ -59,36 +67,25 @@ public class OAuth2Options implements Options {
     private String revocationPath;
     private String scopeSeparator;
     private boolean verifyToken;
-    // this is an openid-connect extension
-    private boolean validateIssuer;
+    private boolean validateIssuer; // this is an openid-connect extension
     private boolean useLoopbackIpAddress;
     private String logoutPath;
-    private String userInfoPath;
-    // extra parameters to be added while requesting the user info
-    private JSONObject userInfoParams;
-    // introspection RFC7662 https://tools.ietf.org/html/rfc7662
-    private String introspectionPath;
-    // JWK path RFC7517 https://tools.ietf.org/html/rfc7517
+    private String userInfoPath; // extra parameters to be added while requesting the user info
+    private JSONObject userInfoParams; // introspection RFC7662 https://tools.ietf.org/html/rfc7662
+    private String introspectionPath; // JWK path RFC7517 https://tools.ietf.org/html/rfc7517
     private String jwkPath;
-    //seconds of JWKs lifetime
-    private long jwkMaxAge;
-    // OpenID non standard
-    private String tenant;
-
+    private long jwkMaxAge; //seconds of JWKs lifetime
+    private String tenant; // OpenID non standard
     private String site;
     private String clientId;
     private String clientSecret;
-
-    // assertion RFC7521 https://tools.ietf.org/html/rfc7521
-    private String clientAssertionType;
+    private String clientAssertionType; // assertion RFC7521 https://tools.ietf.org/html/rfc7521
     private String clientAssertion;
-
     private String userAgent;
     private JSONObject headers;
     private List<PubSecKeyOptions> pubSecKeys;
     private JWTOptions jwtOptions;
-    // extra parameters to be added while requesting a token
-    private JSONObject extraParams;
+    private JSONObject extraParams; // extra parameters to be added while requesting a token
 
     /**
      * Default constructor.
@@ -160,24 +157,52 @@ public class OAuth2Options implements Options {
         }
     }
 
+    /**
+     * Gets the OAuth2 flow type.
+     *
+     * @return the current OAuth2 flow
+     */
     public OAuth2Flow getFlow() {
         return flow;
     }
 
+    /**
+     * Sets the OAuth2 flow type.
+     *
+     * @param flow the OAuth2 flow to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setFlow(OAuth2Flow flow) {
         this.flow = flow;
         return this;
     }
 
+    /**
+     * Gets the supported response types.
+     *
+     * @return a list of supported response types
+     */
     public List<String> getSupportedResponseTypes() {
         return supportedResponseTypes;
     }
 
+    /**
+     * Sets the supported response types.
+     *
+     * @param supportedResponseTypes a list of supported response types to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedResponseTypes(List<String> supportedResponseTypes) {
         this.supportedResponseTypes = supportedResponseTypes;
         return this;
     }
 
+    /**
+     * Adds a supported response type to the existing list.
+     *
+     * @param supportedResponseType a supported response type to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedResponseType(String supportedResponseType) {
         if (supportedResponseTypes == null) {
             supportedResponseTypes = new ArrayList<>();
@@ -186,15 +211,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported response modes.
+     *
+     * @return a list of supported response modes
+     */
     public List<String> getSupportedResponseModes() {
         return supportedResponseModes;
     }
 
+    /**
+     * Sets the supported response modes.
+     *
+     * @param supportedResponseModes a list of supported response modes to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedResponseModes(List<String> supportedResponseModes) {
         this.supportedResponseModes = supportedResponseModes;
         return this;
     }
 
+    /**
+     * Adds a supported response mode to the existing list.
+     *
+     * @param supportedResponseMode a supported response mode to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedResponseMode(String supportedResponseMode) {
         if (supportedResponseModes == null) {
             supportedResponseModes = new ArrayList<>();
@@ -203,15 +245,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported grant types.
+     *
+     * @return a list of supported grant types
+     */
     public List<String> getSupportedGrantTypes() {
         return supportedGrantTypes;
     }
 
+    /**
+     * Sets the supported grant types.
+     *
+     * @param supportedGrantTypes a list of supported grant types to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedGrantTypes(List<String> supportedGrantTypes) {
         this.supportedGrantTypes = supportedGrantTypes;
         return this;
     }
 
+    /**
+     * Adds a supported grant type to the existing list.
+     *
+     * @param supportedGrantType a supported grant type to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedGrantType(String supportedGrantType) {
         if (supportedGrantTypes == null) {
             supportedGrantTypes = new ArrayList<>();
@@ -220,15 +279,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported subject types.
+     *
+     * @return a list of supported subject types
+     */
     public List<String> getSupportedSubjectTypes() {
         return supportedSubjectTypes;
     }
 
+    /**
+     * Sets the supported subject types.
+     *
+     * @param supportedSubjectTypes a list of supported subject types to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedSubjectTypes(List<String> supportedSubjectTypes) {
         this.supportedSubjectTypes = supportedSubjectTypes;
         return this;
     }
 
+    /**
+     * Adds a supported subject type to the existing list.
+     *
+     * @param supportedSubjectType a supported subject type to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedSubjectType(String supportedSubjectType) {
         if (supportedSubjectTypes == null) {
             supportedSubjectTypes = new ArrayList<>();
@@ -237,15 +313,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported ID token signing algorithm values.
+     *
+     * @return a list of supported ID token signing algorithm values
+     */
     public List<String> getSupportedIdTokenSigningAlgValues() {
         return supportedIdTokenSigningAlgValues;
     }
 
+    /**
+     * Sets the supported ID token signing algorithm values.
+     *
+     * @param supportedIdTokenSigningAlgValues a list of supported ID token signing algorithm values to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedIdTokenSigningAlgValues(List<String> supportedIdTokenSigningAlgValues) {
         this.supportedIdTokenSigningAlgValues = supportedIdTokenSigningAlgValues;
         return this;
     }
 
+    /**
+     * Adds a supported ID token signing algorithm value to the existing list.
+     *
+     * @param supportedIdTokenSigningAlgValue a supported ID token signing algorithm value to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedIdTokenSigningAlgValue(String supportedIdTokenSigningAlgValue) {
         if (supportedIdTokenSigningAlgValues == null) {
             supportedIdTokenSigningAlgValues = new ArrayList<>();
@@ -254,15 +347,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported scopes.
+     *
+     * @return a list of supported scopes
+     */
     public List<String> getSupportedScopes() {
         return supportedScopes;
     }
 
+    /**
+     * Sets the supported scopes.
+     *
+     * @param supportedScopes a list of supported scopes to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedScopes(List<String> supportedScopes) {
         this.supportedScopes = supportedScopes;
         return this;
     }
 
+    /**
+     * Adds a supported scope to the existing list.
+     *
+     * @param supportedScope a supported scope to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedScope(String supportedScope) {
         if (supportedScopes == null) {
             supportedScopes = new ArrayList<>();
@@ -271,15 +381,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported token endpoint authentication methods.
+     *
+     * @return a list of supported token endpoint authentication methods
+     */
     public List<String> getSupportedTokenEndpointAuthMethods() {
         return supportedTokenEndpointAuthMethods;
     }
 
+    /**
+     * Sets the supported token endpoint authentication methods.
+     *
+     * @param supportedTokenEndpointAuthMethods a list of supported token endpoint authentication methods to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedTokenEndpointAuthMethods(List<String> supportedTokenEndpointAuthMethods) {
         this.supportedTokenEndpointAuthMethods = supportedTokenEndpointAuthMethods;
         return this;
     }
 
+    /**
+     * Adds a supported token endpoint authentication method to the existing list.
+     *
+     * @param supportedTokenEndpointAuthMethod a supported token endpoint authentication method to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedTokenEndpointAuthMethod(String supportedTokenEndpointAuthMethod) {
         if (supportedTokenEndpointAuthMethods == null) {
             supportedTokenEndpointAuthMethods = new ArrayList<>();
@@ -288,15 +415,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported claims.
+     *
+     * @return a list of supported claims
+     */
     public List<String> getSupportedClaims() {
         return supportedClaims;
     }
 
+    /**
+     * Sets the supported claims.
+     *
+     * @param supportedClaims a list of supported claims to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedClaims(List<String> supportedClaims) {
         this.supportedClaims = supportedClaims;
         return this;
     }
 
+    /**
+     * Adds a supported claim to the existing list.
+     *
+     * @param supportedClaim a supported claim to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedClaim(String supportedClaim) {
         if (supportedClaims == null) {
             supportedClaims = new ArrayList<>();
@@ -305,15 +449,32 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported code challenge methods.
+     *
+     * @return a list of supported code challenge methods
+     */
     public List<String> getSupportedCodeChallengeMethods() {
         return supportedCodeChallengeMethods;
     }
 
+    /**
+     * Sets the supported code challenge methods.
+     *
+     * @param supportedCodeChallengeMethods a list of supported code challenge methods to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedCodeChallengeMethods(List<String> supportedCodeChallengeMethods) {
         this.supportedCodeChallengeMethods = supportedCodeChallengeMethods;
         return this;
     }
 
+    /**
+     * Adds a supported code challenge method to the existing list.
+     *
+     * @param supportedCodeChallengeMethod a supported code challenge method to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedCodeChallengeMethod(String supportedCodeChallengeMethod) {
         if (supportedCodeChallengeMethods == null) {
             supportedCodeChallengeMethods = new ArrayList<>();
@@ -322,15 +483,34 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported introspection endpoint authentication methods.
+     *
+     * @return a list of supported introspection endpoint authentication methods
+     */
     public List<String> getSupportedIntrospectionEndpointAuthMethods() {
         return supportedIntrospectionEndpointAuthMethods;
     }
 
+    /**
+     * Sets the supported introspection endpoint authentication methods.
+     *
+     * @param supportedIntrospectionEndpointAuthMethods a list of supported introspection
+     *                                                  endpoint authentication methods to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedIntrospectionEndpointAuthMethods(List<String> supportedIntrospectionEndpointAuthMethods) {
         this.supportedIntrospectionEndpointAuthMethods = supportedIntrospectionEndpointAuthMethods;
         return this;
     }
 
+    /**
+     * Adds a supported introspection endpoint authentication method to the existing list.
+     *
+     * @param supportedIntrospectionEndpointAuthMethod a supported introspection endpoint
+     *                                                 authentication method to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedIntrospectionEndpointAuthMethod(String supportedIntrospectionEndpointAuthMethod) {
         if (supportedIntrospectionEndpointAuthMethods == null) {
             supportedIntrospectionEndpointAuthMethods = new ArrayList<>();
@@ -339,15 +519,34 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the supported revocation endpoint authentication methods.
+     *
+     * @return a list of supported revocation endpoint authentication methods
+     */
     public List<String> getSupportedRevocationEndpointAuthMethods() {
         return supportedRevocationEndpointAuthMethods;
     }
 
+    /**
+     * Sets the supported revocation endpoint authentication methods.
+     *
+     * @param supportedRevocationEndpointAuthMethods a list of supported revocation endpoint
+     *                                               authentication methods to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedRevocationEndpointAuthMethods(List<String> supportedRevocationEndpointAuthMethods) {
         this.supportedRevocationEndpointAuthMethods = supportedRevocationEndpointAuthMethods;
         return this;
     }
 
+    /**
+     * Adds a supported revocation endpoint authentication method to the existing list.
+     *
+     * @param supportedRevocationEndpointAuthMethod a supported revocation endpoint
+     *                                              authentication method to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedRevocationEndpointAuthMethod(String supportedRevocationEndpointAuthMethod) {
         if (supportedRevocationEndpointAuthMethods == null) {
             supportedRevocationEndpointAuthMethods = new ArrayList<>();
@@ -356,24 +555,52 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Checks if the request parameter is supported.
+     *
+     * @return {@code true} if the request parameter is supported, otherwise {@code false}.
+     */
     public boolean isSupportedRequestParameter() {
         return supportedRequestParameter;
     }
 
+    /**
+     * Sets whether the request parameter is supported.
+     *
+     * @param supportedRequestParameter a boolean indicating whether the request parameter is supported
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedRequestParameter(boolean supportedRequestParameter) {
         this.supportedRequestParameter = supportedRequestParameter;
         return this;
     }
 
+    /**
+     * Gets the supported request object signing algorithm values.
+     *
+     * @return a list of supported request object signing algorithm values
+     */
     public List<String> getSupportedRequestObjectSigningAlgValues() {
         return supportedRequestObjectSigningAlgValues;
     }
 
+    /**
+     * Sets the supported request object signing algorithm values.
+     *
+     * @param supportedRequestObjectSigningAlgValues a list of supported request object signing algorithm values to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSupportedRequestObjectSigningAlgValues(List<String> supportedRequestObjectSigningAlgValues) {
         this.supportedRequestObjectSigningAlgValues = supportedRequestObjectSigningAlgValues;
         return this;
     }
 
+    /**
+     * Adds a supported request object signing algorithm value to the existing list.
+     *
+     * @param supportedRequestObjectSigningAlgValue a supported request object signing algorithm value to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addSupportedRequestObjectSigningAlgValue(String supportedRequestObjectSigningAlgValue) {
         if (supportedRequestObjectSigningAlgValues == null) {
             supportedRequestObjectSigningAlgValues = new ArrayList<>();
@@ -385,7 +612,7 @@ public class OAuth2Options implements Options {
     /**
      * Returns the URL of the authorization server's authorization endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string
      */
     public String getAuthorizationPath() {
         return computePath(authorizationPath);
@@ -394,7 +621,7 @@ public class OAuth2Options implements Options {
     /**
      * Sets the URL of the authorization server's authorization endpoint.
      *
-     * @param authorizationPath an URL as a string
+     * @param authorizationPath a URL as a string
      */
     public OAuth2Options setAuthorizationPath(String authorizationPath) {
         this.authorizationPath = authorizationPath;
@@ -404,7 +631,7 @@ public class OAuth2Options implements Options {
     /**
      * Returns the URL of the authorization server's token endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string
      */
     public String getTokenPath() {
         return computePath(tokenPath);
@@ -413,7 +640,7 @@ public class OAuth2Options implements Options {
     /**
      * Sets the URL of the authorization server's token endpoint.
      *
-     * @param tokenPath an URL as a string
+     * @param tokenPath a URL as a string
      */
     public OAuth2Options setTokenPath(String tokenPath) {
         this.tokenPath = tokenPath;
@@ -423,7 +650,7 @@ public class OAuth2Options implements Options {
     /**
      * Returns the URL of the authorization server's revocation endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string
      */
     public String getRevocationPath() {
         return computePath(revocationPath);
@@ -432,44 +659,88 @@ public class OAuth2Options implements Options {
     /**
      * Sets the URL of the authorization server's revocation endpoint.
      *
-     * @param revocationPath an URL as a string
+     * @param revocationPath a URL as a string
      */
     public OAuth2Options setRevocationPath(String revocationPath) {
         this.revocationPath = revocationPath;
         return this;
     }
 
+    /**
+     * Gets the scope separator used in OAuth2 requests.
+     *
+     * @return the scope separator as a string
+     */
     public String getScopeSeparator() {
         return scopeSeparator;
     }
 
+    /**
+     * Sets the scope separator to be used in OAuth2 requests.
+     *
+     * @param scopeSeparator the scope separator as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setScopeSeparator(String scopeSeparator) {
         this.scopeSeparator = scopeSeparator;
         return this;
     }
 
+    /**
+     * Checks if token verification is enabled.
+     *
+     * @return {@code true} if token verification is enabled, otherwise {@code false}.
+     */
     public boolean isVerifyToken() {
         return verifyToken;
     }
 
+    /**
+     * Enables or disables token verification.
+     *
+     * @param verifyToken {@code true} to enable token verification, {@code false} to disable it
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setVerifyToken(boolean verifyToken) {
         this.verifyToken = verifyToken;
         return this;
     }
 
+    /**
+     * Checks if issuer validation is enabled.
+     *
+     * @return {@code true} if issuer validation is enabled, otherwise {@code false}
+     */
     public boolean isValidateIssuer() {
         return validateIssuer;
     }
 
+    /**
+     * Enables or disables issuer validation.
+     *
+     * @param validateIssuer {@code true} to enable issuer validation, {@code false} to disable it
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setValidateIssuer(boolean validateIssuer) {
         this.validateIssuer = validateIssuer;
         return this;
     }
 
+    /**
+     * Checks if loopback IP address is used.
+     *
+     * @return {@code true} if loopback IP address is used, otherwise {@code false}.
+     */
     public boolean isUseLoopbackIpAddress() {
         return useLoopbackIpAddress;
     }
 
+    /**
+     * Sets whether to use loopback IP address.
+     *
+     * @param useLoopbackIpAddress {@code true} to use loopback IP address, {@code false} otherwise
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setUseLoopbackIpAddress(boolean useLoopbackIpAddress) {
         this.useLoopbackIpAddress = useLoopbackIpAddress;
         return this;
@@ -478,7 +749,7 @@ public class OAuth2Options implements Options {
     /**
      * Returns the URL of the authorization server's logout endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string.
      */
     public String getLogoutPath() {
         return computePath(logoutPath);
@@ -487,7 +758,8 @@ public class OAuth2Options implements Options {
     /**
      * Sets the URL of the authorization server's logout endpoint.
      *
-     * @param logoutPath an URL as a string
+     * @param logoutPath a URL as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
      */
     public OAuth2Options setLogoutPath(String logoutPath) {
         this.logoutPath = logoutPath;
@@ -497,7 +769,7 @@ public class OAuth2Options implements Options {
     /**
      * Returns the URL of the authorization server's userinfo endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string.
      */
     public String getUserInfoPath() {
         return computePath(userInfoPath);
@@ -506,17 +778,29 @@ public class OAuth2Options implements Options {
     /**
      * Sets the URL of the authorization server's userinfo endpoint.
      *
-     * @param userInfoPath an URL as a string
+     * @param userInfoPath a URL as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
      */
     public OAuth2Options setUserInfoPath(String userInfoPath) {
         this.userInfoPath = userInfoPath;
         return this;
     }
 
+    /**
+     * Gets the user information parameters.
+     *
+     * @return a {@code JSONObject} containing user information parameters
+     */
     public JSONObject getUserInfoParams() {
         return userInfoParams;
     }
 
+    /**
+     * Sets the user information parameters.
+     *
+     * @param userInfoParams a {@code JSONObject} containing user information parameters
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setUserInfoParams(JSONObject userInfoParams) {
         this.userInfoParams = userInfoParams;
         return this;
@@ -525,7 +809,7 @@ public class OAuth2Options implements Options {
     /**
      * Returns the URL of the authorization server's introspection endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string
      */
     public String getIntrospectionPath() {
         return computePath(introspectionPath);
@@ -534,7 +818,8 @@ public class OAuth2Options implements Options {
     /**
      * Sets the URL of the authorization server's introspection endpoint.
      *
-     * @param introspectionPath an URL as a string
+     * @param introspectionPath a URL as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
      */
     public OAuth2Options setIntrospectionPath(String introspectionPath) {
         this.introspectionPath = introspectionPath;
@@ -542,42 +827,70 @@ public class OAuth2Options implements Options {
     }
 
     /**
-     * Returns the URL of the authorization server's JSON Web Key Set endpoint.
+     * Returns the URL of the authorization server's JSON Web Key Set (JWKS) endpoint.
      *
-     * @return an URL as a string
+     * @return a URL as a string
      */
     public String getJwkPath() {
         return computePath(jwkPath);
     }
 
     /**
-     * Sets the URL of the authorization server's JSON Web Key Set endpoint.
+     * Sets the URL of the authorization server's JSON Web Key Set (JWKS) endpoint.
      *
-     * @param jwkPath an URL as a string
+     * @param jwkPath a URL as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
      */
     public OAuth2Options setJwkPath(String jwkPath) {
         this.jwkPath = jwkPath;
         return this;
     }
 
+    /**
+     * Gets the maximum age of the JWK set before it is refreshed.
+     *
+     * @return the maximum age in milliseconds
+     */
     public long getJwkMaxAge() {
         return jwkMaxAge;
     }
 
+    /**
+     * Sets the maximum age of the JWK set before it needs to be refreshed.
+     *
+     * @param jwkMaxAge the maximum age in milliseconds
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setJwkMaxAge(long jwkMaxAge) {
         this.jwkMaxAge = jwkMaxAge;
         return this;
     }
 
+    /**
+     * Gets the tenant identifier used in OAuth2 requests.
+     *
+     * @return the tenant identifier as a string
+     */
     public String getTenant() {
         return tenant;
     }
 
+    /**
+     * Sets the tenant identifier to be used in OAuth2 requests.
+     *
+     * @param tenant the tenant identifier as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setTenant(String tenant) {
         this.tenant = tenant;
         return this;
     }
 
+    /**
+     * Gets the site URL used in forming OAuth2 endpoints.
+     *
+     * @return the site URL as a string
+     */
     public String getSite() {
         // remove trailing slash if present
         if (site != null && site.endsWith("/")) {
@@ -586,74 +899,164 @@ public class OAuth2Options implements Options {
         return replaceVariables(site);
     }
 
+    /**
+     * Sets the site URL to be used in forming OAuth2 endpoints.
+     *
+     * @param site the site URL as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setSite(String site) {
         this.site = site;
         return this;
     }
 
+    /**
+     * Gets the client ID used for OAuth2 authentication.
+     *
+     * @return the client ID as a string
+     */
     public String getClientId() {
         return clientId;
     }
 
+    /**
+     * Sets the client ID to be used for OAuth2 authentication.
+     *
+     * @param clientId the client ID as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setClientId(String clientId) {
         this.clientId = AuthUtils.requireNonNullOrBlank(clientId, "Client id cannot be null or blank");
         return this;
     }
 
+    /**
+     * Gets the client secret used for OAuth2 authentication.
+     *
+     * @return the client secret as a string
+     */
     public String getClientSecret() {
         return clientSecret;
     }
 
+    /**
+     * Sets the client secret to be used for OAuth2 authentication.
+     *
+     * @param clientSecret the client secret as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setClientSecret(String clientSecret) {
-        this.clientSecret = AuthUtils.requireNonNullOrBlank(clientSecret, "Client secret cannot be null or blank");
+        this.clientSecret = AuthUtils.requireNonNullOrBlank(clientSecret,
+                "Client secret cannot be null or blank");
         return this;
     }
 
+    /**
+     * Gets the client assertion type used in OAuth2 authentication.
+     *
+     * @return the client assertion type as a string
+     */
     public String getClientAssertionType() {
         return clientAssertionType;
     }
 
+    /**
+     * Sets the client assertion type to be used in OAuth2 authentication.
+     *
+     * @param clientAssertionType the client assertion type as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setClientAssertionType(String clientAssertionType) {
         this.clientAssertionType = clientAssertionType;
         return this;
     }
 
+    /**
+     * Gets the client assertion used for OAuth2 authentication.
+     *
+     * @return the client assertion as a string
+     */
     public String getClientAssertion() {
         return clientAssertion;
     }
 
+    /**
+     * Sets the client assertion to be used for OAuth2 authentication.
+     *
+     * @param clientAssertion the client assertion as a string
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setClientAssertion(String clientAssertion) {
         this.clientAssertion = clientAssertion;
         return this;
     }
 
+    /**
+     * Gets the user agent string to be used in OAuth2 requests.
+     *
+     * @return the user agent string
+     */
     public String getUserAgent() {
         return userAgent;
     }
 
+    /**
+     * Sets the user agent string to be used in OAuth2 requests.
+     *
+     * @param userAgent the user agent string to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setUserAgent(String userAgent) {
         this.userAgent = userAgent;
         return this;
     }
 
+    /**
+     * Gets the custom headers to be sent in OAuth2 requests.
+     *
+     * @return a {@code JSONObject} containing the custom headers
+     */
     public JSONObject getHeaders() {
         return headers;
     }
 
+    /**
+     * Sets custom headers to be sent in OAuth2 requests.
+     *
+     * @param headers a {@code JSONObject} containing the custom headers to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setHeaders(JSONObject headers) {
         this.headers = headers;
         return this;
     }
 
+    /**
+     * Gets the public and secret key options used in OAuth2 authentication.
+     *
+     * @return a list of {@code PubSecKeyOptions}
+     */
     public List<PubSecKeyOptions> getPubSecKeys() {
         return pubSecKeys;
     }
 
+    /**
+     * Sets the public and secret key options to be used in OAuth2 authentication.
+     *
+     * @param pubSecKeys a list of {@code PubSecKeyOptions} to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setPubSecKeys(List<PubSecKeyOptions> pubSecKeys) {
         this.pubSecKeys = pubSecKeys;
         return this;
     }
 
+    /**
+     * Adds a public and secret key option to the existing list for OAuth2 authentication.
+     *
+     * @param pubSecKey a {@code PubSecKeyOptions} object to add
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options addPubSecKeys(PubSecKeyOptions pubSecKey) {
         if (pubSecKeys == null) {
             pubSecKeys = new ArrayList<>();
@@ -662,28 +1065,50 @@ public class OAuth2Options implements Options {
         return this;
     }
 
+    /**
+     * Gets the JWT options used in OAuth2 authentication.
+     *
+     * @return a {@code JWTOptions} object representing the JWT options
+     */
     public JWTOptions getJWTOptions() {
         return jwtOptions;
     }
 
+    /**
+     * Sets the JWT options to be used in OAuth2 authentication.
+     *
+     * @param jwtOptions a {@code JWTOptions} object representing the JWT options to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setJWTOptions(JWTOptions jwtOptions) {
         this.jwtOptions = jwtOptions;
         return this;
     }
 
+    /**
+     * Gets extra parameters to be sent in OAuth2 requests.
+     *
+     * @return a {@code JSONObject} containing the extra parameters
+     */
     public JSONObject getExtraParams() {
         return extraParams;
     }
 
+    /**
+     * Sets extra parameters to be included in OAuth2 requests.
+     *
+     * @param extraParams a {@code JSONObject} containing the extra parameters to set
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
     public OAuth2Options setExtraParams(JSONObject extraParams) {
         this.extraParams = extraParams;
         return this;
     }
 
     /**
-     * Complete the path if its relative prepending the site.
+     * Completes the path if it's relative by prepending the site URL.
      *
-     * @param path the path
+     * @param path the path to be completed
      * @return the complete path as a string
      */
     private String computePath(String path) {
@@ -701,9 +1126,9 @@ public class OAuth2Options implements Options {
     }
 
     /**
-     * Replace the tenant/realm variable in the path.
+     * Replaces the tenant/realm variable in the given path.
      *
-     * @param path the path
+     * @param path the path with potential variables
      * @return the path with the tenant/realm variable replaced
      */
     public String replaceVariables(@Nullable final String path) {
@@ -721,7 +1146,7 @@ public class OAuth2Options implements Options {
     }
 
     /**
-     * Validate the configuration.
+     * Validates the OAuth2 configuration for completeness and consistency.
      *
      * @throws IllegalStateException if the configuration is invalid
      */
