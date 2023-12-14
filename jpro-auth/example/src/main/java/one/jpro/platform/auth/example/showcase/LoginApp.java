@@ -1,9 +1,9 @@
 package one.jpro.platform.auth.example.showcase;
 
 import atlantafx.base.theme.CupertinoLight;
-import one.jpro.platform.auth.AuthAPI;
+import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.example.showcase.page.*;
-import one.jpro.platform.auth.oauth2.OAuth2Credentials;
+import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.dev.StatisticsFilter;

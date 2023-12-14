@@ -2,11 +2,11 @@ package one.jpro.platform.auth.example.showcase.page;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.authentication.Authentication;
-import one.jpro.platform.auth.authentication.User;
+import one.jpro.platform.auth.core.authentication.Authentication;
+import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.example.showcase.LoginApp;
-import one.jpro.platform.auth.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.oauth2.OAuth2Options;
+import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
+import one.jpro.platform.auth.core.oauth2.OAuth2Options;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;

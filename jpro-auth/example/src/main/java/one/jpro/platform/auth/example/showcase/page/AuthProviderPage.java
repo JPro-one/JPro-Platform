@@ -5,8 +5,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.example.showcase.LoginApp;
-import one.jpro.platform.auth.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.oauth2.OAuth2Credentials;
+import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
+import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
