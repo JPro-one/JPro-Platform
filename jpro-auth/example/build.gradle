@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation project(':jpro-auth:core')
+    implementation project(':jpro-auth:routing')
     implementation project(':jpro-routing:core')
     implementation project(':jpro-routing:dev')
     implementation project(':jpro-mdfx')

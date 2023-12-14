@@ -2,18 +2,20 @@ package one.jpro.platform.auth.example.showcase;
 
 import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.auth.core.AuthAPI;
-import one.jpro.platform.auth.example.showcase.page.*;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
+import one.jpro.platform.auth.example.showcase.page.*;
+import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.dev.StatisticsFilter;
+import simplefx.experimental.parts.FXFuture;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import static one.jpro.platform.auth.routing.AuthFilters.oauth2;
 import static one.jpro.platform.routing.RouteUtils.getNode;
-import static one.jpro.platform.routing.RouteUtils.redirect;
 
 /**
  * A showcase application to show how to use the Authorization module in general
@@ -75,9 +77,6 @@ public class LoginApp extends BaseLoginApp {
                         .and(getNode("/user-info", (r) -> new UserInfoPage(this)))
                         .and(getNode("/logout", (r) -> new LoginPage(this))))
                 .path("/auth", Route.empty()
-                        .and(redirect("/google", "/user/console"))
-                        .and(redirect("/microsoft", "/user/console"))
-                        .and(redirect("/keycloak", "/user/console"))
                         .and(getNode("/error", (r) -> new ErrorPage(this))))
                 .path("/provider", Route.empty()
                         .and(getNode("/google", (r) -> new AuthProviderPage(this, googleAuth, googleCredentials)))
@@ -89,8 +88,29 @@ public class LoginApp extends BaseLoginApp {
                                 .and(getNode("/keycloak", (r) -> new AuthProviderDiscoveryPage(this, keycloakAuth)))))
                 .filter(DevFilter.create())
                 .filter(StatisticsFilter.create())
-                .filter(oauth2(googleAuth, googleCredentials, this::setUser, this::setError))
-                .filter(oauth2(microsoftAuth, microsoftCredentials, this::setUser, this::setError))
-                .filter(oauth2(keycloakAuth, keycloakCredentials, this::setUser, this::setError));
+                .filter(oauth2(googleAuth, googleCredentials, user -> {
+                    setUser(user);
+                    setAuthProvider(googleAuth);
+                    return FXFuture.unit(new Redirect("/user/console"));
+                }, error -> {
+                    setError(error);
+                    return FXFuture.unit(new Redirect("/auth/error"));
+                }))
+                .filter(oauth2(microsoftAuth, microsoftCredentials, user -> {
+                    setUser(user);
+                    setAuthProvider(microsoftAuth);
+                    return FXFuture.unit(new Redirect("/user/console"));
+                }, error -> {
+                    setError(error);
+                    return FXFuture.unit(new Redirect("/auth/error"));
+                }))
+                .filter(oauth2(keycloakAuth, keycloakCredentials, user -> {
+                    setUser(user);
+                    setAuthProvider(keycloakAuth);
+                    return FXFuture.unit(new Redirect("/user/console"));
+                }, error -> {
+                    setError(error);
+                    return FXFuture.unit(new Redirect("/auth/error"));
+                }));
     }
 }

@@ -24,7 +24,8 @@ public class AuthProviderPage extends Page {
     public AuthProviderPage(LoginApp loginApp,
                             OAuth2AuthenticationProvider authProvider,
                             OAuth2Credentials authCredentials) {
-        final var headerLabel = new Label("Authentication Provider: " + loginApp.getAuthProviderName(authProvider));
+        final var headerLabel = new Label("Authentication Provider: " +
+                loginApp.getAuthProviderName(authProvider));
         headerLabel.getStyleClass().add("header-label");
 
         final var pane = new VBox(headerLabel);
