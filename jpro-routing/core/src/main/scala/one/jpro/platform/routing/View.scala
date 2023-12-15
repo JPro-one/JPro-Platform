@@ -4,7 +4,10 @@ import one.jpro.platform.routing.sessionmanager.SessionManager
 import simplefx.all
 import simplefx.all._
 
-abstract class View extends Response { THIS =>
+object View {
+  def fromNode(node: javafx.scene.Node): View = RouteUtils.viewFromNode(node)
+}
+abstract class View extends ResponseResult { THIS =>
   def title: String
   def description: String
   var url: String = null
