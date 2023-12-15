@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.example.simple;
+package one.jpro.platform.auth.example.login;
 
 import atlantafx.base.theme.CupertinoLight;
 import com.jpro.webapi.WebAPI;
@@ -8,9 +8,10 @@ import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
-import one.jpro.platform.auth.example.simple.page.ErrorPage;
-import one.jpro.platform.auth.example.simple.page.LoginPage;
-import one.jpro.platform.auth.example.simple.page.SignedInPage;
+import one.jpro.platform.auth.example.login.page.ErrorPage;
+import one.jpro.platform.auth.example.login.page.LoginPage;
+import one.jpro.platform.auth.example.login.page.SignedInPage;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.routing.AuthFilters;
 import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Route;
@@ -28,7 +29,7 @@ import static one.jpro.platform.routing.RouteUtils.getNode;
 import static one.jpro.platform.routing.RouteUtils.viewFromNode;
 
 /**
- * The {@link SimpleApp} class extends {@link RouteApp} to create a JavaFX application
+ * The {@link LoginApp} class extends {@link RouteApp} to create a JavaFX application
  * with integrated Google OAuth authentication. It manages user sessions and error handling
  * using JavaFX properties. This class sets up routes for the application including
  * the login page, successful signed in page, and error handling page.
@@ -48,7 +49,7 @@ import static one.jpro.platform.routing.RouteUtils.viewFromNode;
  *
  * @author Besmir Beqiri
  */
-public class SimpleApp extends RouteApp {
+public class LoginApp extends RouteApp {
 
     static final String GOOGLE_CLIENT_ID = System.getenv("GOOGLE_TEST_CLIENT_ID");
     static final String GOOGLE_CLIENT_SECRET = System.getenv("GOOGLE_TEST_CLIENT_SECRET");
@@ -60,7 +61,7 @@ public class SimpleApp extends RouteApp {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(getScene()::setUserAgentStylesheet);
-        getScene().getStylesheets().add(one.jpro.platform.auth.example.showcase.LoginApp.class
+        getScene().getStylesheets().add(OAuthApp.class
                 .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
         final var googleAuthProvider = AuthAPI.googleAuth()

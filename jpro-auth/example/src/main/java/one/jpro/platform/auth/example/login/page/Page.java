@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.example.simple.page;
+package one.jpro.platform.auth.example.login.page;
 
 import javafx.scene.layout.StackPane;
 

@@ -10,6 +10,5 @@ module one.jpro.platform.auth.example {
     requires atlantafx.base;
 
     exports one.jpro.platform.auth.example.showcase;
-    exports one.jpro.platform.auth.example.simple;
-    exports one.jpro.platform.auth.example.simple.page;
+    exports one.jpro.platform.auth.example.login;
 }

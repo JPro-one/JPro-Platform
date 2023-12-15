@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.example.simple.page;
+package one.jpro.platform.auth.example.login.page;
 
 import com.jpro.webapi.WebAPI;
 import javafx.scene.control.Button;
@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
-import one.jpro.platform.auth.example.simple.SimpleApp;
+import one.jpro.platform.auth.example.login.LoginApp;
 
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ import java.util.Optional;
  */
 public class LoginPage extends Page {
 
-    public LoginPage(SimpleApp app,
+    public LoginPage(LoginApp app,
                      OAuth2AuthenticationProvider authProvider,
                      OAuth2Credentials authCredentials) {
         getStyleClass().add("simple-page");

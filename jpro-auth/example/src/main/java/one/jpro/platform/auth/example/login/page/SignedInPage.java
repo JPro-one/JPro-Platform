@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.example.simple.page;
+package one.jpro.platform.auth.example.login.page;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Button;
@@ -6,7 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.example.simple.SimpleApp;
+import one.jpro.platform.auth.example.login.LoginApp;
 import simplefx.experimental.parts.FXFuture;
 
 /**
@@ -16,7 +16,7 @@ import simplefx.experimental.parts.FXFuture;
  */
 public class SignedInPage extends Page {
 
-    public SignedInPage(SimpleApp app,
+    public SignedInPage(LoginApp app,
                         OAuth2AuthenticationProvider authProvider) {
         final var headerLabel = new Label("Not signed in.");
         headerLabel.getStyleClass().add("header-label");
