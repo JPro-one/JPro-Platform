@@ -90,7 +90,6 @@ public class LoginApp extends RouteApp {
     public final User getUser() {
         final var userJsonString = getSession().get("user");
         if (userJsonString != null) {
-            System.out.println("userJsonString = " + userJsonString);
             final JSONObject userJson = new JSONObject(userJsonString);
             return new User(userJson);
         } else {
