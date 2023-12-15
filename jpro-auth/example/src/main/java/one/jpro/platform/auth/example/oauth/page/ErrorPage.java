@@ -1,11 +1,11 @@
-package one.jpro.platform.auth.example.showcase.page;
+package one.jpro.platform.auth.example.oauth.page;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.example.showcase.LoginApp;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -17,7 +17,7 @@ import java.io.StringWriter;
  */
 public class ErrorPage extends Page {
 
-    public ErrorPage(LoginApp loginApp) {
+    public ErrorPage(OAuthApp loginApp) {
         final var headerLabel = new Label("Something unexpected happen:");
         headerLabel.getStyleClass().add("header-label");
 

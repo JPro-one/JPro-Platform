@@ -9,6 +9,6 @@ module one.jpro.platform.auth.example {
     requires one.jpro.platform.sessions;
     requires atlantafx.base;
 
-    exports one.jpro.platform.auth.example.showcase;
+    exports one.jpro.platform.auth.example.oauth;
     exports one.jpro.platform.auth.example.login;
 }

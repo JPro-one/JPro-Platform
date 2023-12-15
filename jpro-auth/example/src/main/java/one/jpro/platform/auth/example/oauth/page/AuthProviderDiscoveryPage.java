@@ -1,9 +1,9 @@
-package one.jpro.platform.auth.example.showcase.page;
+package one.jpro.platform.auth.example.oauth.page;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.example.showcase.LoginApp;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.mdfx.MarkdownView;
 
@@ -14,7 +14,7 @@ import one.jpro.platform.mdfx.MarkdownView;
  */
 public class AuthProviderDiscoveryPage extends Page {
 
-    public AuthProviderDiscoveryPage(LoginApp loginApp,
+    public AuthProviderDiscoveryPage(OAuthApp loginApp,
                                      OAuth2AuthenticationProvider authProvider) {
         final var headerLabel = new Label("OpenID Connect Discovery: " + loginApp.getAuthProviderName(authProvider));
         headerLabel.getStyleClass().add("header-label");

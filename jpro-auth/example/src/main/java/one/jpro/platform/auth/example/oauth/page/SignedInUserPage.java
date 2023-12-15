@@ -1,17 +1,17 @@
-package one.jpro.platform.auth.example.showcase.page;
+package one.jpro.platform.auth.example.oauth.page;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.authentication.Authentication;
 import one.jpro.platform.auth.core.authentication.User;
-import one.jpro.platform.auth.example.showcase.LoginApp;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Options;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
 
-import static one.jpro.platform.auth.example.showcase.LoginApp.AUTH_ERROR_PATH;
+import static one.jpro.platform.auth.example.oauth.OAuthApp.AUTH_ERROR_PATH;
 import static one.jpro.platform.routing.LinkUtil.gotoPage;
 
 /**
@@ -21,7 +21,7 @@ import static one.jpro.platform.routing.LinkUtil.gotoPage;
  */
 public class SignedInUserPage extends Page {
 
-    public SignedInUserPage(LoginApp loginApp) {
+    public SignedInUserPage(OAuthApp loginApp) {
         final var headerLabel = new Label("Not signed in.");
         headerLabel.getStyleClass().add("header-label");
 

@@ -1,10 +1,10 @@
-package one.jpro.platform.auth.example.showcase;
+package one.jpro.platform.auth.example.oauth;
 
 import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
-import one.jpro.platform.auth.example.showcase.page.*;
+import one.jpro.platform.auth.example.oauth.page.*;
 import one.jpro.platform.auth.routing.AuthFilters;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Redirect;
@@ -25,14 +25,14 @@ import static one.jpro.platform.routing.RouteUtils.getNode;
  *
  * @author Besmir Beqiri
  */
-public class LoginApp extends BaseLoginApp {
+public class OAuthApp extends BaseOAuthApp {
 
     @Override
     public Route createRoute() {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(getScene()::setUserAgentStylesheet);
-        getScene().getStylesheets().add(LoginApp.class
+        getScene().getStylesheets().add(OAuthApp.class
                 .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
         // Google Auth provider

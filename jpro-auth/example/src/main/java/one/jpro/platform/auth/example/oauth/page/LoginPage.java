@@ -1,10 +1,10 @@
-package one.jpro.platform.auth.example.showcase.page;
+package one.jpro.platform.auth.example.oauth.page;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.example.showcase.LoginApp;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 
 import static one.jpro.platform.routing.LinkUtil.gotoPage;
 
@@ -19,7 +19,7 @@ public class LoginPage extends Page {
     public static final String MICROSOFT_PROVIDER_PATH = "/provider/microsoft";
     public static final String KEYCLOAK_PROVIDER_PATH = "/provider/keycloak";
 
-    public LoginPage(LoginApp loginApp) {
+    public LoginPage(OAuthApp loginApp) {
         final var headerLabel = new Label("Authentication Module");
         headerLabel.getStyleClass().add("header-label");
 

@@ -1,9 +1,9 @@
-package one.jpro.platform.auth.example.showcase.page;
+package one.jpro.platform.auth.example.oauth.page;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.example.showcase.LoginApp;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.mdfx.MarkdownView;
 
 /**
@@ -13,7 +13,7 @@ import one.jpro.platform.mdfx.MarkdownView;
  */
 public class IntrospectionTokenPage extends Page {
 
-    public IntrospectionTokenPage(LoginApp loginApp) {
+    public IntrospectionTokenPage(OAuthApp loginApp) {
         final var headerLabel = new Label("Introspect token:");
         headerLabel.getStyleClass().add("header-label");
 
