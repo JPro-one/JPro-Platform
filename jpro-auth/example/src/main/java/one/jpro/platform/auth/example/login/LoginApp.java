@@ -52,7 +52,7 @@ public class LoginApp extends RouteApp {
     static final String GOOGLE_CLIENT_ID = System.getenv("GOOGLE_TEST_CLIENT_ID");
     static final String GOOGLE_CLIENT_SECRET = System.getenv("GOOGLE_TEST_CLIENT_SECRET");
 
-    private final SessionManager sessionManager = new SessionManager("simple-app");
+    private static final SessionManager sessionManager = new SessionManager("simple-app");
 
     @Override
     public Route createRoute() {
