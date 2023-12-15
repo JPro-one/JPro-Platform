@@ -87,10 +87,10 @@ public class LoginApp extends RouteApp {
     }
 
     public final User getUser() {
-        final var userJsonString = getSession().get("user");
-        if (userJsonString != null) {
-            final JSONObject userJson = new JSONObject(userJsonString);
-            return new User(userJson);
+        final String userFromSession = getSession().get("user");
+        if (userFromSession != null) {
+            final JSONObject userJSON = new JSONObject(userFromSession);
+            return new User(userJSON);
         } else {
             return null;
         }
@@ -98,7 +98,8 @@ public class LoginApp extends RouteApp {
 
     public final void setUser(User value) {
         if (value != null) {
-            getSession().put("user", value.toJSON().toString());
+            final String userToSession = value.toJSON().toString();
+            getSession().put("user", userToSession);
         } else {
             getSession().remove("user");
         }
