@@ -54,8 +54,13 @@ public class LoginApp extends RouteApp {
 
     private static final SessionManager sessionManager = new SessionManager("simple-app");
 
+    ObservableMap<String, String> session;
+
     @Override
     public Route createRoute() {
+        session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
+                : sessionManager.getSession("user-session");
+
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(getScene()::setUserAgentStylesheet);
@@ -82,13 +87,8 @@ public class LoginApp extends RouteApp {
                 }, error -> FXFuture.unit(viewFromNode(new ErrorPage(error)))));
     }
 
-    public  ObservableMap<String, String> getSession() {
-        return (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
-                : sessionManager.getSession("user-session");
-    }
-
     public final User getUser() {
-        final var userJsonString = getSession().get("user");
+        final var userJsonString = session.get("user");
         if (userJsonString != null) {
             final JSONObject userJson = new JSONObject(userJsonString);
             return new User(userJson);
@@ -99,9 +99,9 @@ public class LoginApp extends RouteApp {
 
     public final void setUser(User value) {
         if (value != null) {
-            getSession().put("user", value.toJSON().toString());
+            session.put("user", value.toJSON().toString());
         } else {
-            getSession().remove("user");
+            session.remove("user");
         }
     }
 }
