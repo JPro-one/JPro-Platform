@@ -31,8 +31,7 @@ public class SignedInPage extends Page {
             userInfoTextArea.setWrapText(true);
             userInfoTextArea.setEditable(false);
             userInfoTextArea.setPrefHeight(600.0);
-            userInfoTextArea.textProperty().bind(Bindings.createStringBinding(() ->
-                    user.toJSON().toString(), app.userProperty()));
+            userInfoTextArea.setText(user.toJSON().toString());
 
             final var signOutButton = new Button("Sign out");
             signOutButton.setOnAction(event ->

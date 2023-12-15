@@ -89,19 +89,15 @@ public class LoginApp extends RouteApp {
                 : sessionManager.getSession("user-session");
     }
 
-    // User property
-    private ObjectProperty<User> userProperty;
-
     public final User getUser() {
-        User user = null;
         final var userJsonString = getSession().get("user");
         if (userJsonString != null) {
             System.out.println("userJsonString = " + userJsonString);
             final JSONObject userJson = new JSONObject(userJsonString);
-            user = new User(userJson);
+            return new User(userJson);
+        } else {
+            return null;
         }
-
-        return userProperty == null ? user : userProperty.get();
     }
 
     public final void setUser(User value) {
@@ -110,18 +106,5 @@ public class LoginApp extends RouteApp {
         } else {
             getSession().remove("user");
         }
-        userProperty().set(value);
-    }
-
-    /**
-     * The user property contains the currently logged-in user.
-     *
-     * @return the user property
-     */
-    public final ObjectProperty<User> userProperty() {
-        if (userProperty == null) {
-            userProperty = new SimpleObjectProperty<>(this, "user");
-        }
-        return userProperty;
     }
 }

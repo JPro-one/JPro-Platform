@@ -68,11 +68,11 @@ trait Route {
     if(cond.test(r)) _then(r) else _else(r)
   })
 
-  def when(cond: java.util.function.Function[Request, FXFuture[java.lang.Boolean]], _then: Route): Route = and(r => {
+  def whenFuture(cond: java.util.function.Function[Request, FXFuture[java.lang.Boolean]], _then: Route): Route = and(r => {
     cond.apply(r).flatMap(condResult => if (condResult) _then(r) else null)
   })
 
-  def when(cond: java.util.function.Function[Request, FXFuture[java.lang.Boolean]], _then: Route, _else: Route): Route = and(r => {
+  def whenFuture(cond: java.util.function.Function[Request, FXFuture[java.lang.Boolean]], _then: Route, _else: Route): Route = and(r => {
     cond.apply(r).flatMap(condResult => if (condResult) _then(r) else _else(r))
   })
 }
