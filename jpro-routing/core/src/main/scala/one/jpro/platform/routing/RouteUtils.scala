@@ -11,7 +11,7 @@ object RouteUtils {
 
   def redirect(path: String, to: String): Route = get(path, (r) => Response.redirect(to))
 
-  def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.path == path) f.apply(request) else null
+  def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.path == path) f.apply(request) else Response.empty()
 
   def getView(path: String, node: Function[Request, View]): Route = (request: Request) => {
     if (request.path == path) Response.view(node.apply(request))

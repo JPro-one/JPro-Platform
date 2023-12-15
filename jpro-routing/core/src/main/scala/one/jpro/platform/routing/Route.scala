@@ -6,7 +6,7 @@ import java.util.function.Predicate
 
 
 object Route {
-  def empty(): Route = (r) => null
+  def empty(): Route = (r) => Response.empty()
 }
 @FunctionalInterface
 trait Route {
@@ -14,22 +14,19 @@ trait Route {
 
   def and(x: Route): Route = { request =>
     val r = apply(request)
-    if(r == null) {
-      x.apply(request)
-    } else {
-      Response(r.future.flatMap{ r =>
-        if(r == null) {
-          val r = x.apply(request)
-          r.future
-        } else FXFuture.unit(r)
-      })
-    }
+    assert(r != null, "Route returned null: " + this + " for " + request)
+    Response(r.future.flatMap{ r =>
+      if(r == null) {
+        val r2 = x.apply(request)
+        r2.future
+      } else FXFuture.unit(r)
+    })
   }
   def domain(domain: String, route: Route): Route = and((r: Request) => {
     if(r.domain == domain) {
       route.apply(r)
     } else {
-      null
+      Response.empty()
     }
   })
   def path(path: String, route: Route): Route = and((r: Request) => {
@@ -37,7 +34,7 @@ trait Route {
       val r2 = r.copy(path = r.path.drop(path.length), directory = r.resolve(path))
       route.apply(r2)
     } else {
-      null
+      Response.empty()
     }
   })
   def filter(filter: Filter): Route = filter(this)
