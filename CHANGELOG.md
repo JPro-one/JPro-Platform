@@ -1,3 +1,8 @@
+
+### 0.2.8
+#### Changes
+* Fixed parts of the `Route.when` api, which had unexpected argument types.
+
 ### 0.2.7 (December 8, 2023)
 
 #### Improvements
