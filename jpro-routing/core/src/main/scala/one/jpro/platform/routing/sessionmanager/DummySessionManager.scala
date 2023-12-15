@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.sessionmanager
 
-import one.jpro.platform.routing.{Response, RouteNode}
+import one.jpro.platform.routing.{Response, ResponseResult, RouteNode}
 
 class DummySessionManager extends SessionManager {
   override def webApp: RouteNode = null
@@ -9,9 +9,9 @@ class DummySessionManager extends SessionManager {
 
   override def goForward(): Unit = ()
 
-  override def gotoURL(_url: String, x: Response, pushState: Boolean, track: Boolean): Unit = ()
+  override def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = ()
 
-  override def getView(url: String): _root_.simplefx.experimental.FXFuture[Response] = null
+  override def getView(url: String): Response = Response.empty()
 
   override def start(): Unit = ()
 }

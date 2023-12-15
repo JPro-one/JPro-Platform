@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.crawl
 
 import one.jpro.platform.routing.sessionmanager.DummySessionManager
-import one.jpro.platform.routing.{Redirect, RouteNode, SessionManagerContext, View}
+import one.jpro.platform.routing.{Redirect, Response, RouteNode, SessionManagerContext, View}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
@@ -113,10 +113,8 @@ object AppCrawler {
       toIndex -= crawlNext
       indexed += crawlNext
       val result = inFX {
-        val r = createApp.get().route(crawlNext)
-        if(r == null) FXFuture.unit(null)
-        else r
-      }.await
+        createApp.get().route(crawlNext)
+      }.future.await
       result match {
         case Redirect(url) =>
           redirects += crawlNext

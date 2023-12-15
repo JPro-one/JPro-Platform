@@ -31,8 +31,8 @@ public interface OAuth2Filter {
      */
     static Filter create(OAuth2AuthenticationProvider authProvider,
                                 OAuth2Credentials credentials,
-                                Function<User, FXFuture<Response>> userFunction,
-                                Function<Throwable, FXFuture<Response>> errorFunction) {
+                                Function<User, Response> userFunction,
+                                Function<Throwable, Response> errorFunction) {
         Objects.requireNonNull(authProvider, "auth provider can not be null");
         Objects.requireNonNull(credentials, "credentials can not be null");
         Objects.requireNonNull(userFunction, "user function can not be null");
@@ -40,9 +40,9 @@ public interface OAuth2Filter {
 
         return (route) -> (request) -> {
             if (request.path().equals(credentials.getRedirectUri())) {
-                return FXFuture.fromJava(authProvider.authenticate(credentials))
-                        .flatMap(userFunction::apply)
-                        .flatExceptionally(errorFunction::apply);
+                return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
+                        .flatMap(r -> userFunction.apply(r).future())
+                        .flatExceptionally(r -> errorFunction.apply(r).future()));
             } else {
                 return route.apply(request);
             }
