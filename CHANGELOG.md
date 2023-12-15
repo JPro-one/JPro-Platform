@@ -12,6 +12,7 @@
 
 #### Changes
 * Fixed parts of the `Route.when` api, which had unexpected argument types.
+# removed ResponseUtils.redirect and replaced it with Response.redirect() and also added Response.fromNode()
 
 ### 0.2.7 (December 8, 2023)
 
