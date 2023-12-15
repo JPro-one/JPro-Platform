@@ -33,6 +33,7 @@ public class SignedInPage extends Page {
             userInfoTextArea.setText(user.toJSON().toString());
 
             final var signOutButton = new Button("Sign out");
+            signOutButton.setDefaultButton(true);
             signOutButton.setOnAction(event ->
                     FXFuture.fromJava(authProvider.revoke(app.getUser(), "access_token"))
                             .onSuccess(nothing -> {
@@ -40,7 +41,6 @@ public class SignedInPage extends Page {
                                 app.getSessionManager().gotoURL("/");
                                 return nothing;
                             }));
-            signOutButton.setDefaultButton(true);
 
             final var pane = new VBox(headerLabel, userInfoTextArea, signOutButton);
             pane.getStyleClass().add("signed-in-user-pane");
