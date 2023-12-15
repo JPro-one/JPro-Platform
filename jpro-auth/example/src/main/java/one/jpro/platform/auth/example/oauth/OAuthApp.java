@@ -5,7 +5,7 @@ import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.auth.example.oauth.page.*;
-import one.jpro.platform.auth.routing.AuthFilters;
+import one.jpro.platform.auth.routing.OAuth2Filter;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Route;
@@ -90,9 +90,9 @@ public class OAuthApp extends BaseOAuthApp {
                                 .and(getNode("/keycloak", (r) -> new AuthProviderDiscoveryPage(this, keycloakAuth)))))
                 .filter(DevFilter.create())
                 .filter(StatisticsFilter.create())
-                .filter(oauth2(googleAuth, googleCredentials))
-                .filter(oauth2(microsoftAuth, microsoftCredentials))
-                .filter(oauth2(keycloakAuth, keycloakCredentials));
+                .filter(oauth2Filter(googleAuth, googleCredentials))
+                .filter(oauth2Filter(microsoftAuth, microsoftCredentials))
+                .filter(oauth2Filter(keycloakAuth, keycloakCredentials));
     }
 
     /**
@@ -105,8 +105,8 @@ public class OAuthApp extends BaseOAuthApp {
      * @param credentials  The OAuth2 credentials used for authentication.
      * @return A {@link Filter} object configured for OAuth2 authentication flow.
      */
-    private Filter oauth2(OAuth2AuthenticationProvider authProvider, OAuth2Credentials credentials) {
-        return AuthFilters.oauth2(authProvider, credentials, user -> {
+    private Filter oauth2Filter(OAuth2AuthenticationProvider authProvider, OAuth2Credentials credentials) {
+        return OAuth2Filter.create(authProvider, credentials, user -> {
             setUser(user);
             setAuthProvider(authProvider);
             return FXFuture.unit(new Redirect(USER_CONSOLE_PATH));

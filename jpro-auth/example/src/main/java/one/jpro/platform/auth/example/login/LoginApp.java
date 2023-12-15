@@ -2,8 +2,6 @@ package one.jpro.platform.auth.example.login;
 
 import atlantafx.base.theme.CupertinoLight;
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.authentication.User;
@@ -12,7 +10,7 @@ import one.jpro.platform.auth.example.login.page.ErrorPage;
 import one.jpro.platform.auth.example.login.page.LoginPage;
 import one.jpro.platform.auth.example.login.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
-import one.jpro.platform.auth.routing.AuthFilters;
+import one.jpro.platform.auth.routing.OAuth2Filter;
 import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
@@ -78,7 +76,7 @@ public class LoginApp extends RouteApp {
                 .when((r) -> getUser() != null, Route.empty()
                         .and(getNode("/user/signed-in", (r) -> new SignedInPage(this, googleAuthProvider))))
                 .filter(DevFilter.create())
-                .filter(AuthFilters.oauth2(googleAuthProvider, googleCredentials, user -> {
+                .filter(OAuth2Filter.create(googleAuthProvider, googleCredentials, user -> {
                     setUser(user);
                     return FXFuture.unit(new Redirect("/user/signed-in"));
                 }, error -> FXFuture.unit(viewFromNode(new ErrorPage(error)))));

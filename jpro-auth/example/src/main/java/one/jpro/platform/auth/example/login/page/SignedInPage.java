@@ -1,6 +1,5 @@
 package one.jpro.platform.auth.example.login.page;
 
-import javafx.beans.binding.Bindings;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
