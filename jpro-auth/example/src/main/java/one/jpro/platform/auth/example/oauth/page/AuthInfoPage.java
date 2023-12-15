@@ -18,7 +18,6 @@ public class AuthInfoPage extends Page {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var user = loginApp.getUser();
             return user == null ? "" : loginApp.jsonToMarkdown(user.toJSON());

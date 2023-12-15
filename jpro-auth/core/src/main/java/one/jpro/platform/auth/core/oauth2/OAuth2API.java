@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.AuthenticationException;
 import one.jpro.platform.auth.core.http.HttpMethod;
 import one.jpro.platform.auth.core.jwt.JWTOptions;
+import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -390,7 +391,7 @@ public class OAuth2API {
      * @return an OAuth2 provider configured with the discovered option values
      * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery</a>
      */
-    public CompletableFuture<OAuth2AuthenticationProvider> discover(final Stage stage,
+    public CompletableFuture<OpenIDAuthenticationProvider> discover(final Stage stage,
                                                                     final OAuth2Options config) {
         if (config.getSite() == null) {
             CompletableFuture.failedFuture(new RuntimeException("the site url cannot be null"));
@@ -584,7 +585,7 @@ public class OAuth2API {
                                 config.addSupportedRequestObjectSigningAlgValue((String) requestObjectSigningAlgValue));
                     }
 
-                    return CompletableFuture.completedFuture(new OAuth2AuthenticationProvider(stage, config));
+                    return CompletableFuture.completedFuture(new OpenIDAuthenticationProvider(stage, config));
                 });
     }
 

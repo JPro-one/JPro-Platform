@@ -4,8 +4,7 @@ import com.jpro.webapi.WebAPI;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
+import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
 import one.jpro.platform.auth.example.login.LoginApp;
 
 import java.util.Optional;
@@ -17,22 +16,18 @@ import java.util.Optional;
  */
 public class LoginPage extends Page {
 
-    public LoginPage(LoginApp app,
-                     OAuth2AuthenticationProvider authProvider,
-                     OAuth2Credentials authCredentials) {
+    public LoginPage(LoginApp app, GoogleAuthenticationProvider authProvider) {
         getStyleClass().add("simple-page");
 
         final var googleProviderButton = createAuthProviderButton("Google");
         googleProviderButton.setDefaultButton(true);
-        googleProviderButton.setOnAction(event -> {
-            authProvider.authorizeUrl(authCredentials)
-                    .thenAccept(url -> {
-                        // gotoURL call is only needed when running as a desktop app
-                        if (!WebAPI.isBrowser()) {
-                            app.getSessionManager().gotoURL(url);
-                        }
-                    });
-        });
+        googleProviderButton.setOnAction(event -> authProvider.authorizeUrl()
+                .thenAccept(url -> {
+                    // gotoURL call is only needed when running as a desktop app
+                    if (!WebAPI.isBrowser()) {
+                        app.getSessionManager().gotoURL(url);
+                    }
+                }));
 
         getChildren().add(googleProviderButton);
     }

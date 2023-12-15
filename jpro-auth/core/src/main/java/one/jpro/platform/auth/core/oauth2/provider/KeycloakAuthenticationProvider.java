@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Besmir Beqiri
  */
-public class KeycloakAuthenticationProvider extends OAuth2AuthenticationProvider {
+public class KeycloakAuthenticationProvider extends OpenIDAuthenticationProvider {
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Keycloak.
@@ -114,7 +114,7 @@ public class KeycloakAuthenticationProvider extends OAuth2AuthenticationProvider
      * @param options custom OAuth2 options
      * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
      */
-    public static CompletableFuture<OAuth2AuthenticationProvider> discover(@Nullable final Stage stage,
+    public static CompletableFuture<OpenIDAuthenticationProvider> discover(@Nullable final Stage stage,
                                                                            @NotNull final OAuth2Options options) {
         return new KeycloakAuthenticationProvider(stage, options).discover();
     }

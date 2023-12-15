@@ -16,6 +16,7 @@ import one.jpro.platform.auth.core.http.HttpServer;
 import one.jpro.platform.auth.core.jwt.JWTOptions;
 import one.jpro.platform.auth.core.jwt.TokenCredentials;
 import one.jpro.platform.auth.core.jwt.TokenExpiredException;
+import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -88,6 +89,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * once the HTTP server is ready to handle the callback, or with an exception
      * if an error occurs during the process.
      */
+    @NotNull
     public CompletableFuture<String> authorizeUrl(OAuth2Credentials credentials) {
         // Generate the authorization URL and open it in the default browser
         final String authorizeUrl = api.authorizeURL(credentials
@@ -302,7 +304,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      *
      * @return an {@link OAuth2AuthenticationProvider} instance.
      */
-    public CompletableFuture<OAuth2AuthenticationProvider> discover() {
+    public CompletableFuture<OpenIDAuthenticationProvider> discover() {
         return api.discover(stage, options);
     }
 

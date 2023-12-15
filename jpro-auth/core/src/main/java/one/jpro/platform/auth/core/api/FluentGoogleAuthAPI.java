@@ -12,6 +12,7 @@ public class FluentGoogleAuthAPI implements FluentGoogleAuth {
 
     private String clientId;
     private String clientSecret;
+    private String redirectUri;
 
     @Override
     public FluentGoogleAuth clientId(String clientId) {
@@ -26,7 +27,15 @@ public class FluentGoogleAuthAPI implements FluentGoogleAuth {
     }
 
     @Override
+    public FluentGoogleAuth redirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+        return this;
+    }
+
+    @Override
     public GoogleAuthenticationProvider create(Stage stage) {
-        return new GoogleAuthenticationProvider(stage, clientId, clientSecret);
+        final var googleAuthProvider = new GoogleAuthenticationProvider(stage, clientId, clientSecret);
+        googleAuthProvider.getCredentials().setRedirectUri(redirectUri);
+        return googleAuthProvider;
     }
 }

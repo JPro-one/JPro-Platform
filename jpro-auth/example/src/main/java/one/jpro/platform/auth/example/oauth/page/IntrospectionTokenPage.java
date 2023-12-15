@@ -7,7 +7,7 @@ import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.mdfx.MarkdownView;
 
 /**
- * IntrospectionTokenPage
+ * Introspection token page.
  *
  * @author Besmir Beqiri
  */
@@ -18,7 +18,6 @@ public class IntrospectionTokenPage extends Page {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var introspectionInfo = loginApp.getIntrospectionInfo();
             return introspectionInfo == null ? "" : loginApp.jsonToMarkdown(introspectionInfo);

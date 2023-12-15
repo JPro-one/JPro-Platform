@@ -13,6 +13,7 @@ public class FluentMicrosoftAuthAPI implements FluentMicrosoftAuth {
     private String clientId;
     private String clientSecret;
     private String tenant;
+    private String redirectUri;
 
     @Override
     public FluentMicrosoftAuth clientId(String clientId) {
@@ -33,7 +34,15 @@ public class FluentMicrosoftAuthAPI implements FluentMicrosoftAuth {
     }
 
     @Override
+    public FluentMicrosoftAuth redirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+        return this;
+    }
+
+    @Override
     public MicrosoftAuthenticationProvider create(Stage stage) {
-        return new MicrosoftAuthenticationProvider(stage, clientId, clientSecret, tenant);
+        final var microsoftAuthProvider = new MicrosoftAuthenticationProvider(stage, clientId, clientSecret, tenant);
+        microsoftAuthProvider.getCredentials().setRedirectUri(redirectUri);
+        return microsoftAuthProvider;
     }
 }

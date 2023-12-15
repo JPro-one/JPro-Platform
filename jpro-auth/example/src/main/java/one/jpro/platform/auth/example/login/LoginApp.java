@@ -5,7 +5,6 @@ import com.jpro.webapi.WebAPI;
 import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.authentication.User;
-import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.auth.example.login.page.ErrorPage;
 import one.jpro.platform.auth.example.login.page.LoginPage;
 import one.jpro.platform.auth.example.login.page.SignedInPage;
@@ -20,7 +19,6 @@ import org.json.JSONObject;
 import simplefx.experimental.parts.FXFuture;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Optional;
 
 import static one.jpro.platform.routing.RouteUtils.getNode;
@@ -65,18 +63,15 @@ public class LoginApp extends RouteApp {
         final var googleAuthProvider = AuthAPI.googleAuth()
                 .clientId(GOOGLE_CLIENT_ID)
                 .clientSecret(GOOGLE_CLIENT_SECRET)
+                .redirectUri("/auth/google")
                 .create(getStage());
 
-        final var googleCredentials = new OAuth2Credentials()
-                .setScopes(List.of("openid", "email"))
-                .setRedirectUri("/auth/google");
-
         return Route.empty()
-                .and(getNode("/", (r) -> new LoginPage(this, googleAuthProvider, googleCredentials)))
+                .and(getNode("/", (r) -> new LoginPage(this, googleAuthProvider)))
                 .when((r) -> getUser() != null, Route.empty()
                         .and(getNode("/user/signed-in", (r) -> new SignedInPage(this, googleAuthProvider))))
                 .filter(DevFilter.create())
-                .filter(OAuth2Filter.create(googleAuthProvider, googleCredentials, user -> {
+                .filter(OAuth2Filter.create(googleAuthProvider, user -> {
                     setUser(user);
                     return FXFuture.unit(new Redirect("/user/signed-in"));
                 }, error -> FXFuture.unit(viewFromNode(new ErrorPage(error)))));

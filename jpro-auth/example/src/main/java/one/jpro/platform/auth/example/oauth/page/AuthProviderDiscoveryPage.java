@@ -20,7 +20,6 @@ public class AuthProviderDiscoveryPage extends Page {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView providerDiscoveryView = new MarkdownView();
-        providerDiscoveryView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         providerDiscoveryView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var authOptions = loginApp.getAuthOptions();
             return authOptions == null ? "" : loginApp.jsonToMarkdown(authOptions.toJSON());

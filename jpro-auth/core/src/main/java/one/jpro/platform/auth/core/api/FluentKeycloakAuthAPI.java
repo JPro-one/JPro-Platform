@@ -17,6 +17,7 @@ public class FluentKeycloakAuthAPI implements FluentKeycloakAuth {
     private String clientId;
     private String clientSecret;
     private String realm;
+    private String redirectUri;
 
     @Override
     public FluentKeycloakAuth flow(OAuth2Flow flow) {
@@ -48,6 +49,12 @@ public class FluentKeycloakAuthAPI implements FluentKeycloakAuth {
     }
 
     @Override
+    public FluentKeycloakAuth redirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+        return this;
+    }
+
+    @Override
     public KeycloakAuthenticationProvider create(Stage stage) {
         final JSONObject config = new JSONObject();
         if (site != null) config.put("auth-server-url", site);
@@ -55,6 +62,8 @@ public class FluentKeycloakAuthAPI implements FluentKeycloakAuth {
         if (clientSecret != null) config.put("credentials", new JSONObject().put("secret", clientSecret));
         if (realm != null) config.put("realm", realm);
 
-        return new KeycloakAuthenticationProvider(stage, flow, config);
+        final var keycloakAuthProvider = new KeycloakAuthenticationProvider(stage, flow, config);
+        keycloakAuthProvider.getCredentials().setRedirectUri(redirectUri);
+        return keycloakAuthProvider;
     }
 }

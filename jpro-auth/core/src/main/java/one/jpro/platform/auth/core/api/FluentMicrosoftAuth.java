@@ -35,6 +35,14 @@ public interface FluentMicrosoftAuth {
     FluentMicrosoftAuth tenant(String tenant);
 
     /**
+     * Set the redirect uri.
+     *
+     * @param redirectUri the redirect uri
+     * @return self
+     */
+    FluentMicrosoftAuth redirectUri(String redirectUri);
+
+    /**
      * Create a Microsoft authentication provider configured with the provided options.
      *
      * @param stage the stage

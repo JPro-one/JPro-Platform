@@ -4,9 +4,8 @@ import com.jpro.webapi.WebAPI;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
-import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
@@ -21,9 +20,7 @@ import static one.jpro.platform.routing.LinkUtil.gotoPage;
  */
 public class AuthProviderPage extends Page {
 
-    public AuthProviderPage(OAuthApp loginApp,
-                            OAuth2AuthenticationProvider authProvider,
-                            OAuth2Credentials authCredentials) {
+    public AuthProviderPage(OAuthApp loginApp, OpenIDAuthenticationProvider authProvider) {
         final var headerLabel = new Label("Authentication Provider: " +
                 loginApp.getAuthProviderName(authProvider));
         headerLabel.getStyleClass().add("header-label");
@@ -32,6 +29,7 @@ public class AuthProviderPage extends Page {
         pane.getStyleClass().add("auth-provider-pane");
 
         final var authOptions = authProvider.getOptions();
+        final var authCredentials = authProvider.getCredentials();
 
         final var siteLabel = new Label("Site:");
         final var siteField = new TextField(authOptions.getSite());
