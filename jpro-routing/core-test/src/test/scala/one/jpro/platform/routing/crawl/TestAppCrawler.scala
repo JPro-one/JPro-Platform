@@ -35,8 +35,8 @@ class TestAppCrawler {
   def testCrawlApp(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(RouteUtils.get("/", r => new Page1))
-        .and(RouteUtils.get("/page2", r => new Page2)))
+        .and(RouteUtils.getView("/", r => new Page1))
+        .and(RouteUtils.getView("/page2", r => new Page2)))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
 
@@ -50,7 +50,7 @@ class TestAppCrawler {
   def testEmptyImage(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(RouteUtils.get("/", r => new View {
+        .and(RouteUtils.getView("/", r => new View {
           override def title: String = ""
 
           override def description: String = ""
