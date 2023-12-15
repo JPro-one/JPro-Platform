@@ -1,5 +1,15 @@
-
 ### 0.2.8
+
+#### Improvements
+* Updated JPro to version `2023.3.3`.
+* Added `login` example for JPro Auth modules. This example shows how to use the JPro Auth modules to authenticate
+  users in a JPro application. Simplify the launch of examples in the process.
+
+#### Features
+* Added `jpro-auth-routing` module to the platform that provides the API to simplify the combination of  routing 
+  capabilities during the authentication process. Simultaneously, `jpro-auth` module was renamed to `jpro-auth-core`
+  and everything under `one.jpro.platform.auth` package was moved to `one.jpro.platform.auth.core` package.
+
 #### Changes
 * Fixed parts of the `Route.when` api, which had unexpected argument types.
 
@@ -11,10 +21,10 @@
 * Improve documentation for the `jpro-media` module.
 
 #### Features
-* Added `jpro-file` module to `JPro Platform`. For more information, navigate to the 
+* Added `jpro-file` module to the platform. For more information, navigate to the 
   [jpro-file](https://github.com/JPro-one/JPro-Platform/tree/main/jpro-file#readme) module.
-* Added `jpro-webartc` module to `JPro Platform`. Provides an API to use WebRTC in JPro running application.
-* Added `jpro-youtube` module to `JPro Platform`. Makes easy to embed a YouTube video by simply using `YoutubeNode`.
+* Added `jpro-webartc` module to the platform. Provides an API to use WebRTC in JPro running application.
+* Added `jpro-youtube` module to the platform. Makes easy to embed a YouTube video by simply using `YoutubeNode`.
 * Added `ensemble` module to publish platform examples.
 * Added Image and YouTube extensions to the `jpro-mdfx` module.
 * Added Domain Filters to the `jpro-routing-core` module. This is a simple example on how to use it:
@@ -65,12 +75,12 @@ public class DomainExample extends RouteApp {
 
 ### 0.2.4 (September 27, 2023)
 
-* Migrating everything from `JPro Utils` to `JPro Platform`. Change module prefixes to `one.jpro.platform` 
+* Migrating everything from `JPro Utils` to the platform. Change module prefixes to `one.jpro.platform` 
   in the process.
-* Importing `jpro-routing` projects under `JPro Platform`.
-* Add `jpro-image-manager` module to `JPro Platform`.
-* Add `jpro-mdfx` module to `JPro Platform`.
-* Add `jpro-internal-openlink` module to `JPro Platform`.
+* Importing `jpro-routing` projects under the platform.
+* Add `jpro-image-manager` module to the platform.
+* Add `jpro-mdfx` module to the platform.
+* Add `jpro-internal-openlink` module to the platform.
 * Add `deleteCache` script for Linux/macOS platform. This script is used to delete the jars related to JPro Platform
   modules from Gradle and Maven locally on Linux/macOS.
 
