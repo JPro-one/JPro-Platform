@@ -22,8 +22,12 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web']
 }
 
-mainClassName = 'one.jpro.platform.auth.example.simple.SimpleApp'
-//mainClassName = 'one.jpro.platform.auth.example.showcase.LoginApp'
+def examples = [
+        'login' : 'one.jpro.platform.auth.example.login.LoginApp',
+        'oauth' : 'one.jpro.platform.auth.example.oauth.OAuthApp'
+]
+
+mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["login"]
 
 application {
     mainClass = "$mainClassName"
