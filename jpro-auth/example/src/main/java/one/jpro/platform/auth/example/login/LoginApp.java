@@ -11,14 +11,12 @@ import one.jpro.platform.auth.example.login.page.LoginPage;
 import one.jpro.platform.auth.example.login.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.routing.OAuth2Filter;
-import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.sessions.SessionManager;
 import org.json.JSONObject;
-import simplefx.experimental.parts.FXFuture;
 
 import java.net.URL;
 import java.util.List;
@@ -84,8 +82,8 @@ public class LoginApp extends RouteApp {
                 .filter(DevFilter.create())
                 .filter(OAuth2Filter.create(googleAuthProvider, googleCredentials, user -> {
                     setUser(user);
-                    return FXFuture.unit(Response.redirect("/user/signed-in"));
-                }, error -> FXFuture.unit(Response.fromNode(new ErrorPage(error)))));
+                    return Response.redirectFuture("/user/signed-in");
+                }, error -> Response.fromNodeFuture(new ErrorPage(error))));
     }
 
     public final User getUser() {
