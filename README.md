@@ -459,3 +459,39 @@ dependencies {
     implementation 'one.jpro.platform:freeze-detector:0.2.8-SNAPSHOT'
 }
 ```
+
+## Launch the examples
+
+- As desktop application
+```shell
+./gradlew jpro-auth:example:run -Psample=login
+```
+
+```shell
+./gradlew jpro-auth:example:run -Psample=oauth
+```
+
+```shell
+./gradlew jpro-file:example:run -Psample=file-uploader
+```
+
+```shell
+./gradlew jpro-file:example:run -Psample=file-uploader
+```
+
+- As JPro application
+```shell
+./gradlew jpro-auth:example:jproRun -Psample=login
+```
+
+```shell
+./gradlew jpro-auth:example:jproRun -Psample=oauth
+```
+
+```shell
+./gradlew jpro-file:example:jproRun -Psample=file-uploader
+```
+
+```shell
+./gradlew jpro-file:example:jproRun -Psample=file-uploader
+```

@@ -92,7 +92,7 @@ a specified callback handler is invoked for further processing.
     </dependencies>
     ```
 
-### Lunch the examples
+### Launch the examples
 [**Text Editor sample**](https://github.com/JPro-one/jpro-platform/blob/jpro-file-module/jpro-file/example/src/main/java/one/jpro/platform/file/example/editor/TextEditorSample.java)
 * As desktop application
   ```shell
