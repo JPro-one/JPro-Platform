@@ -75,7 +75,8 @@ public class LoginApp extends RouteApp {
 
         return Route.empty()
                 .and(getNode("/", (r) -> new LoginPage(this, googleAuthProvider, googleCredentials)))
-                .and(getNode("/user/signed-in", (r) -> new SignedInPage(this, googleAuthProvider)))
+                .when((r) -> getUser() != null, Route.empty()
+                        .and(getNode("/user/signed-in", (r) -> new SignedInPage(this, googleAuthProvider))))
                 .filter(DevFilter.create())
                 .filter(AuthFilters.oauth2(googleAuthProvider, googleCredentials, user -> {
                     setUser(user);
