@@ -8,7 +8,6 @@ import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
-import one.jpro.platform.auth.example.showcase.LoginApp;
 import one.jpro.platform.auth.example.simple.page.ErrorPage;
 import one.jpro.platform.auth.example.simple.page.LoginPage;
 import one.jpro.platform.auth.example.simple.page.SignedInPage;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static one.jpro.platform.routing.RouteUtils.getNode;
+import static one.jpro.platform.routing.RouteUtils.viewFromNode;
 
 /**
  * The {@link SimpleApp} class extends {@link RouteApp} to create a JavaFX application
@@ -60,7 +60,7 @@ public class SimpleApp extends RouteApp {
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(getScene()::setUserAgentStylesheet);
-        getScene().getStylesheets().add(LoginApp.class
+        getScene().getStylesheets().add(one.jpro.platform.auth.example.showcase.LoginApp.class
                 .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
         final var googleAuthProvider = AuthAPI.googleAuth()
@@ -75,15 +75,11 @@ public class SimpleApp extends RouteApp {
         return Route.empty()
                 .and(getNode("/", (r) -> new LoginPage(this, googleAuthProvider, googleCredentials)))
                 .and(getNode("/user/signed-in", (r) -> new SignedInPage(this, googleAuthProvider)))
-                .and(getNode("/auth/error", (r) -> new ErrorPage(this)))
                 .filter(DevFilter.create())
                 .filter(AuthFilters.oauth2(googleAuthProvider, googleCredentials, user -> {
                     setUser(user);
                     return FXFuture.unit(new Redirect("/user/signed-in"));
-                }, error -> {
-                    setError(error);
-                    return FXFuture.unit(new Redirect("/auth/error"));
-                }));
+                }, error -> FXFuture.unit(viewFromNode(new ErrorPage(error)))));
     }
 
     public  ObservableMap<String, String> getSession() {
@@ -125,28 +121,5 @@ public class SimpleApp extends RouteApp {
             userProperty = new SimpleObjectProperty<>(this, "user");
         }
         return userProperty;
-    }
-
-    // Error property
-    private ObjectProperty<Throwable> errorProperty;
-
-    public final Throwable getError() {
-        return errorProperty == null ? null : errorProperty.get();
-    }
-
-    public final void setError(Throwable value) {
-        errorProperty().set(value);
-    }
-
-    /**
-     * The error property contains the last error that occurred.
-     *
-     * @return the error property
-     */
-    public final ObjectProperty<Throwable> errorProperty() {
-        if (errorProperty == null) {
-            errorProperty = new SimpleObjectProperty<>(this, "error");
-        }
-        return errorProperty;
     }
 }
