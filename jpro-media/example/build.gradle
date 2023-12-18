@@ -16,16 +16,18 @@ dependencies {
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
-mainClassName = 'one.jpro.platform.media.example.MediaPlayerSample'
-//mainClassName = 'one.jpro.platform.media.example.MediaRecorderSample'
-//mainClassName = 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
-//mainClassName = 'one.jpro.platform.media.example.MediaPlayerApplication'
-//mainClassName = 'one.jpro.platform.media.example.MediaRecorderApplication'
-
 javafx {
     version = "$JAVAFX_VERSION"
     modules = ['javafx.controls', 'javafx.swing', 'javafx.media']
 }
+
+def examples = [
+        'media-player' : 'one.jpro.platform.media.example.MediaPlayerSample',
+        'media-recorder' : 'one.jpro.platform.media.example.MediaRecorderSample',
+        'media-recorder-and-player' : 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
+]
+
+mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["media-recorder-and-player"]
 
 run {
     doFirst {

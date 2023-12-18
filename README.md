@@ -468,6 +468,9 @@ dependencies {
 ./gradlew jpro-auth:example:run -Psample=oauth
 ./gradlew jpro-file:example:run -Psample=file-uploader
 ./gradlew jpro-file:example:run -Psample=file-uploader
+./gradlew jpro-media:example:run -Psample=media-player
+./gradlew jpro-media:example:run -Psample=media-recorder
+./gradlew jpro-media:example:run -Psample=media-recorder-and-player
 ```
 
 - As JPro application
@@ -476,4 +479,7 @@ dependencies {
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
+./gradlew jpro-media:example:jproRun -Psample=media-player
+./gradlew jpro-media:example:jproRun -Psample=media-recorder
+./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player
 ```
