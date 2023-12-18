@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.Optional;
 
 import static one.jpro.platform.routing.RouteUtils.getNode;
-import static one.jpro.platform.routing.RouteUtils.viewFromNode;
 
 /**
  * The {@link LoginApp} class extends {@link RouteApp} to create a JavaFX application

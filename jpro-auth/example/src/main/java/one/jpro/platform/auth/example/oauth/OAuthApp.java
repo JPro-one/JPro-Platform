@@ -6,12 +6,10 @@ import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
 import one.jpro.platform.auth.routing.OAuth2Filter;
 import one.jpro.platform.routing.Filter;
-import one.jpro.platform.routing.Redirect;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.dev.StatisticsFilter;
-import simplefx.experimental.parts.FXFuture;
 
 import java.net.URL;
 import java.util.Optional;

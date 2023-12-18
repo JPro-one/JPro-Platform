@@ -32,21 +32,8 @@ public interface OAuth2Filter {
     static Filter create(OpenIDAuthenticationProvider authProvider,
                          Function<User, Response> userFunction,
                          Function<Throwable, Response> errorFunction) {
-        Objects.requireNonNull(authProvider, "auth provider can not be null");
-        Objects.requireNonNull(userFunction, "user function can not be null");
-        Objects.requireNonNull(errorFunction, "error function cannot be null");
-
         final var credentials = authProvider.getCredentials();
-
-        return (route) -> (request) -> {
-            if (request.path().equals(credentials.getRedirectUri())) {
-                return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
-                        .flatMap(r -> userFunction.apply(r).future())
-                        .flatExceptionally(r -> errorFunction.apply(r).future()));
-            } else {
-                return route.apply(request);
-            }
-        };
+        return create(authProvider, credentials, userFunction, errorFunction);
     }
 
     /**
