@@ -30,8 +30,8 @@ public interface OAuth2Filter {
      * @return a {@link Filter} object
      */
     static Filter create(OpenIDAuthenticationProvider authProvider,
-                         Function<User, FXFuture<Response>> userFunction,
-                         Function<Throwable, FXFuture<Response>> errorFunction) {
+                         Function<User, Response> userFunction,
+                         Function<Throwable, Response> errorFunction) {
         Objects.requireNonNull(authProvider, "auth provider can not be null");
         Objects.requireNonNull(userFunction, "user function can not be null");
         Objects.requireNonNull(errorFunction, "error function cannot be null");
