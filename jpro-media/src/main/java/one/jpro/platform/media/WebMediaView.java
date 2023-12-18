@@ -3,6 +3,8 @@ package one.jpro.platform.media;
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.*;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -44,26 +46,9 @@ public abstract class WebMediaView extends MediaView {
 
                 @Override
                 protected void invalidated() {
-                    if (getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
-                        webAPI.executeScript("""
-                                // clear all elements
-                                while ($mediaContainer.firstChild) {
-                                    $mediaContainer.removeChild($mediaContainer.firstChild);
-                                }
-                                // add new element
-                                let videoElement = %s;
-                                videoElement.controls = $controls;
-                                $mediaContainer.appendChild(videoElement);
-                                """.replace("$mediaContainer", mediaContainerElement.getName())
-                                .replace("$controls", String.valueOf(isShowControls()))
-                                .formatted(webMediaEngine.getVideoElement().getName()));
-                        updateVideoElementSize(webMediaEngine);
-                        if (webMediaEngine instanceof WebMediaRecorder) {
-                            webAPI.executeScript("""
-                                    %s.play();
-                                    """.formatted(webMediaEngine.getVideoElement().getName()));
-                        }
-                    }
+                    sceneProperty().removeListener(weakUpdateViewContainerListener);
+                    updateViewContainer();
+                    sceneProperty().addListener(weakUpdateViewContainerListener);
                 }
             };
         }
@@ -193,5 +178,35 @@ public abstract class WebMediaView extends MediaView {
     private void updateVideoElementSize(WebMediaEngine webMediaEngine) {
         updateVideoElementWidth(webMediaEngine);
         updateVideoElementHeight(webMediaEngine);
+    }
+
+    private final InvalidationListener updateViewContainerListener = observable -> updateViewContainer();
+    private final WeakInvalidationListener weakUpdateViewContainerListener =
+            new WeakInvalidationListener(updateViewContainerListener);
+
+    private void updateViewContainer() {
+        if (getScene() != null && getMediaEngine() instanceof WebMediaEngine webMediaEngine) {
+            webAPI.executeScript("""
+                    // clear all elements
+                    while ($mediaContainer.firstChild) {
+                        $mediaContainer.removeChild($mediaContainer.firstChild);
+                    }
+                    // add new element
+                    let videoElement = %s;
+                    videoElement.controls = $controls;
+                    $mediaContainer.appendChild(videoElement);
+                    """.replace("$mediaContainer", mediaContainerElement.getName())
+                    .replace("$controls", String.valueOf(isShowControls()))
+                    .formatted(webMediaEngine.getVideoElement().getName()));
+
+            updateVideoElementSize(webMediaEngine);
+
+            if (webMediaEngine instanceof WebMediaRecorder) {
+                webAPI.executeScript("""
+                        let videoElement = %s;
+                        videoElement.play();
+                        """.formatted(webMediaEngine.getVideoElement().getName()));
+            }
+        }
     }
 }
