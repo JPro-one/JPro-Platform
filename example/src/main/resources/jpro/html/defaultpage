@@ -16,7 +16,7 @@
 
 <body>
 
-    <jpro-app href="/app/default" nativescrolling="true" fullscreen="true"></jpro-app>
+    <jpro-app href="/app/default" nativescrolling="true" fullscreen="true" printJSCommands="true"></jpro-app>
 
 </body>
 
