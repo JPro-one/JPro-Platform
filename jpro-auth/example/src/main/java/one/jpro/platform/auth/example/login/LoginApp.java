@@ -10,13 +10,12 @@ import one.jpro.platform.auth.example.login.page.LoginPage;
 import one.jpro.platform.auth.example.login.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.routing.OAuth2Filter;
-import one.jpro.platform.routing.Redirect;
+import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.sessions.SessionManager;
 import org.json.JSONObject;
-import simplefx.experimental.parts.FXFuture;
 
 import java.net.URL;
 import java.util.Optional;
@@ -52,8 +51,13 @@ public class LoginApp extends RouteApp {
 
     private static final SessionManager sessionManager = new SessionManager("simple-app");
 
+    ObservableMap<String, String> session;
+
     @Override
     public Route createRoute() {
+        session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
+                : sessionManager.getSession("user-session");
+
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(getScene()::setUserAgentStylesheet);
@@ -73,17 +77,12 @@ public class LoginApp extends RouteApp {
                 .filter(DevFilter.create())
                 .filter(OAuth2Filter.create(googleAuthProvider, user -> {
                     setUser(user);
-                    return FXFuture.unit(new Redirect("/user/signed-in"));
-                }, error -> FXFuture.unit(viewFromNode(new ErrorPage(error)))));
-    }
-
-    public  ObservableMap<String, String> getSession() {
-        return (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
-                : sessionManager.getSession("user-session");
+                    return Response.redirect("/user/signed-in");
+                }, error -> Response.node(new ErrorPage(error))));
     }
 
     public final User getUser() {
-        final var userJsonString = getSession().get("user");
+        final var userJsonString = session.get("user");
         if (userJsonString != null) {
             final JSONObject userJson = new JSONObject(userJsonString);
             return new User(userJson);
@@ -94,9 +93,9 @@ public class LoginApp extends RouteApp {
 
     public final void setUser(User value) {
         if (value != null) {
-            getSession().put("user", value.toJSON().toString());
+            session.put("user", value.toJSON().toString());
         } else {
-            getSession().remove("user");
+            session.remove("user");
         }
     }
 }

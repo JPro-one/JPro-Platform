@@ -1,5 +1,18 @@
 ### 0.2.8
 
+#### Changes
+* Changed the types in the Routing. In most cases these are still compatible because utility methods are used.
+
+Before:
+Route: Request => FXFuture[Response]
+Now:
+Route: Request => Response
+Response: FXFuture[ResponseResult]
+
+This made the API more easy to use by hiding complexity which is only needed in rare cases.
+* Fixed parts of the `Route.when` api, which had unexpected argument types.
+* Removed `ResponseUtils.redirect` and replaced it with `Response.redirect` and also added `Response.fromNode`
+
 #### Improvements
 * Updated JPro to version `2023.3.3`.
 * Added `login` example for JPro Auth modules. This example shows how to use the JPro Auth modules to authenticate
@@ -9,10 +22,6 @@
 * Added `jpro-auth-routing` module to the platform that provides the API to simplify the combination of  routing 
   capabilities during the authentication process. Simultaneously, `jpro-auth` module was renamed to `jpro-auth-core`
   and everything under `one.jpro.platform.auth` package was moved to `one.jpro.platform.auth.core` package.
-
-#### Changes
-* Fixed parts of the `Route.when` api, which had unexpected argument types.
-* Removed `ResponseUtils.redirect` and replaced it with `Response.redirect` and also added `Response.fromNode`
 
 ### 0.2.7 (December 8, 2023)
 

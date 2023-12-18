@@ -9,22 +9,22 @@ import java.util.function.Function
 
 object RouteUtils {
 
-  @deprecated
-  val EmptyRoute: Route = (x) => null
+  def redirect(path: String, to: String): Route = get(path, (r) => Response.redirect(to))
 
-  def redirect(path: String, to: String): Route = get(path, (r) => Redirect(to))
+  def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.path == path) f.apply(request) else Response.empty()
 
-  def getFuture(path: String, f: Function[Request, FXFuture[Response]]): Route = (request: Request) => if (request.path == path) f.apply(request) else FXFuture.unit(null)
-
-  def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.path == path) FXFuture.unit(f.apply(request)) else null
-
-  def getNodeFuture(path: String, node: Function[Request, FXFuture[Node]]): Route = (request: Request) => if (request.path == path) node.apply(request).map(node => viewFromNode(node)) else FXFuture.unit(null)
-
-  def getNode(path: String, node: Function[Request, Node]): Route = (request: Request) => if (request.path == path) FXFuture.unit(viewFromNode(node.apply(request))) else null
+  def getView(path: String, node: Function[Request, View]): Route = (request: Request) => {
+    if (request.path == path) Response.view(node.apply(request))
+    else Response.empty()
+  }
+  def getNode(path: String, node: Function[Request, Node]): Route = (request: Request) => {
+    if (request.path == path) Response.node(node.apply(request))
+    else Response.empty()
+  }
 
 
   def transitionFilter(seconds: Double): Filter = route => { request => {
-    route.apply(request).map{
+    Response(route.apply(request).future.map{
       case x: View =>
         val oldNode = request.oldContent.get()
         val newNode = x.realContent
@@ -41,10 +41,10 @@ object RouteUtils {
           x.mapContent(x => res)
         }
       case x => x
-    }
+    })
   }}
   def sideTransitionFilter(seconds: Double): Filter = route => { request => {
-    route.apply(request).map{
+    Response(route.apply(request).future.map{
       case x: View =>
         val oldNode = request.oldContent.get()
         val newNode = x.realContent
@@ -70,10 +70,8 @@ object RouteUtils {
           x.mapContent(x => res)
         }
       case x => x
-    }
+    })
   }}
-
-  def mapViewFilter(request: Request, f: Node => Node): View = ???
 
   def viewFromNode(x: Node): View = new View {
     override def title: String = "view-from-node"

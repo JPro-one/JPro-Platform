@@ -1,9 +1,6 @@
 package one.jpro.platform.webrtc.example.videoroom;
 
-import one.jpro.platform.routing.Filters;
-import one.jpro.platform.routing.Route;
-import one.jpro.platform.routing.RouteApp;
-import one.jpro.platform.routing.RouteUtils;
+import one.jpro.platform.routing.*;
 import one.jpro.platform.webrtc.example.videoroom.page.OverviewPage;
 import one.jpro.platform.webrtc.example.videoroom.page.VideoRoomPage;
 import simplefx.experimental.parts.FXFuture;
@@ -30,9 +27,9 @@ public class VideoRoomApp extends RouteApp {
                     var matcher = roomPattern.matcher(r.path());
                     if(matcher.matches()) {
                         var roomID = matcher.group(1);
-                        return FXFuture.unit(viewFromNode(new VideoRoomPage(roomID, getWebAPI())));
+                        return Response.node(new VideoRoomPage(roomID, getWebAPI()));
                     } else {
-                        return FXFuture.unit(null);
+                        return Response.empty();
                     }
                 })
                 .filter(Filters.FullscreenFilter(true));

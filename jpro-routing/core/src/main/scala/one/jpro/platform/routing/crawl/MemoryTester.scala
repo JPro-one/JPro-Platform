@@ -19,7 +19,7 @@ object MemoryTester {
         JMemoryBuddy.memoryTest(checker2 => {
           val factory = inFX(appFactory.get())
           assert(factory != null, "The appFactory must not return null")
-          val view = inFX(appFactory.get().route(pageURL)).await
+          val view = inFX(appFactory.get().route(pageURL)).future.await
 
           checker2.setAsReferenced(factory)
           checker2.assertCollectable(view) // Hm?

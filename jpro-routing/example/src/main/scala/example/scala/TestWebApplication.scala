@@ -19,27 +19,27 @@ class MyApp(stage: Stage) extends RouteNode(stage) {
 
   setRoute(
     Route.empty()
-      .and(get("", (r) => new MainView))
-      .and(get("/", (r) => new MainView))
-      .and(get("/redirect2", (r) => Redirect("https://google.com")))
-      .and(get("/main", (r) => new MainView))
-      .and(get("/green", (r) => new GreenView))
-      .and(get("/sub", (r) => new SubView))
-      .and(get("/redirect", (r) => Redirect("/sub")))
-      .and(get("/paralax", (r) => new ParalaxPage))
-      .and(get("/pdf", (r) => new PDFTest))
-      .and(get("/leak", (r) => new LeakingPage))
-      .and(get("/collect", (r) => new CollectingPage))
-      .and(get("/jmemorybuddy", (r) => new JMemoryBuddyPage))
-      .and(get("/100", (r) => new ManyNodes(100)))
-      .and(get("/200", (r) => new ManyNodes(200)))
-      .and(get("/400", (r) => new ManyNodes(400)))
-      .and(get("/800", (r) => new ManyNodes(800)))
-      .and(get("/1600", (r) => new ManyNodes(1600)))
-      .and(get("/3200", (r) => new ManyNodes(3200)))
-      .and(get("/6400", (r) => new ManyNodes(6400)))
-      .and(get("/it's\" tricky", (r) => new MainView))
-      .and(get("/it's\" tricky", (r) => new MainView))
+      .and(getView("", (r) => new MainView))
+      .and(getView("/", (r) => new MainView))
+      .and(get("/redirect2", r => Response.redirect("https://google.com")))
+      .and(getView("/main", (r) => new MainView))
+      .and(getView("/green", (r) => new GreenView))
+      .and(getView("/sub", (r) => new SubView))
+      .and(get("/redirect", r => Response.redirect( "/sub")))
+      .and(getView("/paralax", (r) => new ParalaxPage))
+      .and(getView("/pdf", (r) => new PDFTest))
+      .and(getView("/leak", (r) => new LeakingPage))
+      .and(getView("/collect", (r) => new CollectingPage))
+      .and(getView("/jmemorybuddy", (r) => new JMemoryBuddyPage))
+      .and(getView("/100", (r) => new ManyNodes(100)))
+      .and(getView("/200", (r) => new ManyNodes(200)))
+      .and(getView("/400", (r) => new ManyNodes(400)))
+      .and(getView("/800", (r) => new ManyNodes(800)))
+      .and(getView("/1600", (r) => new ManyNodes(1600)))
+      .and(getView("/3200", (r) => new ManyNodes(3200)))
+      .and(getView("/6400", (r) => new ManyNodes(6400)))
+      .and(getView("/it's\" tricky", (r) => new MainView))
+      .and(getView("/it's\" tricky", (r) => new MainView))
       .filter(DevFilter.create)
       .filter(StatisticsFilter.create)
   )
@@ -103,6 +103,12 @@ class Header2(view: View, sessionManager: SessionManager) extends HBox {
     disable <-- (!WebAPI.isBrowser && sessionManager.historyForward.isEmpty)
     onAction --> {
       goForward(this)
+    }
+  }
+  this <++ new Button("Backward2") {
+    onAction --> { e =>
+      println("view.getSessionManager(): " + view.getSessionManager())
+      view.getSessionManager().goBack()
     }
   }
 }

@@ -7,6 +7,7 @@ import one.jpro.platform.auth.example.oauth.page.*;
 import one.jpro.platform.auth.routing.OAuth2Filter;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Redirect;
+import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.dev.StatisticsFilter;
@@ -97,10 +98,10 @@ public class OAuthApp extends BaseOAuthApp {
         return OAuth2Filter.create(openIDAuthProvider, user -> {
             setUser(user);
             setAuthProvider(openIDAuthProvider);
-            return FXFuture.unit(new Redirect(USER_CONSOLE_PATH));
+            return Response.redirect(USER_CONSOLE_PATH);
         }, error -> {
             setError(error);
-            return FXFuture.unit(new Redirect(AUTH_ERROR_PATH));
+            return Response.redirect(AUTH_ERROR_PATH);
         });
     }
 }
