@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.sessionmanager
 
 import com.jpro.webapi.WebAPI
-import one.jpro.platform.routing.{Redirect, Response, RouteNode, View}
+import one.jpro.platform.routing.{Redirect, Response, ResponseResult, RouteNode, View}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 
@@ -27,7 +27,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     markViewCollectable(THIS.view)
   })
 
-  def gotoURL(_url: String, x: Response, pushState: Boolean, track: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = {
     assert(x != null, "Response was null for url: " + _url)
     val url = _url
     x match {

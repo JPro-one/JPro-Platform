@@ -40,9 +40,9 @@ public class ColorsApp extends RouteApp {
               if(matcher.matches()) {
                 var colorStr = matcher.group(1);
                 var color = Color.web(colorStr);
-                return Response.fromNodeFuture(gen("#" + colorStr, r.resolve("/red"), color));
+                return Response.node(gen("#" + colorStr, r.resolve("/red"), color));
               } else {
-                return Response.emptyFuture();
+                return Response.empty();
               }
             })
             .path("/colors",

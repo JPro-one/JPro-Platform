@@ -48,10 +48,10 @@ public interface JWTFilter {
 
         return (route) -> (request) -> {
             if (request.path().equals(authPath)) {
-                return FXFuture.fromJava(authProvider.token(tokenPath, credentials)
+                return Response.fromFuture(FXFuture.fromJava(authProvider.token(tokenPath, credentials)
                                 .thenCompose(authProvider::authenticate))
                         .flatMap(userFunction::apply)
-                        .flatExceptionally(errorFunction::apply);
+                        .flatExceptionally(errorFunction::apply));
             } else {
                 return route.apply(request);
             }

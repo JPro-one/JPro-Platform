@@ -25,7 +25,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     gotoURL(historyCurrent.path, false, true)
   }
 
-  def gotoURL(_url: String, x: Response, pushState: Boolean, track: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = {
     x match {
       case Redirect(url) =>
         logger.debug(s"redirect: ${_url} -> $url")

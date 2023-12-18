@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.filter.container
 
-import one.jpro.platform.routing.{Filter, Request, View}
+import one.jpro.platform.routing.{Filter, Request, Response, View}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 
@@ -48,8 +48,7 @@ object ContainerFilter {
       }
     }
     val r = route(request2)
-    if (r == null) null
-    else r.map {
+    Response(r.future.map {
       case view: View =>
         if (container == null) {
           container = containerLogic.createContainer()
@@ -60,6 +59,6 @@ object ContainerFilter {
           container
         })
       case x => x
-    }
+    })
   }
 }

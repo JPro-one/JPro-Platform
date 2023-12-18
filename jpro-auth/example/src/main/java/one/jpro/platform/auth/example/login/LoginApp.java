@@ -82,8 +82,8 @@ public class LoginApp extends RouteApp {
                 .filter(DevFilter.create())
                 .filter(OAuth2Filter.create(googleAuthProvider, googleCredentials, user -> {
                     setUser(user);
-                    return Response.redirectFuture("/user/signed-in");
-                }, error -> Response.fromNodeFuture(new ErrorPage(error))));
+                    return Response.redirect("/user/signed-in");
+                }, error -> Response.node(new ErrorPage(error))));
     }
 
     public final User getUser() {

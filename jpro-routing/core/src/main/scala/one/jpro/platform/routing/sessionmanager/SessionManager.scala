@@ -4,13 +4,13 @@ import com.jpro.webapi.WebAPI
 import de.sandec.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
-import one.jpro.platform.routing.{HistoryEntry, Response, RouteNode, View}
+import one.jpro.platform.routing.{HistoryEntry, Response, ResponseResult, RouteNode, View}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
-
 import one.jpro.platform.internal.openlink.OpenLink
+
 import java.net.URI
 import java.util.function.Consumer
 
@@ -54,17 +54,13 @@ trait SessionManager { THIS =>
     val url2 = SessionManager.mergeURLs(THIS.url, url)
     try {
       logger.debug(s"goto: $url")
-      val newView = if(view != null && view.handleURL(url)) FXFuture(view) else {
+      val newView = if(view != null && view.handleURL(url)) Response(FXFuture(view)) else {
         getView(url2)
       }
-      if(newView != null) {
-        newView.map { response =>
-          assert(response != null, s"Response for $url2 was null")
-          this.url = url2
-          gotoURL(url2, response, pushState, track)
-        }
-      } else {
-        new NullPointerException(s"Error: no view found for $url").printStackTrace()
+      newView.future.map { response =>
+        assert(response != null, s"Response for $url2 was null")
+        this.url = url2
+        gotoURL(url2, response, pushState, track)
       }
     } catch {
       case ex: Exception =>
@@ -72,9 +68,9 @@ trait SessionManager { THIS =>
     }
   }
 
-  def gotoURL(_url: String, x: Response, pushState: Boolean, track: Boolean): Unit
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit
 
-  def getView(url: String): FXFuture[Response] = {
+  def getView(url: String): Response = {
     val node = if(view == null) null else view.realContent
     webApp.route(url, node)
   }

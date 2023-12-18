@@ -2,14 +2,15 @@ package one.jpro.platform.routing
 
 import simplefx.experimental.FXFuture
 
-trait Response
+case class Response(future: FXFuture[ResponseResult]) {
+  assert(future != null, "future must not be null - but it's value can be null")
+}
 object Response {
-  def empty(): Response = null
-  def emptyFuture(): FXFuture[Response] = FXFuture.unit(empty())
-  def redirect(to: String): Response = Redirect(to)
-  def redirectFuture(to: String): FXFuture[Response] = FXFuture.unit(Redirect(to))
-  def fromNode(node: javafx.scene.Node): Response = new Response {
-    RouteUtils.viewFromNode(node)
-  }
-  def fromNodeFuture(node: javafx.scene.Node): FXFuture[Response] = FXFuture.unit(fromNode(node))
+  def empty(): Response = Response(FXFuture.unit(null))
+  def redirect(to: String): Response = Response(FXFuture.unit(Redirect(to)))
+
+  def view(view: View): Response = Response(FXFuture.unit(view))
+  def node(node: javafx.scene.Node): Response = Response(FXFuture.unit(View.fromNode(node)))
+  def fromFuture(future: FXFuture[Response]): Response = Response(future.flatMap(_.future))
+  def fromFutureResult(future: FXFuture[ResponseResult]): Response = Response(future)
 }
