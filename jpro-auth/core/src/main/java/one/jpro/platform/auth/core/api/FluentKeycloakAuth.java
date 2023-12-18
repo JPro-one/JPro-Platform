@@ -52,6 +52,14 @@ public interface FluentKeycloakAuth {
     FluentKeycloakAuth realm(String realm);
 
     /**
+     * Set the redirect uri.
+     *
+     * @param redirectUri the redirect uri
+     * @return self
+     */
+    FluentKeycloakAuth redirectUri(String redirectUri);
+
+    /**
      * Create a Keycloak authentication provider configured with the provided options..
      *
      * @param stage the stage

@@ -8,6 +8,7 @@ import one.jpro.platform.auth.core.oauth2.OAuth2Options;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Besmir Beqiri
  */
-public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvider {
+public class MicrosoftAuthenticationProvider extends OpenIDAuthenticationProvider {
 
     /**
      * The common tenant identifier for Microsoft OAuth2.
@@ -31,6 +32,8 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
      * The organizations tenant identifier for Microsoft OAuth2.
      */
     public static final String ORGANIZATIONS_TENANT = "organizations";
+
+    public static final List<String> DEFAULT_SCOPES = List.of("openid", "profile", "email", "offline_access");
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Microsoft.
@@ -60,6 +63,7 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
                 .setTenant(tenant)
+                .setSupportedScopes(DEFAULT_SCOPES)
                 .setSite("https://login.microsoftonline.com/{tenant}/v2.0")
                 .setTokenPath("https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token")
                 .setAuthorizationPath("https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize")
@@ -78,7 +82,7 @@ public class MicrosoftAuthenticationProvider extends OAuth2AuthenticationProvide
      * @param options custom OAuth2 options
      * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
      */
-    public static CompletableFuture<OAuth2AuthenticationProvider> discover(Stage stage, OAuth2Options options) {
+    public static CompletableFuture<OpenIDAuthenticationProvider> discover(Stage stage, OAuth2Options options) {
         final String site = options.getSite() == null ?
                 "https://login.microsoftonline.com/{tenant}/v2.0" : options.getSite();
         final JWTOptions jwtOptions = options.getJWTOptions() == null ?

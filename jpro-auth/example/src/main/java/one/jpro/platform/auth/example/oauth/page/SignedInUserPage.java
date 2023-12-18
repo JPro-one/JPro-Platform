@@ -4,9 +4,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.authentication.Authentication;
 import one.jpro.platform.auth.core.authentication.User;
-import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Options;
+import one.jpro.platform.auth.example.oauth.OAuthApp;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;

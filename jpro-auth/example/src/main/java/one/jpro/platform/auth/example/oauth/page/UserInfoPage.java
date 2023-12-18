@@ -18,7 +18,6 @@ public class UserInfoPage extends Page {
         headerLabel.getStyleClass().add("header-label");
 
         MarkdownView markdownView = new MarkdownView();
-        markdownView.getStylesheets().add("/one/jpro/mdfx/mdfx-default.css");
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
             final var userInfo = loginApp.getUserInfo();
             return userInfo == null ? "" : loginApp.jsonToMarkdown(userInfo);

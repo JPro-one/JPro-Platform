@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -15,7 +16,9 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Besmir Beqiri
  */
-public class GoogleAuthenticationProvider extends OAuth2AuthenticationProvider {
+public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
+
+    public static final List<String> DEFAULT_SCOPES = List.of("openid", "email", "profile");
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Google.
@@ -41,6 +44,7 @@ public class GoogleAuthenticationProvider extends OAuth2AuthenticationProvider {
                 .setFlow(OAuth2Flow.AUTH_CODE)
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
+                .setSupportedScopes(DEFAULT_SCOPES)
                 .setSite("https://accounts.google.com")
                 .setTokenPath("https://oauth2.googleapis.com/token")
                 .setAuthorizationPath("/o/oauth2/v2/auth")
@@ -58,9 +62,9 @@ public class GoogleAuthenticationProvider extends OAuth2AuthenticationProvider {
      *
      * @param stage   the JavaFX application stage
      * @param options custom OAuth2 options
-     * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
+     * @return a future with the instantiated {@link OpenIDAuthenticationProvider}
      */
-    public static CompletableFuture<OAuth2AuthenticationProvider> discover(@Nullable final Stage stage,
+    public static CompletableFuture<OpenIDAuthenticationProvider> discover(@Nullable final Stage stage,
                                                                            @NotNull final OAuth2Options options) {
         final String site = options.getSite() == null ? "https://accounts.google.com" : options.getSite();
 
