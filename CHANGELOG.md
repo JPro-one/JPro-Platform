@@ -20,6 +20,10 @@
   capabilities during the authentication process. Simultaneously, `jpro-auth` module was renamed to `jpro-auth-core`
   and everything under `one.jpro.platform.auth` package was moved to `one.jpro.platform.auth.core` package.
 
+#### Bugfixes
+* Fixed web implementation of the `mediaView` **freezing** after the node was removed from the scene and then added 
+  back.
+
 ### 0.2.7 (December 8, 2023)
 
 #### Improvements
