@@ -37,8 +37,8 @@ public interface JWTFilter {
                          JSONObject credentials,
                          String authPath,
                          String tokenPath,
-                         Function<User, FXFuture<Response>> userFunction,
-                         Function<Throwable, FXFuture<Response>> errorFunction) {
+                         Function<User, Response> userFunction,
+                         Function<Throwable, Response> errorFunction) {
         Objects.requireNonNull(authProvider, "auth provider cannot be null");
         Objects.requireNonNull(credentials, "credentials cannot be null");
         Objects.requireNonNull(authPath, "authentication path cannot be null");
@@ -48,10 +48,10 @@ public interface JWTFilter {
 
         return (route) -> (request) -> {
             if (request.path().equals(authPath)) {
-                return Response.fromFuture(FXFuture.fromJava(authProvider.token(tokenPath, credentials)
+                return new Response(FXFuture.fromJava(authProvider.token(tokenPath, credentials)
                                 .thenCompose(authProvider::authenticate))
-                        .flatMap(userFunction::apply)
-                        .flatExceptionally(errorFunction::apply));
+                        .flatMap(user -> userFunction.apply(user).future())
+                        .flatExceptionally(error -> errorFunction.apply(error).future()));
             } else {
                 return route.apply(request);
             }
