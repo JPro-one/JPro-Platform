@@ -2,7 +2,6 @@ package one.jpro.platform.media.recorder.impl;
 
 import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.event.Event;
@@ -147,24 +146,6 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
                 """.formatted(mimeType)));
     }
 
-    @Override
-    ReadOnlyObjectWrapper<MediaSource> mediaResourcePropertyImpl() {
-        if (mediaSource == null) {
-            mediaSource = new ReadOnlyObjectWrapper<>(this, "mediaSource") {
-
-                @Override
-                protected void invalidated() {
-                    final var mediaSource = get();
-                    if (!mediaSource.isLocal()) {
-                        final var objectUrl = mediaSource.jsFile().getObjectURL();
-                        System.out.println("MediaRecorder ObjectURL: " + objectUrl.getName());
-                    }
-                }
-            };
-        }
-        return mediaSource;
-    }
-
     // mimeType property (read-only)
     private ReadOnlyStringWrapper mimeType;
 
@@ -243,17 +224,17 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
         if (recorderReady) {
             if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
                 webAPI.executeScript("""
-                    $blobsRecorded = []; // clear recorded buffer
-                    $mediaRecorder.start(1000); // start recording with a timeslice of 1 second
-                    """
+                        $blobsRecorded = []; // clear recorded buffer
+                        $mediaRecorder.start(1000); // start recording with a timeslice of 1 second
+                        """
                         .replace("$blobsRecorded", blobsRecordedRef)
                         .replace("$mediaRecorder", mediaRecorderRef));
             } else if (getStatus().equals(Status.PAUSED)) {
                 webAPI.executeScript("""
-                    if ($mediaRecorder.state === "paused") {
-                        $mediaRecorder.resume();
-                    }
-                    """.replace("$mediaRecorder", mediaRecorderRef));
+                        if ($mediaRecorder.state === "paused") {
+                            $mediaRecorder.resume();
+                        }
+                        """.replace("$mediaRecorder", mediaRecorderRef));
             }
         }
     }
@@ -262,10 +243,10 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     public void pause() {
         if (recorderReady) {
             webAPI.executeScript("""
-                if ($mediaRecorder.state === "recording") {
-                    $mediaRecorder.pause();
-                }
-                """.replace("$mediaRecorder", mediaRecorderRef));
+                    if ($mediaRecorder.state === "recording") {
+                        $mediaRecorder.pause();
+                    }
+                    """.replace("$mediaRecorder", mediaRecorderRef));
         }
     }
 
@@ -273,8 +254,8 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     public void stop() {
         if (recorderReady) {
             webAPI.executeScript("""
-                $mediaRecorder.stop();
-                """.replace("$mediaRecorder", mediaRecorderRef));
+                    $mediaRecorder.stop();
+                    """.replace("$mediaRecorder", mediaRecorderRef));
         }
     }
 
