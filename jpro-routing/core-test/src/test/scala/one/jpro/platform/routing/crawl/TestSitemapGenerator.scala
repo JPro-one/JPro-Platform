@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.crawl
 
-import one.jpro.platform.routing.RouteUtils._
+import one.jpro.platform.routing.Route._
 import one.jpro.platform.routing.crawl.TestUtils._
 import one.jpro.platform.routing.{Redirect, Response, Route, RouteNode}
 import org.junit.jupiter.api.Test

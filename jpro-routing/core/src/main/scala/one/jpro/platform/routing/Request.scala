@@ -41,6 +41,8 @@ case class Request (
   def getOriginalOldContent(): WeakReference[Node] = origOldContent
   def getOldContent(): WeakReference[Node] = oldContent
 
+  def getQueryParametersScala(): Map[String,String] = queryParameters
+
 
   def getPort(): Int = port
 
