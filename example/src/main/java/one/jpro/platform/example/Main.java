@@ -16,8 +16,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static one.jpro.platform.routing.RouteUtils.getNode;
-import static one.jpro.platform.routing.RouteUtils.redirect;
+import static one.jpro.platform.routing.Route.getNode;
+import static one.jpro.platform.routing.Route.redirect;
 import static one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter.Link;
 
 /**

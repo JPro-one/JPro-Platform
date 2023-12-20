@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import simplefx.experimental.parts.FXFuture;
 
-import static one.jpro.platform.routing.RouteUtils.*;
+import static one.jpro.platform.routing.Route.*;
 
 public class PopupApp extends RouteApp {
 

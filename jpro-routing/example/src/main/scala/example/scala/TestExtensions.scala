@@ -1,7 +1,7 @@
 package example.scala
 
 
-import one.jpro.platform.routing.RouteUtils.{get, getNode, redirect}
+import one.jpro.platform.routing.Route.{get, getNode, redirect}
 import com.jpro.webapi.WebAPI
 import simplefx.all._
 import simplefx.core._

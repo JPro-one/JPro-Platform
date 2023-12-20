@@ -14,8 +14,8 @@ import one.jpro.platform.routing.filter.container.ContainerFilter;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static one.jpro.platform.routing.RouteUtils.getNode;
-import static one.jpro.platform.routing.RouteUtils.redirect;
+import static one.jpro.platform.routing.Route.getNode;
+import static one.jpro.platform.routing.Route.redirect;
 
 /**
  * Creates a simple application that displays different colors using the routing functions.
@@ -37,7 +37,7 @@ public class ColorsApp extends RouteApp {
                 .and(getNode("/blue", (r) -> gen("Blue", "/yellow", Color.BLUE)))
                 .and(getNode("/yellow", (r) -> gen("Yellow", r.resolve("/color/00ff00"), Color.YELLOW)))
                 .and(r -> {
-                    var matcher = colorPattern.matcher(r.path());
+                    var matcher = colorPattern.matcher(r.getPath());
                     if (matcher.matches()) {
                         var colorStr = matcher.group(1);
                         var color = Color.web(colorStr);

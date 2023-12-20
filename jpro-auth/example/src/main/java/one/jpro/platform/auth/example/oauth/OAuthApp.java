@@ -14,7 +14,7 @@ import one.jpro.platform.routing.dev.StatisticsFilter;
 import java.net.URL;
 import java.util.Optional;
 
-import static one.jpro.platform.routing.RouteUtils.getNode;
+import static one.jpro.platform.routing.Route.getNode;
 
 /**
  * A showcase application to show how to use the Authorization module in general

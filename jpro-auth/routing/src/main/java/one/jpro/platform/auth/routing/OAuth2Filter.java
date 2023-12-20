@@ -57,7 +57,7 @@ public interface OAuth2Filter {
         Objects.requireNonNull(errorFunction, "error function cannot be null");
 
         return (route) -> (request) -> {
-            if (request.path().equals(credentials.getRedirectUri())) {
+            if (request.getPath().equals(credentials.getRedirectUri())) {
                 return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
                         .flatMap(r -> userFunction.apply(r).future())
                         .flatExceptionally(r -> errorFunction.apply(r).future()));

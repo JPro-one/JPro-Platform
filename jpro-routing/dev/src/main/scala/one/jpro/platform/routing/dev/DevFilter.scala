@@ -61,7 +61,7 @@ object DevFilter {
         this <++ new TextField {
           request --> {
             if(request != null) {
-              this.text = request.path
+              this.text = request.getPath()
             }
           }
           onAction --> {

@@ -1,12 +1,28 @@
 package one.jpro.platform.routing
 
+import javafx.scene.Node
 import simplefx.experimental._
-
+import java.util.function.Function
 import java.util.function.Predicate
 
 
 object Route {
   def empty(): Route = (r) => Response.empty()
+
+  def redirect(path: String, to: String): Route = get(path, (r) => Response.redirect(to))
+
+  def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.getPath() == path) f.apply(request) else Response.empty()
+
+  def getView(path: String, node: Function[Request, View]): Route = (request: Request) => {
+    if (request.getPath() == path) Response.view(node.apply(request))
+    else Response.empty()
+  }
+
+  def getNode(path: String, node: Function[Request, Node]): Route = (request: Request) => {
+    if (request.getPath() == path) Response.node(node.apply(request))
+    else Response.empty()
+  }
+
 }
 @FunctionalInterface
 trait Route {
@@ -23,15 +39,15 @@ trait Route {
     })
   }
   def domain(domain: String, route: Route): Route = and((r: Request) => {
-    if(r.domain == domain) {
+    if(r.getDomain() == domain) {
       route.apply(r)
     } else {
       Response.empty()
     }
   })
   def path(path: String, route: Route): Route = and((r: Request) => {
-    if(r.path.startsWith(path + "/")) {
-      val r2 = r.copy(path = r.path.drop(path.length), directory = r.resolve(path))
+    if(r.getPath().startsWith(path + "/")) {
+      val r2 = r.copy(path = r.getPath().drop(path.length), directory = r.resolve(path))
       route.apply(r2)
     } else {
       Response.empty()

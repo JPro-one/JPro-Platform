@@ -50,6 +50,18 @@ public class MediaRecorderAndPlayerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
+        // run GC every 1s
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    System.out.println("GC");
+                    System.gc();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
         Pane controlsPane = createControlsPane();
         MediaView cameraView = createCameraView(stage);
         mediaView = MediaView.create(stage);

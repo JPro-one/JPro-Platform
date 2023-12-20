@@ -1,6 +1,6 @@
 package example.scala
 
-import one.jpro.platform.routing.RouteUtils.{get, getNode, redirect}
+import one.jpro.platform.routing.Route.{get, getNode, redirect}
 import com.jpro.webapi.WebAPI
 import one.jpro.platform.routing.{Filters, LinkUtil, Request, Route, RouteNode, RouteUtils}
 import one.jpro.platform.routing.sessionmanager.SessionManager
@@ -15,7 +15,7 @@ object HeaderFactory extends RouteUtils.SFXContainerFactory {
   class MyContainer extends VBox with Container {
 
     this <++ new Label {
-      text <-- (if(request != null) request.origPath else "---")
+      text <-- (if(request != null) request.getOriginalPath() else "---")
     }
     this <++ new StackPane {
       javafx.scene.layout.VBox.setVgrow(this, Priority.ALWAYS)

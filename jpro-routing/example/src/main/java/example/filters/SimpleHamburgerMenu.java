@@ -101,7 +101,7 @@ public class SimpleHamburgerMenu extends VBox implements Container {
             LinkUtil.setLink(label, link.link);
             requestProperty().addListener((observable, oldValue, newValue) -> {
                 if(newValue != null) {
-                    if(newValue.path().startsWith(link.link)) {
+                    if(newValue.getPath().startsWith(link.link)) {
                         label.getStyleClass().add("selected");
                     } else {
                         label.getStyleClass().remove("selected");
@@ -129,7 +129,7 @@ public class SimpleHamburgerMenu extends VBox implements Container {
             LinkUtil.setLink(label, link.link);
             requestProperty().addListener((observable, oldValue, newValue) -> {
                 if(newValue != null) {
-                    if(newValue.path().startsWith(link.link)) {
+                    if(newValue.getPath().startsWith(link.link)) {
                         label.getStyleClass().add("selected");
                     } else {
                         label.getStyleClass().remove("selected");
