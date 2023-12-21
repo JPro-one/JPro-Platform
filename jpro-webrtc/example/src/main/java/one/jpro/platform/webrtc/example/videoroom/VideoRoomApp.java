@@ -21,7 +21,7 @@ public class VideoRoomApp extends RouteApp {
         // / -> overview
         // /room/id -> room
         return Route.empty()
-                .and(Route.getNode("/", (r) -> new OverviewPage()))
+                .and(Route.get("/", (r) -> Response.node(new OverviewPage())))
                 .and(r -> {
                     System.out.println("path: " + r.getPath());
                     var matcher = roomPattern.matcher(r.getPath());

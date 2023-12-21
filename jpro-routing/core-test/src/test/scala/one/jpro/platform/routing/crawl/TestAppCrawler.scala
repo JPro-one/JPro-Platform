@@ -4,7 +4,7 @@ import simplefx.all._
 import simplefx.core._
 import TestUtils._
 import one.jpro.platform.routing.crawl.AppCrawler.LinkInfo
-import one.jpro.platform.routing.{LinkUtil, Route, RouteNode, RouteUtils, View}
+import one.jpro.platform.routing.{LinkUtil, Response, Route, RouteNode, RouteUtils, View}
 import simplefx.all
 import org.junit.jupiter.api.Test
 import simplefx.util.Predef.intercept
@@ -35,8 +35,8 @@ class TestAppCrawler {
   def testCrawlApp(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(Route.getView("/", r => new Page1))
-        .and(Route.getView("/page2", r => new Page2)))
+        .and(Route.get("/", r => Response.view(new Page1)))
+        .and(Route.get("/page2", r => Response.view(new Page2))))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
 
@@ -50,13 +50,13 @@ class TestAppCrawler {
   def testEmptyImage(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(Route.getView("/", r => new View {
+        .and(Route.get("/", r => Response.view(new View {
           override def title: String = ""
 
           override def description: String = ""
 
           override def content: all.Node = new ImageView(null: Image)
-        })))
+        }))))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
   }

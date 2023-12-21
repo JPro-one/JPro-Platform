@@ -1,8 +1,8 @@
 package example.scala
 
-import one.jpro.platform.routing.Route.{get, getNode, redirect}
+import one.jpro.platform.routing.Route.{get, redirect}
 import com.jpro.webapi.WebAPI
-import one.jpro.platform.routing.{Filters, LinkUtil, Request, Route, RouteNode, RouteUtils}
+import one.jpro.platform.routing.{Filters, LinkUtil, Request, Response, Route, RouteNode, RouteUtils}
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import simplefx.all._
 import simplefx.core._
@@ -31,26 +31,25 @@ class ColorTransition(stage: Stage) extends RouteNode(stage) {
     else in
   }
   def toHexString(value: Color): String = "#" + (format(value.getRed) + format(value.getGreen) + format(value.getBlue) + format(value.getOpacity)).toUpperCase
-  def gen(x: String, next: String, color: Color): java.util.function.Function[Request,Node] = (r) => new StackPane {
+  def gen(x: String, next: String, color: Color): Response = Response.node(new StackPane {
     LinkUtil.setLink(this,next)
     this <++ new Label(x) {
       style = "-fx-font-size: 36px;"
     }
     style = s"-fx-background-color: ${toHexString(color)};"
-  }
+  })
   /* Util rename into LinkUtil */
   setRoute(
     Route.empty() /* StartRoute? */
-      .and(get("a", r => null))
       .and(redirect("/", "/green"))
-      .and(getNode("/green", gen("Green","/red", Color.GREEN)))
-      .and(getNode("/red", gen("Red", "/blue", Color.RED)))
-      .and(getNode("/blue", gen("Blue", "/yellow", Color.BLUE)))
-      .and(getNode("/yellow", gen("Yellow", "/red", Color.YELLOW)))
+      .and(get("/green", r => gen("Green","/red", Color.GREEN)))
+      .and(get("/red", r => gen("Red", "/blue", Color.RED)))
+      .and(get("/blue", r => gen("Blue", "/yellow", Color.BLUE)))
+      .and(get("/yellow", r => gen("Yellow", "/red", Color.YELLOW)))
       .path("/colors",
         Route.empty()
-          .and(getNode("/green", gen("Green","./red", Color.GREEN)))
-          .and(getNode("/red", gen("Red", "./green", Color.RED)))
+          .and(get("/green", r => gen("Green","./red", Color.GREEN)))
+          .and(get("/red", r => gen("Red", "./green", Color.RED)))
       )
       // Alternative names: with, apply, map, use, modify, wrap, transform
       // enhancer, operations

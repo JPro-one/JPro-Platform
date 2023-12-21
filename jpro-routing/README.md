@@ -79,7 +79,6 @@ Route static methods:
 Route.empty()
 Route.redirect(String from, String to)
 Route.get(String path, Route route)
-Route.getView(String path, View route)
 ```
 
 Methods of Route:

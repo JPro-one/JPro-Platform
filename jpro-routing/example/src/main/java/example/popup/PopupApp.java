@@ -1,5 +1,6 @@
 package example.popup;
 
+import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
@@ -23,7 +24,7 @@ public class PopupApp extends RouteApp {
     public Route createRoute() {
         return Route.empty()
                 .and(redirect("/", "/popup"))
-                .and(getNode("/popup", (r) -> popupSampleButtons()))
+                .and(get("/popup", (r) -> Response.node(popupSampleButtons())))
                 .filter(DevFilter.create());
     }
 

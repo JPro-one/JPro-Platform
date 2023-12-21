@@ -13,9 +13,9 @@ class TestMemoryTester {
   def simpleTest(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(Route.getView("/", r => new Page1))
-        .and(Route.getView("/page2", r => new Page2))
-        .and(Route.getView("/page4", r => new Page2)))
+        .and(Route.get("/", r => Response.view(new Page1)))
+        .and(Route.get("/page2", r => Response.view(new Page2)))
+        .and(Route.get("/page4", r => Response.view(new Page2))))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
     MemoryTester.testForLeaks(result, () => app)
@@ -26,9 +26,9 @@ class TestMemoryTester {
     val page2 = new Page2
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(Route.getView("/", r => new Page1))
-        .and(Route.getView("/page2", r => page2))
-        .and(Route.getView("/page4", r => new Page2)))
+        .and(Route.get("/", r => Response.view(new Page1)))
+        .and(Route.get("/page2", r => Response.view(page2)))
+        .and(Route.get("/page4", r => Response.view(new Page2))))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
     intercept[Throwable](MemoryTester.testForLeaks(result, () => app))
@@ -40,9 +40,9 @@ class TestMemoryTester {
 
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(Route.getView("/", r => new Page1))
+        .and(Route.get("/", r => Response.view(new Page1)))
         .and(Route.get("/page2", r => Response.node(node2)))
-        .and(Route.getView("/page4", r => new Page2)))
+        .and(Route.get("/page4", r => Response.view(new Page2))))
     }
 
     val result = AppCrawler.crawlApp("http://localhost", () => app)
@@ -53,9 +53,9 @@ class TestMemoryTester {
   def simpleFailingTest3(): Unit = {
     val app = inFX(new RouteNode(null) {
       setRoute(Route.empty()
-        .and(Route.getView("/", r => new Page1))
-        .and(Route.getView("/page2", r => new Page2))
-        .and(Route.getView("/page4", r => new Page2)))
+        .and(Route.get("/", r => Response.view(new Page1)))
+        .and(Route.get("/page2", r => Response.view(new Page2)))
+        .and(Route.get("/page4", r => Response.view(new Page2))))
     })
     val result = AppCrawler.crawlApp("http://localhost", () => app)
     intercept[Throwable](MemoryTester.testForLeaks(result, () => app)) // fails because the webapp is not collectable

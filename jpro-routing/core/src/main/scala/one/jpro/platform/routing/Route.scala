@@ -13,16 +13,6 @@ object Route {
 
   def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.getPath() == path) f.apply(request) else Response.empty()
 
-  def getView(path: String, node: Function[Request, View]): Route = (request: Request) => {
-    if (request.getPath() == path) Response.view(node.apply(request))
-    else Response.empty()
-  }
-
-  def getNode(path: String, node: Function[Request, Node]): Route = (request: Request) => {
-    if (request.getPath() == path) Response.node(node.apply(request))
-    else Response.empty()
-  }
-
 }
 @FunctionalInterface
 trait Route {

@@ -11,9 +11,9 @@ class TestSitemapGenerator {
   def test(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(getView("/", r => new Page1))
-        .and(getView("/page2", r => new Page2))
-        .and(getView("/page4", r => new Page2))
+        .and(get("/", r => Response.view(new Page1)))
+        .and(get("/page2", r => Response.view(new Page2)))
+        .and(get("/page4", r => Response.view(new Page2)))
         .and(r => Response.view(new Page1)))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
@@ -28,7 +28,7 @@ class TestSitemapGenerator {
   def testMailToRedirect(): Unit = {
     def app = new RouteNode(null) {
       setRoute(Route.empty()
-        .and(getView("/", r => pageWithLink(List("/page2", "/page3", "mailto:something"))))
+        .and(get("/", r => Response.view(pageWithLink(List("/page2", "/page3", "mailto:something")))))
         .and(get("/page2", r => Response.redirect("mailto:something-2"))))
     }
     val result = AppCrawler.crawlApp("http://localhost", () => app)
