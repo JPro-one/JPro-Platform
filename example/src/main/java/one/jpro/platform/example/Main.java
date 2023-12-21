@@ -8,6 +8,7 @@ import one.jpro.platform.media.example.MediaRecorderAndPlayerSample;
 import one.jpro.platform.media.example.MediaRecorderSample;
 import one.jpro.platform.routing.Filters;
 import one.jpro.platform.routing.Route;
+import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter;
 import one.jpro.platform.sessions.example.SessionManagerSample;
@@ -16,7 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static one.jpro.platform.routing.Route.getNode;
+import static one.jpro.platform.routing.Route.get;
 import static one.jpro.platform.routing.Route.redirect;
 import static one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter.Link;
 
@@ -52,18 +53,18 @@ public class Main extends RouteApp {
 
         return Route.empty()
                 .and(redirect("/", mediaPlayerSampleLink.prefix()))
-                .and(getNode(mediaPlayerSampleLink.prefix(), request ->
-                        new MediaPlayerSample().createRoot(getStage())))
-                .and(getNode(mediaRecorderSampleLink.prefix(), request ->
-                        new MediaRecorderSample().createRoot(getStage())))
-                .and(getNode(mediaRecorderAndPlayerSampleLink.prefix(), request ->
-                        new MediaRecorderAndPlayerSample().createRoot(getStage())))
-                .and(getNode(markdownViewSampleLink.prefix(), request ->
-                        new MarkdownViewSample().createRoot(getStage())))
-                .and(getNode(scrollPaneLink.prefix(), request ->
-                        new HTMLScrollPaneSample().createRoot()))
-                .and(getNode(sessionManagerLink.prefix(), request ->
-                        new SessionManagerSample().createRoot(getStage())))
+                .and(get(mediaPlayerSampleLink.prefix(), request ->
+                        Response.node(new MediaPlayerSample().createRoot(getStage()))))
+                .and(get(mediaRecorderSampleLink.prefix(), request ->
+                        Response.node(new MediaRecorderSample().createRoot(getStage()))))
+                .and(get(mediaRecorderAndPlayerSampleLink.prefix(), request ->
+                        Response.node(new MediaRecorderAndPlayerSample().createRoot(getStage()))))
+                .and(get(markdownViewSampleLink.prefix(), request ->
+                        Response.node(new MarkdownViewSample().createRoot(getStage()))))
+                .and(get(scrollPaneLink.prefix(), request ->
+                        Response.node(new HTMLScrollPaneSample().createRoot())))
+                .and(get(sessionManagerLink.prefix(), request ->
+                        Response.node(new SessionManagerSample().createRoot(getStage()))))
                 .filter(LinkHeaderFilter.create(links))
                 .filter(Filters.FullscreenFilter(true));
     }
