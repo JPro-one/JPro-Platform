@@ -1,4 +1,4 @@
-### 0.2.9-SNAPSHOT (TBD)
+### 0.2.9 (December 21, 2023)
 
 #### Changes
  * Moved Methods from RouteUtils to Route - for more consistent APIs.
