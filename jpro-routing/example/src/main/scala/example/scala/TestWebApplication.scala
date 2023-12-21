@@ -3,7 +3,7 @@ package example.scala
 import com.jpro.webapi.{HTMLView, WebAPI}
 import de.sandec.jmemorybuddy.JMemoryBuddyLive
 import one.jpro.platform.routing.LinkUtil._
-import one.jpro.platform.routing.RouteUtils._
+import one.jpro.platform.routing.Route._
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import one.jpro.platform.routing._
 import one.jpro.platform.routing.dev.{DevFilter, StatisticsFilter}
@@ -19,27 +19,27 @@ class MyApp(stage: Stage) extends RouteNode(stage) {
 
   setRoute(
     Route.empty()
-      .and(getView("", (r) => new MainView))
-      .and(getView("/", (r) => new MainView))
+      .and(get("", (r) => Response.view(new MainView)))
+      .and(get("/", (r) => Response.view(new MainView)))
       .and(get("/redirect2", r => Response.redirect("https://google.com")))
-      .and(getView("/main", (r) => new MainView))
-      .and(getView("/green", (r) => new GreenView))
-      .and(getView("/sub", (r) => new SubView))
+      .and(get("/main", (r) => Response.view(new MainView)))
+      .and(get("/green", (r) => Response.view(new GreenView)))
+      .and(get("/sub", (r) => Response.view(new SubView)))
       .and(get("/redirect", r => Response.redirect( "/sub")))
-      .and(getView("/paralax", (r) => new ParalaxPage))
-      .and(getView("/pdf", (r) => new PDFTest))
-      .and(getView("/leak", (r) => new LeakingPage))
-      .and(getView("/collect", (r) => new CollectingPage))
-      .and(getView("/jmemorybuddy", (r) => new JMemoryBuddyPage))
-      .and(getView("/100", (r) => new ManyNodes(100)))
-      .and(getView("/200", (r) => new ManyNodes(200)))
-      .and(getView("/400", (r) => new ManyNodes(400)))
-      .and(getView("/800", (r) => new ManyNodes(800)))
-      .and(getView("/1600", (r) => new ManyNodes(1600)))
-      .and(getView("/3200", (r) => new ManyNodes(3200)))
-      .and(getView("/6400", (r) => new ManyNodes(6400)))
-      .and(getView("/it's\" tricky", (r) => new MainView))
-      .and(getView("/it's\" tricky", (r) => new MainView))
+      .and(get("/paralax", (r) => Response.view(new ParalaxPage)))
+      .and(get("/pdf", (r) => Response.view(new PDFTest)))
+      .and(get("/leak", (r) => Response.view(new LeakingPage)))
+      .and(get("/collect", (r) => Response.view(new CollectingPage)))
+      .and(get("/jmemorybuddy", (r) => Response.view(new JMemoryBuddyPage)))
+      .and(get("/100", (r) => Response.view(new ManyNodes(100))))
+      .and(get("/200", (r) => Response.view(new ManyNodes(200))))
+      .and(get("/400", (r) => Response.view(new ManyNodes(400))))
+      .and(get("/800", (r) => Response.view(new ManyNodes(800))))
+      .and(get("/1600", (r) => Response.view(new ManyNodes(1600))))
+      .and(get("/3200", (r) => Response.view(new ManyNodes(3200))))
+      .and(get("/6400", (r) => Response.view(new ManyNodes(6400))))
+      .and(get("/it's\" tricky", (r) => Response.view(new MainView)))
+      .and(get("/it's\" tricky", (r) => Response.view(new MainView)))
       .filter(DevFilter.create)
       .filter(StatisticsFilter.create)
   )

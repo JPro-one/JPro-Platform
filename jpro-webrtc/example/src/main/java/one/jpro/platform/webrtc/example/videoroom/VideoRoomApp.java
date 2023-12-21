@@ -21,10 +21,10 @@ public class VideoRoomApp extends RouteApp {
         // / -> overview
         // /room/id -> room
         return Route.empty()
-                .and(RouteUtils.getNode("/", (r) -> new OverviewPage()))
+                .and(Route.get("/", (r) -> Response.node(new OverviewPage())))
                 .and(r -> {
-                    System.out.println("path: " + r.path());
-                    var matcher = roomPattern.matcher(r.path());
+                    System.out.println("path: " + r.getPath());
+                    var matcher = roomPattern.matcher(r.getPath());
                     if(matcher.matches()) {
                         var roomID = matcher.group(1);
                         return Response.node(new VideoRoomPage(roomID, getWebAPI()));

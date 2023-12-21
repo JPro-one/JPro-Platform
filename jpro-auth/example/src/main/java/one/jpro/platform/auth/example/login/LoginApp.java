@@ -20,8 +20,6 @@ import org.json.JSONObject;
 import java.net.URL;
 import java.util.Optional;
 
-import static one.jpro.platform.routing.RouteUtils.getNode;
-
 /**
  * The {@link LoginApp} class extends {@link RouteApp} to create a JavaFX application
  * with integrated Google OAuth authentication. It manages user sessions and error handling
@@ -70,9 +68,9 @@ public class LoginApp extends RouteApp {
                 .create(getStage());
 
         return Route.empty()
-                .and(getNode("/", (r) -> new LoginPage(this, googleAuthProvider)))
+                .and(Route.get("/", (r) -> Response.node(new LoginPage(this, googleAuthProvider))))
                 .when((r) -> getUser() != null, Route.empty()
-                        .and(getNode("/user/signed-in", (r) -> new SignedInPage(this, googleAuthProvider))))
+                        .and(Route.get("/user/signed-in", (r) -> Response.node(new SignedInPage(this, googleAuthProvider)))))
                 .filter(DevFilter.create())
                 .filter(OAuth2Filter.create(googleAuthProvider, user -> {
                     setUser(user);

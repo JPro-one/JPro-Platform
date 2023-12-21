@@ -28,7 +28,7 @@ object LinkHeaderFilter {
           this <++ new Label {
             styleClass ::= "linkheader-link"
             text <-- link.name
-            when (request != null && request.path.startsWith(link.prefix)) ==> {
+            when (request != null && request.getPath().startsWith(link.prefix)) ==> {
               styleClass <++ "selected"
             }
             LinkUtil.setLink(this, link.prefix, link.name)

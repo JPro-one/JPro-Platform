@@ -47,7 +47,7 @@ public interface JWTFilter {
         Objects.requireNonNull(errorFunction, "error function cannot be null");
 
         return (route) -> (request) -> {
-            if (request.path().equals(authPath)) {
+            if (request.getPath().equals(authPath)) {
                 return new Response(FXFuture.fromJava(authProvider.token(tokenPath, credentials)
                                 .thenCompose(authProvider::authenticate))
                         .flatMap(user -> userFunction.apply(user).future())

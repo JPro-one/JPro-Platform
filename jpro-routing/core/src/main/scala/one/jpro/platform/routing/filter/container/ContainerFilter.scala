@@ -36,7 +36,7 @@ object ContainerFilter {
   def create[A <: javafx.scene.Node](containerLogic: ContainerFactory): Filter = route => request => {
     var container: Node = null
     val request2: Request = {
-      val oldContentV = request.oldContent.get()
+      val oldContentV = request.getOldContent().get()
       logger.debug(s"oldContentV = $oldContentV")
       if (oldContentV != null && containerLogic.isContainer(oldContentV)) {
         logger.debug(s"Found old container")

@@ -13,8 +13,7 @@ import one.jpro.platform.routing.dev.StatisticsFilter;
 
 import java.net.URL;
 import java.util.Optional;
-
-import static one.jpro.platform.routing.RouteUtils.getNode;
+import static one.jpro.platform.routing.Route.get;
 
 /**
  * A showcase application to show how to use the Authorization module in general
@@ -57,25 +56,25 @@ public class OAuthApp extends BaseOAuthApp {
                 .create(getStage());
 
         return Route.empty()
-                .and(getNode("/", (r) -> new LoginPage(this)))
+                .and(get("/", (r) -> Response.node(new LoginPage(this))))
                 .path("/user", Route.empty()
-                        .and(getNode("/console", (r) -> new SignedInUserPage(this)))
-                        .and(getNode("/auth-info", (r) -> new AuthInfoPage(this)))
-                        .and(getNode("/introspect-token", (r) -> new IntrospectionTokenPage(this)))
-                        .and(getNode("/refresh-token", (r) -> new RefreshTokenPage(this)))
-                        .and(getNode("/revoke-token", (r) -> new LoginPage(this)))
-                        .and(getNode("/user-info", (r) -> new UserInfoPage(this)))
-                        .and(getNode("/logout", (r) -> new LoginPage(this))))
+                        .and(get("/console", (r) -> Response.node(new SignedInUserPage(this))))
+                        .and(get("/auth-info", (r) -> Response.node(new AuthInfoPage(this))))
+                        .and(get("/introspect-token", (r) -> Response.node(new IntrospectionTokenPage(this))))
+                        .and(get("/refresh-token", (r) -> Response.node(new RefreshTokenPage(this))))
+                        .and(get("/revoke-token", (r) -> Response.node(new LoginPage(this))))
+                        .and(get("/user-info", (r) -> Response.node(new UserInfoPage(this))))
+                        .and(get("/logout", (r) -> Response.node(new LoginPage(this)))))
                 .path("/auth", Route.empty()
-                        .and(getNode("/error", (r) -> new ErrorPage(this))))
+                        .and(get("/error", (r) -> Response.node(new ErrorPage(this)))))
                 .path("/provider", Route.empty()
-                        .and(getNode("/google", (r) -> new AuthProviderPage(this, googleAuth)))
-                        .and(getNode("/microsoft", (r) -> new AuthProviderPage(this, microsoftAuth)))
-                        .and(getNode("/keycloak", (r) -> new AuthProviderPage(this, keycloakAuth)))
+                        .and(get("/google", (r) -> Response.node(new AuthProviderPage(this, googleAuth))))
+                        .and(get("/microsoft", (r) -> Response.node(new AuthProviderPage(this, microsoftAuth))))
+                        .and(get("/keycloak", (r) -> Response.node(new AuthProviderPage(this, keycloakAuth))))
                         .path("/discovery", Route.empty()
-                                .and(getNode("/google", (r) -> new AuthProviderDiscoveryPage(this, googleAuth)))
-                                .and(getNode("/microsoft", (r) -> new AuthProviderDiscoveryPage(this, microsoftAuth)))
-                                .and(getNode("/keycloak", (r) -> new AuthProviderDiscoveryPage(this, keycloakAuth)))))
+                                .and(get("/google", (r) -> Response.node(new AuthProviderDiscoveryPage(this, googleAuth))))
+                                .and(get("/microsoft", (r) -> Response.node(new AuthProviderDiscoveryPage(this, microsoftAuth))))
+                                .and(get("/keycloak", (r) -> Response.node(new AuthProviderDiscoveryPage(this, keycloakAuth))))))
                 .filter(DevFilter.create())
                 .filter(StatisticsFilter.create())
                 .filter(oauth2Filter(googleAuth))

@@ -13,9 +13,8 @@ import one.jpro.platform.routing.filter.container.ContainerFilter;
 
 import java.util.List;
 import java.util.regex.Pattern;
-
-import static one.jpro.platform.routing.RouteUtils.getNode;
-import static one.jpro.platform.routing.RouteUtils.redirect;
+import one.jpro.platform.routing.Response;
+import one.jpro.platform.routing.Route;
 
 /**
  * Creates a simple application that displays different colors using the routing functions.
@@ -31,25 +30,25 @@ public class ColorsApp extends RouteApp {
 
     public Route createRoute() {
         return Route.empty()
-                .and(redirect("/", "/green"))
-                .and(getNode("/green", (r) -> gen("Green", "/red", Color.GREEN)))
-                .and(getNode("/red", (r) -> gen("Red", "/blue", Color.RED)))
-                .and(getNode("/blue", (r) -> gen("Blue", "/yellow", Color.BLUE)))
-                .and(getNode("/yellow", (r) -> gen("Yellow", r.resolve("/color/00ff00"), Color.YELLOW)))
+                .and(Route.redirect("/", "/green"))
+                .and(Route.get("/green", (r) -> gen("Green", "/red", Color.GREEN)))
+                .and(Route.get("/red", (r) -> gen("Red", "/blue", Color.RED)))
+                .and(Route.get("/blue", (r) -> gen("Blue", "/yellow", Color.BLUE)))
+                .and(Route.get("/yellow", (r) -> gen("Yellow", r.resolve("/color/00ff00"), Color.YELLOW)))
                 .and(r -> {
-                    var matcher = colorPattern.matcher(r.path());
+                    var matcher = colorPattern.matcher(r.getPath());
                     if (matcher.matches()) {
                         var colorStr = matcher.group(1);
                         var color = Color.web(colorStr);
-                        return Response.node(gen("#" + colorStr, r.resolve("/red"), color));
+                        return gen("#" + colorStr, r.resolve("/red"), color);
                     } else {
                         return Response.empty();
                     }
                 })
                 .path("/colors",
                         Route.empty()
-                                .and(getNode("/green", (r) -> gen("Green", r.resolve("/red"), Color.GREEN)))
-                                .and(getNode("/red", (r) -> gen("Red", r.resolve("/green"), Color.RED))))
+                                .and(Route.get("/green", (r) -> gen("Green", r.resolve("/red"), Color.GREEN)))
+                                .and(Route.get("/red", (r) -> gen("Red", r.resolve("/green"), Color.RED))))
                 .filter(Filters.FullscreenFilter(true))
                 .filter(RouteUtils.sideTransitionFilter(1))
                 .filter(DevFilter.create())
@@ -71,7 +70,7 @@ public class ColorsApp extends RouteApp {
      * @param color    the Color object representing the color to display
      * @return the node representing the color page
      */
-    public static Node gen(String title, String nextLink, Color color) {
+    public static Response gen(String title, String nextLink, Color color) {
         StackPane result = new StackPane();
         Label label = new Label(title);
         label.setStyle("-fx-font-size: 36px;");
@@ -81,7 +80,7 @@ public class ColorsApp extends RouteApp {
         StackPane linkArea = new StackPane();
         LinkUtil.setLink(linkArea, nextLink);
         result.getChildren().add(linkArea);
-        return result;
+        return Response.node(result);
     }
 
     /**

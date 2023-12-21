@@ -9,24 +9,10 @@ import java.util.function.Function
 
 object RouteUtils {
 
-  def redirect(path: String, to: String): Route = get(path, (r) => Response.redirect(to))
-
-  def get(path: String, f: Function[Request, Response]): Route = (request: Request) => if (request.path == path) f.apply(request) else Response.empty()
-
-  def getView(path: String, node: Function[Request, View]): Route = (request: Request) => {
-    if (request.path == path) Response.view(node.apply(request))
-    else Response.empty()
-  }
-  def getNode(path: String, node: Function[Request, Node]): Route = (request: Request) => {
-    if (request.path == path) Response.node(node.apply(request))
-    else Response.empty()
-  }
-
-
   def transitionFilter(seconds: Double): Filter = route => { request => {
     Response(route.apply(request).future.map{
       case x: View =>
-        val oldNode = request.oldContent.get()
+        val oldNode = request.getOldContent().get()
         val newNode = x.realContent
         val t = (seconds s)
         if(oldNode == null) {
@@ -46,7 +32,7 @@ object RouteUtils {
   def sideTransitionFilter(seconds: Double): Filter = route => { request => {
     Response(route.apply(request).future.map{
       case x: View =>
-        val oldNode = request.oldContent.get()
+        val oldNode = request.getOldContent().get()
         val newNode = x.realContent
         val t = (seconds s)
         if(oldNode == null) {
