@@ -3,109 +3,129 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 System.setProperty("file.encoding", "UTF-8")
 
 buildscript {
-  repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    maven {
-      url "https://sandec.jfrog.io/artifactory/repo"
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url "https://sandec.jfrog.io/artifactory/repo"
+        }
     }
-  }
 
-  dependencies {
-    classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
-    classpath "SANDEC:simplefx-plugin-gradle:$SIMPLEFX_VERSION"
-    classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
-  }
+    dependencies {
+        classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
+        classpath "SANDEC:simplefx-plugin-gradle:$SIMPLEFX_VERSION"
+        classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
+    }
 }
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:core-test'),
            project(':jpro-routing:example')]) {
-  apply plugin: 'de.sandec.simplefx'
+    apply plugin: 'de.sandec.simplefx'
 
-  compileScala {
-    targetCompatibility = "1.8"
-  }
+    compileScala {
+        targetCompatibility = "1.8"
+    }
 
-  test {
-    useJUnitPlatform()
+    test {
+        useJUnitPlatform()
 
-    testLogging.showStandardStreams = true
-    testLogging.exceptionFormat TestExceptionFormat.FULL
-    testLogging.showExceptions true
-    testLogging.showCauses true
-    testLogging.showStackTraces true
-  }
+        testLogging.showStandardStreams = true
+        testLogging.exceptionFormat TestExceptionFormat.FULL
+        testLogging.showExceptions true
+        testLogging.showCauses true
+        testLogging.showStackTraces true
+    }
 }
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
-  dependencies {
-    api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
-    api "SANDEC:jnodes:$JNODES_VERSION"
-    api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
-    api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-  }
+    dependencies {
+        api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+        api "SANDEC:jnodes:$JNODES_VERSION"
+        api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+        api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+    }
 }
 
 configure([project(':jpro-routing:core')]) {
-  dependencies {
-    api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
-    api project(":internal:openlink")
-  }
+    dependencies {
+        api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
+        api project(":internal:openlink")
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                // Add README.md as an artifact named DOCUMENTATION.md
+                artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                    classifier 'documentation'
+                    extension 'md'
+                }
+            }
+        }
+    }
+
+    tasks.register('renameReadme', Copy) {
+        from '../README.md'
+        into layout.buildDirectory.dir('docs')
+        rename 'README.md', 'DOCUMENTATION.md'
+    }
+
+    javadocJar.dependsOn renameReadme
 }
 
 configure([project(':jpro-routing:dev')]) {
-  dependencies {
-    implementation project(':jpro-routing:core')
-    api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
-    api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
-    api "org.kordamp.ikonli:ikonli-ionicons4-pack:$IKONLI_VERSION"
-    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
-    implementation "org.scenic-view:scenic-view:$SCENIC_VIEW_VERSION"
-  }
+    dependencies {
+        implementation project(':jpro-routing:core')
+        api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
+        api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
+        api "org.kordamp.ikonli:ikonli-ionicons4-pack:$IKONLI_VERSION"
+        implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+        implementation "org.scenic-view:scenic-view:$SCENIC_VIEW_VERSION"
+    }
 }
 
 configure([project(':jpro-routing:core-test')]) {
-  dependencies {
-    implementation project(':jpro-routing:core')
+    dependencies {
+        implementation project(':jpro-routing:core')
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-  }
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+    }
 }
 
 configure(project(':jpro-routing:example')) {
-  apply plugin: 'org.openjfx.javafxplugin'
-  apply plugin: 'jpro-gradle-plugin'
+    apply plugin: 'org.openjfx.javafxplugin'
+    apply plugin: 'jpro-gradle-plugin'
 
 //mainClassName = "example.scala.TestWebApplication"
 //mainClassName = "example.scala.TestExtensions"
 //mainClassName = "example.scala.ColorTransitionApp"
-mainClassName = "example.colors.ColorsApp"
+    mainClassName = "example.colors.ColorsApp"
 //mainClassName = "example.popup.PopupApp"
 
-  application {
-    mainClass = "$mainClassName"
-    mainModule = moduleName
-  }
+    application {
+        mainClass = "$mainClassName"
+        mainModule = moduleName
+    }
 
-  dependencies {
-    implementation project(':jpro-routing:core')
-    implementation project(':jpro-routing:dev')
-    implementation project(':jpro-routing:popup')
+    dependencies {
+        implementation project(':jpro-routing:core')
+        implementation project(':jpro-routing:dev')
+        implementation project(':jpro-routing:popup')
 
-    implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
-    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
-    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
-  }
+        implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
+        implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+        runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+    }
 
-  javafx {
-    version = "$JAVAFX_VERSION"
-    modules = [ 'javafx.graphics', 'javafx.controls','javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
-  }
+    javafx {
+        version = "$JAVAFX_VERSION"
+        modules = ['javafx.graphics', 'javafx.controls', 'javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web']
+    }
 
-  jpro {
-    openingPath = "/"
-  }
+    jpro {
+        openingPath = "/"
+    }
 }
