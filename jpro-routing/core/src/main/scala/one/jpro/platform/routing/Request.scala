@@ -23,12 +23,15 @@ case class Request (
 
   assert(resolve(path) == origPath, s"resolve path: ${resolve(path)} != origPath: ${origPath}")
 
+  def getUrl(): String = url
+  def getProtocol(): String = protocol
+  def getDomain(): String = directory
+  def getPort(): Int = port
+  def getOriginalPath(): String = origPath
+
   def getPath(): String = path
 
   def getDirectory(): String = directory
-
-  def getOriginalPath(): String = origPath
-  def getDomain(): String = directory
   def getQueryParameter(key: String): Option[String] = queryParameters.get(key)
 
   def getQueryParameterOrElse(key: String, default: String): String = queryParameters.getOrElse(key, default)
@@ -43,8 +46,6 @@ case class Request (
 
   def getQueryParametersScala(): Map[String,String] = queryParameters
 
-
-  def getPort(): Int = port
 
   def resolve(path: String): String = {
     assert(path.startsWith("/") || path.startsWith("./") || path.startsWith("../"), s"Path must start with / or ./ or ../ but was: ${path}")
