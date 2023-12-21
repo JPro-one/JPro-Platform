@@ -1,5 +1,6 @@
 ### 0.2.9-SNAPSHOT (TBD)
  * Moved Methods from RouteUtils to Route - for more consistent APIs.
+ * Removed the methods Route.getView and Route.getNode for more consistent APIs.
  * Added Documentation for jpro-routing
 
 ### 0.2.8 (December 19, 2023)
