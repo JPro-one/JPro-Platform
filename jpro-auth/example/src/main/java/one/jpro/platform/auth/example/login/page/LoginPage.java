@@ -4,7 +4,6 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
-import one.jpro.platform.auth.example.login.LoginApp;
 import one.jpro.platform.auth.routing.OAuth2Filter;
 
 import java.util.Optional;
@@ -16,7 +15,7 @@ import java.util.Optional;
  */
 public class LoginPage extends Page {
 
-    public LoginPage(LoginApp app, GoogleAuthenticationProvider authProvider) {
+    public LoginPage(GoogleAuthenticationProvider authProvider) {
         getStyleClass().add("simple-page");
 
         final var googleProviderButton = createAuthProviderButton("Google");

@@ -68,9 +68,9 @@ public class LoginApp extends RouteApp {
                 .create(getStage());
 
         return Route.empty()
-                .and(Route.get("/", (r) -> Response.node(new LoginPage(this, googleAuthProvider))))
-                .when((r) -> getUser() != null, Route.empty()
-                        .and(Route.get("/user/signed-in", (r) -> Response.node(new SignedInPage(this, googleAuthProvider)))))
+                .and(Route.get("/", (r) -> Response.node(new LoginPage(googleAuthProvider))))
+                .when(request -> isUserAuthenticated(), Route.empty()
+                        .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
                 .filter(DevFilter.create())
                 .filter(OAuth2Filter.create(googleAuthProvider, user -> {
                     setUser(user);
@@ -94,5 +94,9 @@ public class LoginApp extends RouteApp {
         } else {
             session.remove("user");
         }
+    }
+
+    private boolean isUserAuthenticated() {
+        return getUser() != null;
     }
 }
