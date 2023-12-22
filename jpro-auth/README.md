@@ -13,7 +13,7 @@ asynchronous operations preventing UI blocking during authentication processes.
 - Gradle
     ```groovy
     dependencies {
-          implementation("one.jpro.platform:jpro-auth:0.2.9")
+          implementation("one.jpro.platform:jpro-auth:0.2.10-SNAPSHOT")
     }
     ```
 - Maven
@@ -22,7 +22,7 @@ asynchronous operations preventing UI blocking during authentication processes.
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-auth</artifactId>
-        <version>0.2.9</version>
+        <version>0.2.10-SNAPSHOT</version>
       </dependency>
     </dependencies>
     ```
