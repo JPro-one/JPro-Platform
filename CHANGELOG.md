@@ -1,10 +1,14 @@
 ### 0.2.10-SNAPSHOT (TBD)
 
+#### Improvements
+* Simplify the authorization process for a given OAuth2 authentication provider via the `jpro-auth-routing` module
+by calling the `OAuth2Filter.authorize` method.
+
 ### 0.2.9 (December 21, 2023)
 
 #### Changes
- * Moved Methods from RouteUtils to Route - for more consistent APIs.
- * Removed the methods Route.getView and Route.getNode for more consistent APIs.
+* Moved Methods from RouteUtils to Route - for more consistent APIs.
+* Removed the methods Route.getView and Route.getNode for more consistent APIs.
 
 #### Improvements
 * Added Documentation for `jpro-routing` modules.
