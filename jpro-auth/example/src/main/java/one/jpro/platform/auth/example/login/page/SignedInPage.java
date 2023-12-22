@@ -38,7 +38,6 @@ public class SignedInPage extends Page {
                             .onSuccess(nothing -> {
                                 app.setUser(null);
                                 app.getSessionManager().gotoURL("/");
-                                return nothing;
                             }));
             signOutButton.setDefaultButton(true);
 

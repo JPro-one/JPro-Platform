@@ -53,7 +53,6 @@ public class PopupAPI {
         fu.onComplete((v) -> {
             indicator.setProgress(1.0);
             closePopup(popup);
-            return null;
         });
         return fu;
     }
