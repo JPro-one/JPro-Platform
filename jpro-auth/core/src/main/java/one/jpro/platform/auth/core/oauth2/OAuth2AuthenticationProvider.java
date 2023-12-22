@@ -90,7 +90,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * if an error occurs during the process.
      */
     @NotNull
-    public CompletableFuture<String> authorizeUrl(OAuth2Credentials credentials) {
+    public CompletableFuture<String> authorizeUrl(@NotNull final OAuth2Credentials credentials) {
+        Objects.requireNonNull(credentials, "credentials cannot be null");
+
         // Generate the authorization URL and open it in the default browser
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
