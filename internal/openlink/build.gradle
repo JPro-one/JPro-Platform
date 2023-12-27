@@ -11,15 +11,3 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter:$MOCKITO_VERSION")
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
-
-test {
-    useJUnitPlatform()
-
-    testLogging {
-        events "passed", "skipped", "failed"
-        showExceptions true
-        showCauses true
-        showStackTraces true
-        exceptionFormat "full"
-    }
-}

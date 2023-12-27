@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -56,7 +54,7 @@ configure(subprojects.findAll { it.name != 'example' }) {
             showExceptions true
             showCauses true
             showStackTraces true
-            exceptionFormat TestExceptionFormat.FULL
+            exceptionFormat "full"
         }
     }
 }

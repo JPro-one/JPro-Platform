@@ -10,17 +10,9 @@ compileJava {
 }
 
 test {
-    useJUnitPlatform()
     jvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
     ]
-    testLogging {
-        events "passed", "skipped", "failed"
-        showExceptions true
-        showCauses true
-        showStackTraces true
-        exceptionFormat "full"
-    }
 }
 
 javadoc {
