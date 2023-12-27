@@ -22,18 +22,11 @@ compileJava {
 }
 
 test {
-    useJUnitPlatform()
     jvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media",
-            "--add-exports", "javafx.graphics/com.sun.javafx.application=testfx.core"
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=testfx.core",
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=testfx.core"
     ]
-    testLogging {
-        events "passed", "skipped", "failed"
-        showExceptions true
-        showCauses true
-        showStackTraces true
-        exceptionFormat "full"
-    }
 
     onlyIf { !Boolean.getBoolean("ciTest") }
 }
