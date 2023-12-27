@@ -540,6 +540,7 @@ public class MediaPlayerTests {
     private void waitForStatusReady() throws TimeoutException {
         waitForStatus(Status.READY);
         log.debug("Run additional checks...");
+        WaitForAsyncUtils.waitForFxEvents();
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isFalse();
         assertThat(stopButton.isDisable()).isFalse();
@@ -553,6 +554,7 @@ public class MediaPlayerTests {
         robot.clickOn(playButton);
         waitForStatus(Status.PLAYING);
         log.debug("Run additional checks...");
+        WaitForAsyncUtils.waitForFxEvents();
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
         assertThat(stopButton.isDisable()).isFalse();
@@ -564,6 +566,7 @@ public class MediaPlayerTests {
         robot.clickOn(stopButton);
         waitForStatus(Status.STOPPED);
         log.debug("Run additional checks...");
+        WaitForAsyncUtils.waitForFxEvents();
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isTrue();
