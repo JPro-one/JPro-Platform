@@ -14,10 +14,12 @@ object IncrementalLoading {
    * This should be called, before the node is added to the scene.
    */
   def loadNode(node: Node): Node = {
-    node.setVisible(false)
-    getContext(node).map { ctx =>
-      println("get context finished")
-      ctx.enqueueNode(node)
+    if(WebAPI.isBrowser) {
+      node.setVisible(false)
+      getContext(node).map { ctx =>
+        println("get context finished")
+        ctx.enqueueNode(node)
+      }
     }
     node
   }
@@ -31,30 +33,24 @@ object IncrementalLoading {
       if(toMakeVisible.size == 1) startIncrementalLoading()
     }
     def startIncrementalLoading(): Unit = {
-      if (WebAPI.isBrowser) {
-        // We are sure the node is in the scene
-        val webAPI = WebAPI.getWebAPI(node.scene)
+      // We are sure the node is in the scene
+      val webAPI = WebAPI.getWebAPI(node.scene)
 
-        def makeNextVisible(): Unit = {
-          println(" makeNextVisible " + toMakeVisible.size)
-          webAPI.runAfterUpdate(new Runnable {
-            override def run(): Unit = {
-              if (!toMakeVisible.isEmpty) {
-                toMakeVisible.reverse.head.setVisible(true)
-                toMakeVisible = toMakeVisible.reverse.tail.reverse
-                nextFrame --> {
-                  makeNextVisible()
-                }
+      def makeNextVisible(): Unit = {
+        println(" makeNextVisible " + toMakeVisible.size)
+        webAPI.runAfterUpdate(new Runnable {
+          override def run(): Unit = {
+            if (!toMakeVisible.isEmpty) {
+              toMakeVisible.reverse.head.setVisible(true)
+              toMakeVisible = toMakeVisible.reverse.tail.reverse
+              nextFrame --> {
+                makeNextVisible()
               }
             }
-          })
-        }
-
-        runLater(makeNextVisible())
-      } else {
-        toMakeVisible.map(_.setVisible(true))
-        toMakeVisible = Nil
+          }
+        })
       }
+      runLater(makeNextVisible())
     }
   }
 
