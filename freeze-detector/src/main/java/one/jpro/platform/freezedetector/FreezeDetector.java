@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 
 import java.time.Duration;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FreezeDetector {
@@ -15,7 +16,7 @@ public class FreezeDetector {
         this(Duration.ofSeconds(1));
     }
 
-    public FreezeDetector(Duration duration, Consumer<Thread> callback) {
+    public FreezeDetector(Duration duration, BiConsumer<Thread, Duration> callback) {
         if(!Platform.isFxApplicationThread()) {
             throw new IllegalStateException("Can run only on the FX thread");
         }
@@ -41,9 +42,9 @@ public class FreezeDetector {
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
-                if(System.currentTimeMillis() - lastUpdate > duration.toMillis()) {
-                    callback.accept(fxthread);
-                    lastUpdate = System.currentTimeMillis();
+                long timeGone2 = System.currentTimeMillis() - lastUpdate;
+                if(timeGone2 > duration.toMillis()) {
+                    callback.accept(fxthread, Duration.ofMillis(timeGone2));
                     try {
                         Thread.sleep(duration.toMillis());
                     } catch (InterruptedException ex) {
@@ -57,8 +58,8 @@ public class FreezeDetector {
     }
 
     public FreezeDetector(Duration duration) {
-        this(duration, (thread) -> {
-            System.out.println("Freeze detected");
+        this(duration, (thread, timeGone) -> {
+            System.out.println("Freeze detected for " + timeGone.toMillis() + "ms");
             System.out.println(" Thread: " + thread.getName());
             for (StackTraceElement element : thread.getStackTrace()) {
                 System.out.println(" " + element);
