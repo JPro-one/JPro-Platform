@@ -85,17 +85,6 @@ configure(project(':jpro-routing:example')) {
     apply plugin: 'org.openjfx.javafxplugin'
     apply plugin: 'jpro-gradle-plugin'
 
-//mainClassName = "example.scala.TestWebApplication"
-//mainClassName = "example.scala.TestExtensions"
-//mainClassName = "example.scala.ColorTransitionApp"
-    mainClassName = "example.colors.ColorsApp"
-//mainClassName = "example.popup.PopupApp"
-
-    application {
-        mainClass = "$mainClassName"
-        mainModule = moduleName
-    }
-
     dependencies {
         implementation project(':jpro-routing:core')
         implementation project(':jpro-routing:dev')
@@ -113,5 +102,16 @@ configure(project(':jpro-routing:example')) {
 
     jpro {
         openingPath = "/"
+    }
+
+    def examples = [
+            'colors' : 'example.colors.ColorsApp',
+            'test' : 'example.scala.TestWebApplication'
+    ]
+    mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["colors"]
+
+    application {
+        mainClass = "$mainClassName"
+        mainModule = moduleName
     }
 }

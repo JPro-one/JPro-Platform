@@ -471,6 +471,8 @@ dependencies {
 ./gradlew jpro-media:example:run -Psample=media-player
 ./gradlew jpro-media:example:run -Psample=media-recorder
 ./gradlew jpro-media:example:run -Psample=media-recorder-and-player
+./gradlew jpro-routing:example:run -Psample=colors
+./gradlew jpro-routing:example:run -Psample=test
 ```
 
 - As JPro application
@@ -482,4 +484,6 @@ dependencies {
 ./gradlew jpro-media:example:jproRun -Psample=media-player
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player
+./gradlew jpro-routing:example:jproRun -Psample=colors
+./gradlew jpro-routing:example:jproRun -Psample=test
 ```
