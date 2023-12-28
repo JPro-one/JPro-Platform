@@ -1,11 +1,12 @@
+
+.devfilter-vbox {
+    -fx-background-color: #f0f0f0;
+}
+
 .devfilter-hbox {
     -fx-alignment: center;
     -fx-padding: 6;
     -fx-spacing: 16;
-}
-
-.devfilter-vbox {
-    -fx-alignment: center;
 }
 
 .devfilter-icon-button,

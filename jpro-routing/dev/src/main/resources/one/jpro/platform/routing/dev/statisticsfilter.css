@@ -1,3 +1,6 @@
+.statisticsfilter-vbox {
+    -fx-background-color: #f0f0f0;
+}
 .statisticsfilter-hbox {
     -fx-alignment: center;
     -fx-padding: 6;
