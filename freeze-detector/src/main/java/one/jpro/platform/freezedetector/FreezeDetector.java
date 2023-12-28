@@ -11,6 +11,7 @@ public class FreezeDetector {
 
     Thread fxthread;
     Long lastUpdate;
+    Integer counter = 0;
 
     public FreezeDetector() {
         this(Duration.ofSeconds(1));
@@ -27,15 +28,18 @@ public class FreezeDetector {
             @Override
             public void handle(long now) {
                 lastUpdate = System.currentTimeMillis();
+                counter = 1;
             }
         }.start();
+        lastUpdate = System.currentTimeMillis();
+        counter = 1;
 
         var t = new Thread(() -> {
             while(fxthread.getState() != Thread.State.TERMINATED) {
                 long now = System.currentTimeMillis();
                 long timeGone = now - lastUpdate;
                 try {
-                    long toSleep = duration.toMillis() - timeGone;
+                    long toSleep = (duration.toMillis() * counter - timeGone);
                     if(toSleep > 0) {
                         Thread.sleep(toSleep);
                     }
@@ -43,13 +47,9 @@ public class FreezeDetector {
                     ex.printStackTrace();
                 }
                 long timeGone2 = System.currentTimeMillis() - lastUpdate;
-                if(timeGone2 > duration.toMillis()) {
+                if(timeGone2 > duration.toMillis() * counter) {
+                    counter += 1;
                     callback.accept(fxthread, Duration.ofMillis(timeGone2));
-                    try {
-                        Thread.sleep(duration.toMillis());
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
                 }
             }
         }, "FX-Freeze-Detector-Thread");
