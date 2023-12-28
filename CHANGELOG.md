@@ -1,5 +1,8 @@
 ### 0.2.10-SNAPSHOT (TBD)
 
+#### Features
+* Added `IncrementalLoading` to the routing module. Checkout the routing documentation for more details.
+
 #### Improvements
 * Simplify the authorization process for a given OAuth2 authentication provider via the `jpro-auth-routing` module
 by calling the `OAuth2Filter.authorize` method.
