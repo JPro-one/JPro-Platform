@@ -132,10 +132,13 @@ object StatisticsFilter {
             //  text <-- ("Latency: " + webAPIData.latency + " ms")
             //}
 
-            this <++ new StatBox() {
+            this <++ new StatBox(true) {
               labels <++ new Label("Latency: ")
               values <++ new Label() {
-                text <-- ("" + webAPIData.latency)
+                text <-- ("" + toTimeString(webAPIData.latency * (millisecond))._1)
+              }
+              units <++ new Label() {
+                text <-- ("" + toTimeString(webAPIData.latency * (millisecond))._2)
               }
             }
           }
