@@ -17,7 +17,6 @@ object IncrementalLoading {
     if(WebAPI.isBrowser) {
       node.setVisible(false)
       getContext(node).map { ctx =>
-        println("get context finished")
         ctx.enqueueNode(node)
       }
     }
@@ -37,7 +36,6 @@ object IncrementalLoading {
       val webAPI = WebAPI.getWebAPI(node.scene)
 
       def makeNextVisible(): Unit = {
-        println(" makeNextVisible " + toMakeVisible.size)
         webAPI.runAfterUpdate(new Runnable {
           override def run(): Unit = {
             if (!toMakeVisible.isEmpty) {
