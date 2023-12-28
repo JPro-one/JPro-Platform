@@ -24,6 +24,7 @@ trait Route {
     Response(r.future.flatMap{ r =>
       if(r == null) {
         val r2 = x.apply(request)
+        assert(r2 != null, "Route returned null: " + x + " for " + request)
         r2.future
       } else FXFuture.unit(r)
     })
