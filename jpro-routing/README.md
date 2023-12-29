@@ -164,3 +164,23 @@ This improves the performance and user experience and ensures the same behavior 
 
 Currently, it's required to set a resource called `jpro/html/defaultpage` in the resources -
 checkout our sample project: https://github.com/JPro-one/jpro-routing-sample
+
+
+
+### Additional Features
+
+#### Incremental Loading
+
+It's possible to load parts of the application incrementally.
+This is especially useful when optimizing the start time for websites.
+
+```
+import one.jpro.platform.routing.performance.IncrementalLoading;
+
+...
+parent.getChildren().add(IncrementalLoading.loadNode(yourNode));
+...
+```
+
+When this is done - JPro sends one Node at a time to the client.
+This allows the client to render the frame as soon as possible - ensuring early visible content for the user.

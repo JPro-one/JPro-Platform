@@ -23,9 +23,12 @@ public class TestFreezeDetector {
 
     @Test
     public void testFreezeDetector() throws InterruptedException {
+        // THIS IS UNSTABLE WITH MAC AND JAVAFX < 21
         AtomicInteger counter = new AtomicInteger(0);
         inFX(() -> new FreezeDetector(Duration.ofMillis(100),
-                thread -> counter.incrementAndGet()));
+                (thread,duration) -> {
+            counter.incrementAndGet();
+        }));
 
         assertEquals(0, counter.get());
         Thread.sleep(200);
@@ -50,7 +53,7 @@ public class TestFreezeDetector {
         assertEquals(2, counter.get());
     }
 
-    public void inFX(Runnable r) {
+    public static void inFX(Runnable r) {
         CountDownLatch l = new CountDownLatch(1);
         AtomicReference<Throwable> ex = new AtomicReference<>();
         Platform.runLater(() -> {

@@ -7,6 +7,7 @@ import one.jpro.platform.routing.Route._
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import one.jpro.platform.routing._
 import one.jpro.platform.routing.dev.{DevFilter, StatisticsFilter}
+import one.jpro.platform.routing.performance.IncrementalLoading
 import org.controlsfx.control.PopOver
 import simplefx.all._
 import simplefx.core._
@@ -30,6 +31,7 @@ class MyApp(stage: Stage) extends RouteNode(stage) {
       .and(get("/pdf", (r) => Response.view(new PDFTest)))
       .and(get("/leak", (r) => Response.view(new LeakingPage)))
       .and(get("/collect", (r) => Response.view(new CollectingPage)))
+      .and(get("/incremental", (r) => Response.view(new IncrementalPage)))
       .and(get("/jmemorybuddy", (r) => Response.view(new JMemoryBuddyPage)))
       .and(get("/100", (r) => Response.view(new ManyNodes(100))))
       .and(get("/200", (r) => Response.view(new ManyNodes(200))))
@@ -75,6 +77,7 @@ class Header(view: View, sessionManager: SessionManager) extends HBox {
   this <++ new HeaderLink("3200"    , "/3200" )
   this <++ new HeaderLink("6400"    , "/6400" )
   this <++ new HeaderLink("leak"    , "/leak" )
+  this <++ new HeaderLink("incremental"    , "/incremental" )
   this <++ new HeaderLink("collect"    , "/collect" )
   this <++ new HeaderLink("jmemorybuddy"    , "/jmemorybuddy" )
   this <++ new HeaderLink("No Link" , "" ) {
@@ -251,6 +254,19 @@ class SubView extends Page {
     this <++ new Label("SUBVIEW") { font = new Font(60); padding = Insets(100)}
     this <++ new Label("SUBVIEW") { font = new Font(60); padding = Insets(100)}
     this <++ new Label("I'm fullscreen!") { font = new Font(60)}
+  }
+}
+
+class IncrementalPage extends Page {
+  def title = "Incremental"
+  def description = "desc Incremental"
+
+  val content = new VBox {
+    (1 to 100).map { i =>
+      val n = new Label("Node " + i)
+      IncrementalLoading.loadNode(n)
+      this <++ n
+    }
   }
 }
 

@@ -1,7 +1,10 @@
+.statisticsfilter-vbox {
+    -fx-background-color: #f0f0f0;
+}
 .statisticsfilter-hbox {
     -fx-alignment: center;
     -fx-padding: 6;
-    -fx-spacing: 16;
+    -fx-spacing: 8;
 }
 
 .statisticsfilter-statbox {
@@ -20,7 +23,7 @@
 }
 
 .statisticsfilter-statbox-values {
-    -fx-padding: 0 8 0 8;
+    -fx-padding: 0 4 0 4;
     -fx-alignment: center-right;
 }
 
@@ -28,6 +31,7 @@
     -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-text-alignment: right;
+    -fx-min-width: 18px;
 }
 
 .statisticsfilter-statbox-units {
@@ -38,4 +42,5 @@
     -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-text-alignment: right;
+    -fx-min-width: 36px;
 }
