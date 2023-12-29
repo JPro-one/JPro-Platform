@@ -1,3 +1,6 @@
+### 0.2.11-SNAPSHOT (TBD)
+
+----------------------
 ### 0.2.10 (December 29, 2023)
 
 #### Features
@@ -11,6 +14,7 @@
 * Simplify the authorization process for a given OAuth2 authentication provider via the `jpro-auth-routing` module
 by calling the `OAuth2Filter.authorize` method.
 
+----------------------
 ### 0.2.9 (December 21, 2023)
 
 #### Changes
@@ -20,6 +24,7 @@ by calling the `OAuth2Filter.authorize` method.
 #### Improvements
 * Added Documentation for `jpro-routing` modules.
 
+----------------------
 ### 0.2.8 (December 19, 2023)
 
 #### Changes
@@ -46,6 +51,7 @@ by calling the `OAuth2Filter.authorize` method.
 * Fixed web implementation of the `mediaView` **freezing** after the node was removed from the scene and then added 
   back.
 
+----------------------
 ### 0.2.7 (December 8, 2023)
 
 #### Improvements
@@ -85,6 +91,7 @@ public class DomainExample extends RouteApp {
 * In the `jpro-auth` module, the package named `one.jpro.platform.auth.oath2` was correctly renamed to 
 `one.jpro.platform.auth.oauth2`.
 
+----------------------
 ### 0.2.6 (September 28, 2023)
 
 #### Improvements
@@ -98,6 +105,7 @@ public class DomainExample extends RouteApp {
 #### Bugfixes
 * Provide a more compatible solution to open URls on Windows platform via the OpenLink internal module.
 
+----------------------
 ### 0.2.5 (September 28, 2023)
 
 #### Improvements
@@ -106,6 +114,7 @@ public class DomainExample extends RouteApp {
 #### Bugfixes
 * ScrollPane hotfix applied in the `jpro-scrollpane` module.
 
+----------------------
 ### 0.2.4 (September 27, 2023)
 
 * Migrating everything from `JPro Utils` to the platform. Change module prefixes to `one.jpro.platform` 
