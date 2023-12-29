@@ -1,7 +1,8 @@
-### 0.2.10-SNAPSHOT (TBD)
+### 0.2.10 (December 29, 2023)
 
 #### Features
 * Added `IncrementalLoading` to the routing module. Checkout the routing documentation for more details.
+* In the `jpro-auth-core` module added Google specific implementation for token introspection.
 
 #### Improvements
 * The statistics and dev filter now have backgrounds and a slightly better design.
