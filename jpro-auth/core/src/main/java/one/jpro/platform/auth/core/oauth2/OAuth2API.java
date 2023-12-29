@@ -18,12 +18,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static one.jpro.platform.auth.core.utils.AuthUtils.BASE64_ENCODER;
 
 /**
  * OAuth2 API provides the required functionalities to interact with an OAuth2 provider.
@@ -34,16 +36,30 @@ public class OAuth2API {
 
     private static final Pattern MAX_AGE = Pattern.compile("max-age=\"?(\\d+)\"?");
     private static final String CACHE_CONTROL = "cache-control";
-    private static final Base64.Encoder BASE64_ENCODER = AuthUtils.BASE64_ENCODER;
 
     @NotNull
-    private final OAuth2Options options;
+    protected final OAuth2Options options;
     @NotNull
     private final HttpClient httpClient;
 
+    /**
+     * Creates an OAuth2 API object.
+     *
+     * @param options the OAuth2 options
+     */
     public OAuth2API(@NotNull final OAuth2Options options) {
-        this.options = options;
+        this.options = Objects.requireNonNull(options, "OAuth2 options cannot be null");
         this.httpClient = HttpClient.newHttpClient();
+    }
+
+    /**
+     * Returns the options used to configure this API.
+     *
+     * @return an OAuth2 options object
+     */
+    @NotNull
+    public OAuth2Options getOptions() {
+        return options;
     }
 
     /**
@@ -632,8 +648,8 @@ public class OAuth2API {
      * @param payload the payload to send
      * @return an asynchronous http response wrapped in a completable future
      */
-    private CompletableFuture<HttpResponse<String>> fetch(HttpMethod method, String path,
-                                                          JSONObject headers, String payload) {
+    protected CompletableFuture<HttpResponse<String>> fetch(HttpMethod method, String path,
+                                                            JSONObject headers, String payload) {
         if (path == null || path.isEmpty()) {
             // and this can happen as it is a config option that is dependent on the provider
             return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid path"));

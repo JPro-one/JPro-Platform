@@ -47,26 +47,36 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     @Nullable
     private final Stage stage;
     @NotNull
-    private final OAuth2Options options;
-    @NotNull
     private final OAuth2API api;
+    @NotNull
+    private final OAuth2Options options;
 
     private HttpServer httpServer;
 
     /**
-     * Creates a OAuth2 authentication provider.
+     * Creates an OAuth2 authentication provider.
+     *
+     * @param stage the JavaFX application stage
+     * @param api   the OAuth2 api
+     */
+    public OAuth2AuthenticationProvider(@Nullable final Stage stage, @NotNull final OAuth2API api) {
+        this.stage = stage;
+        this.api = Objects.requireNonNull(api, "OAuth2 api cannot be null");
+        this.options = api.getOptions();
+        this.options.validate();
+
+        // Create a new http server
+        this.httpServer = HttpServer.create(stage);
+    }
+
+    /**
+     * Creates an OAuth2 authentication provider.
      *
      * @param stage   the JavaFX application stage
      * @param options the OAuth2 options
      */
     public OAuth2AuthenticationProvider(@Nullable final Stage stage, @NotNull final OAuth2Options options) {
-        this.stage = stage;
-        this.options = Objects.requireNonNull(options, "OAuth2 options cannot be null");
-        this.api = new OAuth2API(options);
-        this.options.validate();
-
-        // Create a new http server
-        this.httpServer = HttpServer.create(stage);
+        this(stage, new OAuth2API(options));
     }
 
     /**
@@ -658,7 +668,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             final int port = httpServer.getServerPort();
             String server = httpServer.getServerHost();
             final String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
-            if (getOptions().isUseLoopbackIpAddress()) {
+            if (options.isUseLoopbackIpAddress()) {
                 server = loopbackAddress;
             }
             final boolean localAddress = server.equals("localhost") || server.equals(loopbackAddress);

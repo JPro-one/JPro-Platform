@@ -2,6 +2,7 @@ package one.jpro.platform.auth.core.oauth2.provider;
 
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.User;
+import one.jpro.platform.auth.core.oauth2.OAuth2API;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.auth.core.oauth2.OAuth2Options;
@@ -23,18 +24,29 @@ public class OpenIDAuthenticationProvider extends OAuth2AuthenticationProvider {
     /**
      * Creates a OAuth2 authentication provider.
      *
-     * @param stage   the JavaFX application stage
-     * @param options the OAuth2 options
+     * @param stage the JavaFX application stage
+     * @param api   the OAuth2 api
      */
-    public OpenIDAuthenticationProvider(@Nullable Stage stage, @NotNull OAuth2Options options) {
-        super(stage, options);
+    protected OpenIDAuthenticationProvider(@Nullable Stage stage, @NotNull OAuth2API api) {
+        super(stage, api);
 
+        final OAuth2Options options = api.getOptions();
         // Configure credentials scopes
         if (options.getSupportedScopes() != null && !options.getSupportedScopes().isEmpty()) {
             credentials.setScopes(options.getSupportedScopes());
         } else {
             credentials.setScopes(List.of("openid"));
         }
+    }
+
+    /**
+     * Creates a OAuth2 authentication provider.
+     *
+     * @param stage   the JavaFX application stage
+     * @param options the OAuth2 options
+     */
+    public OpenIDAuthenticationProvider(@Nullable Stage stage, @NotNull OAuth2Options options) {
+        this(stage, new OAuth2API(options));
     }
 
     @NotNull
