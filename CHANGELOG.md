@@ -4,6 +4,9 @@
 * Added `IncrementalLoading` to the routing module. Checkout the routing documentation for more details.
 
 #### Improvements
+* The statistics and dev filter now have backgrounds and a slightly better design.
+* Improved the FreezeDetector module.
+* Added ContainerVBox which can be used to create a `ContainerFilter`.
 * Simplify the authorization process for a given OAuth2 authentication provider via the `jpro-auth-routing` module
 by calling the `OAuth2Filter.authorize` method.
 
