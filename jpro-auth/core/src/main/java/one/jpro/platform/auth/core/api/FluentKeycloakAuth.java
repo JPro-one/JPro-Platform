@@ -60,7 +60,7 @@ public interface FluentKeycloakAuth {
     FluentKeycloakAuth redirectUri(String redirectUri);
 
     /**
-     * Create a Keycloak authentication provider configured with the provided options..
+     * Create a Keycloak authentication provider.
      *
      * @param stage the stage
      * @return a {@link KeycloakAuthenticationProvider} instance.

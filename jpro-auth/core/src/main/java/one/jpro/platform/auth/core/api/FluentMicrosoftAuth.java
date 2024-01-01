@@ -43,7 +43,7 @@ public interface FluentMicrosoftAuth {
     FluentMicrosoftAuth redirectUri(String redirectUri);
 
     /**
-     * Create a Microsoft authentication provider configured with the provided options.
+     * Create a Microsoft authentication provider.
      *
      * @param stage the stage
      * @return a {@link MicrosoftAuthenticationProvider} instance.

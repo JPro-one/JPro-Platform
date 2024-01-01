@@ -35,7 +35,7 @@ public interface FluentGoogleAuth {
     FluentGoogleAuth redirectUri(String redirectUri);
 
     /**
-     * Create a Google authentication provider configured with the provided options.
+     * Create a Google authentication provider.
      *
      * @param stage the stage
      * @return a {@link GoogleAuthenticationProvider} instance.
