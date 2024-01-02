@@ -32,14 +32,14 @@ public class LoginPage extends Page {
      * @return a button node
      */
     public Button createAuthProviderButton(String text) {
-        ImageView iconView = new ImageView();
+        final var iconView = new ImageView();
         iconView.setFitWidth(56);
         iconView.setFitHeight(56);
         Optional.ofNullable(getClass().getResourceAsStream("/images/" + text + "_Logo.png"))
                 .map(inputStream -> new Image(inputStream, 0, 0, true, true))
                 .ifPresent(iconView::setImage);
 
-        Button loginButton = new Button("Login with\n" + text, iconView);
+        final var loginButton = new Button("Login with\n" + text, iconView);
         loginButton.getStyleClass().addAll("login-button");
         return loginButton;
     }

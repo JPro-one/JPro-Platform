@@ -21,33 +21,32 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
- * The {@link LoginApp} class extends {@link RouteApp} to create a JavaFX application
+ * The {@link GoogleLoginApp} class extends {@link RouteApp} to create a JavaFX application
  * with integrated Google OAuth authentication. It manages user sessions and error handling
  * using JavaFX properties. This class sets up routes for the application including
  * the login page, successful signed in page, and error handling page.
- *
- * <p>It uses environment variables to fetch Google Client ID and Secret for OAuth configuration.
+ * <p>
+ * It uses environment variables to fetch Google Client ID and Secret for OAuth configuration.
  * The class provides a structured way to handle user authentication and maintain session state.
- *
- * <p>Routes are defined to handle different parts of the application, such as user authentication,
+ * <p>
+ * Routes are defined to handle different parts of the application, such as user authentication,
  * session management, and error display. This includes handling OAuth2 authentication with Google,
  * managing user sessions, and providing appropriate UI responses for different authentication states.
- *
- * <p>It also defines properties for the current user and any errors that occur during the
+ * <p>
+ * It also defines properties for the current user and any errors that occur during the
  * authentication process, allowing for easy integration with JavaFX UI components and data binding.
- *
- * <p>Note: This class requires additional context about {@code RouteApp}, {@code AuthAPI},
+ * <p>
+ * Note: This class requires additional context about {@code RouteApp}, {@code AuthAPI},
  * {@code OAuth2Credentials}, and other related classes/methods for its full functionality.
  *
  * @author Besmir Beqiri
  */
-public class LoginApp extends RouteApp {
+public class GoogleLoginApp extends RouteApp {
 
     static final String GOOGLE_CLIENT_ID = System.getenv("GOOGLE_TEST_CLIENT_ID");
     static final String GOOGLE_CLIENT_SECRET = System.getenv("GOOGLE_TEST_CLIENT_SECRET");
 
-    private static final SessionManager sessionManager = new SessionManager("simple-app");
-
+    private static final SessionManager sessionManager = new SessionManager("google-login-app");
     ObservableMap<String, String> session;
 
     @Override

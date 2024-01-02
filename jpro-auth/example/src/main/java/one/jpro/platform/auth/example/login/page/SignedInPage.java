@@ -5,7 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.example.login.LoginApp;
+import one.jpro.platform.auth.example.login.GoogleLoginApp;
 import simplefx.experimental.parts.FXFuture;
 
 /**
@@ -15,8 +15,7 @@ import simplefx.experimental.parts.FXFuture;
  */
 public class SignedInPage extends Page {
 
-    public SignedInPage(LoginApp app,
-                        OAuth2AuthenticationProvider authProvider) {
+    public SignedInPage(GoogleLoginApp app, OAuth2AuthenticationProvider authProvider) {
         final var headerLabel = new Label("Not signed in.");
         headerLabel.getStyleClass().add("header-label");
 
