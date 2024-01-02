@@ -26,7 +26,7 @@ public class UsernamePasswordCredentialsTest {
 
         Exception exception = Assertions.assertThrowsExactly(CredentialValidationException.class,
                 () -> credentials.validate(null));
-        assertEquals("username cannot be null or blank", exception.getMessage());
+        assertEquals("Username cannot be null or blank", exception.getMessage());
     }
 
     @Test
@@ -35,7 +35,7 @@ public class UsernamePasswordCredentialsTest {
 
         Exception exception = Assertions.assertThrowsExactly(CredentialValidationException.class,
                 () -> credentials.validate(null));
-        assertEquals("username cannot be null or blank", exception.getMessage());
+        assertEquals("Username cannot be null or blank", exception.getMessage());
     }
 
     @Test
@@ -44,7 +44,7 @@ public class UsernamePasswordCredentialsTest {
 
         Exception exception = Assertions.assertThrowsExactly(CredentialValidationException.class,
                 () -> credentials.validate(null));
-        assertEquals("password cannot be null", exception.getMessage());
+        assertEquals("Password cannot be null", exception.getMessage());
     }
 
     @Test
