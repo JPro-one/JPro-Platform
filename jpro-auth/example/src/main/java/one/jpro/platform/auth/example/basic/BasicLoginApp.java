@@ -27,23 +27,23 @@ import java.util.Set;
  * The {@link BasicLoginApp} class is a specialized implementation of {@link RouteApp} designed for handling
  * user authentication and session management in a web application context. This class incorporates
  * {@link BasicAuthenticationProvider} to facilitate basic authentication using username and password credentials.
- * <ul>
  * Key Features:
- *     <li>Authentication: Utilizes {@link BasicAuthenticationProvider} for authenticating users. It defines specific
- *     roles such as "USER" and "ADMIN" and creates an authentication provider instance accordingly.</li>
- *     <li>Credentials Management: Manages user credentials using {@link UsernamePasswordCredentials} which are
- *     essential for the authentication process.</li>
- *     <li>Session Management: Employs {@link SessionManager} for maintaining user sessions. This enables the
- *     application to persist user state across different requests. It distinguishes between browser and non-browser
- *     environments for session handling</li>
- *     <li>Routing: Defines application routing using the {@link Route} class. It sets up various routes like the root
- *     path and authenticated user path, and integrates authentication filters to protect these routes.</li>
- *     <li>Error Handling: Implements error handling within the authentication flow, ensuring that authentication
- *     failures are managed gracefully.</li>
- *     <li>Routing: Defines application routing using the {@link Route} class. It sets up various routes like the root
- *     path and authenticated user path, and integrates authentication filters to protect these routes.</li>
- *     <li>User State Management: Provides methods for retrieving and setting the authenticated user in the session,
- *     thereby managing the user's state throughout the application.</li>
+ * <ul>
+ *   <li>Authentication: Utilizes {@link BasicAuthenticationProvider} for authenticating users. It defines specific
+ *   roles such as "USER" and "ADMIN" and creates an authentication provider instance accordingly.</li>
+ *   <li>Credentials Management: Manages user credentials using {@link UsernamePasswordCredentials} which are
+ *   essential for the authentication process.</li>
+ *   <li>Session Management: Employs {@link SessionManager} for maintaining user sessions. This enables the
+ *   application to persist user state across different requests. It distinguishes between browser and non-browser
+ *   environments for session handling.</li>
+ *   <li>Routing: Defines application routing using the {@link Route} class. It sets up various routes like the root
+ *   path and authenticated user path, and integrates authentication filters to protect these routes.</li>
+ *   <li>Error Handling: Implements error handling within the authentication flow, ensuring that authentication
+ *   failures are managed gracefully.</li>
+ *   <li>Routing: Defines application routing using the {@link Route} class. It sets up various routes like the root
+ *   path and authenticated user path, and integrates authentication filters to protect these routes.</li>
+ *   <li>User State Management: Provides methods for retrieving and setting the authenticated user in the session,
+ *   thereby managing the user's state throughout the application.</li>
  * </ul>
  *
  * @author Besmir Beqiri
