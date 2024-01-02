@@ -28,6 +28,12 @@
     -fx-padding: 36px;
 }
 
+.login-pane.basic {
+    -fx-max-width: 480px;
+    -fx-max-height: 400px;
+    -fx-alignment: center_left;
+}
+
 .login-pane > .tile-pane {
     -fx-hgap: 24px;
     -fx-vgap: 24px;
