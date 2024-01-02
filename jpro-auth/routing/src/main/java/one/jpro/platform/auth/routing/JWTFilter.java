@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Defines a {@link Route} filter using JWT authentication mechanism.
+ * Defines {@link Route} filters using JWT authentication mechanism.
  *
  * @author Besmir Beqiri
  */
@@ -22,8 +22,7 @@ public interface JWTFilter {
 
     /**
      * Creates {@link Route} filter from a given {@link OAuth2AuthenticationProvider},
-     * {@link OAuth2Credentials} and an operation a given user if the authentication
-     * is successful.
+     * {@link OAuth2Credentials} and functions for handling successful and error cases.
      *
      * @param authProvider  the JWT authentication provider
      * @param credentials   a JSON object with the authentication information

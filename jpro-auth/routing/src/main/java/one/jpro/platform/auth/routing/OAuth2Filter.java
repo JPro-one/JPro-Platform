@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Defines a {@link Route} filter using OAuth2 authentication mechanism.
+ * Defines {@link Route} filters using OAuth2 authentication mechanism.
  *
  * @author Besmir Beqiri
  */
@@ -21,8 +21,7 @@ public interface OAuth2Filter {
 
     /**
      * Creates {@link Route} filter from a given {@link OAuth2AuthenticationProvider},
-     * {@link OAuth2Credentials} and an operation a given user if the authentication
-     * is successful.
+     * {@link OAuth2Credentials} and functions for handling successful and error cases.
      *
      * @param openidAuthProvider the OpenID authentication provider
      * @param userFunction       operation on the given user argument
@@ -38,11 +37,10 @@ public interface OAuth2Filter {
 
     /**
      * Creates {@link Route} filter from a given {@link OAuth2AuthenticationProvider},
-     * {@link OAuth2Credentials} and an operation a given user if the authentication
-     * is successful.
+     * {@link OAuth2Credentials} and functions for handling successful and error cases.
      *
-     * @param authProvider  the OAuth2 authentication provider
-     * @param credentials   the OAuth2 credentials
+     * @param authProvider  an OAuth2 authentication provider
+     * @param credentials   an OAuth2 credentials
      * @param userFunction  operation on the given user argument
      * @param errorFunction operation on the given error argument
      * @return a {@link Filter} object
