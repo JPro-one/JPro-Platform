@@ -20,6 +20,7 @@ module one.jpro.platform.auth.core {
     exports one.jpro.platform.auth.core;
     exports one.jpro.platform.auth.core.api;
     exports one.jpro.platform.auth.core.authentication;
+    exports one.jpro.platform.auth.core.basic;
     exports one.jpro.platform.auth.core.jwt;
     exports one.jpro.platform.auth.core.oauth2;
     exports one.jpro.platform.auth.core.oauth2.provider;

@@ -1,7 +1,10 @@
-package one.jpro.platform.auth.core.authentication;
+package one.jpro.platform.auth.core.basic;
 
+import one.jpro.platform.auth.core.authentication.CredentialValidationException;
+import one.jpro.platform.auth.core.authentication.Credentials;
 import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -18,24 +21,31 @@ public class UsernamePasswordCredentials implements Credentials {
 
     private static final Base64.Encoder BASE64_ENCODER = AuthUtils.BASE64_ENCODER;
 
-    @NotNull
+    @Nullable
     private String username;
 
-    @NotNull
+    @Nullable
     private String password;
 
     /**
      * Default constructor.
-     *
-     * @param username User's name.
-     * @param password User's password.
      */
-    public UsernamePasswordCredentials(@NotNull final String username, @NotNull final String password) {
+    public UsernamePasswordCredentials() {
+    }
+
+    /**
+     * Constructor with username and password.
+     *
+     * @param username User's name
+     * @param password User's password
+     */
+    public UsernamePasswordCredentials(@NotNull String username, @NotNull String password) {
         this.username = username;
         this.password = password;
     }
 
-    public @NotNull String getUsername() {
+    @Nullable
+    public String getUsername() {
         return username;
     }
 
@@ -43,7 +53,8 @@ public class UsernamePasswordCredentials implements Credentials {
         this.username = username;
     }
 
-    public @NotNull String getPassword() {
+    @Nullable
+    public String getPassword() {
         return password;
     }
 
@@ -54,12 +65,12 @@ public class UsernamePasswordCredentials implements Credentials {
     @Override
     public <V> void validate(V arg) throws CredentialValidationException {
         if (username == null || username.isBlank()) {
-            throw new CredentialValidationException("username cannot be null or blank");
+            throw new CredentialValidationException("Username cannot be null or blank");
         }
         // passwords are allowed to be empty
         // for example this is used by basic auth
         if (password == null) {
-            throw new CredentialValidationException("password cannot be null");
+            throw new CredentialValidationException("Password cannot be null");
         }
     }
 
@@ -100,8 +111,8 @@ public class UsernamePasswordCredentials implements Credentials {
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-        Optional.of(getUsername()).ifPresent(username -> json.put("username", username));
-        Optional.of(getPassword()).ifPresent(password -> json.put("password", password));
+        Optional.ofNullable(getUsername()).ifPresent(username -> json.put("username", username));
+        Optional.ofNullable(getPassword()).ifPresent(password -> json.put("password", password));
         return json;
     }
 }

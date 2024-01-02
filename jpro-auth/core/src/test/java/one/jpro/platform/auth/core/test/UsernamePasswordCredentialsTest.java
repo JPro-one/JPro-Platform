@@ -1,7 +1,7 @@
 package one.jpro.platform.auth.core.test;
 
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
-import one.jpro.platform.auth.core.authentication.UsernamePasswordCredentials;
+import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

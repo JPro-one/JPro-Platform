@@ -12,6 +12,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.jpro.webapi.WebAPI;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.*;
+import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.auth.core.http.HttpServer;
 import one.jpro.platform.auth.core.jwt.JWTOptions;
 import one.jpro.platform.auth.core.jwt.TokenCredentials;

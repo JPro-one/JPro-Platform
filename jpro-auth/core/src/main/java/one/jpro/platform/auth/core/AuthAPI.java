@@ -10,6 +10,15 @@ import one.jpro.platform.auth.core.api.*;
 public interface AuthAPI {
 
     /**
+     * Configure and create a basic (username and password) authentication provider.
+     *
+     * @return fluent style api.
+     */
+    static FluentBasicAuth basicAuth() {
+        return new FluentBasicAuthAPI();
+    }
+
+    /**
      * Configure and create a Google authentication provider.
      *
      * @return fluent style api.

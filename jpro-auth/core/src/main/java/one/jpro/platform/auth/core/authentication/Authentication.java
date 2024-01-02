@@ -51,23 +51,37 @@ public interface Authentication extends Principal {
         return json;
     }
 
+    /**
+     * Build an {@link Authentication} instance for the user.
+     *
+     * @param username User's name
+     * @return an {@link Authentication} object
+     */
     @NotNull
     static Authentication create(@NotNull String username) {
-        return Authentication.create(username, null, null);
+        return new User(username, null, null);
     }
 
-    static  Authentication create(@NotNull String username,
-                                  @NotNull Set<String> roles) {
+    /**
+     * Build an {@link Authentication} instance for the user.
+     *
+     * @param username User's name
+     * @param roles    User's roles
+     * @return an {@link Authentication} object
+     */
+    @NotNull
+    static Authentication create(@NotNull String username,
+                                 @NotNull Set<String> roles) {
         Objects.requireNonNull(roles, "User's roles are null.");
         return new User(username, roles, null);
     }
 
     /**
-     * Build an {@link Authentication} instance foe the user.
+     * Build an {@link Authentication} instance for the user.
      *
-     * @param username User's name
+     * @param username   User's name
      * @param attributes User's attributes
-     * @return An {@link Authentication} for the user
+     * @return an {@link Authentication} object
      */
     @NotNull
     static Authentication create(@NotNull String username,
@@ -79,10 +93,10 @@ public interface Authentication extends Principal {
     /**
      * Builds an {@link Authentication} instance for the user.
      *
-     * @param username User's name
-     * @param roles User's roles
+     * @param username   User's name
+     * @param roles      User's roles
      * @param attributes User's attributes
-     * @return An {@link Authentication} for the user
+     * @return an {@link Authentication} object
      */
     @NotNull
     static Authentication create(@NotNull String username,
@@ -92,10 +106,10 @@ public interface Authentication extends Principal {
     }
 
     /**
-     * Builds an {@link Authentication} instance for the user from a {@link JSONObject}.
+     * Builds an {@link User} instance for the user from a {@link JSONObject}.
      *
      * @param json a {@link JSONObject} containing user's data.
-     * @return An {@link Authentication} for the user
+     * @return an {@link User} object
      */
     @NotNull
     static User create(@NotNull JSONObject json) {
