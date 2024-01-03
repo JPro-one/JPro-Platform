@@ -6,7 +6,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
-import one.jpro.platform.auth.core.basic.BasicAuthenticationProvider;
+import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.auth.example.basic.BasicLoginApp;
 
 /**

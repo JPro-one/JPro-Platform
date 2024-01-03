@@ -46,7 +46,7 @@ public interface FluentMicrosoftAuth {
      * Create a Microsoft authentication provider.
      *
      * @param stage the stage
-     * @return a {@link MicrosoftAuthenticationProvider} instance.
+     * @return a {@link MicrosoftAuthenticationProvider} instance
      */
     MicrosoftAuthenticationProvider create(Stage stage);
 }

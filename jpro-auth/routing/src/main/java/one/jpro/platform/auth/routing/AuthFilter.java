@@ -1,7 +1,7 @@
 package one.jpro.platform.auth.routing;
 
 import one.jpro.platform.auth.core.authentication.User;
-import one.jpro.platform.auth.core.basic.BasicAuthenticationProvider;
+import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Response;

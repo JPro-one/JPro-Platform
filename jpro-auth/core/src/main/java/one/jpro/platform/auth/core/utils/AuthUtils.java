@@ -1,5 +1,7 @@
 package one.jpro.platform.auth.core.utils;
 
+import one.jpro.platform.auth.core.crypto.PasswordEncoder;
+import one.jpro.platform.auth.core.crypto.bcrypt.BCryptPasswordEncoder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,6 +23,7 @@ public final class AuthUtils {
 
     public static final Base64.Encoder BASE64_ENCODER = Base64.getUrlEncoder();
     public static final Base64.Decoder BASE64_DECODER = Base64.getUrlDecoder();
+    public static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     /**
      * Checks that the specified string is not {@code null} and

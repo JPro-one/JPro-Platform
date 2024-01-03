@@ -12,7 +12,7 @@ public interface AuthAPI {
     /**
      * Configure and create a basic (username and password) authentication provider.
      *
-     * @return fluent style api.
+     * @return fluent style api
      */
     static FluentBasicAuth basicAuth() {
         return new FluentBasicAuthAPI();
@@ -21,7 +21,7 @@ public interface AuthAPI {
     /**
      * Configure and create a Google authentication provider.
      *
-     * @return fluent style api.
+     * @return fluent style api
      */
     static FluentGoogleAuth googleAuth() {
         return new FluentGoogleAuthAPI();
@@ -30,7 +30,7 @@ public interface AuthAPI {
     /**
      * Configure and create a Keycloak authentication provider.
      *
-     * @return fluent style api.
+     * @return fluent style api
      */
     static FluentKeycloakAuth keycloakAuth() {
         return new FluentKeycloakAuthAPI();
@@ -39,7 +39,7 @@ public interface AuthAPI {
     /**
      * Configure and create a Microsoft authentication provider.
      *
-     * @return fluent style api.
+     * @return fluent style api
      */
     static FluentMicrosoftAuth microsoftAuth() {
         return new FluentMicrosoftAuthAPI();

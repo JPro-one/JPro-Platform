@@ -63,7 +63,7 @@ public interface FluentKeycloakAuth {
      * Create a Keycloak authentication provider.
      *
      * @param stage the stage
-     * @return a {@link KeycloakAuthenticationProvider} instance.
+     * @return a {@link KeycloakAuthenticationProvider} instance
      */
     KeycloakAuthenticationProvider create(Stage stage);
 }

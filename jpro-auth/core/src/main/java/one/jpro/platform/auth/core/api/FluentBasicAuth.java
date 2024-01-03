@@ -1,6 +1,6 @@
 package one.jpro.platform.auth.core.api;
 
-import one.jpro.platform.auth.core.basic.BasicAuthenticationProvider;
+import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +39,7 @@ public interface FluentBasicAuth {
     /**
      * Create a simple authentication provider.
      *
-     * @return a {@link BasicAuthenticationProvider} instance.
+     * @return a {@link BasicAuthenticationProvider} instance
      */
     BasicAuthenticationProvider create();
 }

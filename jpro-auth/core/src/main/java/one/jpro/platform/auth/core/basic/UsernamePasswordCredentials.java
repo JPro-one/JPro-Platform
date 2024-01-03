@@ -2,15 +2,16 @@ package one.jpro.platform.auth.core.basic;
 
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
 import one.jpro.platform.auth.core.authentication.Credentials;
-import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
+
+import static one.jpro.platform.auth.core.utils.AuthUtils.BASE64_ENCODER;
+import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
 
 /**
  * Username and password credentials holder.
@@ -18,8 +19,6 @@ import java.util.Optional;
  * @author Besmir Beqiri
  */
 public class UsernamePasswordCredentials implements Credentials {
-
-    private static final Base64.Encoder BASE64_ENCODER = AuthUtils.BASE64_ENCODER;
 
     @Nullable
     private String username;
@@ -36,8 +35,8 @@ public class UsernamePasswordCredentials implements Credentials {
     /**
      * Constructor with username and password.
      *
-     * @param username User's name
-     * @param password User's password
+     * @param username the user's name
+     * @param password the user's password
      */
     public UsernamePasswordCredentials(@NotNull String username, @NotNull String password) {
         this.username = username;
@@ -112,7 +111,8 @@ public class UsernamePasswordCredentials implements Credentials {
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         Optional.ofNullable(getUsername()).ifPresent(username -> json.put("username", username));
-        Optional.ofNullable(getPassword()).ifPresent(password -> json.put("password", password));
+        Optional.ofNullable(getPassword())
+                .ifPresent(password -> json.put("password", BCRYPT_PASSWORD_ENCODER.encode(password)));
         return json;
     }
 }

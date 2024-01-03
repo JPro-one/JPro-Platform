@@ -1,6 +1,7 @@
-package one.jpro.platform.auth.core.basic;
+package one.jpro.platform.auth.core.basic.provider;
 
 import one.jpro.platform.auth.core.authentication.*;
+import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -11,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
 
 /**
  * The {@code BasicAuthenticationProvider} class implements the {@code AuthenticationProvider} interface
@@ -34,8 +37,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     /**
      * Constructs a new {@code BasicAuthenticationProvider} with specified roles and attributes.
      *
-     * @param roles      the set of roles to be associated with the authenticated user, may be {@code null}.
-     * @param attributes the map of attributes to be associated with the authenticated user, may be {@code null}.
+     * @param roles      the set of roles to be associated with the authenticated user, may be {@code null}
+     * @param attributes the map of attributes to be associated with the authenticated user, may be {@code null}
      */
     public BasicAuthenticationProvider(@Nullable final Set<String> roles,
                                        @Nullable final Map<String, Object> attributes) {
@@ -47,7 +50,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
      * Authenticates the user based on the provided {@code UsernamePasswordCredentials}.
      *
      * @param credentials the credentials containing the username and password
-     * @return a {@code CompletableFuture} that, when completed, provides the authenticated {@code User}.
+     * @return a {@code CompletableFuture} that, when completed, provides the authenticated {@code User}
      * @throws CredentialValidationException if the credentials are not valid
      */
     @NotNull
@@ -66,7 +69,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
         userJSON.put(User.KEY_ROLES, new JSONArray(roles));
 
         JSONObject authJSON = new JSONObject();
-        authJSON.put("password", credentials.getPassword());
+        authJSON.put("password", BCRYPT_PASSWORD_ENCODER.encode(credentials.getPassword()));
         userJSON.put(User.KEY_ATTRIBUTES, new JSONObject(attributes).put("auth", authJSON));
 
         final User user = Authentication.create(userJSON);
@@ -97,7 +100,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     /**
      * Gets the set of roles associated with this authentication provider.
      *
-     * @return The set of roles, may be {@code null}.
+     * @return the set of roles, may be {@code null}
      */
     @Nullable
     public Set<String> getRoles() {
@@ -107,7 +110,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     /**
      * Sets the roles to be associated with this authentication provider.
      *
-     * @param roles The set of roles, may be {@code null}.
+     * @param roles the set of roles, may be {@code null}
      */
     public void setRoles(@Nullable Set<String> roles) {
         this.roles = roles;
@@ -116,7 +119,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     /**
      * Gets the attributes associated with this authentication provider.
      *
-     * @return The attributes, may be {@code null}.
+     * @return the attributes, may be {@code null}
      */
     @Nullable
     public Map<String, Object> getAttributes() {
@@ -126,7 +129,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     /**
      * Sets the attributes to be associated with this authentication provider.
      *
-     * @param attributes The map of attributes, may be {@code null}.
+     * @param attributes the map of attributes, may be {@code null}
      */
     public void setAttributes(@Nullable Map<String, Object> attributes) {
         this.attributes = attributes;

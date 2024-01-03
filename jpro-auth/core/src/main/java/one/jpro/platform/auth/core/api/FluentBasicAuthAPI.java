@@ -1,6 +1,6 @@
 package one.jpro.platform.auth.core.api;
 
-import one.jpro.platform.auth.core.basic.BasicAuthenticationProvider;
+import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 
 import java.util.Map;
 import java.util.Set;
