@@ -37,7 +37,7 @@ import java.util.Optional;
  * authentication process, allowing for easy integration with JavaFX UI components and data binding.
  * <p>
  * Note: This class requires additional context about {@code RouteApp}, {@code AuthAPI},
- * {@code OAuth2Credentials}, and other related classes/methods for its full functionality.
+ * {@code OAuth2AuthenticationProvider}, and other related classes/methods for its full functionality.
  *
  * @author Besmir Beqiri
  */
@@ -67,7 +67,7 @@ public class GoogleLoginApp extends RouteApp {
                 .create(getStage());
 
         return Route.empty()
-                .and(Route.get("/", (r) -> Response.node(new LoginPage(googleAuthProvider))))
+                .and(Route.get("/", request -> Response.node(new LoginPage(googleAuthProvider))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
                 .filter(DevFilter.create())

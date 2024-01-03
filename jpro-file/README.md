@@ -74,7 +74,7 @@ a specified callback handler is invoked for further processing.
       fileDropper.setOnFilesSelected(fileSources -> openFiles(fileSources));
       ```
 
-### Configuration
+### Installation
 - Gradle
     ```groovy
     dependencies {

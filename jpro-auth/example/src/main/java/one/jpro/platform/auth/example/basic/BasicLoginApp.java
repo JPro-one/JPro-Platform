@@ -70,7 +70,7 @@ public class BasicLoginApp extends RouteApp {
                 .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
         return Route.empty()
-                .and(Route.get("/", (r) -> Response.node(new LoginPage(this, basicAuthProvider, credentials))))
+                .and(Route.get("/", request -> Response.node(new LoginPage(this, basicAuthProvider, credentials))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
                 .filter(DevFilter.create())
