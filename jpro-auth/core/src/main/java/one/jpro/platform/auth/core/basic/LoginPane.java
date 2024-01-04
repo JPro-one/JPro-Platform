@@ -8,7 +8,12 @@ import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Login pane.
+ * This class represents a login pane. It is designed to provide a user interface for login functionality.
+ * The pane includes labels, text fields for username and password, and a submit button.
+ * <p>
+ * It uses {@link UsernamePasswordCredentials} for binding username and password properties.
+ * <p>
+ * Style classes are used for each component for easy customization.
  *
  * @author Besmir Beqiri
  */
@@ -23,6 +28,11 @@ public class LoginPane extends VBox {
     private final PasswordField passwordField;
     private final Button submitButton;
 
+    /**
+     * Constructs a new LoginPane with the specified credentials.
+     *
+     * @param credentials the credentials object to bind to the username and password fields
+     */
     public LoginPane(@NotNull UsernamePasswordCredentials credentials) {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
@@ -48,31 +58,61 @@ public class LoginPane extends VBox {
         getChildren().addAll(headerLabel, usernameLabel, usernameTextField, passwordLabel, passwordField, submitButton);
     }
 
+    /**
+     * Returns the header label of the login pane.
+     *
+     * @return the header label
+     */
     @NotNull
     public final Label getHeaderLabel() {
         return headerLabel;
     }
 
+    /**
+     * Returns the username label of the login pane.
+     *
+     * @return the username label
+     */
     @NotNull
     public final Label getUsernameLabel() {
         return usernameLabel;
     }
 
+    /**
+     * Returns the username text field of the login pane.
+     *
+     * @return the username text field
+     */
     @NotNull
     public final TextField getUsernameTextField() {
         return usernameTextField;
     }
 
+    /**
+     * Returns the password label of the login pane.
+     *
+     * @return the password label
+     */
     @NotNull
     public final Label getPasswordLabel() {
         return passwordLabel;
     }
 
+    /**
+     * Returns the password field of the login pane.
+     *
+     * @return the password field
+     */
     @NotNull
     public final PasswordField getPasswordField() {
         return passwordField;
     }
 
+    /**
+     * Returns the submit button of the login pane.
+     *
+     * @return the submit button
+     */
     @NotNull
     public final Button getSubmitButton() {
         return submitButton;
