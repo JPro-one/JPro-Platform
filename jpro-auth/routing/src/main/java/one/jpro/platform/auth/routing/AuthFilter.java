@@ -1,9 +1,11 @@
 package one.jpro.platform.auth.routing;
 
+import javafx.scene.Node;
 import one.jpro.platform.auth.core.authentication.User;
-import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
+import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.routing.Filter;
+import one.jpro.platform.routing.LinkUtil;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import org.jetbrains.annotations.NotNull;
@@ -44,5 +46,18 @@ public interface AuthFilter {
                 return route.apply(request);
             }
         };
+    }
+
+    /**
+     * Initiates the authorization process for a given basic authentication provider.
+     *
+     * @param node              the JavaFX node context for the authorization
+     * @param basicAuthProvider the basic authentication provider
+     */
+    static void authorize(@NotNull Node node, @NotNull BasicAuthenticationProvider basicAuthProvider) {
+        Objects.requireNonNull(node, "Node can not be null");
+        Objects.requireNonNull(basicAuthProvider, "Authentication provider can not be null");
+
+        LinkUtil.getSessionManager(node).gotoURL(basicAuthProvider.getAuthorizationPath());
     }
 }

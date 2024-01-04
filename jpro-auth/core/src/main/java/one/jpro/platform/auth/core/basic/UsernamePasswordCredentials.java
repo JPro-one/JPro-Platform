@@ -1,5 +1,7 @@
 package one.jpro.platform.auth.core.basic;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
 import one.jpro.platform.auth.core.authentication.Credentials;
 import org.jetbrains.annotations.NotNull;
@@ -20,12 +22,6 @@ import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODE
  */
 public class UsernamePasswordCredentials implements Credentials {
 
-    @Nullable
-    private String username;
-
-    @Nullable
-    private String password;
-
     /**
      * Default constructor.
      */
@@ -39,36 +35,58 @@ public class UsernamePasswordCredentials implements Credentials {
      * @param password the user's password
      */
     public UsernamePasswordCredentials(@NotNull String username, @NotNull String password) {
-        this.username = username;
-        this.password = password;
+        setUsername(username);
+        setPassword(password);
     }
+
+    // Username property
+    private StringProperty username;
 
     @Nullable
     public String getUsername() {
-        return username;
+        return (username == null) ? null : username.get();
     }
 
     public void setUsername(@NotNull String username) {
-        this.username = username;
+        usernameProperty().set(username);
     }
+
+    @NotNull
+    public final StringProperty usernameProperty() {
+        if (username == null) {
+            username = new SimpleStringProperty(this, "username");
+        }
+        return username;
+    }
+
+    // Password property
+    private StringProperty password;
 
     @Nullable
     public String getPassword() {
-        return password;
+        return (password == null) ? null : password.get();
     }
 
-    public void setPassword(@NotNull String password) {
-        this.password = password;
+    public final void setPassword(@NotNull String password) {
+        passwordProperty().set(password);
+    }
+
+    @NotNull
+    public final StringProperty passwordProperty() {
+        if (password == null) {
+            password = new SimpleStringProperty(this, "password");
+        }
+        return password;
     }
 
     @Override
     public <V> void validate(V arg) throws CredentialValidationException {
-        if (username == null || username.isBlank()) {
+        if (getUsername() == null || getUsername().isBlank()) {
             throw new CredentialValidationException("Username cannot be null or blank");
         }
         // passwords are allowed to be empty
         // for example this is used by basic auth
-        if (password == null) {
+        if (getPassword() == null) {
             throw new CredentialValidationException("Password cannot be null");
         }
     }
@@ -90,6 +108,7 @@ public class UsernamePasswordCredentials implements Credentials {
     public String toHttpAuthorization() {
         final var result = new StringBuilder();
 
+        final String username = getUsername();
         if (username != null) {
             // RFC check
             if (username.indexOf(':') != -1) {
@@ -100,6 +119,7 @@ public class UsernamePasswordCredentials implements Credentials {
 
         result.append(':');
 
+        final String password = getPassword();
         if (password != null) {
             result.append(password);
         }
