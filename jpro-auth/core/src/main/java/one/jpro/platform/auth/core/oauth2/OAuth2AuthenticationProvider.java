@@ -102,7 +102,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      */
     @NotNull
     public CompletableFuture<String> authorizeUrl(@NotNull final OAuth2Credentials credentials) {
-        Objects.requireNonNull(credentials, "credentials cannot be null");
+        Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
 
         // Generate the authorization URL and open it in the default browser
         final String authorizeUrl = api.authorizeURL(credentials

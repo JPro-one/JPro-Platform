@@ -7,6 +7,7 @@ import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import simplefx.experimental.parts.FXFuture;
 
@@ -32,18 +33,18 @@ public interface JWTFilter {
      * @param errorFunction operation on the given error argument
      * @return a {@link Filter} object
      */
-    static Filter create(JWTAuthenticationProvider authProvider,
-                         JSONObject credentials,
-                         String authPath,
-                         String tokenPath,
-                         Function<User, Response> userFunction,
-                         Function<Throwable, Response> errorFunction) {
-        Objects.requireNonNull(authProvider, "auth provider cannot be null");
-        Objects.requireNonNull(credentials, "credentials cannot be null");
-        Objects.requireNonNull(authPath, "authentication path cannot be null");
-        Objects.requireNonNull(tokenPath, "token path cannot be null");
-        Objects.requireNonNull(userFunction, "user function cannot be null");
-        Objects.requireNonNull(errorFunction, "error function cannot be null");
+    static Filter create(@NotNull JWTAuthenticationProvider authProvider,
+                         @NotNull JSONObject credentials,
+                         @NotNull String authPath,
+                         @NotNull String tokenPath,
+                         @NotNull Function<User, Response> userFunction,
+                         @NotNull Function<Throwable, Response> errorFunction) {
+        Objects.requireNonNull(authProvider, "Authentication provider cannot be null");
+        Objects.requireNonNull(credentials, "Credentials cannot be null");
+        Objects.requireNonNull(authPath, "Authentication path cannot be null");
+        Objects.requireNonNull(tokenPath, "Token path cannot be null");
+        Objects.requireNonNull(userFunction, "User function cannot be null");
+        Objects.requireNonNull(errorFunction, "Error function cannot be null");
 
         return (route) -> (request) -> {
             if (request.getPath().equals(authPath)) {

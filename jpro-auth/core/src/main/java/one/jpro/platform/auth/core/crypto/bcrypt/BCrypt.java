@@ -42,6 +42,7 @@ import java.util.Arrays;
  * The amount of work increases exponentially (2**log_rounds), so each increment is twice
  * as much work. The default log_rounds is 10, and the valid range is 4 to 31.
  *
+ * @author Damien Miller
  * @see <a href="https://github.com/spring-projects/spring-security/blob/main/crypto/src/main/java/org/springframework/security/crypto/bcrypt/BCrypt.java">Spring Security BCrypt implementation</a>
  */
 public class BCrypt {

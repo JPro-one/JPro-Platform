@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * BCrypt password encoder tests.
  *
+ * @author Dave Syer
  * @author Besmir Beqiri
  */
 public class BCryptPasswordEncoderTests {

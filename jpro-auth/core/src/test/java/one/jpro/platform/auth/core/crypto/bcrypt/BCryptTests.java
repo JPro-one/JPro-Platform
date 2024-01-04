@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * JUnit unit tests for BCrypt routines.
  *
+ * @author Damien Miller
  * @author Besmir Beqiri
  */
 public class BCryptTests {
