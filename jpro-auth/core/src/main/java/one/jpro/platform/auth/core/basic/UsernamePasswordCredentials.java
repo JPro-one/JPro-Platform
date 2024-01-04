@@ -96,12 +96,12 @@ public class UsernamePasswordCredentials implements Credentials {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UsernamePasswordCredentials that = (UsernamePasswordCredentials) o;
-        return Objects.equals(username, that.username) && Objects.equals(password, that.password);
+        return Objects.equals(getUsername(), that.getUsername()) && Objects.equals(getPassword(), that.getPassword());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, password);
+        return Objects.hash(getUsername(), getPassword());
     }
 
     @Override
