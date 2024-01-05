@@ -54,40 +54,40 @@ public interface Authentication extends Principal {
     /**
      * Build an {@link Authentication} instance for the user.
      *
-     * @param username User's name
+     * @param username the user's name
      * @return an {@link Authentication} object
      */
     @NotNull
     static Authentication create(@NotNull String username) {
-        return new User(username, null, null);
+        return new User(username);
     }
 
     /**
      * Build an {@link Authentication} instance for the user.
      *
-     * @param username User's name
-     * @param roles    User's roles
+     * @param username the user's name
+     * @param roles    the user's roles
      * @return an {@link Authentication} object
      */
     @NotNull
     static Authentication create(@NotNull String username,
                                  @NotNull Set<String> roles) {
         Objects.requireNonNull(roles, "User's roles are null.");
-        return new User(username, roles, null);
+        return new User(username, roles);
     }
 
     /**
      * Build an {@link Authentication} instance for the user.
      *
-     * @param username   User's name
-     * @param attributes User's attributes
+     * @param username   the user's name
+     * @param attributes the user's attributes
      * @return an {@link Authentication} object
      */
     @NotNull
     static Authentication create(@NotNull String username,
                                  @NotNull Map<String, Object> attributes) {
         Objects.requireNonNull(attributes, "User's attributes are null.");
-        return new User(username, null, attributes);
+        return new User(username, attributes);
     }
 
     /**
@@ -106,13 +106,13 @@ public interface Authentication extends Principal {
     }
 
     /**
-     * Builds an {@link User} instance for the user from a {@link JSONObject}.
+     * Builds an {@link Authentication} instance for the user from a {@link JSONObject}.
      *
      * @param json a {@link JSONObject} containing user's data.
-     * @return an {@link User} object
+     * @return an {@link Authentication} object
      */
     @NotNull
-    static User create(@NotNull JSONObject json) {
+    static Authentication create(@NotNull JSONObject json) {
         return new User(json);
     }
 }

@@ -100,7 +100,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * once the HTTP server is ready to handle the callback, or with an exception
      * if an error occurs during the process.
      */
-    @NotNull
     public CompletableFuture<String> authorizeUrl(@NotNull final OAuth2Credentials credentials) {
         Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
 
@@ -128,7 +127,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @return a future that will complete with the authenticated user
      */
     @Override
-    @NotNull
     public CompletableFuture<User> authenticate(@NotNull final Credentials credentials) {
         try {
             if (credentials instanceof UsernamePasswordCredentials usernamePasswordCredentials) {
@@ -490,7 +488,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         // TODO: Configure roles
 
         // Create authentication instance
-        return Authentication.create(userJSON);
+        return new User(userJSON);
     }
 
     /**

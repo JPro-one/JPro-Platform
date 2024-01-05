@@ -29,21 +29,54 @@ public class User implements Authentication {
     private final Map<String, Object> attributes;
 
     /**
-     * Create a server authentication holding user's name, roles and attributes.
+     * Create a user holding a name.
      *
-     * @param name       The name the authenticated user
-     * @param roles      Roles of the authenticated user
-     * @param attributes Attributes of the authenticated user
+     * @param name the user's name
      */
-    public User(@NotNull String name,
-                @Nullable Set<String> roles,
-                @Nullable Map<String, Object> attributes) {
+    public User(@NotNull String name) {
+        this(name, null, null);
+    }
+
+    /**
+     * Create a user holding a name and roles.
+     *
+     * @param name  the user's name
+     * @param roles the user's roles
+     */
+    public User(@NotNull String name, @Nullable Set<String> roles) {
+        this(name, roles, null);
+    }
+
+    /**
+     * Create a user holding a name and attributes.
+     *
+     * @param name       the user's name
+     * @param attributes the user's attributes
+     */
+    public User(@NotNull String name, @Nullable Map<String, Object> attributes) {
+        this(name, null, attributes);
+    }
+
+    /**
+     * Create a user holding a name, roles and attributes.
+     *
+     * @param name       the user's name
+     * @param roles      the user's roles
+     * @param attributes the user's attributes
+     */
+    public User(@NotNull String name, @Nullable Set<String> roles, @Nullable Map<String, Object> attributes) {
         Objects.requireNonNull(name, "User's name is null.");
+
         this.name = name;
         this.roles = (roles == null || roles.isEmpty()) ? Collections.emptySet() : roles;
         this.attributes = attributes == null ? Collections.emptyMap() : attributes;
     }
 
+    /**
+     * Create a user from a JSON object.
+     *
+     * @param json the JSON object
+     */
     public User(@NotNull JSONObject json) {
         String username = json.optString(KEY_NAME); // check with name key
         if (username == null || username.isBlank()) {
