@@ -66,7 +66,7 @@ public class BasicLoginApp extends RouteApp {
 
     public BasicLoginApp() {
         userManager.createUser(new UsernamePasswordCredentials("user", "password"),
-                Set.of("USER"), Map.of("enabled", Boolean.TRUE)).join();
+                Set.of(), Map.of("enabled", Boolean.TRUE)).join();
     }
 
     @Override

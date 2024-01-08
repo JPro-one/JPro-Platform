@@ -64,7 +64,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
      */
     @Override
     public CompletableFuture<User> authenticate(@NotNull final UsernamePasswordCredentials credentials)
-            throws CredentialValidationException {
+            throws AuthenticationException, CredentialValidationException {
         try {
             credentials.validate(null);
         } catch (CredentialValidationException ex) {
@@ -73,7 +73,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
         }
 
         return getUserManager().loadUserByUsername(credentials.getUsername())
-                .thenComposeAsync(user -> {
+                .thenCompose(user -> {
                     final JSONObject attributesJSON = user.toJSON().getJSONObject(User.KEY_ATTRIBUTES);
                     if (attributesJSON.has("credentials")) {
                         final JSONObject credentialsJSON = attributesJSON.getJSONObject("credentials");
