@@ -20,7 +20,7 @@ package one.jpro.platform.auth.core.crypto;
  *
  * @author Keith Donald
  * @author Besmir Beqiri
- * @see <a href="">Spring Security PasswordEncoder implementation</a>
+ * @see <a href="https://github.com/spring-projects/spring-security/blob/main/crypto/src/main/java/org/springframework/security/crypto/password/PasswordEncoder.java">Spring Security PasswordEncoder implementation</a>
  */
 public interface PasswordEncoder {
 
