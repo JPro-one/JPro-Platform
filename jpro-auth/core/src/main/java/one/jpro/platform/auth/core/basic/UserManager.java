@@ -27,7 +27,6 @@ public interface UserManager {
      * @return a {@code CompletableFuture} that, upon completion, returns the created {@code User} object.
      * @throws CredentialValidationException if the provided credentials do not meet the required validation criteria.
      */
-
     CompletableFuture<User> createUser(@NotNull UsernamePasswordCredentials credentials,
                                        @Nullable Set<String> roles,
                                        @Nullable Map<String, Object> attributes) throws CredentialValidationException;

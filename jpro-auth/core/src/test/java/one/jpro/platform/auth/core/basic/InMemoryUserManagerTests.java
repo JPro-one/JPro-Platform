@@ -7,11 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * In memory UserManager tests.
@@ -23,15 +22,15 @@ public class InMemoryUserManagerTests {
     private InMemoryUserManager userManager;
 
     @BeforeEach
-    public void setup() throws ExecutionException, InterruptedException {
+    public void setup() {
         userManager = new InMemoryUserManager();
         userManager.createUser(new UsernamePasswordCredentials("someuser", "somepassword"),
-                Set.of("USER"), Map.of("enabled", Boolean.TRUE)).get();
+                Set.of("USER"), Map.of("enabled", Boolean.TRUE)).join();
     }
 
     @Test
-    public void testCreateUser() throws ExecutionException, InterruptedException {
-        final User user = userManager.loadUserByUsername("someuser").get();
+    public void testCreateUser() {
+        final User user = userManager.loadUserByUsername("someuser").join();
         assertThat(user.getName()).isEqualTo("someuser");
         assertThat(user.getRoles()).containsExactly("USER");
         assertThat(user.getAttributes()).containsEntry("enabled", Boolean.TRUE);
@@ -39,15 +38,15 @@ public class InMemoryUserManagerTests {
     }
 
     @Test
-    public void testUpdateUser() throws ExecutionException, InterruptedException {
-        final User user = userManager.loadUserByUsername("someuser").get();
+    public void testUpdateUser() {
+        final User user = userManager.loadUserByUsername("someuser").join();
         assertThat(user.getName()).isEqualTo("someuser");
         assertThat(user.getRoles()).containsExactly("USER");
         assertThat(user.getAttributes()).containsEntry("enabled", Boolean.TRUE);
         assertThat(user.hasAttribute("credentials")).isTrue();
 
-        userManager.updateUser("someuser", Set.of("ADMIN"), Map.of("enabled", Boolean.FALSE)).get();
-        final User updatedUser = userManager.loadUserByUsername("someuser").get();
+        userManager.updateUser("someuser", Set.of("ADMIN"), Map.of("enabled", Boolean.FALSE)).join();
+        final User updatedUser = userManager.loadUserByUsername("someuser").join();
         assertThat(updatedUser.getName()).isEqualTo("someuser");
         assertThat(updatedUser.getRoles()).containsExactly("ADMIN");
         assertThat(updatedUser.getAttributes()).containsEntry("enabled", Boolean.FALSE);
@@ -55,27 +54,28 @@ public class InMemoryUserManagerTests {
     }
 
     @Test
-    public void testDeleteUser() throws ExecutionException, InterruptedException {
-        final User user = userManager.loadUserByUsername("someuser").get();
+    public void testDeleteUser() {
+        final User user = userManager.loadUserByUsername("someuser").join();
         assertThat(user.getName()).isEqualTo("someuser");
-        userManager.deleteUser("someuser").get();
-        assertThat(userManager.loadUserByUsername("someuser")).failsWithin(1, TimeUnit.SECONDS)
-                .withThrowableThat().havingRootCause().isInstanceOf(UserNotFoundException.class)
-                .withMessage("User does not exist: someuser");
+        userManager.deleteUser("someuser").join();
+
+        assertThatThrownBy(() -> userManager.loadUserByUsername("someuser").get())
+                .hasRootCauseInstanceOf(UserNotFoundException.class)
+                .hasRootCauseMessage("User does not exist: someuser");
     }
 
     @Test
-    public void testUpdatePassword() throws ExecutionException, InterruptedException {
-        userManager.changePassword("someuser", "newpassword").get();
-        final User updatedUser = userManager.loadUserByUsername("someuser").get();
+    public void testUpdatePassword() {
+        userManager.changePassword("someuser", "newpassword").join();
+        final User updatedUser = userManager.loadUserByUsername("someuser").join();
         assertThat(updatedUser.getName()).isEqualTo("someuser");
         assertThat(updatedUser.hasAttribute("credentials")).isTrue();
         final JSONObject updatedUserJSON = updatedUser.toJSON();
         final JSONObject updatedCredentialsJSON = updatedUserJSON.getJSONObject("attributes")
                 .getJSONObject("credentials");
         assertThat(updatedCredentialsJSON.getString("username")).isEqualTo("someuser");
-        assertThat(BCRYPT_PASSWORD_ENCODER.matches("newpassword",
-                updatedCredentialsJSON.getString("password"))).isTrue();
+        assertThat(updatedCredentialsJSON.getString("password")).matches(encryptedPassword ->
+                BCRYPT_PASSWORD_ENCODER.matches("newpassword", encryptedPassword));
     }
 
     @Test
