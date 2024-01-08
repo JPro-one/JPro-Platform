@@ -4,7 +4,7 @@ import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
-import one.jpro.platform.auth.routing.OAuth2Filter;
+import one.jpro.platform.auth.routing.AuthOAuth2Filter;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
@@ -92,7 +92,7 @@ public class OAuthApp extends BaseOAuthApp {
      * @return A {@link Filter} object configured for OAuth2 authentication flow.
      */
     private Filter oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
-        return OAuth2Filter.create(openIDAuthProvider, user -> {
+        return AuthOAuth2Filter.create(openIDAuthProvider, user -> {
             setUser(user);
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);

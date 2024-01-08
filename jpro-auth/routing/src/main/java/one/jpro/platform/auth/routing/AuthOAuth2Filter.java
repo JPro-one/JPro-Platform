@@ -18,7 +18,7 @@ import java.util.function.Function;
  *
  * @author Besmir Beqiri
  */
-public interface OAuth2Filter {
+public interface AuthOAuth2Filter {
 
     /**
      * Creates {@link Route} filter from a given {@link OAuth2AuthenticationProvider},

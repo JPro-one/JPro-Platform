@@ -19,7 +19,7 @@ import java.util.function.Function;
  *
  * @author Besmir Beqiri
  */
-public interface JWTFilter {
+public interface AuthJwtFilter {
 
     /**
      * Creates {@link Route} filter from a given {@link OAuth2AuthenticationProvider},

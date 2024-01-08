@@ -9,7 +9,7 @@ import one.jpro.platform.auth.example.login.page.ErrorPage;
 import one.jpro.platform.auth.example.login.page.LoginPage;
 import one.jpro.platform.auth.example.login.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
-import one.jpro.platform.auth.routing.OAuth2Filter;
+import one.jpro.platform.auth.routing.AuthOAuth2Filter;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
@@ -71,7 +71,7 @@ public class GoogleLoginApp extends RouteApp {
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
                 .filter(DevFilter.create())
-                .filter(OAuth2Filter.create(googleAuthProvider, user -> {
+                .filter(AuthOAuth2Filter.create(googleAuthProvider, user -> {
                     setUser(user);
                     return Response.redirect("/user/signed-in");
                 }, error -> Response.node(new ErrorPage(error))));
