@@ -7,6 +7,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+import java.util.ResourceBundle;
+
 /**
  * This class represents a login pane. It is designed to provide a user interface for login functionality.
  * The pane includes labels, text fields for username and password, and a submit button.
@@ -30,28 +33,48 @@ public class LoginPane extends VBox {
 
     /**
      * Constructs a new LoginPane with the specified credentials.
+     * This constructor uses a default resource bundle for localization.
      *
-     * @param credentials the credentials object to bind to the username and password fields
+     * @param credentials The {@code UsernamePasswordCredentials} object
+     *                    containing the credentials for the login.
+     *                    This object cannot be {@code null}.
+     * @throws NullPointerException if {@code credentials} is {@code null}.
      */
     public LoginPane(@NotNull UsernamePasswordCredentials credentials) {
+        this(credentials, ResourceBundle.getBundle("one.jpro.platform.auth.core.basic.login-pane"));
+    }
+
+    /**
+     * Constructs a new LoginPane with the specified credentials and
+     * a resource bundle for localization.
+     *
+     * @param credentials the {@code UsernamePasswordCredentials} object containing the credentials for the login
+     * @param langBundle  the {@code ResourceBundle} used for localizing the UI text
+     * @throws NullPointerException if either {@code credentials} or {@code langBundle} is {@code null}.
+     */
+    public LoginPane(@NotNull UsernamePasswordCredentials credentials,
+                     @NotNull ResourceBundle langBundle) {
+        Objects.requireNonNull(credentials, "Credentials cannot be null");
+        Objects.requireNonNull(langBundle, "Language bundle cannot be null");
+
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
-        headerLabel = new Label("Basic Login Form");
+        headerLabel = new Label(langBundle.getString("label.header"));
         headerLabel.getStyleClass().add("header-label");
 
-        usernameLabel = new Label("Username :");
+        usernameLabel = new Label(langBundle.getString("label.username"));
         usernameLabel.getStyleClass().add("username-label");
         usernameField = new TextField();
         usernameField.getStyleClass().add("username-field");
         credentials.usernameProperty().bind(usernameField.textProperty());
 
-        passwordLabel = new Label("Password :");
+        passwordLabel = new Label(langBundle.getString("label.password"));
         passwordLabel.getStyleClass().add("password-label");
         passwordField = new PasswordField();
         passwordField.getStyleClass().add("password-field");
         credentials.passwordProperty().bind(passwordField.textProperty());
 
-        submitButton = new Button("Sign In");
+        submitButton = new Button(langBundle.getString("button.submit"));
         submitButton.getStyleClass().add("submit-button");
         submitButton.setDefaultButton(true);
 
