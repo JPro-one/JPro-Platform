@@ -488,4 +488,6 @@ dependencies {
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player
 ./gradlew jpro-routing:example:jproRun -Psample=colors
 ./gradlew jpro-routing:example:jproRun -Psample=test
+./gradlew jpro-webrtc:example:jproRun
+./gradlew jpro-sipjs:example:jproRun
 ```
