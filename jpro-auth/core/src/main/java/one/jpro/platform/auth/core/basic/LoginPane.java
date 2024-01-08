@@ -23,7 +23,7 @@ public class LoginPane extends VBox {
 
     private final Label headerLabel;
     private final Label usernameLabel;
-    private final TextField usernameTextField;
+    private final TextField usernameField;
     private final Label passwordLabel;
     private final PasswordField passwordField;
     private final Button submitButton;
@@ -41,9 +41,9 @@ public class LoginPane extends VBox {
 
         usernameLabel = new Label("Username :");
         usernameLabel.getStyleClass().add("username-label");
-        usernameTextField = new TextField();
-        usernameTextField.getStyleClass().add("username-field");
-        credentials.usernameProperty().bind(usernameTextField.textProperty());
+        usernameField = new TextField();
+        usernameField.getStyleClass().add("username-field");
+        credentials.usernameProperty().bind(usernameField.textProperty());
 
         passwordLabel = new Label("Password :");
         passwordLabel.getStyleClass().add("password-label");
@@ -55,7 +55,7 @@ public class LoginPane extends VBox {
         submitButton.getStyleClass().add("submit-button");
         submitButton.setDefaultButton(true);
 
-        getChildren().addAll(headerLabel, usernameLabel, usernameTextField, passwordLabel, passwordField, submitButton);
+        getChildren().addAll(headerLabel, usernameLabel, usernameField, passwordLabel, passwordField, submitButton);
     }
 
     /**
@@ -84,8 +84,8 @@ public class LoginPane extends VBox {
      * @return the username text field
      */
     @NotNull
-    public final TextField getUsernameTextField() {
-        return usernameTextField;
+    public final TextField getUsernameField() {
+        return usernameField;
     }
 
     /**
