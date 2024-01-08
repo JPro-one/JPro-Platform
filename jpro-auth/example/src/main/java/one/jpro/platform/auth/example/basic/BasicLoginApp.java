@@ -65,7 +65,7 @@ public class BasicLoginApp extends RouteApp {
     ObservableMap<String, String> session;
 
     public BasicLoginApp() {
-        userManager.createUser(new UsernamePasswordCredentials("user", "password"),
+        userManager.createUser(new UsernamePasswordCredentials("admin", "password"),
                 Set.of(), Map.of("enabled", Boolean.TRUE)).join();
     }
 

@@ -17,6 +17,8 @@ public class LoginPage extends Page {
         final var loginPane = new LoginPane(credentials);
         loginPane.getStyleClass().add("basic");
         loginPane.getSubmitButton().setOnAction(event -> AuthBasicFilter.authorize(loginPane, authProvider));
+        loginPane.getUsernameField().setPromptText("admin");
+        loginPane.getPasswordField().setPromptText("password");
 
         getChildren().add(loginPane);
     }
