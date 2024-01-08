@@ -8,28 +8,37 @@ public class VideoFrame extends HTMLView {
 
     private WebAPI webAPI;
     JSVariable elem;
+
+    JSVariable videoElem;
+
+
     public VideoFrame(WebAPI webAPI) {
         super("<video autoplay playsinline ></video>");
         this.webAPI = webAPI;
         elem = webAPI.getHTMLViewElement(this);
+        videoElem = webAPI.executeScriptWithVariable(elem.getName()+".firstElementChild");
 
         setPrefSize(100,100);
 
         widthProperty().addListener((observable, oldValue, newValue) -> {
-            webAPI.executeScript(elem.getName()+".firstElementChild.width = "+newValue.intValue()+";");
+            webAPI.executeScript(videoElem.getName()+".width = "+newValue.intValue()+";");
         });
         heightProperty().addListener((observable, oldValue, newValue) -> {
-            webAPI.executeScript(elem.getName()+".firstElementChild.height = "+newValue.intValue()+";");
+            webAPI.executeScript(videoElem.getName()+".height = "+newValue.intValue()+";");
         });
+    }
+
+    public JSVariable getVideoElem() {
+        return videoElem;
     }
 
     public void setStream(MediaStream stream) {
         stream.js.thenAccept(s -> {
-            webAPI.executeScript(elem.getName()+".firstElementChild.srcObject = "+s.getName()+";");
+            webAPI.executeScript(videoElem.getName()+".srcObject = "+s.getName()+";");
         });
     }
 
     public void setStream(JSVariable stream) {
-        webAPI.executeScript(elem.getName()+".firstElementChild.srcObject = "+stream.getName()+";");
+        webAPI.executeScript(videoElem.getName()+".srcObject = "+stream.getName()+";");
     }
 }
