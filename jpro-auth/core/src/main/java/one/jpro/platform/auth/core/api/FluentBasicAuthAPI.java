@@ -1,5 +1,6 @@
 package one.jpro.platform.auth.core.api;
 
+import one.jpro.platform.auth.core.basic.UserManager;
 import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 
 import java.util.Map;
@@ -12,13 +13,20 @@ import java.util.Set;
  */
 public class FluentBasicAuthAPI implements FluentBasicAuth {
 
+    private UserManager userManager;
     private Set<String> roles;
     private Map<String, Object> attributes;
     private String authorizationPath = BasicAuthenticationProvider.DEFAULT_AUTHORIZATION_PATH;
 
     @Override
-    public FluentBasicAuth roles(Set<String> roles) {
-        this.roles = roles;
+    public FluentBasicAuth userManager(UserManager userManager) {
+        this.userManager = userManager;
+        return this;
+    }
+
+    @Override
+    public FluentBasicAuth roles(String... roles) {
+        this.roles = Set.of(roles);
         return this;
     }
 
@@ -36,7 +44,7 @@ public class FluentBasicAuthAPI implements FluentBasicAuth {
 
     @Override
     public BasicAuthenticationProvider create() {
-        final var basicAuthProvider = new BasicAuthenticationProvider(roles, attributes);
+        final var basicAuthProvider = new BasicAuthenticationProvider(userManager, roles, attributes);
         basicAuthProvider.setAuthorizationPath(authorizationPath);
         return basicAuthProvider;
     }

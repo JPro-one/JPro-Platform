@@ -1,10 +1,14 @@
 package one.jpro.platform.auth.core.basic.provider;
 
-import one.jpro.platform.auth.core.authentication.*;
+import one.jpro.platform.auth.core.authentication.AuthenticationException;
+import one.jpro.platform.auth.core.authentication.AuthenticationProvider;
+import one.jpro.platform.auth.core.authentication.CredentialValidationException;
+import one.jpro.platform.auth.core.authentication.User;
+import one.jpro.platform.auth.core.basic.UserManager;
+import one.jpro.platform.auth.core.basic.UserNotFoundException;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +32,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     public static final String DEFAULT_AUTHORIZATION_PATH = "/auth/basic";
 
     @NotNull
+    private UserManager userManager;
+    @NotNull
     private String authorizationPath = DEFAULT_AUTHORIZATION_PATH;
     @Nullable
     private Set<String> roles;
@@ -37,11 +43,14 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
     /**
      * Constructs a new {@code BasicAuthenticationProvider} with specified roles and attributes.
      *
-     * @param roles      the set of roles to be associated with the authenticated user, may be {@code null}
-     * @param attributes the map of attributes to be associated with the authenticated user, may be {@code null}
+     * @param userManager the user manager to be used for authentication
+     * @param roles       the set of roles to be associated with the authenticated user, may be {@code null}
+     * @param attributes  the map of attributes to be associated with the authenticated user, may be {@code null}
      */
-    public BasicAuthenticationProvider(@Nullable final Set<String> roles,
+    public BasicAuthenticationProvider(@NotNull final UserManager userManager,
+                                       @Nullable final Set<String> roles,
                                        @Nullable final Map<String, Object> attributes) {
+        this.userManager = userManager;
         this.roles = roles;
         this.attributes = attributes;
     }
@@ -53,7 +62,6 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
      * @return a {@code CompletableFuture} that, when completed, provides the authenticated {@code User}
      * @throws CredentialValidationException if the credentials are not valid
      */
-    @NotNull
     @Override
     public CompletableFuture<User> authenticate(@NotNull final UsernamePasswordCredentials credentials)
             throws CredentialValidationException {
@@ -64,16 +72,62 @@ public class BasicAuthenticationProvider implements AuthenticationProvider<Usern
             return CompletableFuture.failedFuture(ex);
         }
 
-        JSONObject userJSON = new JSONObject();
-        userJSON.put(User.KEY_NAME, credentials.getUsername());
-        userJSON.put(User.KEY_ROLES, new JSONArray(roles));
+        return getUserManager().loadUserByUsername(credentials.getUsername())
+                .thenComposeAsync(user -> {
+                    final JSONObject attributesJSON = user.toJSON().getJSONObject(User.KEY_ATTRIBUTES);
+                    if (attributesJSON.has("credentials")) {
+                        final JSONObject credentialsJSON = attributesJSON.getJSONObject("credentials");
+                        final String username = credentialsJSON.getString("username");
+                        final String encodedPassword = credentialsJSON.getString("password");
 
-        JSONObject authJSON = new JSONObject();
-        authJSON.put("password", BCRYPT_PASSWORD_ENCODER.encode(credentials.getPassword()));
-        userJSON.put(User.KEY_ATTRIBUTES, new JSONObject(attributes).put("auth", authJSON));
+                        if (username.equals(credentials.getUsername())
+                                && BCRYPT_PASSWORD_ENCODER.matches(credentials.getPassword(), encodedPassword)) {
+                            final JSONObject authJSON = new JSONObject();
+                            authJSON.put("type", "basic");
+                            authJSON.put("username", username);
+                            authJSON.put("password", encodedPassword);
 
-        final User user = Authentication.create(userJSON);
-        return CompletableFuture.completedFuture(user);
+                            final JSONObject userJSON = user.toJSON();
+                            userJSON.put(User.KEY_ROLES, roles);
+                            userJSON.put(User.KEY_ATTRIBUTES, new JSONObject(attributes).put("auth", authJSON));
+                            return CompletableFuture.completedFuture(new User(userJSON));
+                        } else {
+                            return CompletableFuture.failedFuture(
+                                    new AuthenticationException("Invalid username or password"));
+                        }
+                    } else {
+                        return CompletableFuture.failedFuture(
+                                new AuthenticationException("User has no credentials"));
+                    }
+                })
+                .exceptionallyCompose(throwable -> {
+                    final Throwable rootCause = throwable.getCause();
+                    if (rootCause instanceof UserNotFoundException) {
+                        return CompletableFuture.failedFuture(
+                                new AuthenticationException("Invalid username", rootCause));
+                    } else {
+                        return CompletableFuture.failedFuture(rootCause);
+                    }
+                });
+    }
+
+    /**
+     * Gets the user manager associated with this authentication provider.
+     *
+     * @return the user manager
+     */
+    @NotNull
+    public UserManager getUserManager() {
+        return userManager;
+    }
+
+    /**
+     * Sets the user manager to be associated with this authentication provider.
+     *
+     * @param userManager the user manager
+     */
+    public void setUserManager(@NotNull final UserManager userManager) {
+        this.userManager = userManager;
     }
 
     /**

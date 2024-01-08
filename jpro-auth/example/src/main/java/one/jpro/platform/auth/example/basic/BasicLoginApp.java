@@ -5,8 +5,10 @@ import com.jpro.webapi.WebAPI;
 import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.authentication.User;
-import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
+import one.jpro.platform.auth.core.basic.InMemoryUserManager;
+import one.jpro.platform.auth.core.basic.UserManager;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
+import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.auth.example.basic.page.ErrorPage;
 import one.jpro.platform.auth.example.basic.page.LoginPage;
 import one.jpro.platform.auth.example.basic.page.SignedInPage;
@@ -20,6 +22,7 @@ import one.jpro.platform.sessions.SessionManager;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,13 +53,21 @@ import java.util.Set;
  */
 public class BasicLoginApp extends RouteApp {
 
+    private final UserManager userManager = new InMemoryUserManager();
+
     private final BasicAuthenticationProvider basicAuthProvider = AuthAPI.basicAuth()
-            .roles(Set.of("USER", "ADMIN"))
+            .userManager(userManager)
+            .roles("USER", "ADMIN")
             .create();
     private final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials();
 
     private static final SessionManager sessionManager = new SessionManager("basic-login-app");
     ObservableMap<String, String> session;
+
+    public BasicLoginApp() {
+        userManager.createUser(new UsernamePasswordCredentials("user", "password"),
+                Set.of("USER"), Map.of("enabled", Boolean.TRUE)).join();
+    }
 
     @Override
     public Route createRoute() {

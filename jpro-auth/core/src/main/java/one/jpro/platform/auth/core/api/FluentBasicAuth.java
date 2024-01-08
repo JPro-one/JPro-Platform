@@ -1,9 +1,9 @@
 package one.jpro.platform.auth.core.api;
 
+import one.jpro.platform.auth.core.basic.UserManager;
 import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Fluent Basic (username and password) Authentication interface.
@@ -13,12 +13,20 @@ import java.util.Set;
 public interface FluentBasicAuth {
 
     /**
+     * Set the user manager.
+     *
+     * @param userManager the user manager
+     * @return self
+     */
+    FluentBasicAuth userManager(UserManager userManager);
+
+    /**
      * Set the roles.
      *
      * @param roles the roles
      * @return self
      */
-    FluentBasicAuth roles(Set<String> roles);
+    FluentBasicAuth roles(String... roles);
 
     /**
      * Set the attributes.
