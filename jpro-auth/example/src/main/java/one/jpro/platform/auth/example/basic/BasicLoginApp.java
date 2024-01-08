@@ -84,11 +84,11 @@ public class BasicLoginApp extends RouteApp {
                 .and(Route.get("/", request -> Response.node(new LoginPage(basicAuthProvider, credentials))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .filter(DevFilter.create())
                 .filter(AuthBasicFilter.create(basicAuthProvider, credentials, user -> {
                     setUser(user);
                     return Response.redirect("/user/signed-in");
-                }, error -> Response.node(new ErrorPage(error))));
+                }, error -> Response.node(new ErrorPage(error))))
+                .filter(DevFilter.create());
     }
 
     public final User getUser() {

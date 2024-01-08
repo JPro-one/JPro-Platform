@@ -75,11 +75,11 @@ public class OAuthApp extends BaseOAuthApp {
                                 .and(get("/google", request -> Response.node(new AuthProviderDiscoveryPage(this, googleAuth))))
                                 .and(get("/microsoft", request -> Response.node(new AuthProviderDiscoveryPage(this, microsoftAuth))))
                                 .and(get("/keycloak", request -> Response.node(new AuthProviderDiscoveryPage(this, keycloakAuth))))))
-                .filter(DevFilter.create())
-                .filter(StatisticsFilter.create())
                 .filter(oauth2Filter(googleAuth))
                 .filter(oauth2Filter(microsoftAuth))
-                .filter(oauth2Filter(keycloakAuth));
+                .filter(oauth2Filter(keycloakAuth))
+                .filter(StatisticsFilter.create())
+                .filter(DevFilter.create());
     }
 
     /**
