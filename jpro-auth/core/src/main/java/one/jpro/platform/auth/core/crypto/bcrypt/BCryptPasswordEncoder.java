@@ -1,3 +1,17 @@
+// Copyright 2002-2011 the original author or authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package one.jpro.platform.auth.core.crypto.bcrypt;
 
 import one.jpro.platform.auth.core.crypto.PasswordEncoder;
@@ -9,12 +23,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The {@link BCryptPasswordEncoder} class implements the {@link PasswordEncoder} interface,
- * providing password encoding and validation using BCrypt hashing algorithm. This class allows
- * configuring the strength and version of the BCrypt algorithm and uses a secure random instance
- * for salt generation.
+ * Implementation of PasswordEncoder that uses the BCrypt strong hashing function. Clients
+ * can optionally supply a "version" ($2a, $2b, $2y) and a "strength" (a.k.a. log rounds
+ * in BCrypt) and a SecureRandom instance. The larger the strength parameter the more work
+ * will have to be done (exponentially) to hash the passwords. The default value is 10.
  *
+ * @author Dave Syer
  * @author Besmir Beqiri
+ * @see <a href="https://github.com/spring-projects/spring-security/blob/main/crypto/src/main/java/org/springframework/security/crypto/bcrypt/BCryptPasswordEncoder.java">Spring Security BCryptPasswordEncoder implementation</a>
  */
 public class BCryptPasswordEncoder implements PasswordEncoder {
 
