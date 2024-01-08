@@ -12,7 +12,6 @@ import one.jpro.platform.sipjs.api.options.InvitationAcceptOptions;
 import one.jpro.platform.sipjs.api.options.InviterOptions;
 import one.jpro.platform.sipjs.api.options.UserAgentOptions;
 import one.jpro.platform.sipjs.api.session.Session;
-import one.jpro.platform.sipjs.example.SceneGraphSerializer;
 import one.jpro.platform.webrtc.VideoFrame;
 
 public class AliceAndBobPage extends VBox {
