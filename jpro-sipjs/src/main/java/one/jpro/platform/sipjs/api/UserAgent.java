@@ -58,11 +58,10 @@ public class UserAgent {
     }
 
     /**
-     * Creates a new user agent.
-     *
-     * @param options The options for the user agent.
-     * @param webapi  The webapi.
-     * @return The user agent.
+     * Makes a call to the given target.
+     * @param target The target.
+     * @param options The options.
+     * @return A completable future that completes when the call is established.
      */
     public CompletableFuture<Inviter> makeCall(String target, InviterOptions options) {
         return JSVariable.promiseToFuture(webapi, startPromise).thenApply((v) -> {
