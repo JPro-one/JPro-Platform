@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * In memory UserManager tests.
@@ -59,8 +59,9 @@ public class InMemoryUserManagerTests {
         final User user = userManager.loadUserByUsername("someuser").get();
         assertThat(user.getName()).isEqualTo("someuser");
         userManager.deleteUser("someuser").get();
-        assertThatExceptionOfType(UserNotFoundException.class)
-                .isThrownBy(() -> userManager.loadUserByUsername("someuser").get());
+        assertThat(userManager.loadUserByUsername("someuser")).failsWithin(1, TimeUnit.SECONDS)
+                .withThrowableThat().havingRootCause().isInstanceOf(UserNotFoundException.class)
+                .withMessage("User does not exist: someuser");
     }
 
     @Test
