@@ -1,50 +1,49 @@
-package one.jpro.platform.auth.core.test;
+package one.jpro.platform.auth.core.basic;
 
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
-import one.jpro.platform.auth.core.authentication.UsernamePasswordCredentials;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static one.jpro.platform.auth.core.utils.AuthUtils.BASE64_ENCODER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * UsernamePasswordCredentials tests.
  *
  * @author Besmir Beqiri
  */
-public class UsernamePasswordCredentialsTest {
+public class UsernamePasswordCredentialsTests {
 
     @Test
     public void nullUsernameShouldMakeValidationThrowsException() {
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(null, "password");
 
-        Exception exception = Assertions.assertThrowsExactly(CredentialValidationException.class,
-                () -> credentials.validate(null));
-        assertEquals("username cannot be null or blank", exception.getMessage());
+        assertThatExceptionOfType(CredentialValidationException.class)
+                .isThrownBy(() -> credentials.validate(null))
+                .withMessage("Username cannot be null or blank");
     }
 
     @Test
     public void blankUsernameShouldMakeValidationThrowsException() {
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(" ", "password");
 
-        Exception exception = Assertions.assertThrowsExactly(CredentialValidationException.class,
-                () -> credentials.validate(null));
-        assertEquals("username cannot be null or blank", exception.getMessage());
+        assertThatExceptionOfType(CredentialValidationException.class)
+                .isThrownBy(() -> credentials.validate(null))
+                .withMessage("Username cannot be null or blank");
     }
 
     @Test
     public void missingPasswordShouldMakeValidationThrowsException() {
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("username", null);
 
-        Exception exception = Assertions.assertThrowsExactly(CredentialValidationException.class,
-                () -> credentials.validate(null));
-        assertEquals("password cannot be null", exception.getMessage());
+        assertThatExceptionOfType(CredentialValidationException.class)
+                .isThrownBy(() -> credentials.validate(null))
+                .withMessage("Password cannot be null");
     }
 
     @Test
@@ -53,14 +52,14 @@ public class UsernamePasswordCredentialsTest {
                 new UsernamePasswordCredentials("name@mail.com", "password");
         UsernamePasswordCredentials credentials2 =
                 new UsernamePasswordCredentials("name@mail.com", "password");
-        assertEquals(credentials1, credentials2);
+        assertThat(credentials1).isEqualTo(credentials2);
     }
 
     @Test
     public void testHashCodeMethod() {
         UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials("some_username", "some_password");
-        assertEquals(Objects.hash(credentials.getUsername(), credentials.getPassword()), credentials.hashCode());
+        assertThat(credentials.hashCode()).isEqualTo(Objects.hash(credentials.getUsername(), credentials.getPassword()));
     }
 
     @Test
@@ -70,7 +69,7 @@ public class UsernamePasswordCredentialsTest {
 
         String authHeader = "Basic " + BASE64_ENCODER.encodeToString((credentials.getUsername() + ":"
                 + credentials.getPassword()).getBytes(StandardCharsets.UTF_8));
-        assertEquals(authHeader, credentials.toHttpAuthorization());
+        assertThat(credentials.toHttpAuthorization()).isEqualTo(authHeader);
     }
 
     @Test
@@ -78,10 +77,17 @@ public class UsernamePasswordCredentialsTest {
         UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials("some_username", "some_password");
 
+        JSONObject credentialsJSON = credentials.toJSON();
+        assertThat(credentialsJSON.has("username")).isTrue();
+        assertThat(credentialsJSON.has("password")).isTrue();
+        assertThat(BCRYPT_PASSWORD_ENCODER.matches("some_password",
+                credentialsJSON.getString("password"))).isTrue();
+
         JSONObject json = new JSONObject();
         json.put("username", credentials.getUsername());
-        json.put("password", credentials.getPassword());
+        json.put("password", BCRYPT_PASSWORD_ENCODER.encode(credentials.getPassword()));
 
-        assertTrue(credentials.toJSON().similar(json));
+        assertThat(credentialsJSON.getString("username")).isEqualTo(json.getString("username"));
+        assertThat(credentialsJSON.getString("password")).isNotEqualTo(json.getString("password"));
     }
 }

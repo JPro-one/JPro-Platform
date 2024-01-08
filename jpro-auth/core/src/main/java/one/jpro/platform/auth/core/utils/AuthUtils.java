@@ -1,5 +1,7 @@
 package one.jpro.platform.auth.core.utils;
 
+import one.jpro.platform.auth.core.crypto.PasswordEncoder;
+import one.jpro.platform.auth.core.crypto.bcrypt.BCryptPasswordEncoder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -17,10 +19,11 @@ import java.util.stream.Collectors;
  *
  * @author Besmir Beqiri
  */
-public final class AuthUtils {
+public interface AuthUtils {
 
-    public static final Base64.Encoder BASE64_ENCODER = Base64.getUrlEncoder();
-    public static final Base64.Decoder BASE64_DECODER = Base64.getUrlDecoder();
+    Base64.Encoder BASE64_ENCODER = Base64.getUrlEncoder();
+    Base64.Decoder BASE64_DECODER = Base64.getUrlDecoder();
+    PasswordEncoder BCRYPT_PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     /**
      * Checks that the specified string is not {@code null} and
@@ -42,7 +45,7 @@ public final class AuthUtils {
      * @throws NullPointerException     if {@code str} is {@code null}
      * @throws IllegalArgumentException if {@code str} is blank
      */
-    public static String requireNonNullOrBlank(String str, String message) {
+    static String requireNonNullOrBlank(String str, String message) {
         if (str == null)
             throw new NullPointerException(message);
         if (str.isBlank()) {
@@ -57,7 +60,7 @@ public final class AuthUtils {
      * @param json a JSON object
      * @return a query string
      */
-    public static String jsonToQuery(JSONObject json) {
+    static String jsonToQuery(JSONObject json) {
         return json.toMap().entrySet().stream()
                 .filter(entry -> entry.getValue() != null && !entry.getValue().toString().isBlank())
                 .map(entry -> URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8) + "=" +
@@ -71,7 +74,7 @@ public final class AuthUtils {
      * @param query a query string
      * @return a JSON object
      */
-    public static JSONObject queryToJson(String query) {
+    static JSONObject queryToJson(String query) {
         if (query == null) {
             return null;
         }
@@ -110,7 +113,7 @@ public final class AuthUtils {
      * @param value   the value to check
      * @return <code>true</code> if the specified headers contain the specified value
      */
-    public static boolean containsValue(HttpHeaders headers, String value) {
+    static boolean containsValue(HttpHeaders headers, String value) {
         return headers.map().entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
                 .anyMatch(s -> s.contains(value));
@@ -123,7 +126,7 @@ public final class AuthUtils {
      * @param response       the HTTP response
      * @param scopeSeparator the scope separator
      */
-    public static void processNonStandardHeaders(JSONObject json, HttpResponse<String> response, String scopeSeparator) {
+    static void processNonStandardHeaders(JSONObject json, HttpResponse<String> response, String scopeSeparator) {
         // inspect the response header for the non-standard:
         // X-OAuth-Scopes and X-Accepted-OAuth-Scopes
         final var xOAuthScopes = response.headers().firstValue("X-OAuth-Scopes");
@@ -146,7 +149,7 @@ public final class AuthUtils {
      * @param json the JSON object
      * @return the error description
      */
-    public static String extractErrorDescription(JSONObject json) {
+    static String extractErrorDescription(JSONObject json) {
         if (json == null) {
             return "null";
         }
@@ -171,11 +174,7 @@ public final class AuthUtils {
      * @param str the percent encoded <code>String</code>
      * @return expanded form of the input, for example, "foo%20bar" becomes "foo bar"
      */
-    public static String decodePercent(String str) {
+    static String decodePercent(String str) {
         return URLDecoder.decode(str, StandardCharsets.UTF_8);
-    }
-
-    private AuthUtils() {
-        // Hide the default constructor.
     }
 }

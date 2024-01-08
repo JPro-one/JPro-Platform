@@ -1,12 +1,10 @@
-package one.jpro.platform.auth.example.login.page;
+package one.jpro.platform.auth.example.basic.page;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
-import one.jpro.platform.auth.example.login.GoogleLoginApp;
-import simplefx.experimental.parts.FXFuture;
+import one.jpro.platform.auth.example.basic.BasicLoginApp;
 
 /**
  * Signed in page.
@@ -15,7 +13,7 @@ import simplefx.experimental.parts.FXFuture;
  */
 public class SignedInPage extends Page {
 
-    public SignedInPage(GoogleLoginApp app, OAuth2AuthenticationProvider authProvider) {
+    public SignedInPage(BasicLoginApp app) {
         final var headerLabel = new Label("Not signed in.");
         headerLabel.getStyleClass().add("header-label");
 
@@ -23,7 +21,7 @@ public class SignedInPage extends Page {
         if (user == null) {
             getChildren().add(headerLabel);
         } else {
-            headerLabel.setText("Signed in as user: " + user.getName());
+            headerLabel.setText("Signed in as: " + user.getName());
 
             final var userInfoTextArea = new TextArea();
             userInfoTextArea.setWrapText(true);
@@ -32,12 +30,10 @@ public class SignedInPage extends Page {
             userInfoTextArea.setText(user.toJSON().toString());
 
             final var signOutButton = new Button("Sign out");
-            signOutButton.setOnAction(event ->
-                    FXFuture.fromJava(authProvider.revoke(app.getUser(), "access_token"))
-                            .onSuccess(nothing -> {
-                                app.setUser(null);
-                                app.getSessionManager().gotoURL("/");
-                            }));
+            signOutButton.setOnAction(event -> {
+                app.setUser(null);
+                app.getSessionManager().gotoURL("/");
+            });
             signOutButton.setDefaultButton(true);
 
             final var pane = new VBox(headerLabel, userInfoTextArea, signOutButton);

@@ -72,7 +72,6 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
      * @return a {@link CompletableFuture} holding the {@link User} object.
      */
     @Override
-    @NotNull
     public CompletableFuture<User> authenticate(@NotNull final TokenCredentials credentials) {
         try {
             credentials.validate(null);
@@ -199,6 +198,6 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
         userJSON.put(Authentication.KEY_ATTRIBUTES, new JSONObject().put("auth", jwtJSON));
 
         // Create authentication instance
-        return Authentication.create(userJSON);
+        return new User(userJSON);
     }
 }

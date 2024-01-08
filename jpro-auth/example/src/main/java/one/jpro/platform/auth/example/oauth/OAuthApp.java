@@ -4,7 +4,7 @@ import atlantafx.base.theme.CupertinoLight;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
-import one.jpro.platform.auth.routing.OAuth2Filter;
+import one.jpro.platform.auth.routing.AuthOAuth2Filter;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
@@ -56,30 +56,30 @@ public class OAuthApp extends BaseOAuthApp {
                 .create(getStage());
 
         return Route.empty()
-                .and(get("/", (r) -> Response.node(new LoginPage(this))))
+                .and(get("/", request -> Response.node(new LoginPage(this))))
                 .path("/user", Route.empty()
-                        .and(get("/console", (r) -> Response.node(new SignedInUserPage(this))))
-                        .and(get("/auth-info", (r) -> Response.node(new AuthInfoPage(this))))
-                        .and(get("/introspect-token", (r) -> Response.node(new IntrospectionTokenPage(this))))
-                        .and(get("/refresh-token", (r) -> Response.node(new RefreshTokenPage(this))))
-                        .and(get("/revoke-token", (r) -> Response.node(new LoginPage(this))))
-                        .and(get("/user-info", (r) -> Response.node(new UserInfoPage(this))))
-                        .and(get("/logout", (r) -> Response.node(new LoginPage(this)))))
+                        .and(get("/console", request -> Response.node(new SignedInUserPage(this))))
+                        .and(get("/auth-info", request -> Response.node(new AuthInfoPage(this))))
+                        .and(get("/introspect-token", request -> Response.node(new IntrospectionTokenPage(this))))
+                        .and(get("/refresh-token", request -> Response.node(new RefreshTokenPage(this))))
+                        .and(get("/revoke-token", request -> Response.node(new LoginPage(this))))
+                        .and(get("/user-info", request -> Response.node(new UserInfoPage(this))))
+                        .and(get("/logout", request -> Response.node(new LoginPage(this)))))
                 .path("/auth", Route.empty()
-                        .and(get("/error", (r) -> Response.node(new ErrorPage(this)))))
+                        .and(get("/error", request -> Response.node(new ErrorPage(this)))))
                 .path("/provider", Route.empty()
-                        .and(get("/google", (r) -> Response.node(new AuthProviderPage(this, googleAuth))))
-                        .and(get("/microsoft", (r) -> Response.node(new AuthProviderPage(this, microsoftAuth))))
-                        .and(get("/keycloak", (r) -> Response.node(new AuthProviderPage(this, keycloakAuth))))
+                        .and(get("/google", request -> Response.node(new AuthProviderPage(this, googleAuth))))
+                        .and(get("/microsoft", request -> Response.node(new AuthProviderPage(this, microsoftAuth))))
+                        .and(get("/keycloak", request -> Response.node(new AuthProviderPage(this, keycloakAuth))))
                         .path("/discovery", Route.empty()
-                                .and(get("/google", (r) -> Response.node(new AuthProviderDiscoveryPage(this, googleAuth))))
-                                .and(get("/microsoft", (r) -> Response.node(new AuthProviderDiscoveryPage(this, microsoftAuth))))
-                                .and(get("/keycloak", (r) -> Response.node(new AuthProviderDiscoveryPage(this, keycloakAuth))))))
-                .filter(DevFilter.create())
-                .filter(StatisticsFilter.create())
+                                .and(get("/google", request -> Response.node(new AuthProviderDiscoveryPage(this, googleAuth))))
+                                .and(get("/microsoft", request -> Response.node(new AuthProviderDiscoveryPage(this, microsoftAuth))))
+                                .and(get("/keycloak", request -> Response.node(new AuthProviderDiscoveryPage(this, keycloakAuth))))))
                 .filter(oauth2Filter(googleAuth))
                 .filter(oauth2Filter(microsoftAuth))
-                .filter(oauth2Filter(keycloakAuth));
+                .filter(oauth2Filter(keycloakAuth))
+                .filter(StatisticsFilter.create())
+                .filter(DevFilter.create());
     }
 
     /**
@@ -92,7 +92,7 @@ public class OAuthApp extends BaseOAuthApp {
      * @return A {@link Filter} object configured for OAuth2 authentication flow.
      */
     private Filter oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
-        return OAuth2Filter.create(openIDAuthProvider, user -> {
+        return AuthOAuth2Filter.create(openIDAuthProvider, user -> {
             setUser(user);
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);

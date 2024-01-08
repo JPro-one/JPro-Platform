@@ -23,11 +23,12 @@ javafx {
 }
 
 def examples = [
-        'login' : 'one.jpro.platform.auth.example.login.LoginApp',
-        'oauth' : 'one.jpro.platform.auth.example.oauth.OAuthApp'
+        'basic-login' : 'one.jpro.platform.auth.example.basic.BasicLoginApp',
+        'google-login': 'one.jpro.platform.auth.example.login.GoogleLoginApp',
+        'oauth'       : 'one.jpro.platform.auth.example.oauth.OAuthApp'
 ]
 
-mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["login"]
+mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["google-login"]
 
 application {
     mainClass = "$mainClassName"

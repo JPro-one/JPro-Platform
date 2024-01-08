@@ -1,6 +1,7 @@
 dependencies {
     api project(":jpro-auth:core")
     api project(":jpro-routing:core")
+    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"

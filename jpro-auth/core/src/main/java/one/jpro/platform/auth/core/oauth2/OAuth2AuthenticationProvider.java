@@ -12,6 +12,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.jpro.webapi.WebAPI;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.*;
+import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.auth.core.http.HttpServer;
 import one.jpro.platform.auth.core.jwt.JWTOptions;
 import one.jpro.platform.auth.core.jwt.TokenCredentials;
@@ -99,9 +100,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * once the HTTP server is ready to handle the callback, or with an exception
      * if an error occurs during the process.
      */
-    @NotNull
     public CompletableFuture<String> authorizeUrl(@NotNull final OAuth2Credentials credentials) {
-        Objects.requireNonNull(credentials, "credentials cannot be null");
+        Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
 
         // Generate the authorization URL and open it in the default browser
         final String authorizeUrl = api.authorizeURL(credentials
@@ -127,7 +127,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @return a future that will complete with the authenticated user
      */
     @Override
-    @NotNull
     public CompletableFuture<User> authenticate(@NotNull final Credentials credentials) {
         try {
             if (credentials instanceof UsernamePasswordCredentials usernamePasswordCredentials) {
@@ -489,7 +488,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         // TODO: Configure roles
 
         // Create authentication instance
-        return Authentication.create(userJSON);
+        return new User(userJSON);
     }
 
     /**

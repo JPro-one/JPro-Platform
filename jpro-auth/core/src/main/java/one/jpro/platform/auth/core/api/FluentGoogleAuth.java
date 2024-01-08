@@ -38,7 +38,7 @@ public interface FluentGoogleAuth {
      * Create a Google authentication provider.
      *
      * @param stage the stage
-     * @return a {@link GoogleAuthenticationProvider} instance.
+     * @return a {@link GoogleAuthenticationProvider} instance
      */
     GoogleAuthenticationProvider create(Stage stage);
 }

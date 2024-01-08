@@ -19,5 +19,5 @@ public interface AuthenticationProvider<T extends Credentials> {
      *                    information for authenticating the user.
      * @return the result future
      */
-    @NotNull CompletableFuture<User> authenticate(@NotNull T credentials);
+    CompletableFuture<User> authenticate(@NotNull T credentials);
 }

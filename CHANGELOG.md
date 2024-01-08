@@ -1,5 +1,16 @@
 ### 0.2.11-SNAPSHOT (TBD)
 
+### Features
+* Added `basic` authentication API to the `jpro-auth-core` module. This API can be used to authenticate users
+  with a username and password. Checkout the `jpro-auth-core` module documentation for more details or the provided
+  example on how to use it.
+* Added `AuthFilter` to the `jpro-auth-routing` module. This filter can be used to authenticate users with a 
+  username and password. Checkout the `jpro-auth-routing` module documentation for more details or the provided
+  example on how to use it.
+
+### Improvements
+* Improved the `jpro-auth-core` module documentation.
+
 ----------------------
 ### 0.2.10 (December 29, 2023)
 

@@ -464,7 +464,8 @@ dependencies {
 
 - As desktop application
 ```shell
-./gradlew jpro-auth:example:run -Psample=login
+./gradlew jpro-auth:example:run -Psample=basic-login
+./gradlew jpro-auth:example:run -Psample=google-login
 ./gradlew jpro-auth:example:run -Psample=oauth
 ./gradlew jpro-file:example:run -Psample=file-uploader
 ./gradlew jpro-file:example:run -Psample=file-uploader
@@ -477,7 +478,8 @@ dependencies {
 
 - As JPro application
 ```shell
-./gradlew jpro-auth:example:jproRun -Psample=login
+./gradlew jpro-auth:example:jproRun -Psample=basic-login
+./gradlew jpro-auth:example:jproRun -Psample=google-login
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
