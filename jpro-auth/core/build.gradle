@@ -1,3 +1,7 @@
+plugins {
+    id "org.javamodularity.moduleplugin" version "1.8.12"
+}
+
 dependencies {
     implementation project(":internal:openlink")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
@@ -6,11 +10,6 @@ dependencies {
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     api "org.json:json:$JSON_VERSION"
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-    testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
-    testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
 publishing {

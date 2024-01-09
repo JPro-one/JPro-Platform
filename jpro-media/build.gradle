@@ -8,13 +8,9 @@ dependencies {
     api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     api "org.json:json:$JSON_VERSION"
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testImplementation "org.testfx:testfx-junit5:$TESTFX_VERSION"
     testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
-    testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
-    testImplementation "org.hamcrest:hamcrest:$HAMCREST_VERSION"
     testRuntimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8'
-    testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
 compileJava {

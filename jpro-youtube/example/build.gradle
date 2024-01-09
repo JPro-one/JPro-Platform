@@ -7,7 +7,6 @@ mainClassName = "one.jpro.platform.youtube.example.YoutubeExample"
 
 application {
     mainClass = "$mainClassName"
-    mainModule = moduleName
 }
 
 dependencies {

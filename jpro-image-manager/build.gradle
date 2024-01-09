@@ -2,9 +2,4 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "org.json:json:$JSON_VERSION"
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-    testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-    testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
-    testImplementation "org.mockito:mockito-junit-jupiter:$MOCKITO_VERSION"
 }

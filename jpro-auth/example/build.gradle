@@ -32,5 +32,4 @@ mainClassName = project.hasProperty("sample") ? examples[project.getProperties()
 
 application {
     mainClass = "$mainClassName"
-    mainModule = moduleName
 }

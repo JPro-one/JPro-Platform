@@ -7,7 +7,6 @@ mainClassName = "one.jpro.platform.sipjs.example.SIPJSApp"
 
 application {
     mainClass = "$mainClassName"
-    mainModule = moduleName
 }
 
 dependencies {

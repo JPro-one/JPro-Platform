@@ -41,8 +41,16 @@ configure(subprojects.findAll { it.name != 'example' }) {
 
     dependencies {
         testImplementation "org.junit.jupiter:junit-jupiter:$JUNIT_VERSION"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+
         testImplementation "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+        testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
+        testImplementation "org.mockito:mockito-junit-jupiter:$MOCKITO_VERSION"
+        testImplementation "org.hamcrest:hamcrest:$HAMCREST_VERSION"
+        testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
+        testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
     }
 
     test {

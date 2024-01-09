@@ -8,7 +8,6 @@ mainClassName = "one.jpro.platform.webrtc.example.videoroom.VideoRoomApp"
 
 application {
     mainClass = "$mainClassName"
-    mainModule = moduleName
 }
 
 dependencies {

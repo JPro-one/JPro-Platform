@@ -19,5 +19,4 @@ mainClassName = 'one.jpro.platform.htmlscrollpane.example.HTMLScrollPaneSample'
 
 application {
     mainClass = "$mainClassName"
-    mainModule = moduleName
 }

@@ -29,8 +29,6 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
         api "SANDEC:jnodes:$JNODES_VERSION"
         api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
         api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
-        testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
     }
 }
 
@@ -75,9 +73,6 @@ configure([project(':jpro-routing:dev')]) {
 configure([project(':jpro-routing:core-test')]) {
     dependencies {
         implementation project(':jpro-routing:core')
-
-        testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
     }
 }
 
@@ -105,13 +100,12 @@ configure(project(':jpro-routing:example')) {
     }
 
     def examples = [
-            'colors' : 'example.colors.ColorsApp',
-            'test' : 'example.scala.TestWebApplication'
+            'colors': 'example.colors.ColorsApp',
+            'test'  : 'example.scala.TestWebApplication'
     ]
     mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["colors"]
 
     application {
         mainClass = "$mainClassName"
-        mainModule = moduleName
     }
 }

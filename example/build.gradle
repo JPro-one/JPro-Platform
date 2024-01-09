@@ -24,7 +24,6 @@ javafx {
 
 application {
   mainClass = "$mainClassName"
-  mainModule = moduleName
   applicationDefaultJvmArgs = [
           "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
   ]
