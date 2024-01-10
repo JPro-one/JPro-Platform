@@ -9,6 +9,7 @@
   example on how to use it.
 
 ### Improvements
+* Updated JPro dependencies to version `2024.1.0`.
 * Improved the `jpro-auth-core` module documentation.
 
 ----------------------
