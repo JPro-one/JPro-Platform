@@ -1,5 +1,6 @@
 plugins {
     id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
+    id "org.javamodularity.moduleplugin" version "$MODULE_PLUGIN_VERSION"
     id 'org.openjfx.javafxplugin'
     id 'jpro-gradle-plugin'
 }
@@ -23,8 +24,9 @@ javafx {
 }
 
 application {
-  mainClass = "$mainClassName"
-  applicationDefaultJvmArgs = [
-          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
-  ]
+    mainClass = "$mainClassName"
+    mainModule = 'one.jpro.platform.example'
+    applicationDefaultJvmArgs = [
+            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
+    ]
 }

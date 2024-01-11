@@ -22,24 +22,17 @@ javafx {
 }
 
 def examples = [
-        'media-player' : 'one.jpro.platform.media.example.MediaPlayerSample',
-        'media-recorder' : 'one.jpro.platform.media.example.MediaRecorderSample',
-        'media-recorder-and-player' : 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
+        'media-player'             : 'one.jpro.platform.media.example.MediaPlayerSample',
+        'media-recorder'           : 'one.jpro.platform.media.example.MediaRecorderSample',
+        'media-recorder-and-player': 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
 ]
 
 mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["media-recorder-and-player"]
 
-run {
-    doFirst {
-        jvmArgs = [
-                '--add-exports', 'javafx.base/com.sun.javafx.event=one.jpro.platform.media'
-        ]
-    }
-}
-
 application {
-  mainClass = "$mainClassName"
-  applicationDefaultJvmArgs = [
-          "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
-  ]
+    mainClass = "$mainClassName"
+    mainModule = 'one.jpro.platform.media.example'
+    applicationDefaultJvmArgs = [
+            "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"
+    ]
 }
