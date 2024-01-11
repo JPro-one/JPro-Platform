@@ -3,12 +3,6 @@ plugins {
     id 'jpro-gradle-plugin'
 }
 
-mainClassName = "one.jpro.platform.sipjs.example.SIPJSApp"
-
-application {
-    mainClass = "$mainClassName"
-}
-
 dependencies {
     implementation project(':jpro-sipjs')
     implementation project(':jpro-routing:core')
@@ -18,4 +12,11 @@ dependencies {
 javafx {
     version = "$JAVAFX_VERSION"
     modules = ['javafx.graphics', 'javafx.controls', 'javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web']
+}
+
+mainClassName = "one.jpro.platform.sipjs.example.SIPJSApp"
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = 'one.jpro.platform.sipjs.example'
 }

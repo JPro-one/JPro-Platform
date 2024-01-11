@@ -28,6 +28,7 @@ mainClassName = project.hasProperty("sample") ? examples[project.getProperties()
 
 application {
     mainClass = "$mainClassName"
+    mainModule = "one.jpro.platform.file.example"
     applicationDefaultJvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
     ]

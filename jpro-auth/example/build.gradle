@@ -32,4 +32,5 @@ mainClassName = project.hasProperty("sample") ? examples[project.getProperties()
 
 application {
     mainClass = "$mainClassName"
+    mainModule = "one.jpro.platform.auth.example"
 }

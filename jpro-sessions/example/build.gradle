@@ -20,4 +20,5 @@ mainClassName = 'one.jpro.platform.sessions.example.SessionManagerSample'
 
 application {
     mainClass = "$mainClassName"
+    mainModule = "one.jpro.platform.sessions.example"
 }

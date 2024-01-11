@@ -3,12 +3,6 @@ plugins {
     id 'jpro-gradle-plugin'
 }
 
-mainClassName = "one.jpro.platform.youtube.example.YoutubeExample"
-
-application {
-    mainClass = "$mainClassName"
-}
-
 dependencies {
     implementation project(':jpro-youtube')
 }
@@ -16,4 +10,11 @@ dependencies {
 javafx {
     version = "$JAVAFX_VERSION"
     modules = ['javafx.graphics', 'javafx.controls', 'javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web']
+}
+
+mainClassName = "one.jpro.platform.youtube.example.YoutubeExample"
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = "one.jpro.platform.youtube.example"
 }
