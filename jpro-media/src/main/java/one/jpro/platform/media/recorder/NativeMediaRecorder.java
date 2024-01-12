@@ -12,14 +12,17 @@ import org.bytedeco.javacv.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -142,6 +145,11 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
             semaphore.acquire();
         } catch (InterruptedException ex) {
             setError("Exception during the enabling of video and audio capture.", ex);
+        }
+
+        final var micDevices = getAudioInputDevices();
+        for (Mixer.Info micDevice : micDevices) {
+            logger.info("Mic device: {}", micDevice.getName());
         }
 
         // Set recorder ready
@@ -508,6 +516,44 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
             Platform.runLater(() -> setError(new MediaRecorderException(message, ex)));
         }
         logger.error(message, ex);
+    }
+
+    /**
+     * Retries the list of available audio input devices used as microphones.
+     *
+     * @return the list of available audio input devices
+     */
+    private List<Mixer.Info> getAudioInputDevices() {
+        final Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
+        List<Mixer.Info> result = new ArrayList<>();
+        for (Mixer.Info info : mixerInfos) {
+            final Mixer mixer = AudioSystem.getMixer(info);
+            final Line.Info[] lineInfos = mixer.getTargetLineInfo();
+            // Only prints out info is it is a Microphone
+            if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
+                logger.debug(DIVIDER_LINE);
+                for (Line.Info lineInfo : lineInfos) {
+                    logger.debug("Mic Line Name: " + info.getName()); // The audio device name
+                    logger.debug("Mic Line Description: " + info.getDescription()); // The type of audio device
+                    printSupportedAudioFormats(lineInfo);
+                }
+                logger.debug(DIVIDER_LINE);
+                result.add(info);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Print to terminal the supported audio formats.
+     *
+     * @param lineInfo the line info
+     */
+    private void printSupportedAudioFormats(final Line.Info lineInfo) {
+        if (lineInfo instanceof final DataLine.Info dataLineInfo) {
+            logger.debug("Supported Audio Formats:");
+            Arrays.stream(dataLineInfo.getFormats()).forEach(format -> logger.debug("{}", format));
+        }
     }
 
     /**
