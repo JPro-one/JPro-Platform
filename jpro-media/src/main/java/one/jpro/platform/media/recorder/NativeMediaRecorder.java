@@ -96,7 +96,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
 
         // Initialize audio frame grabber
         micGrabber = new FFmpegFrameGrabber(getDefaultAudioInputDevice());
-        micGrabber.setFormat("avfoundation");
+        micGrabber.setFormat(getDefaultAudioInputFormat());
         micGrabber.setAudioChannels(DEFAULT_AUDIO_CHANNELS);
         micGrabber.setSampleRate(DEFAULT_AUDIO_SAMPLE_RATE);
 
@@ -590,6 +590,43 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
         }
 
         return audioDevice;
+    }
+
+    /**
+     * Gets the default audio input format based on the operating system.
+     * <p>
+     * This method determines the appropriate audio input format for use with {@link FFmpegFrameGrabber},
+     * based on the operating system where the application is running:
+     * </p>
+     * <ul>
+     * <li>Windows: Returns "dshow" for DirectShow.</li>
+     * <li>macOS: Returns "avfoundation" for AVFoundation.</li>
+     * <li>Linux: Returns "alsa" for ALSA.</li>
+     * <li>Other: Returns "default" as a fallback,
+     * but this should be adjusted based on specific requirements or environment.</li>
+     * </ul>
+     *
+     * @return the format string for audio input format
+     */
+    public static String getDefaultAudioInputFormat() {
+        String OS = System.getProperty("os.name").toLowerCase();
+        String format;
+
+        if (OS.contains("win")) {
+            // Windows - DirectShow
+            format = "dshow";
+        } else if (OS.contains("mac")) {
+            // macOS - AVFoundation
+            format = "avfoundation";
+        } else if (OS.contains("nix") || OS.contains("nux") || OS.contains("aix")) {
+            // Linux - ALSA
+            format = "alsa";
+        } else {
+            // Unknown OS - fallback
+            format = "default";
+        }
+
+        return format;
     }
 
 }
