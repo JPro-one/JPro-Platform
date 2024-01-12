@@ -147,11 +147,6 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
             setError("Exception during the enabling of video and audio capture.", ex);
         }
 
-        final var micDevices = getAudioInputDevices();
-        for (Mixer.Info micDevice : micDevices) {
-            logger.info("Mic device: {}", micDevice.getName());
-        }
-
         // Set recorder ready
         recorderReady = true;
 
@@ -519,44 +514,6 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
     }
 
     /**
-     * Retries the list of available audio input devices used as microphones.
-     *
-     * @return the list of available audio input devices
-     */
-    private List<Mixer.Info> getAudioInputDevices() {
-        final Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
-        List<Mixer.Info> result = new ArrayList<>();
-        for (Mixer.Info info : mixerInfos) {
-            final Mixer mixer = AudioSystem.getMixer(info);
-            final Line.Info[] lineInfos = mixer.getTargetLineInfo();
-            // Only prints out info is it is a Microphone
-            if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
-                logger.debug(DIVIDER_LINE);
-                for (Line.Info lineInfo : lineInfos) {
-                    logger.debug("Mic Line Name: " + info.getName()); // The audio device name
-                    logger.debug("Mic Line Description: " + info.getDescription()); // The type of audio device
-                    printSupportedAudioFormats(lineInfo);
-                }
-                logger.debug(DIVIDER_LINE);
-                result.add(info);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Print to terminal the supported audio formats.
-     *
-     * @param lineInfo the line info
-     */
-    private void printSupportedAudioFormats(final Line.Info lineInfo) {
-        if (lineInfo instanceof final DataLine.Info dataLineInfo) {
-            logger.debug("Supported Audio Formats:");
-            Arrays.stream(dataLineInfo.getFormats()).forEach(format -> logger.debug("{}", format));
-        }
-    }
-
-    /**
      * Prints to terminal the capture device description. This includes details about the camera and
      * microphone being used for recording.
      */
@@ -581,7 +538,8 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
 
         // Print microphone device description
         if (micGrabber != null) {
-            String microphoneDescription = micGrabber.getFormat() + " - " + getDefaultAudioInputDevice();
+            String microphoneDescription = "format: " + micGrabber.getFormat()
+                    + " - device: " + getDefaultAudioInputDevice();
             logger.debug("Microphone Device Description: " + microphoneDescription);
             logger.debug("Audio Channels: " + micGrabber.getAudioChannels());
             logger.debug("Sample Rate: " + micGrabber.getSampleRate());
@@ -622,8 +580,8 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
 
         String audioDevice;
         if (OS.contains("win")) {
-            // Windows - use device name or leave it null for default
-            audioDevice = "null"; // TODO: might need to adjust this based on the windows system
+            // Windows - use device name
+            audioDevice = "audio=" + getAudioInputDevices().get(1).getName();
         } else if (OS.contains("mac")) {
             // macOS - default device
             audioDevice = ":0";
@@ -636,6 +594,35 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
         }
 
         return audioDevice;
+    }
+
+    /**
+     * Retries the list of available audio input devices used as microphones.
+     *
+     * @return the list of available audio input devices
+     */
+    private static List<Mixer.Info> getAudioInputDevices() {
+        final Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
+        List<Mixer.Info> result = new ArrayList<>();
+        for (Mixer.Info info : mixerInfos) {
+            final Mixer mixer = AudioSystem.getMixer(info);
+            final Line.Info[] lineInfos = mixer.getTargetLineInfo();
+            // Only prints out info is it is a Microphone
+            if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
+                logger.debug(DIVIDER_LINE);
+                for (Line.Info lineInfo : lineInfos) {
+                    logger.debug("Mic Line Name: " + info.getName()); // The audio device name
+                    logger.debug("Mic Line Description: " + info.getDescription()); // The type of audio device
+                    logger.debug("Supported Audio Formats:");
+                    if (lineInfo instanceof final DataLine.Info dataLineInfo) {
+                        Arrays.stream(dataLineInfo.getFormats()).forEach(format -> logger.debug("{}", format));
+                    }
+                }
+                logger.debug(DIVIDER_LINE);
+                result.add(info);
+            }
+        }
+        return result;
     }
 
     /**
