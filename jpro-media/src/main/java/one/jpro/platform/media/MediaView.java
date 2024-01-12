@@ -15,10 +15,10 @@ import one.jpro.platform.media.player.impl.FXMediaPlayerView;
 import one.jpro.platform.media.player.impl.WebMediaPlayer;
 import one.jpro.platform.media.player.impl.WebMediaPlayerView;
 import one.jpro.platform.media.recorder.MediaRecorder;
-import one.jpro.platform.media.recorder.impl.NativeMediaRecorder;
-import one.jpro.platform.media.recorder.impl.NativeMediaRecorderView;
-import one.jpro.platform.media.recorder.impl.WebMediaRecorder;
-import one.jpro.platform.media.recorder.impl.WebMediaRecorderView;
+import one.jpro.platform.media.recorder.NativeMediaRecorder;
+import one.jpro.platform.media.recorder.NativeMediaRecorderView;
+import one.jpro.platform.media.recorder.WebMediaRecorder;
+import one.jpro.platform.media.recorder.WebMediaRecorderView;
 
 /**
  * Provides a view of {@link MediaSource} being played by a {@link MediaPlayer}

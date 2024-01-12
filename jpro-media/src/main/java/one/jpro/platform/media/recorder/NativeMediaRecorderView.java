@@ -1,4 +1,4 @@
-package one.jpro.platform.media.recorder.impl;
+package one.jpro.platform.media.recorder;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
@@ -6,7 +6,6 @@ import javafx.beans.property.*;
 import javafx.scene.image.ImageView;
 import one.jpro.platform.media.MediaEngine;
 import one.jpro.platform.media.MediaView;
-import one.jpro.platform.media.recorder.MediaRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

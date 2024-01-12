@@ -1,4 +1,4 @@
-package one.jpro.platform.media.recorder.impl;
+package one.jpro.platform.media.recorder;
 
 import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
@@ -8,8 +8,6 @@ import javafx.event.Event;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.WebMediaEngine;
 import one.jpro.platform.media.event.MediaRecorderEvent;
-import one.jpro.platform.media.recorder.MediaRecorder;
-import one.jpro.platform.media.recorder.MediaRecorderException;
 import org.json.JSONObject;
 
 import java.util.Objects;

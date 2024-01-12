@@ -1,4 +1,4 @@
-package one.jpro.platform.media.recorder.impl;
+package one.jpro.platform.media.recorder;
 
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -6,8 +6,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.event.MediaRecorderEvent;
-import one.jpro.platform.media.recorder.MediaRecorder;
-import one.jpro.platform.media.recorder.MediaRecorderException;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.*;
@@ -30,7 +28,7 @@ import java.util.stream.Stream;
  *
  * @author Besmir Beqiri
  */
-public final class NativeMediaRecorder extends BaseMediaRecorder {
+public class NativeMediaRecorder extends BaseMediaRecorder {
 
     private static final Logger logger = LoggerFactory.getLogger(NativeMediaRecorder.class);
 

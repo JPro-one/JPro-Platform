@@ -1,4 +1,4 @@
-package one.jpro.platform.media.recorder.impl;
+package one.jpro.platform.media.recorder;
 
 import com.sun.javafx.event.EventHandlerManager;
 import javafx.application.Platform;
@@ -12,8 +12,6 @@ import javafx.event.EventHandler;
 import javafx.util.Duration;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.event.MediaRecorderEvent;
-import one.jpro.platform.media.recorder.MediaRecorder;
-import one.jpro.platform.media.recorder.MediaRecorderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
