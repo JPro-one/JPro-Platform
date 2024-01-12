@@ -14,11 +14,8 @@ import org.bytedeco.javacv.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.ShortBuffer;
 import java.nio.file.Files;
@@ -26,7 +23,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 /**
@@ -36,49 +32,48 @@ import java.util.stream.Stream;
  */
 public final class FXMediaRecorder extends BaseMediaRecorder {
 
-    private final Logger log = LoggerFactory.getLogger(FXMediaRecorder.class);
+    private static final Logger logger = LoggerFactory.getLogger(FXMediaRecorder.class);
 
     private static final Path RECORDING_PATH = Path.of(System.getProperty("user.home"),
             ".jpro", "video", "capture");
     private static final String DIVIDER_LINE =
-            CharBuffer.allocate(80).toString().replace( '\0', '*' );
+            CharBuffer.allocate(80).toString().replace('\0', '*');
 
     // Video resources
-    private static final int WEBCAM_DEVICE_INDEX = 0;
+    private static final int CAMERA_DEVICE_INDEX = 0; // Use the default system camera
+    private static final String MICROPHONE_DEVICE_NAME = ":0"; // Use the default system microphone
     private static final int FRAME_RATE = 30;
     private static final String MP4_FILE_EXTENSION = ".mp4";
-    private final FrameGrabber webcamGrabber;
-    private final JavaFXFrameConverter frameConverter;
-    private final ImageView frameView;
+    private FrameGrabber cameraGrabber;
+    private FFmpegFrameGrabber micGrabber;
+    private final JavaFXFrameConverter cameraFrameConverter;
+    private final ImageView cameraView;
     private double frameRate;
 
     // Audio resources
+    private static final int DEFAULT_AUDIO_CHANNELS = 1; // Mono audio
     private static final int DEFAULT_AUDIO_SAMPLE_RATE = 44100; // 44.1 KHz
-    private static final int DEFAULT_AUDIO_CHANNELS = 0; // no audioHz
-    private static final int DEFAULT_AUDIO_FRAME_SIZE = 1; // 1 byte
-    private AudioFormat audioFormat;
-    private TargetDataLine micLine;
-    private int audioSampleRate;
-    private int audioNumChannels;
 
     // Storage resources
     private FFmpegFrameRecorder recorder;
     private Path tempVideoFile;
 
     // Recording state
-    private volatile boolean recordingStarted = false;
-    private volatile boolean recordingStopped = false;
+    private volatile long startTime = 0;
+    private volatile boolean recording = false;
 
     // Concurrency and locking resources
     private final ThreadGroup scheduledThreadGroup = new ThreadGroup("Media Recorder thread pool");
     private int threadCounter;
     private final ExecutorService videoExecutorService;
-    private final ScheduledExecutorService audioExecutorService;
+    private final ExecutorService audioExecutorService;
     private final ExecutorService startStopRecordingExecutorService;
-    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
-    private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
+    private final Semaphore semaphore = new Semaphore(2);
 
+    /**
+     * Default constructor for FXMediaRecorder.
+     * Initializes the video and audio capture resources.
+     */
     public FXMediaRecorder() {
         // Set native log level to error
         avutil.av_log_set_level(avutil.AV_LOG_ERROR);
@@ -91,16 +86,22 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             return thread;
         };
         videoExecutorService = Executors.newSingleThreadExecutor(threadFactory);
-        audioExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        audioExecutorService = Executors.newSingleThreadExecutor(threadFactory);
         startStopRecordingExecutorService = Executors.newSingleThreadExecutor(threadFactory);
 
-        // Initialize webcam frame grabber
-        webcamGrabber = (isOsWindows()) ? new VideoInputFrameGrabber(WEBCAM_DEVICE_INDEX)
-                : new OpenCVFrameGrabber(WEBCAM_DEVICE_INDEX);
+        // Initialize camera frame grabber
+        cameraGrabber = (isOsWindows()) ? new VideoInputFrameGrabber(CAMERA_DEVICE_INDEX)
+                : new OpenCVFrameGrabber(CAMERA_DEVICE_INDEX);
         // Frame to JavaFX image converter
-        frameConverter = new JavaFXFrameConverter();
+        cameraFrameConverter = new JavaFXFrameConverter();
         // Use ImageView to show camera grabbed frames
-        frameView = new ImageView();
+        cameraView = new ImageView();
+
+        // Initialize audio frame grabber
+        micGrabber = new FFmpegFrameGrabber(MICROPHONE_DEVICE_NAME);
+        micGrabber.setFormat("avfoundation");
+        micGrabber.setAudioChannels(DEFAULT_AUDIO_CHANNELS);
+        micGrabber.setSampleRate(DEFAULT_AUDIO_SAMPLE_RATE);
 
         // Stop and release native resources on exit
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -114,192 +115,161 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                             .map(Path::toFile)
                             .forEach(File::delete);
                 } catch (IOException ex) {
-                    log.error(ex.getMessage(), ex);
+                    logger.error(ex.getMessage(), ex);
                 }
             }
         }));
     }
 
     ImageView getCameraView() {
-        return frameView;
+        return cameraView;
     }
 
     @Override
     public void enable() {
         if (recorderReady) {
-            log.info("Media recorder is already enabled.");
+            logger.info("Media recorder is already enabled.");
         } else {
-            log.debug("Enabling media recorder...");
-            // Camera frame grabber runnable
-            final Runnable frameGrabber = () -> {
-                try {
-                    // start the video capture
-                    webcamGrabber.start();
-                    frameRate = (webcamGrabber.getFrameRate() < FRAME_RATE) ? FRAME_RATE : webcamGrabber.getFrameRate();
-                    printCaptureDeviceDescription();
-                } catch (FrameGrabber.Exception ex) {
-                    setError("Exception during the enabling of video camera stream.", ex);
-                    release();
-                }
-
-                try {
-                    // start the audio capture
-                    enableAudioCapture();
-                } catch (LineUnavailableException ex) {
-                    setError("Exception on creating audio input line from the microphone.", ex);
-                    if (micLine != null) {
-                        micLine.close();
-                    }
-                }
-
-                // Set recorder ready
-                recorderReady = true;
-                Platform.runLater(() -> {
-                    // Set status to ready
-                    setStatus(Status.READY);
-
-                    // Fire ready event
-                    Event.fireEvent(FXMediaRecorder.this,
-                            new MediaRecorderEvent(FXMediaRecorder.this,
-                                    MediaRecorderEvent.MEDIA_RECORDER_READY));
-                });
-
-                // Start the camera frame grabbing, showing and recording task
-                try {
-                    while (recorderReady) {
-                        // effectively grab a single frame
-                        final Frame frame;
-                        readLock.lock();
-                        try {
-                            frame = webcamGrabber.grab();
-                        } finally {
-                            readLock.unlock();
-                        }
-
-                        if (frame != null) {
-                            // convert and show the frame
-                            updateCameraView(frameView, frameConverter.convert(frame));
-
-                            // write the webcam frame if recording started
-                            writeVideoFrame(frame);
-                        }
-                    }
-                } catch (FrameGrabber.Exception ex) {
-                    setError("Exception during camera stream frame grabbing.", ex);
-                    release();
-                }
-            };
-
-            videoExecutorService.execute(frameGrabber);
+            logger.debug("Enabling media recorder...");
+            enableVideoCapture();
+            enableAudioCapture();
         }
+
+        try {
+            // Wait for the video and audio capture to be enabled
+            semaphore.acquire();
+        } catch (InterruptedException ex) {
+            setError("Exception during the enabling of video and audio capture.", ex);
+        }
+
+        // Set recorder ready
+        recorderReady = true;
+
+        // Set status to ready
+        setStatus(Status.READY);
+
+        // Fire ready event
+        Event.fireEvent(FXMediaRecorder.this,
+                new MediaRecorderEvent(FXMediaRecorder.this,
+                        MediaRecorderEvent.MEDIA_RECORDER_READY));
     }
 
     /**
-     * Records a video frame.
+     * Initializes and starts video capture from the camera.
+     */
+    private void enableVideoCapture() {
+        logger.debug("Enabling video capture...");
+        // Camera frame grabber runnable
+        final Runnable frameGrabber = () -> {
+            try {
+                // Acquire the semaphore
+                semaphore.acquire();
+
+                // start the video capture
+                cameraGrabber.start();
+                frameRate = (cameraGrabber.getFrameRate() < FRAME_RATE) ? FRAME_RATE : cameraGrabber.getFrameRate();
+                printCaptureDeviceDescription();
+            } catch (FrameGrabber.Exception | InterruptedException ex) {
+                setError("Exception during the enabling of video stream from the camera.", ex);
+                release();
+            } finally {
+                // Release the semaphore
+                semaphore.release();
+                logger.debug("Video capture enabled.");
+            }
+
+            // Start the camera frame grabbing, showing and recording task
+            try {
+                while (recorderReady) {
+                    // effectively grab a single frame
+                    final Frame videoFrame = cameraGrabber.grabFrame();
+                    if (videoFrame != null) {
+                        // convert and show the frame
+                        updateCameraView(cameraView, cameraFrameConverter.convert(videoFrame));
+                        // write the webcam frame if recording started
+                        writeVideoFrame(videoFrame);
+                    }
+                }
+            } catch (FrameGrabber.Exception ex) {
+                setError("Exception during camera stream frame grabbing.", ex);
+                release();
+            }
+        };
+
+        videoExecutorService.execute(frameGrabber);
+    }
+
+    /**
+     * Initializes and starts audio capture from the microphone.
+     */
+    private void enableAudioCapture() {
+        logger.debug("Enabling audio capture...");
+        final Runnable audioSampleGrabber = () -> {
+            try {
+                // Acquire the semaphore
+                semaphore.acquire();
+
+                // start the audio capture
+                micGrabber.start();
+            } catch (FrameGrabber.Exception | InterruptedException ex) {
+                setError("Exception during the enabling of audio stream from the microphone.", ex);
+                release();
+            } finally {
+                // Release the semaphore
+                semaphore.release();
+                logger.debug("Audio capture enabled.");
+            }
+
+            try {
+                while (recorderReady) {
+                    // effectively grab a single frame
+                    final Frame audioFrame = micGrabber.grabSamples();
+                    if (audioFrame != null) {
+                        ShortBuffer audioData = (ShortBuffer) audioFrame.samples[0];
+                        short[] shorts = new short[audioData.limit()];
+                        audioData.get(shorts);
+                        audioData.flip();
+
+                        writeAudioSamples(audioData);
+                    }
+                }
+            } catch (FrameGrabber.Exception ex) {
+                setError("Exception during microphone stream frame grabbing.", ex);
+                release();
+            }
+        };
+
+        audioExecutorService.execute(audioSampleGrabber);
+    }
+
+    /**
+     * Records a single video frame.
      *
-     * @param frame the frame to record
+     * @param frame the video frame to be recorded.
      */
     private void writeVideoFrame(Frame frame) {
-        if (!recordingStopped && recorder != null) {
-            writeLock.lock();
+        if (recorder != null && recording) {
             try {
                 recorder.record(frame);
             } catch (FFmpegFrameRecorder.Exception ex) {
                 setError("Exception during video frame recording.", ex);
-            } finally {
-                writeLock.unlock();
             }
         }
     }
 
     /**
-     * Records an audio data.
+     * Records audio samples. This method is called for each audio sample captured from the microphone.
      *
-     * @throws LineUnavailableException if the mic line is unavailable
+     * @param audioSamples the buffer containing audio samples to be recorded
      */
-    private void enableAudioCapture() throws LineUnavailableException {
-        final Mixer.Info micDevice = getDefaultMicDevice();
-        if (micDevice != null) {
-            final Mixer micMixer = AudioSystem.getMixer(micDevice);
-            // Audio format: 44.1k sample rate, 16 bits, mono, signed, little endian
-            audioFormat = new AudioFormat(DEFAULT_AUDIO_SAMPLE_RATE, 16, 1, true, false);
-            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
-
-            if (micMixer.isLineSupported(dataLineInfo)) {
-                micLine = (TargetDataLine) micMixer.getLine(dataLineInfo);
-                micLine.open(audioFormat);
-                micLine.start();
-
-                audioSampleRate = (int) audioFormat.getSampleRate();
-                audioNumChannels = audioFormat.getChannels();
-            }
-
-            final Runnable audioSampleGrabber = () -> {
-                if (recordingStarted) {
-                    // Initialize audio buffer
-                    final int audioBufferSize = audioSampleRate * audioNumChannels;
-                    final byte[] audioBytes = new byte[audioBufferSize];
-
-                    // Read from the line
-                    int nBytesRead = 0;
-                    while (nBytesRead == 0) {
-                        nBytesRead = micLine.read(audioBytes, 0, micLine.available());
-                    }
-
-                    final int nSamplesRead = nBytesRead / 2;
-                    final short[] samples = new short[nSamplesRead];
-
-                    final ByteOrder byteOrder = audioFormat.isBigEndian() ?
-                            ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
-
-                    // Wrap our short[] into a ShortBuffer
-                    ByteBuffer.wrap(audioBytes).order(byteOrder).asShortBuffer().get(samples);
-                    ShortBuffer samplesBuff = ShortBuffer.wrap(samples, 0, nSamplesRead);
-
-//                    log.trace("Record audio samples: {}", nSamplesRead);
-
-                    // recorder audio data
-                    if (!recordingStopped && recorder != null) {
-                        writeLock.lock();
-                        try {
-                            recorder.recordSamples(audioSampleRate, audioNumChannels, samplesBuff);
-                        } catch (FFmpegFrameRecorder.Exception ex) {
-                            setError("Exception on recording the audio samples.", ex);
-                        } finally {
-                            writeLock.unlock();
-                        }
-                    }
-                }
-            };
-
-            final long period = (long) (1000.0 / frameRate);
-            audioExecutorService.scheduleAtFixedRate(audioSampleGrabber, 0, period, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    /**
-     * Retries the list of available audio input devices and returns the default microphone device.
-     *
-     * @return the default microphone device
-     */
-    private Mixer.Info getDefaultMicDevice() {
-        final Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
-        for (Mixer.Info info : mixerInfos) {
-            final Mixer mixer = AudioSystem.getMixer(info);
-            final Line.Info[] lineInfos = mixer.getTargetLineInfo();
-            // Only prints out info is it is a Microphone
-            if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
-                log.debug(DIVIDER_LINE);
-                for (Line.Info lineInfo : lineInfos) {
-                    log.debug("Mic Line Name: " + info.getName()); // The audio device name
-                    log.debug("Mic Line Description: " + info.getDescription()); // The type of audio device
-                    printSupportedAudioFormats(lineInfo);
-                }
-                log.debug(DIVIDER_LINE);
-                return info;
+    private void writeAudioSamples(ShortBuffer audioSamples) {
+        if (recorder != null && recording) {
+            try {
+                recorder.recordSamples(audioSamples);
+            } catch (FFmpegFrameRecorder.Exception ex) {
+                setError("Exception during audio samples recording.", ex);
             }
         }
-        return null;
     }
 
     @Override
@@ -310,13 +280,12 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 if (recorderReady) {
                     tempVideoFile = createTempFilename("video_", MP4_FILE_EXTENSION);
 
-                    recorder = new FFmpegFrameRecorder(tempVideoFile.toString(),
-                            webcamGrabber.getImageWidth(), webcamGrabber.getImageHeight());
+                    recorder = new FFmpegFrameRecorder(tempVideoFile.toString(), cameraGrabber.getImageWidth(),
+                            cameraGrabber.getImageHeight(), micGrabber.getAudioChannels());
                     recorder.setInterleaved(true);
                     recorder.setVideoOption("tune", "zerolatency"); // low latency for webcam streaming
                     recorder.setVideoOption("preset", "ultrafast"); // low cpu usage for the encoder
                     recorder.setVideoOption("crf", "28");           // video quality
-//                    recorder.setVideoBitrate(webcamGrabber.getVideoBitrate());
                     recorder.setVideoBitrate(8 * 1024 * 1024);      // 8 Mbps for 1080p
                     recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                     recorder.setFormat("mp4");
@@ -324,17 +293,15 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                     recorder.setGopSize((int) (frameRate * 2));
                     recorder.setAudioOption("crf", "0");            // no variable bitrate audio
                     recorder.setAudioQuality(0);                    // highest quality
-//                    recorder.setAudioBitrate(getAudioSampleRate() * getFrameSize() * getAudioChannels());
                     recorder.setAudioBitrate(192000);               // 192 kbps
                     recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-                    recorder.setSampleRate(getAudioSampleRate());
-                    recorder.setAudioChannels(getAudioChannels());
+                    recorder.setSampleRate(micGrabber.getSampleRate());
 
                     try {
                         // Enable recording
                         recorder.start();
-                        recordingStopped = false;
-                        recordingStarted = true;
+                        startTime = System.currentTimeMillis();
+                        recording = true;
 
                         Platform.runLater(() -> {
                             // Set status to recording
@@ -349,7 +316,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                         setError("Exception on starting the audio/video recorder.", ex);
                     }
                 } else {
-                    log.info("Please, enable the camera first!");
+                    logger.info("Please, enable the camera first!");
                 }
             };
 
@@ -357,7 +324,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         } else if (getStatus().equals(Status.PAUSED)) {
             if (recorderReady) {
                 // enable recording
-                recordingStarted = true;
+                recording = true;
 
                 // Set status to recording
                 setStatus(Status.RECORDING);
@@ -373,7 +340,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     @Override
     public void pause() {
         // Disable recording
-        recordingStarted = false;
+        recording = false;
 
         // Set status to paused
         setStatus(Status.PAUSED);
@@ -410,18 +377,14 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
      */
     private void stopRecording() {
         // Stop recording
-        recordingStarted = false;
-        recordingStopped = true;
+        recording = false;
 
         // Release video recorder resources
         if (recorder != null) {
-            writeLock.lock();
             try {
                 recorder.close(); // This call stops the recorder and releases all resources used by it.
             } catch (FrameRecorder.Exception ex) {
                 setError("Exception on stopping the audio/video recorder", ex);
-            } finally {
-                writeLock.unlock();
             }
         }
     }
@@ -431,19 +394,21 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
      */
     public void release() {
         recorderReady = false;
+        recording = false;
         releaseVideoResources();
         releaseAudioResources();
     }
 
     /**
-     * Release the video resources.
+     * Releases the resources associated with the video capture.
      */
     private void releaseVideoResources() {
         if (videoExecutorService != null && !videoExecutorService.isShutdown()) {
             try {
                 // release video grabber
-                if (webcamGrabber != null) {
-                    webcamGrabber.release();
+                if (cameraGrabber != null) {
+                    cameraGrabber.close();
+                    cameraGrabber = null;
                 }
 
                 // stop the video recoding service
@@ -457,65 +422,25 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
     }
 
     /**
-     * Release the audio resources.
+     * Releases the resources associated with the audio capture.
      */
     private void releaseAudioResources() {
         if (audioExecutorService != null && !audioExecutorService.isShutdown()) {
             try {
                 // release audio grabber
-                if (micLine != null) {
-                    micLine.close();
+                if (micGrabber != null) {
+                    micGrabber.close();
+                    micGrabber = null;
                 }
 
                 // stop the audio recording service
                 audioExecutorService.shutdown();
                 //noinspection ResultOfMethodCallIgnored
                 audioExecutorService.awaitTermination(100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException ex) {
+            } catch (FrameGrabber.Exception | InterruptedException ex) {
                 setError("Exception in stopping the audio frame capture service.", ex);
             }
         }
-    }
-
-    /**
-     * Obtains the audio sample rate from the specified audio format
-     * used for recoding. If not specified, then default value (44100) is returned.
-     *
-     * @return the audio sample rate
-     */
-    private int getAudioSampleRate() {
-        if (audioFormat == null) return DEFAULT_AUDIO_SAMPLE_RATE;
-
-        final int sampleRate = (int) audioFormat.getSampleRate();
-        return (sampleRate == AudioSystem.NOT_SPECIFIED) ? DEFAULT_AUDIO_SAMPLE_RATE : sampleRate;
-    }
-
-    /**
-     * Obtains the number of audio channels from the specified audio format
-     * used for recoding. If not specified, then <code>0</code> is returned,
-     * meaning there no audio input device available.
-     *
-     * @return the number of audio channels (1 for mono, 2 for stereo, etc.)
-     */
-    private int getAudioChannels() {
-        if (audioFormat == null) return DEFAULT_AUDIO_CHANNELS;
-
-        final int audioChannels = audioFormat.getChannels();
-        return (audioChannels == AudioSystem.NOT_SPECIFIED) ? DEFAULT_AUDIO_CHANNELS : audioChannels;
-    }
-
-    /**
-     * Obtains the frame size in bytes. For compressed formats, the return value is
-     * the frame size of the uncompressed audio data. {@code AudioSystem.NOT_SPECIFIED}
-     * is returned when the frame size is not defined for this audio format.
-     *
-     * @return the number of bytes per frame, or {@code AudioSystem.NOT_SPECIFIED}
-     */
-    private int getFrameSize() {
-        if (audioFormat == null) return DEFAULT_AUDIO_FRAME_SIZE;
-
-        final int frameSize = audioFormat.getFrameSize();
-        return (frameSize == AudioSystem.NOT_SPECIFIED) ? DEFAULT_AUDIO_FRAME_SIZE : frameSize;
     }
 
     /**
@@ -552,14 +477,14 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
             try {
                 Files.createDirectories(parentDir);
             } catch (IOException ex) {
-                log.error(ex.getMessage(), ex);
+                logger.error(ex.getMessage(), ex);
             }
         }
         return tempFile;
     }
 
     /**
-     * Check if the OS is Windows.
+     * Checks if the operating system is Windows.
      *
      * @return true if the OS is Windows, false otherwise
      */
@@ -580,36 +505,50 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         } else {
             Platform.runLater(() -> setError(new MediaRecorderException(message, ex)));
         }
-        log.error(message, ex);
+        logger.error(message, ex);
     }
 
     /**
-     * Print to terminal the capture device description.
+     * Prints to terminal the capture device description. This includes details about the camera and
+     * microphone being used for recording.
      */
     private void printCaptureDeviceDescription() {
-        log.debug(DIVIDER_LINE);
-        if (isOsWindows()) {
+        logger.debug(DIVIDER_LINE);
+
+        // Print camera device description
+        if (cameraGrabber != null) {
             try {
-                log.debug("Capture devices: " + Arrays.toString(VideoInputFrameGrabber.getDeviceDescriptions()));
+                if (isOsWindows()) {
+                    logger.debug("Camera Device Description: " +
+                            Arrays.toString(VideoInputFrameGrabber.getDeviceDescriptions()));
+                }
+
+                logger.debug("Image Width: " + cameraGrabber.getImageWidth());
+                logger.debug("Image Height: " + cameraGrabber.getImageHeight());
+                logger.debug("Frame Rate: " + frameRate);
             } catch (FrameGrabber.Exception ex) {
-                log.error(ex.getMessage(), ex);
+                logger.error("Error getting camera device description: " + ex.getMessage(), ex);
             }
         }
-        log.debug("Capture Device Info:");
-        log.debug("Image Width: " + webcamGrabber.getImageWidth());
-        log.debug("Image Height: " + webcamGrabber.getImageHeight());
-        log.debug("Frame Rate: " + frameRate);
+
+        // Print microphone device description
+        if (micGrabber != null) {
+            String microphoneDescription = micGrabber.getFormat() + " - " + MICROPHONE_DEVICE_NAME;
+            logger.debug("Microphone Device Description: " + microphoneDescription);
+            logger.debug("Audio Channels: " + micGrabber.getAudioChannels());
+            logger.debug("Sample Rate: " + micGrabber.getSampleRate());
+        }
     }
 
     /**
-     * Print to terminal the supported audio formats.
-     *
-     * @param lineInfo the line info
+     * Adjusts the timestamp of the recording to match the system time. Ensures synchronization
+     * between video and audio streams.
      */
-    private void printSupportedAudioFormats(final Line.Info lineInfo) {
-        if (lineInfo instanceof final DataLine.Info dataLineInfo) {
-            log.debug("Supported Audio Formats:");
-            Arrays.stream(dataLineInfo.getFormats()).forEach(format -> log.debug("{}", format));
+    private void adjustTimestamp() {
+        long t = 1000 * (System.currentTimeMillis() - startTime);
+        if (t > recorder.getTimestamp()) {
+            logger.debug("Correct recorder timestamp: " + t);
+            recorder.setTimestamp(t);
         }
     }
 }
