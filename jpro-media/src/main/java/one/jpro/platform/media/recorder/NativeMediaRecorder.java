@@ -119,12 +119,17 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
         }));
     }
 
-    ImageView getCameraView() {
+    /**
+     * Returns the {@link ImageView} instance used to display video frames captured from the camera.
+     *
+     * @return <code>ImageView</code> instance showing the captured video frames
+     */
+    public final ImageView getCameraView() {
         return cameraView;
     }
 
     @Override
-    public void enable() {
+    public final void enable() {
         if (recorderReady) {
             logger.info("Media recorder is already enabled.");
         } else {
@@ -243,7 +248,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
     /**
      * Records a single video frame.
      *
-     * @param frame the video frame to be recorded.
+     * @param frame the video frame to be recorded
      */
     private void writeVideoFrame(Frame frame) {
         if (recorder != null && recording) {
@@ -271,7 +276,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
     }
 
     @Override
-    public void start() {
+    public final void start() {
         if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
             final Runnable startRecordingRunnable = () -> {
                 // Start the recording if the camera is enabled
@@ -336,7 +341,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
     }
 
     @Override
-    public void pause() {
+    public final void pause() {
         // Disable recording
         recording = false;
 
@@ -350,7 +355,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
     }
 
     @Override
-    public void stop() {
+    public final void stop() {
         final Runnable startRecordingRunnable = () -> {
             stopRecording();
 
@@ -390,7 +395,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
     /**
      * Stop the acquisition from the camera and microphone and release all the resources.
      */
-    public void release() {
+    public final void release() {
         recorderReady = false;
         recording = false;
         releaseVideoResources();

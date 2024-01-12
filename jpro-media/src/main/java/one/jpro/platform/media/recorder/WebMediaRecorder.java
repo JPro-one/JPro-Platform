@@ -17,7 +17,7 @@ import java.util.Objects;
  *
  * @author Besmir Beqiri
  */
-public final class WebMediaRecorder extends BaseMediaRecorder implements WebMediaEngine {
+public class WebMediaRecorder extends BaseMediaRecorder implements WebMediaEngine {
 
     private static final String DEFAULT_MIME_TYPE = "video/webm";
 
@@ -118,12 +118,12 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     }
 
     @Override
-    public WebAPI getWebAPI() {
+    public final WebAPI getWebAPI() {
         return webAPI;
     }
 
     @Override
-    public JSVariable getVideoElement() {
+    public final JSVariable getVideoElement() {
         return recorderVideoElement;
     }
 
@@ -138,7 +138,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
      * specified format.
      * @throws Exception
      */
-    public boolean isTypeSupported(String mimeType) throws Exception {
+    public final boolean isTypeSupported(String mimeType) throws Exception {
         return Boolean.getBoolean(webAPI.executeScriptWithReturn("""
                 MediaRecorder.isTypeSupported("%s")
                 """.formatted(mimeType)));
@@ -147,7 +147,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     // mimeType property (read-only)
     private ReadOnlyStringWrapper mimeType;
 
-    public String getMimeType() {
+    public final String getMimeType() {
         return (mimeType == null) ? DEFAULT_MIME_TYPE : mimeType.get();
     }
 
@@ -155,7 +155,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
         mimeTypePropertyImpl().set(value);
     }
 
-    public ReadOnlyStringProperty mimeTypeProperty() {
+    public final ReadOnlyStringProperty mimeTypeProperty() {
         return mimeTypePropertyImpl().getReadOnlyProperty();
     }
 
@@ -168,7 +168,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
 
     // Recorder controller methods
     @Override
-    public void enable() {
+    public final void enable() {
         final var mediaRecorderOptions = new MediaRecorderOptions().mimeType(getMimeType());
         webAPI.executeScript("""
                 $blobsRecorded = []; // stream buffer
@@ -218,7 +218,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     }
 
     @Override
-    public void start() {
+    public final void start() {
         if (recorderReady) {
             if (getStatus().equals(Status.INACTIVE) || getStatus().equals(Status.READY)) {
                 webAPI.executeScript("""
@@ -238,7 +238,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     }
 
     @Override
-    public void pause() {
+    public final void pause() {
         if (recorderReady) {
             webAPI.executeScript("""
                     if ($mediaRecorder.state === "recording") {
@@ -249,7 +249,7 @@ public final class WebMediaRecorder extends BaseMediaRecorder implements WebMedi
     }
 
     @Override
-    public void stop() {
+    public final void stop() {
         if (recorderReady) {
             webAPI.executeScript("""
                     $mediaRecorder.stop();

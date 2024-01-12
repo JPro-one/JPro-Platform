@@ -30,7 +30,7 @@ public class NativeMediaRecorderView extends MediaView {
     }
 
     @Override
-    public ObjectProperty<MediaEngine> mediaEngineProperty() {
+    public final ObjectProperty<MediaEngine> mediaEngineProperty() {
         if (mediaEngine == null) {
             mediaEngine = new SimpleObjectProperty<>(this, "mediaEngine") {
 
@@ -60,7 +60,7 @@ public class NativeMediaRecorderView extends MediaView {
     }
 
     @Override
-    public DoubleProperty fitHeightProperty() {
+    public final DoubleProperty fitHeightProperty() {
         if (fitHeight == null) {
             fitHeight = new SimpleDoubleProperty(this, "fitHeight") {
 

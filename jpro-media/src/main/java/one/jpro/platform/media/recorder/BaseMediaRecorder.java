@@ -26,13 +26,13 @@ import java.util.TimerTask;
  */
 abstract class BaseMediaRecorder implements MediaRecorder {
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseMediaRecorder.class);
+
     private RecorderTimerTask recorderTimerTask;
     volatile boolean recorderReady;
     volatile boolean isUpdateDurationEnabled;
     long startRecordingTime = 0;
     private double pauseDurationTime = 0;
-
-    private final Logger log = LoggerFactory.getLogger(BaseMediaRecorder.class);
 
     // media source property (read-only)
     ReadOnlyObjectWrapper<MediaSource> mediaSource;
@@ -117,12 +117,12 @@ abstract class BaseMediaRecorder implements MediaRecorder {
         return (duration == null) ? Duration.ZERO : duration.get();
     }
 
-    void setDuration(Duration value) {
+    final void setDuration(Duration value) {
         durationPropertyImpl().set(value);
     }
 
     @Override
-    public ReadOnlyObjectProperty<Duration> durationProperty() {
+    public final ReadOnlyObjectProperty<Duration> durationProperty() {
         return durationPropertyImpl().getReadOnlyProperty();
     }
 
@@ -132,7 +132,7 @@ abstract class BaseMediaRecorder implements MediaRecorder {
 
                 @Override
                 protected void invalidated() {
-                    log.trace("Recording duration: {} s", get().toSeconds());
+                    logger.trace("Recording duration: {} s", get().toSeconds());
                 }
             };
         }
