@@ -39,7 +39,6 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
 
     // Video resources
     private static final int CAMERA_DEVICE_INDEX = 0; // Use the default system camera
-    private static final String MICROPHONE_DEVICE_NAME = ":0"; // Use the default system microphone
     private static final int FRAME_RATE = 30;
     private static final String MP4_FILE_EXTENSION = ".mp4";
     private FrameGrabber cameraGrabber;
@@ -96,7 +95,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
         cameraView = new ImageView();
 
         // Initialize audio frame grabber
-        micGrabber = new FFmpegFrameGrabber(MICROPHONE_DEVICE_NAME);
+        micGrabber = new FFmpegFrameGrabber(getDefaultAudioInputDevice());
         micGrabber.setFormat("avfoundation");
         micGrabber.setAudioChannels(DEFAULT_AUDIO_CHANNELS);
         micGrabber.setSampleRate(DEFAULT_AUDIO_SAMPLE_RATE);
@@ -536,7 +535,7 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
 
         // Print microphone device description
         if (micGrabber != null) {
-            String microphoneDescription = micGrabber.getFormat() + " - " + MICROPHONE_DEVICE_NAME;
+            String microphoneDescription = micGrabber.getFormat() + " - " + getDefaultAudioInputDevice();
             logger.debug("Microphone Device Description: " + microphoneDescription);
             logger.debug("Audio Channels: " + micGrabber.getAudioChannels());
             logger.debug("Sample Rate: " + micGrabber.getSampleRate());
@@ -554,4 +553,43 @@ public class NativeMediaRecorder extends BaseMediaRecorder {
             recorder.setTimestamp(t);
         }
     }
+
+    /**
+     * Gets the default audio input device name based on the operating system.
+     * <p>
+     * This method determines the appropriate audio input device for use with {@link FFmpegFrameGrabber},
+     * based on the operating system where the application is running:
+     * </p>
+     * <ul>
+     * <li>Windows: Returns "null", which typically lets the system select the default device.
+     *     Note: This might need to be adjusted based on the system configuration.</li>
+     * <li>macOS: Returns ":0" to refer to the default audio input device as per AVFoundation's standard.</li>
+     * <li>Linux: Returns "default", which typically refers to the default ALSA audio input device.</li>
+     * <li>Other: Returns "default" as a generic fallback. This should be validated or adjusted
+     *     based on the specific requirements or environment.</li>
+     * </ul>
+     *
+     * @return the name of the default audio input device
+     */
+    public static String getDefaultAudioInputDevice() {
+        String OS = System.getProperty("os.name").toLowerCase();
+
+        String audioDevice;
+        if (OS.contains("win")) {
+            // Windows - use device name or leave it null for default
+            audioDevice = "null"; // TODO: might need to adjust this based on the windows system
+        } else if (OS.contains("mac")) {
+            // macOS - default device
+            audioDevice = ":0";
+        } else if (OS.contains("nix") || OS.contains("nux") || OS.contains("aix")) {
+            // Linux - default device
+            audioDevice = "default";
+        } else {
+            // Unknown OS - fallback
+            audioDevice = "default";
+        }
+
+        return audioDevice;
+    }
+
 }
