@@ -11,7 +11,7 @@ import one.jpro.platform.media.MediaEngine;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.event.MediaRecorderEvent;
-import one.jpro.platform.media.recorder.impl.FXMediaRecorder;
+import one.jpro.platform.media.recorder.impl.NativeMediaRecorder;
 import one.jpro.platform.media.recorder.impl.WebMediaRecorder;
 
 import java.util.Optional;
@@ -60,7 +60,7 @@ public interface MediaRecorder extends MediaEngine, EventTarget {
             final WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new WebMediaRecorder(webAPI);
         }
-        return new FXMediaRecorder();
+        return new NativeMediaRecorder();
     }
 
     /**

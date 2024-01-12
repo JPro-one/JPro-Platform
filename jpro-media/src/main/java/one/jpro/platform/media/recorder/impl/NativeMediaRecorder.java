@@ -30,9 +30,9 @@ import java.util.stream.Stream;
  *
  * @author Besmir Beqiri
  */
-public final class FXMediaRecorder extends BaseMediaRecorder {
+public final class NativeMediaRecorder extends BaseMediaRecorder {
 
-    private static final Logger logger = LoggerFactory.getLogger(FXMediaRecorder.class);
+    private static final Logger logger = LoggerFactory.getLogger(NativeMediaRecorder.class);
 
     private static final Path RECORDING_PATH = Path.of(System.getProperty("user.home"),
             ".jpro", "video", "capture");
@@ -74,7 +74,7 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
      * Default constructor for FXMediaRecorder.
      * Initializes the video and audio capture resources.
      */
-    public FXMediaRecorder() {
+    public NativeMediaRecorder() {
         // Set native log level to error
         avutil.av_log_set_level(avutil.AV_LOG_ERROR);
 
@@ -149,8 +149,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         setStatus(Status.READY);
 
         // Fire ready event
-        Event.fireEvent(FXMediaRecorder.this,
-                new MediaRecorderEvent(FXMediaRecorder.this,
+        Event.fireEvent(NativeMediaRecorder.this,
+                new MediaRecorderEvent(NativeMediaRecorder.this,
                         MediaRecorderEvent.MEDIA_RECORDER_READY));
     }
 
@@ -308,8 +308,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                             setStatus(Status.RECORDING);
 
                             // Fire start event
-                            Event.fireEvent(FXMediaRecorder.this,
-                                    new MediaRecorderEvent(FXMediaRecorder.this,
+                            Event.fireEvent(NativeMediaRecorder.this,
+                                    new MediaRecorderEvent(NativeMediaRecorder.this,
                                             MediaRecorderEvent.MEDIA_RECORDER_START));
                         });
                     } catch (FFmpegFrameRecorder.Exception ex) {
@@ -330,8 +330,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 setStatus(Status.RECORDING);
 
                 // Fire start event
-                Event.fireEvent(FXMediaRecorder.this,
-                        new MediaRecorderEvent(FXMediaRecorder.this,
+                Event.fireEvent(NativeMediaRecorder.this,
+                        new MediaRecorderEvent(NativeMediaRecorder.this,
                                 MediaRecorderEvent.MEDIA_RECORDER_RESUME));
             }
         }
@@ -346,8 +346,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
         setStatus(Status.PAUSED);
 
         // Fire start event
-        Event.fireEvent(FXMediaRecorder.this,
-                new MediaRecorderEvent(FXMediaRecorder.this,
+        Event.fireEvent(NativeMediaRecorder.this,
+                new MediaRecorderEvent(NativeMediaRecorder.this,
                         MediaRecorderEvent.MEDIA_RECORDER_PAUSE));
     }
 
@@ -364,8 +364,8 @@ public final class FXMediaRecorder extends BaseMediaRecorder {
                 setStatus(Status.INACTIVE);
 
                 // Fire start event
-                Event.fireEvent(FXMediaRecorder.this,
-                        new MediaRecorderEvent(FXMediaRecorder.this,
+                Event.fireEvent(NativeMediaRecorder.this,
+                        new MediaRecorderEvent(NativeMediaRecorder.this,
                                 MediaRecorderEvent.MEDIA_RECORDER_STOP));
             });
         };

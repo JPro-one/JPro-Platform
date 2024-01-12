@@ -15,17 +15,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author Besmir Beqiri
  */
-public class FXMediaRecorderView extends MediaView {
+public class NativeMediaRecorderView extends MediaView {
 
-    private final Logger log = LoggerFactory.getLogger(FXMediaRecorderView.class);
+    private static final Logger logger = LoggerFactory.getLogger(NativeMediaRecorderView.class);
 
     private ImageView fxFrameView;
 
-    public FXMediaRecorderView() {
+    public NativeMediaRecorderView() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
     }
 
-    public FXMediaRecorderView(FXMediaRecorder mediaRecorder) {
+    public NativeMediaRecorderView(NativeMediaRecorder mediaRecorder) {
         this();
         setMediaEngine(mediaRecorder);
     }
@@ -84,7 +84,7 @@ public class FXMediaRecorderView extends MediaView {
                     if (fxFrameView != null) {
                         fxFrameView.setPreserveRatio(get());
                     }
-                    log.trace("preserve ratio: {}", isPreserveRatio());
+                    logger.trace("preserve ratio: {}", isPreserveRatio());
                 }
             };
         }
@@ -99,7 +99,7 @@ public class FXMediaRecorderView extends MediaView {
                 getChildren().add(fxFrameView);
             }
             fxFrameView.setFitWidth(fitWidth);
-            log.trace("video width: {}", fitWidth);
+            logger.trace("video width: {}", fitWidth);
         }
     }
 
@@ -111,7 +111,7 @@ public class FXMediaRecorderView extends MediaView {
                 getChildren().add(fxFrameView);
             }
             fxFrameView.setFitHeight(fitHeight);
-            log.trace("video height: " + fitHeight);
+            logger.trace("video height: " + fitHeight);
         }
     }
 
@@ -120,7 +120,7 @@ public class FXMediaRecorderView extends MediaView {
             new WeakInvalidationListener(updateViewContainerListener);
 
     private void updateViewContainer() {
-        if (getScene() != null && getMediaEngine() instanceof FXMediaRecorder fxMediaRecorder) {
+        if (getScene() != null && getMediaEngine() instanceof NativeMediaRecorder fxMediaRecorder) {
             fxFrameView = fxMediaRecorder.getCameraView();
             fxFrameView.setPreserveRatio(isPreserveRatio());
             setInternalFitWidth(getFitWidth());
