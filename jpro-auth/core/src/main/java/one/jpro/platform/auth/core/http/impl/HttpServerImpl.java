@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.SocketOption;
 import java.net.StandardSocketOptions;
 import java.net.URI;
 import java.nio.channels.SelectableChannel;
@@ -120,10 +121,11 @@ public final class HttpServerImpl implements HttpServer {
                 : new InetSocketAddress(options.getHost(), options.getPort());
 
         serverSocketChannel = ServerSocketChannel.open();
-        if (options.isReuseAddr()) {
+        final Set<SocketOption<?>> supportedOptions = serverSocketChannel.supportedOptions();
+        if (options.isReuseAddr() && supportedOptions.contains(StandardSocketOptions.SO_REUSEADDR)) {
             serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, options.isReuseAddr());
         }
-        if (options.isReusePort()) {
+        if (options.isReusePort() && supportedOptions.contains(StandardSocketOptions.SO_REUSEPORT)) {
             serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, options.isReusePort());
         }
         serverSocketChannel.configureBlocking(false);
