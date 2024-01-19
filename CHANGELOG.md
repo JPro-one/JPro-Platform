@@ -10,6 +10,7 @@
 
 ### Improvements
 * Updated JPro dependencies to version `2024.1.0`.
+* Updated **JavaFX** dependencies to version `17.0.10`.
 * Improved the `jpro-auth-core` module documentation.
 
 ----------------------
