@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class HttpServerImpl implements HttpServer {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpServerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpServerImpl.class);
 
     /**
      * Common header for the MIME Content-Type
@@ -84,18 +84,18 @@ public final class HttpServerImpl implements HttpServer {
         final Handler handler = (request, callback) -> {
             this.uri = request.uri();
 
-            log.debug("***************************************************************************");
-            log.debug("Server host: {}", getServerHost());
-            log.debug("Server port: {}", getServerPort());
-            log.debug("Full requested URL: {}", getFullRequestedURL());
-            log.debug("Parameters: {}", getParameters());
-            log.debug("Request URI: {}", request.uri());
-            log.debug("Request method: {}", request.method());
-            log.debug("Request version: {}", request.version());
-            log.debug("Request headers: {}", request.headers());
-            log.debug("Response status: {}", response.status());
-            log.debug("Response body: {}", new String(response.body()));
-            log.debug("***************************************************************************");
+            logger.debug("***************************************************************************");
+            logger.debug("Server host: {}", getServerHost());
+            logger.debug("Server port: {}", getServerPort());
+            logger.debug("Full requested URL: {}", getFullRequestedURL());
+            logger.debug("Parameters: {}", getParameters());
+            logger.debug("Request URI: {}", request.uri());
+            logger.debug("Request method: {}", request.method());
+            logger.debug("Request version: {}", request.version());
+            logger.debug("Request headers: {}", request.headers());
+            logger.debug("Response status: {}", response.status());
+            logger.debug("Response body: {}", new String(response.body()));
+            logger.debug("***************************************************************************");
 
             callback.accept(response);
             serverResponseFuture.complete(uri);
@@ -122,11 +122,19 @@ public final class HttpServerImpl implements HttpServer {
 
         serverSocketChannel = ServerSocketChannel.open();
         final Set<SocketOption<?>> supportedOptions = serverSocketChannel.supportedOptions();
-        if (options.isReuseAddr() && supportedOptions.contains(StandardSocketOptions.SO_REUSEADDR)) {
-            serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, options.isReuseAddr());
+        if (options.isReuseAddr()) {
+            if (supportedOptions.contains(StandardSocketOptions.SO_REUSEADDR)) {
+                serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, options.isReuseAddr());
+            } else {
+                logger.warn("The 'SO_REUSEADDR' option is not supported on this platform.");
+            }
         }
-        if (options.isReusePort() && supportedOptions.contains(StandardSocketOptions.SO_REUSEPORT)) {
-            serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, options.isReusePort());
+        if (options.isReusePort()) {
+            if (supportedOptions.contains(StandardSocketOptions.SO_REUSEPORT)) {
+                serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, options.isReusePort());
+            } else {
+                logger.warn("The 'SO_REUSEPORT' option is not supported on this platform.");
+            }
         }
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.bind(address, options.getAcceptLength());
@@ -146,14 +154,14 @@ public final class HttpServerImpl implements HttpServer {
     public void start() {
         thread.start();
         connectionEventLoops.forEach(ConnectionEventLoop::start);
-        log.info("Starting server on port: {}", getServerPort());
+        logger.info("Starting server on port: {}", getServerPort());
     }
 
     private void run() {
         try {
             doRun();
         } catch (IOException ex) {
-            log.error("Error on connection termination", ex);
+            logger.error("Error on connection termination", ex);
             stop.set(true); // stop the world on critical error
         }
     }
@@ -190,7 +198,7 @@ public final class HttpServerImpl implements HttpServer {
             } catch (IOException | InterruptedException ex) {
                 throw new HttpServerException(ex);
             }
-            log.info("Server stopped on port: {}", getServerPort());
+            logger.info("Server stopped on port: {}", getServerPort());
         }
 
         if (selector.isOpen()) {
