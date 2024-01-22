@@ -1,4 +1,4 @@
-### 0.2.11-SNAPSHOT (TBD)
+### 0.2.11 (January 22, 2024)
 
 ### Features
 * Added `basic` authentication API to the `jpro-auth-core` module. This API can be used to authenticate users
