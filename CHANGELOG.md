@@ -8,6 +8,11 @@
   username and password. Checkout the `jpro-auth-routing` module documentation for more details or the provided
   example on how to use it.
 
+### Changes
+* Renamed authentication filter classes in the `jpro-auth-routing` module to be more consistent with the rest of the
+  platform. Specifically, the `OAuth2Filter` class was renamed to `AuthOAuth2Filter` and the `JWTFilter` class was
+  renamed to `AuthJWTFilter`.
+
 ### Improvements
 * Updated JPro dependencies to version `2024.1.0`.
 * Updated **JavaFX** dependencies to version `17.0.10`.
