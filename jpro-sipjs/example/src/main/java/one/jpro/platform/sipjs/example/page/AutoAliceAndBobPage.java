@@ -12,13 +12,9 @@ import one.jpro.platform.sipjs.api.options.InviterOptions;
 import one.jpro.platform.sipjs.api.options.UserAgentOptions;
 import one.jpro.platform.sipjs.api.session.Session;
 import one.jpro.platform.webrtc.VideoFrame;
+import static one.jpro.platform.sipjs.example.Variables.*;
 
 public class AutoAliceAndBobPage extends VBox {
-
-
-    private String server = "wss://edge.sip.onsip.com";
-    String sipAlice = "sip:alice.swCqVznyordTFItTopErJxcn2qxtdxR1@sipjs.onsip.com";
-    String sipBob = "sip:bob.swCqVznyordTFItTopErJxcn2qxtdxR1@sipjs.onsip.com";
 
     public AutoAliceAndBobPage() {
         // Add title
