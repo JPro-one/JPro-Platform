@@ -16,6 +16,8 @@ public class Session {
 
     StringProperty state;
 
+    JSVariable jsFun;
+
     Session(JSVariable session, WebAPI webapi) {
         session.isPromise().thenAccept((v) -> {
             if(v == true) {
@@ -28,7 +30,7 @@ public class Session {
         this.webapi = webapi;
 
         state = new SimpleStringProperty(State.Initial);
-        var jsFun = webapi.registerJavaFunction(str -> {
+        jsFun = webapi.registerJavaFunction(str -> {
             // remove first and last character
             str = str.substring(1, str.length() - 1);
             state.set(str);
@@ -68,5 +70,56 @@ public class Session {
         public static final String Established = "Established";
         public static final String Terminating = "Terminating";
         public static final String Terminated = "Terminated";
+    }
+
+    public void bye() {
+        webapi.executeScript(session.getName() + ".bye();");
+    }
+
+    public void endCall() {
+        /* From the SIPjs documentation:
+        function endCall() {
+  switch(session.state) {
+    case SessionState.Initial:
+    case SessionState.Establishing:
+      if (session instanceOf Inviter) {
+        // An unestablished outgoing session
+        session.cancel();
+      } else {
+        // An unestablished incoming session
+        session.reject();
+      }
+      break;
+    case SessionState.Established:
+      // An established session
+      session.bye();
+      break;
+    case SessionState.Terminating:
+    case SessionState.Terminated:
+      // Cannot terminate a session that is already terminated
+      break;
+  }
+}
+         */
+        webapi.executeScript("switch("+session.getName()+".state) {\n" +
+                "    case SessionState.Initial:\n" +
+                "    case SessionState.Establishing:\n" +
+                "      if ("+session.getName()+" instanceOf Inviter) {\n" +
+                "        // An unestablished outgoing session\n" +
+                "        "+session.getName()+".cancel();\n" +
+                "      } else {\n" +
+                "        // An unestablished incoming session\n" +
+                "        "+session.getName()+".reject();\n" +
+                "      }\n" +
+                "      break;\n" +
+                "    case SessionState.Established:\n" +
+                "      // An established session\n" +
+                "      "+session.getName()+".bye();\n" +
+                "      break;\n" +
+                "    case SessionState.Terminating:\n" +
+                "    case SessionState.Terminated:\n" +
+                "      // Cannot terminate a session that is already terminated\n" +
+                "      break;\n" +
+                "  }");
     }
 }

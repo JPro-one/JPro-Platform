@@ -28,6 +28,14 @@ public class InvitationAcceptOptions {
     }
 
     /**
+     * Creates a new instance of InvitationAcceptOptions with only video but no audio.
+     * @return
+     */
+    public static InvitationAcceptOptions createVideoOnlyCall() {
+        return new InvitationAcceptOptions(new SessionDescriptionHandlerOptions(new MediaStreamConstraints(false, true)));
+    }
+
+    /**
      * Creates a new instance of InvitationAcceptOptions with default options.
      * @return
      */

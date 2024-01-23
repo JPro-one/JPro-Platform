@@ -1,8 +1,10 @@
 package one.jpro.platform.sipjs.example.page;
 
 import com.jpro.webapi.WebAPI;
-import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -11,15 +13,15 @@ import one.jpro.platform.sipjs.api.UserAgent;
 import one.jpro.platform.sipjs.api.options.InvitationAcceptOptions;
 import one.jpro.platform.sipjs.api.options.InviterOptions;
 import one.jpro.platform.sipjs.api.options.UserAgentOptions;
+import one.jpro.platform.sipjs.api.session.Inventation;
 import one.jpro.platform.sipjs.api.session.Session;
 import one.jpro.platform.webrtc.VideoFrame;
 
 public class AliceAndBobPage extends VBox {
-
-
     private String server = "wss://edge.sip.onsip.com";
     String sipAlice = "sip:alice.swCqVznyordTFItTopErJxcn2qxtdxR1@sipjs.onsip.com";
     String sipBob = "sip:bob.swCqVznyordTFItTopErJxcn2qxtdxR1@sipjs.onsip.com";
+
 
     public AliceAndBobPage() {
         // Add title
@@ -33,8 +35,8 @@ public class AliceAndBobPage extends VBox {
     }
 
     public void setup(WebAPI webapi) {
-        var user1 = createUser(webapi, sipAlice, "Alice", sipBob);
-        var user2 = createUser(webapi, sipBob, "Bob", null);
+        var user1 = new AliceAndBobPage.User(webapi, sipAlice, "Alice", sipBob);
+        var user2 = new AliceAndBobPage.User(webapi, sipBob, "Bob", sipAlice);
 
         var hbox = new HBox(user1, user2);
         hbox.getStyleClass().add("alice-and-bob-hbox");
@@ -42,36 +44,112 @@ public class AliceAndBobPage extends VBox {
         getChildren().addAll(hbox);
     }
 
+    class User extends VBox {
+        WebAPI webapi;
+        UserAgent userAgent;
+        String target;
+        ObjectProperty<Session> session = new SimpleObjectProperty(null);
+        public User(WebAPI webapi, String sip, String displayName, String target) {
+            this.target = target;
+            this.webapi = webapi;
+            var options = new UserAgentOptions();
+            this.getStyleClass().add("user-container");
+            this.getChildren().add(new Label(displayName+ ":"));
+            options.addServer(server);
+            options.addUri(sip);
+            options.addDisplayName(displayName);
+            userAgent = new UserAgent(options, webapi);
+            InviterOptions.createVideoCall();
+            userAgent.setOnInvite(invitation -> {
+                //invitation.accept(InvitationAcceptOptions.createVideoOnlyCall());
+                //handleSession(webapi, invitation, this);
+                session.set(invitation);
+            });
+            makeCallButton();
+            makeAcceptButton();
+            makeRejectButton();
+            makeHangupButton();
+        }
 
-    public Node createUser(WebAPI webapi, String sip, String displayName, String target) {
-        var options = new UserAgentOptions();
-        var container = new VBox();
-        container.getStyleClass().add("user-container");
-        container.getChildren().add(new Label(displayName+ ":"));
-        options.addServer(server);
-        options.addUri(sip);
-        options.addDisplayName(displayName);
-        var userAgent = new UserAgent(options, webapi);
-        InviterOptions.createVideoCall();
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if(target != null) {
-                userAgent.makeCall(target, InviterOptions.createVideoCall()).thenAccept(session -> {
-                    //session.state
-                    handleSession(webapi, session, container);
-                });
-            }
-        }).start();
-        userAgent.setOnInvite(invitation -> {
-            invitation.accept(InvitationAcceptOptions.createVideoCall());
-            handleSession(webapi, invitation, container);
-        });
+        public void makeCall() {
+            userAgent.makeCall(target, InviterOptions.createVideoOnlyCall()).thenAccept(session -> {
+                //session.state
+                handleSession(webapi, session, this);
+            });
+        }
 
-        return container;
+        public void makeCallButton() {
+            // Active when session is null
+            var button = new Button("Call");
+            button.getStyleClass().add("call-button");
+            button.setOnAction(event -> {
+                makeCall();
+            });
+            session.addListener((observable, oldValue, newValue) -> {
+                if (newValue == null) {
+                    button.setDisable(false);
+                } else {
+                    button.setDisable(true);
+                }
+            });
+            getChildren().add(button);
+        }
+        public void makeAcceptButton() {
+            // Active when session is a Inventation
+            var button = new Button("Accept");
+            button.getStyleClass().add("call-button");
+            button.setOnAction(event -> {
+                ((Inventation) session.get()).accept(InvitationAcceptOptions.createVideoOnlyCall());
+                handleSession(webapi, session.get(), this);
+            });
+            session.addListener((observable, oldValue, newValue) -> {
+                if (newValue instanceof Inventation) {
+                    button.setDisable(false);
+                } else {
+                    button.setDisable(true);
+                }
+            });
+            button.setDisable(true);
+            getChildren().add(button);
+        }
+
+        public void makeRejectButton() {
+            // Active when session is a Inventation
+            var button = new Button("Reject");
+            button.getStyleClass().add("call-button");
+            button.setOnAction(event -> {
+                ((Inventation) session.get()).reject();
+                session.set(null);
+            });
+            session.addListener((observable, oldValue, newValue) -> {
+                if (newValue instanceof Inventation) {
+                    button.setDisable(false);
+                } else {
+                    button.setDisable(true);
+                }
+            });
+            button.setDisable(true);
+            getChildren().add(button);
+        }
+
+        public void makeHangupButton() {
+            // Active when session is not null
+            var button = new Button("Hangup");
+            button.getStyleClass().add("call-button");
+            button.setOnAction(event -> {
+                session.get().bye();
+                session.set(null);
+            });
+            session.addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    button.setDisable(false);
+                } else {
+                    button.setDisable(true);
+                }
+            });
+            button.setDisable(true);
+            getChildren().add(button);
+        }
     }
 
     public void handleSession(WebAPI webapi, Session session, Pane container) {

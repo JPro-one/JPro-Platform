@@ -26,6 +26,7 @@ public class UserAgent {
 
     Consumer<Inventation> onInvite;
 
+    private JSVariable onInviteJS;
     /**
      * Creates a new user agent.
      *
@@ -41,7 +42,7 @@ public class UserAgent {
         var optionsVariable = options.asJSVariable(webapi);
 
         // setup onInvite
-        var onInviteJS = webapi.registerJavaFunctionWithVariable(invite -> {
+        onInviteJS = webapi.registerJavaFunctionWithVariable(invite -> {
             var inventation = new Inventation(invite, webapi);
             onInvite.accept(inventation);
         });
