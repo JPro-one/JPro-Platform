@@ -73,7 +73,7 @@ public class SceneGraphSerializer {
             sb.append("]");
         }
         sb.append("\n");
-        if(isFinalClass(clazz)) {
+        if(!isFinalClass(clazz)) {
             if(node instanceof Parent) {
                 for(var child : ((Parent) node).getChildrenUnmodifiable()) {
                     sb.append(serialize(child, depth + 1));
