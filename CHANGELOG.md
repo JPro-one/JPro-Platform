@@ -1,4 +1,4 @@
-### 0.2.12-SNAPSHOT (TBD)
+### 0.2.12 (February 7. 2024)
 
 ### Improvements
 * Updated **SimpleFX** to version `3.2.30`.
