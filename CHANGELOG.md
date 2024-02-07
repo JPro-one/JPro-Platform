@@ -1,7 +1,7 @@
 ### 0.2.12-SNAPSHOT (TBD)
 
 ### Improvements
-* Updated **SimpleFX** to version `3.2.29`.
+* Updated **SimpleFX** to version `3.2.30`.
 
 ### Features
 * Added the `jpro-scenegraph` module, which can be used to create a human and ai friendly 
