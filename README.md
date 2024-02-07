@@ -85,6 +85,27 @@ dependencies {
 }
 ```
 
+## JPro SceneGraph
+Creates human and AI friendly String representations of JavaFX SceneGraphs.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-scenegraph</artifactId>
+    <version>0.2.12-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-scenegraph:0.2.12-SNAPSHOT")
+}
+```
+
 ## JPro File
 This library provides a simple way to pick, drop, upload and download files in **JPro/JavaFX** applications.
 
