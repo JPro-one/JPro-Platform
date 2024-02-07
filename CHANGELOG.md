@@ -3,6 +3,10 @@
 ### Improvements
 * Updated **SimpleFX** to version `3.2.29`.
 
+### Features
+* Added the `jpro-scenegraph` module, which can be used to create a human and ai friendly 
+  String representation of a scene graph.
+
 ----------------------
 ### 0.2.11 (January 22, 2024)
 
