@@ -1,5 +1,8 @@
 ### 0.2.13 (TBD)
 
+### Features
+* Added `jpro-internal-util` module to the platform. This module contains internal utilities that are used by other
+  modules in the platform. `PlatformUtils` moved from `jpro-internal-openlink` to this module in the process.
 
 ----------------------
 ### 0.2.12 (February 7. 2024)
