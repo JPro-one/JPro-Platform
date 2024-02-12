@@ -1,7 +1,7 @@
 package one.jpro.platform.internal.openlink.test;
 
 import one.jpro.platform.internal.openlink.OpenLink;
-import one.jpro.platform.internal.openlink.util.PlatformUtils;
+import one.jpro.platform.internal.util.PlatformUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Besmir Beqiri
  */
-public class OpenLinkTest {
+public class OpenLinkTests {
 
     @Mock
     private static Runtime runtime;

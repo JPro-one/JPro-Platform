@@ -72,7 +72,7 @@ configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-aut
            project("jpro-scenegraph"), project("jpro-sessions"),
            project("jpro-html-scrollpane"), project("freeze-detector"), project("jpro-routing:core"),
            project("jpro-routing:dev"), project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
-           project("internal:openlink")]) {
+           project("internal:openlink"), project("internal:util")]) {
     apply plugin: 'maven-publish'
 
     publishing {

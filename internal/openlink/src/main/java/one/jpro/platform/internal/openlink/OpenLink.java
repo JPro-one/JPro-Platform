@@ -1,6 +1,6 @@
 package one.jpro.platform.internal.openlink;
 
-import one.jpro.platform.internal.openlink.util.PlatformUtils;
+import one.jpro.platform.internal.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
