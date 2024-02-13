@@ -29,34 +29,24 @@ public class CommandRunnerTests {
     }
 
     @Test
-    public void constructorWithArgs() {
+    public void constructorWithArgsTest() {
         String[] args = {"arg1", "arg2"};
         commandRunner = new CommandRunner(logger, args);
         assertThat(commandRunner.getCmdList()).containsExactly(args);
     }
 
     @Test
-    public void addArgAdds() {
+    public void addArgTest() {
         String arg = "testArg";
         commandRunner.addArg(arg);
         assertThat(commandRunner.getCmdList()).contains(arg);
     }
 
     @Test
-    public void addArgsAddsMultiple() {
+    public void addMultipleArgsTest() {
         String[] args = {"arg3", "arg4"};
         commandRunner.addArgs(args);
         assertThat(commandRunner.getCmdList()).contains(args);
-    }
-
-    @Test
-    public void addToEnvAdds() {
-        String key = "KEY";
-        String value = "VALUE";
-        commandRunner.addToEnv(key, value);
-        // Directly accessing envVars is not possible without reflection since it's private.
-        // Assuming a hypothetical method getEnvVars for demonstration purposes.
-        assertThat(commandRunner.getEnvVars()).containsEntry(key, value);
     }
 
     @Test
@@ -66,7 +56,7 @@ public class CommandRunnerTests {
         } else {
             commandRunner.addArgs("ls", "build.gradle");
         }
-        assertThat(commandRunner.runProcess("dir")).isEqualTo(0);
+        assertThat(commandRunner.run("dir")).isEqualTo(0);
         assertThat(commandRunner.getResponses().size()).isEqualTo(1);
         assertThat(commandRunner.getLastResponse()).isEqualTo("build.gradle");
     }
@@ -82,11 +72,11 @@ public class CommandRunnerTests {
             commandRunner.addArgs("mkdir", "runner");
             output = "File exists";
         }
-        assertThat(commandRunner.runProcess("mkdir", tempDir.toFile())).isEqualTo(0);
+        assertThat(commandRunner.run("mkdir", tempDir.toFile())).isEqualTo(0);
         assertThat(commandRunner.getResponses().size()).isEqualTo(0);
         assertThat(commandRunner.getLastResponse()).isEqualTo("");
 
-        assertThat(commandRunner.runProcess("mkdir", tempDir.toFile())).isEqualTo(1);
+        assertThat(commandRunner.run("mkdir", tempDir.toFile())).isEqualTo(1);
         assertThat(commandRunner.getLastResponse()).endsWith(output);
     }
 }

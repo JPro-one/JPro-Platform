@@ -119,15 +119,6 @@ public class CommandRunner {
     }
 
     /**
-     * Gets the current environment variables.
-     *
-     * @return the current environment variables
-     */
-    public Map<String, String> getEnvVars() {
-        return envVars;
-    }
-
-    /**
      * Runs a process with a given set of command line arguments.
      *
      * @param processName the name of the process
@@ -135,8 +126,8 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public int runProcess(String processName) throws IOException, InterruptedException {
-        return runProcess(processName, null);
+    public int run(String processName) throws IOException, InterruptedException {
+        return run(processName, null);
     }
 
     /**
@@ -148,7 +139,7 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public int runProcess(String processName, File workingDirectory) throws IOException, InterruptedException {
+    public int run(String processName, File workingDirectory) throws IOException, InterruptedException {
         Process process = setupProcess(processName, workingDirectory);
         Thread logThread = mergeProcessOutput(process.getInputStream());
         int result = process.waitFor();
@@ -167,7 +158,7 @@ public class CommandRunner {
      * @return the process object
      * @throws IOException if an I/O error occurs
      */
-    public Process runAsyncProcess(String processName, File workingDirectory) throws IOException {
+    public Process runAsync(String processName, File workingDirectory) throws IOException {
         Process process = setupProcess(processName, workingDirectory);
         mergeProcessOutput(process.getInputStream());
         return process;
@@ -182,8 +173,8 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public boolean runTimedProcess(String processName, long timeout) throws IOException, InterruptedException {
-        return runTimedProcess(processName, null, timeout);
+    public boolean runTimed(String processName, long timeout) throws IOException, InterruptedException {
+        return runTimed(processName, null, timeout);
     }
 
     /**
@@ -197,7 +188,7 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public boolean runTimedProcess(String processName, File workingDirectory, long timeout)
+    public boolean runTimed(String processName, File workingDirectory, long timeout)
             throws IOException, InterruptedException {
         Process process = setupProcess(processName, workingDirectory);
         Thread logThread = mergeProcessOutput(process.getInputStream());
