@@ -1,4 +1,4 @@
-### 0.2.13 (TBD)
+### 0.2.13 (February 14, 2024)
 
 ### Features
 * Added `jpro-internal-util` module to the platform. This module contains internal utilities that are used by other
