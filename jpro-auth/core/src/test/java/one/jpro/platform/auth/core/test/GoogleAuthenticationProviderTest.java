@@ -52,8 +52,7 @@ public class GoogleAuthenticationProviderTest {
                     assertEquals(List.of("client_secret_post", "client_secret_basic"),
                             options.getSupportedTokenEndpointAuthMethods());
                     assertEquals(List.of("aud", "email", "email_verified", "exp", "family_name",
-                                    "given_name", "iat", "iss", "locale", "name", "picture", "sub"),
-                            options.getSupportedClaims());
+                                    "given_name", "iat", "iss", "name", "picture", "sub"), options.getSupportedClaims());
                     assertEquals(List.of("plain", "S256"), options.getSupportedCodeChallengeMethods());
                     assertEquals(List.of("authorization_code", "refresh_token",
                             "urn:ietf:params:oauth:grant-type:device_code",
