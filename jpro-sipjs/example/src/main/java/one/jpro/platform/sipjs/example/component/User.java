@@ -13,6 +13,7 @@ import one.jpro.platform.sipjs.api.options.InviterOptions;
 import one.jpro.platform.sipjs.api.options.UserAgentOptions;
 import one.jpro.platform.sipjs.api.session.Inventation;
 import one.jpro.platform.sipjs.api.session.Session;
+import one.jpro.platform.webrtc.MediaStream;
 import one.jpro.platform.webrtc.VideoFrame;
 
 public class User extends VBox {
@@ -20,6 +21,9 @@ public class User extends VBox {
     UserAgent userAgent;
     String target;
     ObjectProperty<Session> session = new SimpleObjectProperty(null);
+
+    VideoFrame localVideoElement;
+    VideoFrame remoteVideoElement;
     public User(WebAPI webapi, String server, String sip, String displayName, String target) {
         this.target = target;
         this.webapi = webapi;
@@ -40,6 +44,7 @@ public class User extends VBox {
         makeAcceptButton();
         makeRejectButton();
         makeHangupButton();
+        makeScreenShareButton();
     }
 
     public void makeCall() {
@@ -112,14 +117,28 @@ public class User extends VBox {
             session.set(null);
         });
         session.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                button.setDisable(false);
-            } else {
-                button.setDisable(true);
-            }
+            button.setDisable(session.get() == null);
         });
-        button.setDisable(true);
+        button.setDisable(session.get() == null);
         getChildren().add(button);
+    }
+
+    public void makeScreenShareButton() {
+        // Active when session is not null
+        var button = new Button("Screen Share");
+        button.getStyleClass().add("call-button");
+        button.setOnAction(event -> {
+            var stream = MediaStream.getScreenStream(webapi);
+            session.get().switchToStream(stream);
+            localVideoElement.setStream(stream);
+        });
+        session.addListener((observable, oldValue, newValue) -> {
+            button.setDisable(session.get() == null);
+        });
+        button.setDisable(session.get() == null);
+        getChildren().add(button);
+
+
     }
 
 
@@ -147,17 +166,17 @@ public class User extends VBox {
         // Add local video
         var localVideoStream = session.getLocalStream();
         webapi.executeScript("console.log('localVideoStream: ' + "+localVideoStream.getName()+");");
-        var videoElement = new VideoFrame(webapi);
-        videoElement.getStyleClass().add("video-local");
-        videoElement.setStream(localVideoStream);
+        localVideoElement = new VideoFrame(webapi);
+        localVideoElement.getStyleClass().add("video-local");
+        localVideoElement.setStream(localVideoStream);
         var description = new Label("Local Video");
         container.getChildren().add(description);
-        container.getChildren().add(videoElement);
+        container.getChildren().add(localVideoElement);
 
         // Add remote video
         var remoteVideoStream = session.getRemoteStream();
         webapi.executeScript("console.log('remoteVideoStream: ' + "+remoteVideoStream.getName()+");");
-        var remoteVideoElement = new VideoFrame(webapi);
+        remoteVideoElement = new VideoFrame(webapi);
         remoteVideoElement.getStyleClass().add("video-remote");
         remoteVideoElement.setStream(remoteVideoStream);
         var remoteDescription = new Label("Remote Video");

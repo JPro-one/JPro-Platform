@@ -4,6 +4,7 @@ import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import one.jpro.platform.webrtc.MediaStream;
 import one.jpro.platform.webrtc.VideoFrame;
 
 /**
@@ -62,6 +63,21 @@ public class Session {
                 "});\n" +
                 frame.getVideoElem().getName()+".srcObject = remoteStream;\n" +
                 frame.getVideoElem().getName()+".play();");
+    }
+
+    /**
+     * Switches the stream of the call to the given stream.
+     * @param stream
+     */
+    public void switchToStream(MediaStream stream) {
+        stream.js.thenAccept(js -> {
+            webapi.executeScript("var videoTrack = "+js.getName()+".getVideoTracks()[0];\n" +
+                    "var sender = "+session.getName()+".sessionDescriptionHandler.peerConnection.getSenders().find(function(s) {\n" +
+                    "  return s.track.kind == videoTrack.kind;\n" +
+                    "});\n" +
+                    "console.log('found sender:', sender);\n" +
+                    "sender.replaceTrack(videoTrack);");
+        });
     }
 
     public class State {
