@@ -44,7 +44,7 @@ public class User extends VBox {
 
     public void makeCall() {
         userAgent.makeCall(target, InviterOptions.createVideoOnlyCall()).thenAccept(session -> {
-            //session.state
+            this.session.set(session);
             handleSession(webapi, session, this);
         });
     }
