@@ -1,7 +1,6 @@
-package one.jpro.platform.auth.core.test;
+package one.jpro.platform.auth.core.oauth2.provider;
 
 import one.jpro.platform.auth.core.oauth2.OAuth2Options;
-import one.jpro.platform.auth.core.oauth2.provider.MicrosoftAuthenticationProvider;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -1,6 +1,5 @@
-package one.jpro.platform.auth.core.test;
+package one.jpro.platform.auth.core.http;
 
-import one.jpro.platform.auth.core.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

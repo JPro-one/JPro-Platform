@@ -1,8 +1,5 @@
-package one.jpro.platform.auth.core.test;
+package one.jpro.platform.auth.core.http;
 
-import one.jpro.platform.auth.core.http.HttpOptions;
-import one.jpro.platform.auth.core.http.HttpServer;
-import one.jpro.platform.auth.core.http.HttpServerException;
 import one.jpro.platform.auth.core.http.impl.HttpServerImpl;
 
 import java.io.IOException;

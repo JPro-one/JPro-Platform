@@ -1,4 +1,4 @@
-package one.jpro.platform.auth.core.test;
+package one.jpro.platform.auth.core.oauth2;
 
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
 import one.jpro.platform.auth.core.authentication.User;

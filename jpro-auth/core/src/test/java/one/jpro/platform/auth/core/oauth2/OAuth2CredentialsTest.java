@@ -1,8 +1,6 @@
-package one.jpro.platform.auth.core.test;
+package one.jpro.platform.auth.core.oauth2;
 
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
-import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
-import one.jpro.platform.auth.core.oauth2.OAuth2Flow;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
