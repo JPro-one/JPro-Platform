@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Besmir Beqiri
  */
-public class HttpStatusTest {
+public class HttpStatusTests {
 
     @Test
     public void fetchingHttpStatusByCodeShouldGetTheRightOne() {

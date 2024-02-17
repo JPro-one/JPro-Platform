@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
  *
  * @author Besmir Beqiri
  */
-public class OAuth2OptionsTest {
+public class OAuth2OptionsTests {
 
     @Test
     public void trailingSlashShouldBeRemoved() {

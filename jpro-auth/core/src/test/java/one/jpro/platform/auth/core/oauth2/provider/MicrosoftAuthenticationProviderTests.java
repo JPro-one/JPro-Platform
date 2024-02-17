@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Besmir Beqiri
  */
-public class MicrosoftAuthenticationProviderTest {
+public class MicrosoftAuthenticationProviderTests {
 
     @Test
     public void configWithClientIdAndClientSecretAndTenant() {

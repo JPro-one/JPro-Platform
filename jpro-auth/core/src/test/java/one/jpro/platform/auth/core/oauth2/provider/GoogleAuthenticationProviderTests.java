@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Besmir Beqiri
  */
-public class GoogleAuthenticationProviderTest {
+public class GoogleAuthenticationProviderTests {
 
     @Test
     public void configWithClientIdAndClientSecret() {

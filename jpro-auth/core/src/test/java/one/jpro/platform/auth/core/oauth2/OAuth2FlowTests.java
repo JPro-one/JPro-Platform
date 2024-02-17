@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  * @author Besmir Beqiri
  */
-public class OAuth2FlowTest {
+public class OAuth2FlowTests {
 
     @Test
     public void fetchingOAuth2FlowByGrantTypeShouldGetTheRightOne() {

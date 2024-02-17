@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Besmir Beqiri
  */
-public class AuthenticationServerTest {
+public class AuthenticationServerTests {
 
     @Test
     public void testHttpServer() throws IOException, InterruptedException {

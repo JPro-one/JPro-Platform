@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Besmir Beqiri
  */
-public class HttpOptionsTest {
+public class HttpOptionsTests {
 
     @Test
     public void testDefaultValuesFromHttpOptions() {

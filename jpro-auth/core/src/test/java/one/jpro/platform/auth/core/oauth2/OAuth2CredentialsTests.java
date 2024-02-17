@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Besmir Beqiri
  */
-public class OAuth2CredentialsTest {
+public class OAuth2CredentialsTests {
 
     @Test
     public void checkFields() {
