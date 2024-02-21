@@ -479,7 +479,7 @@ dependencies {
 ./gradlew jpro-auth:example:run -Psample=basic-login
 ./gradlew jpro-auth:example:run -Psample=google-login
 ./gradlew jpro-auth:example:run -Psample=oauth
-./gradlew jpro-file:example:run -Psample=file-uploader
+./gradlew jpro-file:example:run -Psample=text-editor
 ./gradlew jpro-file:example:run -Psample=file-uploader
 ./gradlew jpro-media:example:run -Psample=media-player
 ./gradlew jpro-media:example:run -Psample=media-recorder
@@ -493,7 +493,7 @@ dependencies {
 ./gradlew jpro-auth:example:jproRun -Psample=basic-login
 ./gradlew jpro-auth:example:jproRun -Psample=google-login
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
-./gradlew jpro-file:example:jproRun -Psample=file-uploader
+./gradlew jpro-file:example:jproRun -Psample=text-editor
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
 ./gradlew jpro-media:example:jproRun -Psample=media-player
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder
