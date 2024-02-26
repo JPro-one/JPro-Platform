@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":jpro-sessions"))
+    implementation(project(":jpro-session"))
     implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"

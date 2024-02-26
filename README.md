@@ -294,7 +294,7 @@ dependencies {
 }
 ```
 
-## JPro Sessions
+## JPro Session
 This library provides a simple implementation of a session manager for **JavaFX/JPro** applications.
 It remembers the user, based on a cookie. A simple ObservableMap is used to store the session data.
 This data is only accessible in the JPro Server, not in the browser - which can be important for some security reasons.
@@ -304,7 +304,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 <dependencies>
   <dependency>
     <groupId>one.jpro.platform</groupId>
-    <artifactId>jpro-sessions</artifactId>
+    <artifactId>jpro-session</artifactId>
     <version>0.2.14-SNAPSHOT</version>
   </dependency>
 </dependencies>
@@ -313,7 +313,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-sessions:0.2.14-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-session:0.2.14-SNAPSHOT")
 }
 ```
 

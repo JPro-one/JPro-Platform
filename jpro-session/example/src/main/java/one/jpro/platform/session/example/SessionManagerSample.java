@@ -1,4 +1,4 @@
-package one.jpro.platform.sessions.example;
+package one.jpro.platform.session.example;
 
 import atlantafx.base.theme.CupertinoLight;
 import com.jpro.webapi.WebAPI;
@@ -15,7 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import one.jpro.platform.sessions.SessionManager;
+import one.jpro.platform.session.SessionManager;
 
 public class SessionManagerSample extends Application {
 

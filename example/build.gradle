@@ -11,7 +11,7 @@ dependencies {
     implementation project(":jpro-mdfx:example")
     implementation project(":jpro-media:example")
     implementation project(":jpro-html-scrollpane:example")
-    implementation project(":jpro-sessions:example")
+    implementation project(":jpro-session:example")
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }

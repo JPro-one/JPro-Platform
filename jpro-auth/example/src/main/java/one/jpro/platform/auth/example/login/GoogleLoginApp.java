@@ -14,7 +14,7 @@ import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
-import one.jpro.platform.sessions.SessionManager;
+import one.jpro.platform.session.SessionManager;
 import org.json.JSONObject;
 
 import java.net.URL;

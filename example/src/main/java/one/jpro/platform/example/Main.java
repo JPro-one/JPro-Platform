@@ -11,7 +11,7 @@ import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter;
-import one.jpro.platform.sessions.example.SessionManagerSample;
+import one.jpro.platform.session.example.SessionManagerSample;
 
 import java.net.URL;
 import java.util.ArrayList;

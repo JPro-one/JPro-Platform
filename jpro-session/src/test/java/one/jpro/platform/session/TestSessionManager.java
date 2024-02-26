@@ -1,7 +1,8 @@
-package one.jpro.platform.sessions;
+package one.jpro.platform.session;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableMap;
+import one.jpro.platform.session.SessionManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
