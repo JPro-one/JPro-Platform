@@ -188,7 +188,7 @@ all while utilizing the same codebase.
   <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacv-platform</artifactId>
-      <version>1.5.9</version>
+      <version>1.5.10</version>
       <!-- use compile scope when running/deploying with JPro,-->
       <!-- since the platform related libraries are no more needed-->
       <!-- <scope>compile</scope>-->
@@ -199,12 +199,12 @@ all while utilizing the same codebase.
 #### Gradle configuration
 ```groovy
 plugins {
-    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.9"
+    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.10"
 }
 
 dependencies {
     implementation("one.jpro.platform:jpro-media:0.2.14-SNAPSHOT")
-    implementation "org.bytedeco:javacv-platform:1.5.9" // use compileOnly configuration when running/deploying with JPro
+    implementation "org.bytedeco:javacv-platform:1.5.10" // use compileOnly configuration when running/deploying with JPro
 }
 ```
 
