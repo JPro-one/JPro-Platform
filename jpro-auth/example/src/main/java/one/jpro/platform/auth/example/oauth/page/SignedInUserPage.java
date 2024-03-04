@@ -29,7 +29,7 @@ public class SignedInUserPage extends Page {
         if (authProvider == null) {
             getChildren().add(headerLabel);
         } else {
-            headerLabel.setText("Signed in user: " + (loginApp.getUser() == null ? "" : loginApp.getUser().getName()));
+            headerLabel.setText("Signed in user: " + (loginApp.userAPI.getUser() == null ? "" : loginApp.userAPI.getUser().getName()));
 
             final var authInfoBox = loginApp.createButtonWithDescription(
                     "Show authentication information about this user.", "Auth Info",
@@ -37,7 +37,7 @@ public class SignedInUserPage extends Page {
 
             final var introspectTokenBox = loginApp.createButtonWithDescription(
                     "Introspect the access token.", "Introspect Token",
-                    event -> FXFuture.fromJava(authProvider.introspect(loginApp.getUser(), "access_token"))
+                    event -> FXFuture.fromJava(authProvider.introspect(loginApp.userAPI.getUser(), "access_token"))
                             .map(json -> {
                                 loginApp.setIntrospectionInfo(json);
                                 gotoPage(headerLabel, "/user/introspect-token");
@@ -58,9 +58,9 @@ public class SignedInUserPage extends Page {
 
             final var refreshTokenBox = loginApp.createButtonWithDescription(
                     "Use refresh token to get a new access token.", "Refresh Token",
-                    event -> FXFuture.fromJava(authProvider.refresh(loginApp.getUser()))
+                    event -> FXFuture.fromJava(authProvider.refresh(loginApp.userAPI.getUser()))
                             .map(newUser -> {
-                                loginApp.setUser(newUser);
+                                loginApp.userAPI.setUser(newUser);
                                 gotoPage(headerLabel, "/user/refresh-token");
                                 return newUser;
                             })
@@ -72,7 +72,7 @@ public class SignedInUserPage extends Page {
             refreshTokenBox.setDisable(true);
 
             // if the user has a refresh token, enable the refresh token button
-            Optional.ofNullable(loginApp.getUser()).map(Authentication::toJSON)
+            Optional.ofNullable(loginApp.userAPI.getUser()).map(Authentication::toJSON)
                     .map(json -> json.getJSONObject(User.KEY_ATTRIBUTES))
                     .map(json -> json.getJSONObject("auth"))
                     .map(json -> json.optString("refresh_token"))
@@ -82,7 +82,7 @@ public class SignedInUserPage extends Page {
             final var revokeTokenBox = loginApp.createButtonWithDescription(
                     "Revoke the access token.", "Revoke Token",
                     event -> {
-                        final var user = loginApp.getUser();
+                        final var user = loginApp.userAPI.getUser();
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
@@ -112,7 +112,7 @@ public class SignedInUserPage extends Page {
             final var userInfoBox = loginApp.createButtonWithDescription(
                     "Get more user information from the provider.", "User Info",
                     event -> {
-                        final var user = loginApp.getUser();
+                        final var user = loginApp.userAPI.getUser();
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
@@ -144,7 +144,7 @@ public class SignedInUserPage extends Page {
             final var logoutBox = loginApp.createButtonWithDescription(
                     "Sign out from the provider.", "Sign Out",
                     event -> {
-                        final var user = loginApp.getUser();
+                        final var user = loginApp.userAPI.getUser();
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
@@ -154,7 +154,7 @@ public class SignedInUserPage extends Page {
                         FXFuture.fromJava(authProvider.logout(user))
                                 .map(unused -> {
                                     // the result can be ignored
-                                    loginApp.setUser(null);
+                                    loginApp.userAPI.setUser(null);
                                     gotoPage(headerLabel, "/user/logout");
                                     return unused;
                                 })

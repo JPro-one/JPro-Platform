@@ -30,13 +30,13 @@ public class OAuthApp extends BaseOAuthApp {
     private static final SessionManager sessionManager = new SessionManager("oauth-app");
 
     ObservableMap<String, String> session;
-    UserAPI userManager;
+    public UserAPI userAPI;
 
     @Override
     public Route createRoute() {
         session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
                 : sessionManager.getSession("user-session");
-        userManager = new UserAPI(session);
+        userAPI = new UserAPI(session);
 
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
@@ -105,7 +105,7 @@ public class OAuthApp extends BaseOAuthApp {
      * @return A {@link Filter} object configured for OAuth2 authentication flow.
      */
     private Filter oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
-        return AuthOAuth2Filter.create(openIDAuthProvider, userManager, user -> {
+        return AuthOAuth2Filter.create(openIDAuthProvider, userAPI, user -> {
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);
         }, error -> {

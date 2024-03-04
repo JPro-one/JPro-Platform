@@ -44,29 +44,6 @@ public abstract class BaseOAuthApp extends RouteApp {
     public static final String USER_CONSOLE_PATH = "/user/console";
     public static final String AUTH_ERROR_PATH = "/auth/error";
 
-    // User property
-    private ObjectProperty<User> userProperty;
-
-    public final User getUser() {
-        return userProperty == null ? null : userProperty.get();
-    }
-
-    public final void setUser(User value) {
-        userProperty().set(value);
-    }
-
-    /**
-     * The user property contains the currently logged-in user.
-     *
-     * @return the user property
-     */
-    public final ObjectProperty<User> userProperty() {
-        if (userProperty == null) {
-            userProperty = new SimpleObjectProperty<>(this, "user");
-        }
-        return userProperty;
-    }
-
     // Introspection Info property
     private ObjectProperty<JSONObject> introspectionInfoProperty;
 
