@@ -5,28 +5,27 @@ import one.jpro.platform.auth.core.authentication.User;
 import org.json.JSONObject;
 
 /**
- * The UserAPI class is a simple
- * class that provides a way to
- * get and set the user object
- * from the session.
- * @author floriankirmaier
+ * The {@link UserSession} class provides a structured way to handle user authentication and maintain inside the session.
+ *
+ * @author Florian Kirmaier
  */
-public class UserAPI {
+public class UserSession {
 
-    private ObservableMap<String, String> session;
+    private final ObservableMap<String, String> session;
 
     /**
-     * The constructor for the UserAPI class
-     * @param session
+     * Creates a new instance of the UserAPI class.
+     *
+     * @param session the session to use for session management
      */
-    public UserAPI(ObservableMap<String, String> session) {
+    public UserSession(ObservableMap<String, String> session) {
         this.session = session;
     }
 
     /**
-     * The getUser method returns the user
-     * object from the session
-     * @return User
+     * Retrieves the user object from the session.
+     *
+     * @return the user object retrieved from the session
      */
     public final User getUser() {
         final var userJsonString = session.get("user");
@@ -39,9 +38,9 @@ public class UserAPI {
     }
 
     /**
-     * The setUser method sets the user
-     * object in the session
-     * @param user
+     * Sets the user object in the session.
+     *
+     * @param user the user object to set in the session
      */
     public final void setUser(User user) {
         if (user != null) {

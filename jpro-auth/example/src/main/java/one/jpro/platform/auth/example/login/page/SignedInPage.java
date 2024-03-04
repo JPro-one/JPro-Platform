@@ -19,7 +19,7 @@ public class SignedInPage extends Page {
         final var headerLabel = new Label("Not signed in.");
         headerLabel.getStyleClass().add("header-label");
 
-        final var user = app.userAPI.getUser();
+        final var user = app.userSession.getUser();
         if (user == null) {
             getChildren().add(headerLabel);
         } else {
@@ -33,9 +33,9 @@ public class SignedInPage extends Page {
 
             final var signOutButton = new Button("Sign out");
             signOutButton.setOnAction(event ->
-                    FXFuture.fromJava(authProvider.revoke(app.userAPI.getUser(), "access_token"))
+                    FXFuture.fromJava(authProvider.revoke(app.userSession.getUser(), "access_token"))
                             .onSuccess(nothing -> {
-                                app.userAPI.setUser(null);
+                                app.userSession.setUser(null);
                                 app.getSessionManager().gotoURL("/");
                             }));
             signOutButton.setDefaultButton(true);

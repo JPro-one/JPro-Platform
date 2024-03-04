@@ -19,7 +19,7 @@ public class AuthInfoPage extends Page {
 
         MarkdownView markdownView = new MarkdownView();
         markdownView.mdStringProperty().bind(Bindings.createStringBinding(() -> {
-            final var user = loginApp.userAPI.getUser();
+            final var user = loginApp.getUserSession().getUser();
             return user == null ? "" : loginApp.jsonToMarkdown(user.toJSON());
         }));
 

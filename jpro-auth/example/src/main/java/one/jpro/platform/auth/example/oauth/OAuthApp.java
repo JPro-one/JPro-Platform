@@ -7,7 +7,7 @@ import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
 import one.jpro.platform.auth.routing.AuthOAuth2Filter;
-import one.jpro.platform.auth.routing.UserAPI;
+import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
@@ -30,13 +30,13 @@ public class OAuthApp extends BaseOAuthApp {
     private static final SessionManager sessionManager = new SessionManager("oauth-app");
 
     ObservableMap<String, String> session;
-    public UserAPI userAPI;
+    private UserSession userSession;
 
     @Override
     public Route createRoute() {
         session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
                 : sessionManager.getSession("user-session");
-        userAPI = new UserAPI(session);
+        userSession = new UserSession(session);
 
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
@@ -105,12 +105,16 @@ public class OAuthApp extends BaseOAuthApp {
      * @return A {@link Filter} object configured for OAuth2 authentication flow.
      */
     private Filter oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
-        return AuthOAuth2Filter.create(openIDAuthProvider, userAPI, user -> {
+        return AuthOAuth2Filter.create(openIDAuthProvider, userSession, user -> {
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);
         }, error -> {
             setError(error);
             return Response.redirect(AUTH_ERROR_PATH);
         });
+    }
+
+    public UserSession getUserSession() {
+        return userSession;
     }
 }

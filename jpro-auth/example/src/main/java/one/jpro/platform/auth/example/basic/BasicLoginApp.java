@@ -4,7 +4,6 @@ import atlantafx.base.theme.CupertinoLight;
 import com.jpro.webapi.WebAPI;
 import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
-import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.basic.InMemoryUserManager;
 import one.jpro.platform.auth.core.basic.UserManager;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
@@ -14,13 +13,12 @@ import one.jpro.platform.auth.example.basic.page.LoginPage;
 import one.jpro.platform.auth.example.basic.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.routing.AuthBasicFilter;
-import one.jpro.platform.auth.routing.UserAPI;
+import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.session.SessionManager;
-import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.Map;
@@ -64,7 +62,7 @@ public class BasicLoginApp extends RouteApp {
 
     private static final SessionManager sessionManager = new SessionManager("basic-login-app");
     ObservableMap<String, String> session;
-    public UserAPI userAPI;
+    public UserSession userSession;
 
     public BasicLoginApp() {
         userManager.createUser(new UsernamePasswordCredentials("admin", "password"),
@@ -75,7 +73,7 @@ public class BasicLoginApp extends RouteApp {
     public Route createRoute() {
         session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI()) :
                 sessionManager.getSession("user-session");
-        userAPI = new UserAPI(session);
+        userSession = new UserSession(session);
 
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
@@ -88,13 +86,13 @@ public class BasicLoginApp extends RouteApp {
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
                 .filter(AuthBasicFilter.create(basicAuthProvider, credentials, user -> {
-                    userAPI.setUser(user);
+                    userSession.setUser(user);
                     return Response.redirect("/user/signed-in");
                 }, error -> Response.node(new ErrorPage(error))))
                 .filter(DevFilter.create());
     }
 
     private boolean isUserAuthenticated() {
-        return userAPI.getUser() != null;
+        return userSession.getUser() != null;
     }
 }

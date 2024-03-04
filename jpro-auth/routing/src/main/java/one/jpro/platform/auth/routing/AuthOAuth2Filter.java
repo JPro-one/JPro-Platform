@@ -25,17 +25,17 @@ public interface AuthOAuth2Filter {
      * {@link OAuth2Credentials} and functions for handling successful and error cases.
      *
      * @param openidAuthProvider the OpenID authentication provider
-     * @param userAPI            the user API
+     * @param userSession        the user session
      * @param userFunction       operation on the given user argument
      * @param errorFunction      operation on the given error argument
      * @return a {@link Filter} object
      */
     static Filter create(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
-                         @NotNull UserAPI userAPI,
+                         @NotNull UserSession userSession,
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {
         final var credentials = openidAuthProvider.getCredentials();
-        return create(openidAuthProvider, userAPI, credentials, userFunction, errorFunction);
+        return create(openidAuthProvider, userSession, credentials, userFunction, errorFunction);
     }
 
     /**
@@ -43,14 +43,14 @@ public interface AuthOAuth2Filter {
      * {@link OAuth2Credentials} and functions for handling successful and error cases.
      *
      * @param authProvider  an OAuth2 authentication provider
-     * @param userAPI       the user API
+     * @param userSession   the user session
      * @param credentials   an OAuth2 credentials
      * @param userFunction  operation on the given user argument
      * @param errorFunction operation on the given error argument
      * @return a {@link Filter} object
      */
     static Filter create(@NotNull OAuth2AuthenticationProvider authProvider,
-                         @NotNull UserAPI userAPI,
+                         @NotNull UserSession userSession,
                          @NotNull OAuth2Credentials credentials,
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {
@@ -63,7 +63,7 @@ public interface AuthOAuth2Filter {
             if (request.getPath().equals(credentials.getRedirectUri())) {
                 return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
                         .flatMap(r -> {
-                            userAPI.setUser(r);
+                            userSession.setUser(r);
                             return userFunction.apply(r).future();
                         })
                         .flatExceptionally(r -> errorFunction.apply(r).future()));
