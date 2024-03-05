@@ -1,4 +1,4 @@
-### 0.2.14-SNAPSHOT (TBD)
+### 0.2.14 (TBD)
 
 ### Changes
 * Renamed `jpro-sessions` module to `jpro-session`.
