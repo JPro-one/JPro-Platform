@@ -1,4 +1,4 @@
-### 0.2.14 (TBD)
+### 0.2.14 (March 5, 2024)
 
 ### Changes
 * Renamed `jpro-sessions` module to `jpro-session`.
