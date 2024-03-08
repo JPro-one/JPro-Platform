@@ -104,7 +104,10 @@ public class HelloWorld {
 ## Images and extensions
 
 CoPilots favorite music:
+```
+// doesn't work reliable on desktop, but works very well with JPro.
 ![alt](youtube:dQw4w9WgXcQ)
+```
 
 Some Image:
 ![alt](https://www.jpro.one/app/default/resourcesencoded/cp:/1/1/one/jpro/img/landing/DUKE-forward.png)
