@@ -496,3 +496,8 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-webrtc:example:jproRun
 ./gradlew jpro-sipjs:example:jproRun
 ```
+
+- Run the [ensemble](https://www.jfx-ensemble.com/) website
+```shell
+./gradlew ensemble:site:jproRun
+```
