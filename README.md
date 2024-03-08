@@ -46,18 +46,6 @@ repositories {
 }
 ```
 
-## Lunch the examples
-The [example](https://github.com/JPro-one/jpro-platform/blob/main/example/src/main/java/one/jpro/platform/example/Main.java)
-subproject holds different examples from the other modules. To run it, you can use the following command:
-* As web application via JPro server
-```shell
-./gradlew example:jproRun
-```
-* As desktop application
-```shell
-./gradlew example:run
-```
-
 ## JPro Auth
 Rely on this library to add sophisticated authentication and authorization to your **JPro/JavaFX** applications.
 Finely control access with a degree of customization that can accommodate even the most complex security requirements.
@@ -473,9 +461,12 @@ dependencies {
 ```
 
 ## Launch the examples
+To run the examples, you can use the following commands:
 
 - As desktop application
 ```shell
+./gradlew example:run
+
 ./gradlew jpro-auth:example:run -Psample=basic-login
 ./gradlew jpro-auth:example:run -Psample=google-login
 ./gradlew jpro-auth:example:run -Psample=oauth
@@ -490,6 +481,8 @@ dependencies {
 
 - As JPro application
 ```shell
+./gradlew example:jproRun
+
 ./gradlew jpro-auth:example:jproRun -Psample=basic-login
 ./gradlew jpro-auth:example:jproRun -Psample=google-login
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
