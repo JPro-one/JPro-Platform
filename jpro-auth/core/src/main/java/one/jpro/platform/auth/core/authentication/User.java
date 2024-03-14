@@ -143,4 +143,14 @@ public class User implements Authentication {
         }
         return exists;
     }
+
+    /**
+     * Retrieve the user's email from the user's attributes.
+     *
+     * @return the email as a string
+     */
+    public String getEmail() {
+        return toJSON().getJSONObject(User.KEY_ATTRIBUTES).getJSONObject("auth")
+                .getJSONObject("idToken").getJSONObject("payload").getString("email");
+    }
 }

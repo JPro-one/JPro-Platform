@@ -23,7 +23,7 @@ public class SignedInPage extends Page {
         if (user == null) {
             getChildren().add(headerLabel);
         } else {
-            headerLabel.setText("Signed in as user: " + user.getName());
+            headerLabel.setText("Signed in as user: " + user.getName() + "\n(" + user.getEmail() + ")");
 
             final var userInfoTextArea = new TextArea();
             userInfoTextArea.setWrapText(true);

@@ -29,8 +29,12 @@ public class SignedInUserPage extends Page {
         if (authProvider == null) {
             getChildren().add(headerLabel);
         } else {
-            headerLabel.setText("Signed in user: " + (loginApp.getUserSession().getUser() == null ? ""
-                    : loginApp.getUserSession().getUser().getName()));
+            final User user = loginApp.getUserSession().getUser();
+            if (user == null) {
+                headerLabel.setText("Not signed in.");
+            } else {
+                headerLabel.setText("Signed in user: " + user.getName() + "\n(" + user.getEmail() + ")");
+            }
 
             final var authInfoBox = loginApp.createButtonWithDescription(
                     "Show authentication information about this user.", "Auth Info",
@@ -83,7 +87,6 @@ public class SignedInUserPage extends Page {
             final var revokeTokenBox = loginApp.createButtonWithDescription(
                     "Revoke the access token.", "Revoke Token",
                     event -> {
-                        final var user = loginApp.getUserSession().getUser();
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
@@ -113,7 +116,6 @@ public class SignedInUserPage extends Page {
             final var userInfoBox = loginApp.createButtonWithDescription(
                     "Get more user information from the provider.", "User Info",
                     event -> {
-                        final var user = loginApp.getUserSession().getUser();
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
@@ -145,7 +147,6 @@ public class SignedInUserPage extends Page {
             final var logoutBox = loginApp.createButtonWithDescription(
                     "Sign out from the provider.", "Sign Out",
                     event -> {
-                        final var user = loginApp.getUserSession().getUser();
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
