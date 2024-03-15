@@ -30,11 +30,8 @@ public class SignedInUserPage extends Page {
             getChildren().add(headerLabel);
         } else {
             final User user = loginApp.getUserSession().getUser();
-            if (user == null) {
-                headerLabel.setText("Not signed in.");
-            } else {
-                headerLabel.setText("Signed in user: " + user.getName() + "\n(" + user.getEmail() + ")");
-            }
+            headerLabel.setText(user == null ? "Not signed in." :
+                    "Signed in user: " + user.getName() + "\n(" + user.getAttribute("email") + ")");
 
             final var authInfoBox = loginApp.createButtonWithDescription(
                     "Show authentication information about this user.", "Auth Info",
@@ -42,7 +39,8 @@ public class SignedInUserPage extends Page {
 
             final var introspectTokenBox = loginApp.createButtonWithDescription(
                     "Introspect the access token.", "Introspect Token",
-                    event -> FXFuture.fromJava(authProvider.introspect(loginApp.getUserSession().getUser(), "access_token"))
+                    event -> FXFuture.fromJava(authProvider.introspect(loginApp.getUserSession().getUser(),
+                                    "access_token"))
                             .map(json -> {
                                 loginApp.setIntrospectionInfo(json);
                                 gotoPage(headerLabel, "/user/introspect-token");
