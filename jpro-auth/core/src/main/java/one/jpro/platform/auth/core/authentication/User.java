@@ -174,7 +174,6 @@ public class User implements Authentication {
      * @return the email as a string
      */
     public String getEmail() {
-        return toJSON().getJSONObject(User.KEY_ATTRIBUTES).getJSONObject("auth")
-                .getJSONObject("idToken").getJSONObject("payload").getString("email");
+        return getAttribute("email").orElseThrow();
     }
 }
