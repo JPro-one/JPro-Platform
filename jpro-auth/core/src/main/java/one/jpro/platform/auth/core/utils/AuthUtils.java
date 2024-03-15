@@ -107,6 +107,48 @@ public interface AuthUtils {
     }
 
     /**
+     * Find the value of a key in a JSON object.
+     *
+     * @param json the JSON object
+     * @param key the key to search for
+     * @return the value of the key
+     */
+    static Object findValueByKey(JSONObject json, String key) {
+        // Check if the current JSON object has the key.
+        if (json.has(key)) {
+            return json.get(key);
+        }
+
+        // If the key is not in the current object, search deeper.
+        for (String currentKey : json.keySet()) {
+            Object value = json.get(currentKey);
+
+            if (value instanceof JSONObject) {
+                // If it's a nested JSONObject, search recursively in this object.
+                final Object result = findValueByKey((JSONObject) value, key);
+                if (result != null) {
+                    return result;
+                }
+            } else if (value instanceof JSONArray array) {
+                // If it's a JSONArray, iterate through its elements.
+                for (int i = 0; i < array.length(); i++) {
+                    Object arrayElement = array.get(i);
+                    if (arrayElement instanceof JSONObject) {
+                        // If an element of the array is a JSONObject, search recursively in this object.
+                        Object result = findValueByKey((JSONObject) arrayElement, key);
+                        if (result != null) {
+                            return result;
+                        }
+                    }
+                }
+            }
+        }
+
+        // If the key was not found in the current object or any of its sub objects, return null.
+        return null;
+    }
+
+    /**
      * Checks if the specified headers contain the specified value.
      *
      * @param headers the HTTP headers
