@@ -9,6 +9,7 @@ public class PlatformUtils {
 
     private static final String os = System.getProperty("os.name");
     private static final String version = System.getProperty("os.version");
+    private static final String arch = System.getProperty("os.arch");
     private static final String javafxPlatform = System.getProperty("javafx.platform");
     private static final boolean embedded = Boolean.getBoolean("com.sun.javafx.isEmbedded");
     private static final boolean ANDROID = "android".equals(javafxPlatform) || "Dalvik".equals(System.getProperty("java.vm.name"));
@@ -78,6 +79,15 @@ public class PlatformUtils {
      */
     public static boolean isIOS(){
         return IOS;
+    }
+
+    /**
+     * Returns true if the operating system architecture is arm64 (aarch64).
+     *
+     * @return <code>true</code> if the operating system architecture is arm64, <code>false</code> otherwise.
+     */
+    public static boolean isAarch64() {
+        return arch.equals("aarch64");
     }
 
     /**
