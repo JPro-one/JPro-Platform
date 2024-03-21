@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class OAuth2AuthenticationProvider implements AuthenticationProvider<Credentials> {
 
-    private static final Logger log = LoggerFactory.getLogger(OAuth2AuthenticationProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthenticationProvider.class);
 
     private static final Base64.Decoder BASE64_DECODER = AuthUtils.BASE64_DECODER;
 
@@ -106,7 +106,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         // Generate the authorization URL and open it in the default browser
         final String authorizeUrl = api.authorizeURL(credentials
                 .setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri())));
-        log.debug("Authorize URL: {}", authorizeUrl);
+        logger.debug("Authorize URL: {}", authorizeUrl);
 
         if (!WebAPI.isBrowser()) {
             if (httpServer != null) {
@@ -154,10 +154,10 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     // basic validation passed
                     return CompletableFuture.completedFuture(newUser);
                 } catch (TokenExpiredException | IllegalStateException ex) {
-                    log.error(ex.getMessage(), ex);
+                    logger.error(ex.getMessage(), ex);
 //                    return CompletableFuture.failedFuture(ex);
                 } catch (JwkException ex) {
-                    log.error(ex.getMessage(), ex);
+                    logger.error(ex.getMessage(), ex);
 //                    return CompletableFuture.failedFuture(new RuntimeException(ex.getMessage(), ex));
                 }
 
@@ -188,7 +188,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                                 final String clientId = options.getClientId();
                                 if (clientId != null && !clientId.equals(json.getString("client_id"))) {
                                     // client identifier for the OAuth2 client that requested this token
-                                    log.info("Introspect `client_id` doesn't match configured `client_id`");
+                                    logger.info("Introspect `client_id` doesn't match configured `client_id`");
                                 }
                             }
 
@@ -210,7 +210,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
             // Wrap the Query Parameters in a JSONObject for easy access
             final JSONObject queryParams = new JSONObject(httpServer.getQueryParams());
-            log.debug("URL query parameters: {}", queryParams);
+            logger.debug("URL query parameters: {}", queryParams);
 
             // Retrieve the authorization code
             if (queryParams.has("code")) {
@@ -455,7 +455,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
                 authJSON.put("claimToken", "accessToken");
             } catch (JWTDecodeException | IllegalStateException ex) {
-                log.trace("Cannot decode access token:", ex);
+                logger.trace("Cannot decode access token:", ex);
             }
         }
 
@@ -479,7 +479,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     userJSON.put(Authentication.KEY_NAME, payload.getString("email"));
                 }
             } catch (JWTDecodeException | IllegalStateException ex) {
-                log.trace("Cannot decode id token:", ex);
+                logger.trace("Cannot decode id token:", ex);
             }
         }
 
@@ -545,6 +545,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         } catch (com.auth0.jwt.exceptions.TokenExpiredException tex) {
             throw new TokenExpiredException(tex.getMessage(), tex.getExpiredOn());
         }
+//        catch (com.auth0.jwt.exceptions.JWTDecodeException dex) {
+//            throw new IllegalStateException(dex.getMessage());
+//        }
 
         // validate the audience
         if (json.has("aud")) {

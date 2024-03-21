@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 class ConnectionEventLoop {
 
-    private static final Logger log = LoggerFactory.getLogger(ConnectionEventLoop.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionEventLoop.class);
 
     private final HttpOptions options;
     private final Handler handler;
@@ -155,7 +155,7 @@ class ConnectionEventLoop {
          * Called when the request times out.
          */
         private void onRequestTimeout() {
-            log.trace("Request timeout in connection with id: {}", id);
+            logger.trace("Request timeout in connection with id: {}", id);
             failSafeClose();
         }
 
@@ -166,7 +166,7 @@ class ConnectionEventLoop {
             try {
                 doOnReadable();
             } catch (IOException | RuntimeException ex) {
-                log.error("Read error in connection with id: {}", id);
+                logger.error("Read error in connection with id: {}", id);
                 failSafeClose();
             }
         }
@@ -180,20 +180,20 @@ class ConnectionEventLoop {
             buffer.clear();
             int numBytes = socketChannel.read(buffer);
             if (numBytes < 0) {
-                log.trace("Close read in connection with id: {}", id);
+                logger.trace("Close read in connection with id: {}", id);
                 failSafeClose();
                 return;
             }
             buffer.flip();
             byteTokenizer.add(buffer);
-            log.trace("Read bytes in connection with id: {}, read_bytes: {}, request_bytes: {}",
+            logger.trace("Read bytes in connection with id: {}, read_bytes: {}, request_bytes: {}",
                     id, numBytes, byteTokenizer.remaining());
             if (requestParser.parse()) {
-                log.trace("Read request with connection id: {} and request_bytes: {}", id, byteTokenizer.remaining());
+                logger.trace("Read request with connection id: {} and request_bytes: {}", id, byteTokenizer.remaining());
                 onParseRequest();
             } else {
                 if (byteTokenizer.size() > options.getMaxRequestSize()) {
-                    log.trace("Exceed request max_size in connection with id: {} and request_size: {}", id, byteTokenizer.size());
+                    logger.trace("Exceed request max_size in connection with id: {} and request_size: {}", id, byteTokenizer.size());
                     failSafeClose();
                 }
             }
@@ -230,7 +230,7 @@ class ConnectionEventLoop {
                 try {
                     prepareToWriteResponse(response);
                 } catch (IOException ex) {
-                    log.trace("Response error in connection with id: {}", id);
+                    logger.trace("Response error in connection with id: {}", id);
                     failSafeClose();
                 }
             });
@@ -256,7 +256,7 @@ class ConnectionEventLoop {
                 headers.add(new Header(HEADER_CONTENT_LENGTH, Integer.toString(response.body().length)));
             }
             writeBuffer = ByteBuffer.wrap(response.serialize(version, headers));
-            log.trace("Response ready in connection with id: {} and num_bytes: {}", id, writeBuffer.remaining());
+            logger.trace("Response ready in connection with id: {} and num_bytes: {}", id, writeBuffer.remaining());
             doOnWritable();
         }
 
@@ -267,7 +267,7 @@ class ConnectionEventLoop {
             try {
                 doOnWritable();
             } catch (IOException | RuntimeException ex) {
-                log.trace("Write error in connection with id: {}", id);
+                logger.trace("Write error in connection with id: {}", id);
                 failSafeClose();
             }
         }
@@ -297,13 +297,13 @@ class ConnectionEventLoop {
             int numBytes = doWrite();
             if (!writeBuffer.hasRemaining()) { // Response fully written
                 writeBuffer = null; // done with current write buffer, remove reference
-                log.trace("Write response with connection id: {} and num_bytes: {}", id, numBytes);
+                logger.trace("Write response with connection id: {} and num_bytes: {}", id, numBytes);
                 if (httpOneDotZero && !keepAlive) { // non-persistent connection, close now
-                    log.trace("Close after response with connection id: {}", id);
+                    logger.trace("Close after response with connection id: {}", id);
                     failSafeClose();
                 } else { // Persistent connection
                     if (requestParser.parse()) { // Subsequent request in the buffer
-                        log.trace("Pipeline request with connection id: {} and request_bytes: {}", id, byteTokenizer.remaining());
+                        logger.trace("Pipeline request with connection id: {} and request_bytes: {}", id, byteTokenizer.remaining());
                         onParseRequest();
                     } else { // Switch back to read mode
                         requestTimeoutTask = scheduler.schedule(this::onRequestTimeout, options.getRequestTimeout());
@@ -314,7 +314,7 @@ class ConnectionEventLoop {
                 if ((selectionKey.interestOps() & SelectionKey.OP_WRITE) == 0) {
                     selectionKey.interestOps(SelectionKey.OP_WRITE);
                 }
-                log.trace("Write in connection with id: {} and num_bytes: {}", id, numBytes);
+                logger.trace("Write in connection with id: {} and num_bytes: {}", id, numBytes);
             }
         }
 
@@ -407,7 +407,7 @@ class ConnectionEventLoop {
             try {
                 doRegister(socketChannel);
             } catch (IOException ex) {
-                log.error("Error on registering a new socket channel", ex);
+                logger.error("Error on registering a new socket channel", ex);
                 try {
                     socketChannel.close();
                 } catch (IOException ignore) {}

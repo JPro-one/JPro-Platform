@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCredentials> {
 
-    private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
 
     private static final Base64.Decoder BASE64_DECODER = AuthUtils.BASE64_DECODER;
 
@@ -52,10 +52,10 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
      * @return a {@link CompletableFuture} holding the token credentials
      */
     public CompletableFuture<TokenCredentials> token(@NotNull String tokenPath, @NotNull final JSONObject authInfo) {
-        log.debug("Requesting token from: {}, and authentication info: {}", authOptions.getSite() + tokenPath, authInfo);
+        logger.debug("Requesting token from: {}, and authentication info: {}", authOptions.getSite() + tokenPath, authInfo);
         return api.token(tokenPath, authInfo)
                 .thenCompose(json -> {
-                    log.info("Received token: {}", json);
+                    logger.info("Received token: {}", json);
                     if (json.has("token")) {
                         return CompletableFuture.completedFuture(new TokenCredentials(json.getString("token")));
                     } else {
@@ -76,7 +76,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
         try {
             credentials.validate(null);
         } catch (CredentialValidationException ex) {
-            log.error("JWT token validation failed", ex);
+            logger.error("JWT token validation failed", ex);
             return CompletableFuture.failedFuture(ex);
         }
 
@@ -86,7 +86,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
             final String decodedJwtPayload = new String(BASE64_DECODER.decode(encodedJwtPayload));
             payload = new JSONObject(decodedJwtPayload);
         } catch (JWTDecodeException ex) {
-            log.error("JWT token decoding failed", ex);
+            logger.error("JWT token decoding failed", ex);
             return CompletableFuture.failedFuture(ex);
         }
 
