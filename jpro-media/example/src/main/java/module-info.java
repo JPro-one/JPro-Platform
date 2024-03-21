@@ -22,6 +22,10 @@ module one.jpro.platform.media.example {
     requires org.bytedeco.opencv.linux.x86_64;
     requires org.bytedeco.openblas.linux.x86_64;
 
+    requires org.bytedeco.ffmpeg.linux.arm64;
+    requires org.bytedeco.opencv.linux.arm64;
+    requires org.bytedeco.openblas.linux.arm64;
+
     requires org.bytedeco.ffmpeg.macosx.x86_64;
     requires org.bytedeco.opencv.macosx.x86_64;
     requires org.bytedeco.openblas.macosx.x86_64;
