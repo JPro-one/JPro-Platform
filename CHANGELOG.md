@@ -1,5 +1,19 @@
 ### 0.2.15-SNAPSHOT (TBD)
 
+#### Improvements
+* Updated **SimpleFX** dependencies to version `3.2.32`.
+* Added `ensemble` running command in the documentation.
+
+### Features
+* Added native support to `jpro-media` module for the Linux `arm64` architecture.
+* Added `getAttribute(String key)` method to the User class in `jpro-auth-core` module. This will help developers to
+easily retrieve attributes from the user object. Add also `getEmail()` method to simplify the retrieval of the email
+from the attribute.
+* Added `UserSession` class to the authentication filters to simplify the User storage and retrieval process.
+
+#### Bugfixes
+* Minor fixes and documentation improvements.
+
 ----------------------
 
 ### 0.2.14 (March 5, 2024)
