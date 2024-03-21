@@ -70,13 +70,16 @@ public final class FileStorage {
      * Creates a temporary file in the specified directory with the provided file name and type.
      * If any of the parameters are null, it falls back to default values.
      *
-     * @param dir      the directory in which to create the file. Defaults to {@link #JPRO_TMP_DIR} if null
+     * @param dir      the directory in which to create the file,
+     *                 if null, the directory defaults to {@link #JPRO_TMP_DIR}
      * @param fileName the name of the file to create. Defaults to "filename" if null
      * @param fileType the file extension or type. Defaults to ".tmp" if null
      * @return a Path object representing the created file
-     * @throws IOException If an I/O error occurs or the file already exists
+     * @throws IOException if an I/O error occurs or the file already exists
      */
-    public static Path createTempFile(@Nullable Path dir, @Nullable String fileName, @Nullable String fileType) throws IOException {
+    public static Path createTempFile(@Nullable Path dir,
+                                      @Nullable String fileName,
+                                      @Nullable String fileType) throws IOException {
         dir = Objects.requireNonNullElse(dir, JPRO_TMP_DIR);
         fileName = Objects.requireNonNullElse(fileName, "filename");
         fileType = Objects.requireNonNullElse(fileType, ".tmp");
