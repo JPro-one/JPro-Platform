@@ -3,13 +3,12 @@ package one.jpro.platform.sipjs.api.session;
 import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
 import one.jpro.platform.sipjs.api.options.InvitationAcceptOptions;
-import one.jpro.platform.sipjs.api.session.Session;
 
 /**
  * Represents an incoming call.
  */
-public class Inventation extends Session {
-    public Inventation(JSVariable session, WebAPI webapi) {
+public class Invitation extends Session {
+    public Invitation(JSVariable session, WebAPI webapi) {
         super(session, webapi);
     }
 

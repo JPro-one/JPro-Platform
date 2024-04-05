@@ -5,7 +5,7 @@ import com.jpro.webapi.WebAPI;
 import one.jpro.platform.sipjs.SipJSUtil;
 import one.jpro.platform.sipjs.api.options.InviterOptions;
 import one.jpro.platform.sipjs.api.options.UserAgentOptions;
-import one.jpro.platform.sipjs.api.session.Inventation;
+import one.jpro.platform.sipjs.api.session.Invitation;
 import one.jpro.platform.sipjs.api.session.Inviter;
 
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +24,7 @@ public class UserAgent {
     JSVariable startPromise;
     UserAgentOptions options;
 
-    Consumer<Inventation> onInvite;
+    Consumer<Invitation> onInvite;
 
     private JSVariable onInviteJS;
     /**
@@ -43,7 +43,7 @@ public class UserAgent {
 
         // setup onInvite
         onInviteJS = webapi.registerJavaFunctionWithVariable(invite -> {
-            var inventation = new Inventation(invite, webapi);
+            var inventation = new Invitation(invite, webapi);
             onInvite.accept(inventation);
         });
         webapi.executeScript(optionsVariable.getName() + ".delegate = { onInvite: " + onInviteJS.getName() + " };");
@@ -77,7 +77,7 @@ public class UserAgent {
      * Sets the onInvite consumer.
      * @param onInvite
      */
-    public void setOnInvite(Consumer<Inventation> onInvite) {
+    public void setOnInvite(Consumer<Invitation> onInvite) {
         this.onInvite = onInvite;
     }
 

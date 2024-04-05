@@ -11,7 +11,7 @@ import one.jpro.platform.sipjs.api.UserAgent;
 import one.jpro.platform.sipjs.api.options.InvitationAcceptOptions;
 import one.jpro.platform.sipjs.api.options.InviterOptions;
 import one.jpro.platform.sipjs.api.options.UserAgentOptions;
-import one.jpro.platform.sipjs.api.session.Inventation;
+import one.jpro.platform.sipjs.api.session.Invitation;
 import one.jpro.platform.sipjs.api.session.Session;
 import one.jpro.platform.webrtc.MediaStream;
 import one.jpro.platform.webrtc.VideoFrame;
@@ -75,11 +75,11 @@ public class User extends VBox {
         var button = new Button("Accept");
         button.getStyleClass().add("call-button");
         button.setOnAction(event -> {
-            ((Inventation) session.get()).accept(InvitationAcceptOptions.createVideoOnlyCall());
+            ((Invitation) session.get()).accept(InvitationAcceptOptions.createVideoOnlyCall());
             handleSession(webapi, session.get(), this);
         });
         session.addListener((observable, oldValue, newValue) -> {
-            if (newValue instanceof Inventation) {
+            if (newValue instanceof Invitation) {
                 button.setDisable(false);
             } else {
                 button.setDisable(true);
@@ -94,11 +94,11 @@ public class User extends VBox {
         var button = new Button("Reject");
         button.getStyleClass().add("call-button");
         button.setOnAction(event -> {
-            ((Inventation) session.get()).reject();
+            ((Invitation) session.get()).reject();
             session.set(null);
         });
         session.addListener((observable, oldValue, newValue) -> {
-            if (newValue instanceof Inventation) {
+            if (newValue instanceof Invitation) {
                 button.setDisable(false);
             } else {
                 button.setDisable(true);
