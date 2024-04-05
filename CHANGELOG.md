@@ -1,5 +1,8 @@
 ### 0.2.16-SNAPSHOT (TBD)
 
+### Features
+* Added `setPrintToConsole` method to CommandRunner class in the `jpro-internal-util` module. This method can be used
+  to set the print output of the command runner to the console. This is useful for debugging purposes.
 
 ----------------------
 

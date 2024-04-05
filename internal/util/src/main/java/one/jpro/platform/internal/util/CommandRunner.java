@@ -21,6 +21,7 @@ public class CommandRunner {
     private final List<String> secretArgs = new ArrayList<>();
     private final StringBuffer processOutput = new StringBuffer();
     private boolean interactive = false;
+    private boolean printToConsole = false;
 
     /**
      * Initializes CommandRunner with default logger and command line arguments.
@@ -50,6 +51,16 @@ public class CommandRunner {
      */
     public void setInteractive(boolean interactive) {
         this.interactive = interactive;
+    }
+
+    /**
+     * When set to true, it will enable the process output to be
+     * printed to the console. By default, is false
+     *
+     * @param printToConsole a boolean that sets the print to console mode
+     */
+    public void setPrintToConsole(boolean printToConsole) {
+        this.printToConsole = printToConsole;
     }
 
     /**
@@ -261,6 +272,9 @@ public class CommandRunner {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 reader.lines().forEach(line -> {
                     processOutput.append(line).append("\n");
+                    if (printToConsole) {
+                        System.out.println(line);
+                    }
                     logger.debug(line);
                 });
             } catch (IOException ex) {
