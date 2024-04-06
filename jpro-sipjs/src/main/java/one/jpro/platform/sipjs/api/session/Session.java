@@ -89,7 +89,9 @@ public class Session {
     }
 
     public void bye() {
-        webapi.executeScript(session.getName() + ".bye();");
+        webapi.js().eval(session.getName() + ".bye();")
+                .toPromise()
+                .onPromiseError(e -> e.printStackTrace());
     }
 
     public void endCall() {
