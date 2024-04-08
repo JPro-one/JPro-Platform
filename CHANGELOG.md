@@ -1,4 +1,4 @@
-### 0.2.16-SNAPSHOT (TBD)
+### 0.2.16 (April 8, 2024)
 
 ### Features
 * Added `setPrintToConsole` method to CommandRunner class in the `jpro-internal-util` module. This method can be used
