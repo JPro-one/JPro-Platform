@@ -4,11 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -20,33 +22,87 @@ public class CommandRunnerTests {
 
     private Logger logger;
     private CommandRunner commandRunner;
+    private File mockFile;
 
     @BeforeEach
     public void setUp() {
         // Initialize with a mocked logger
         logger = mock(Logger.class);
         commandRunner = new CommandRunner(logger);
+        mockFile = mock(File.class);
     }
 
     @Test
-    public void constructorWithArgsTest() {
+    public void constructorWithArgs() {
         String[] args = {"arg1", "arg2"};
         commandRunner = new CommandRunner(logger, args);
         assertThat(commandRunner.getCmdList()).containsExactly(args);
     }
 
     @Test
-    public void addArgTest() {
+    public void addArg() {
         String arg = "testArg";
         commandRunner.addArg(arg);
         assertThat(commandRunner.getCmdList()).contains(arg);
     }
 
     @Test
-    public void addMultipleArgsTest() {
+    public void addMultipleArgs() {
         String[] args = {"arg3", "arg4"};
         commandRunner.addArgs(args);
         assertThat(commandRunner.getCmdList()).contains(args);
+    }
+
+    @Test
+    public void runAsync() throws IOException {
+        if (PlatformUtils.isWindows()) {
+            commandRunner.addArgs("cmd", "/c", "dir", "/b", "build.gradle");
+        } else {
+            commandRunner.addArgs("ls", "build.gradle");
+        }
+        Process process = commandRunner.runAsync("ls");
+        assertThat(process.getClass()).isAssignableTo(Process.class);
+    }
+
+    @Test
+    public void runAsyncWithMockDirectoryThrowsException() {
+        if (PlatformUtils.isWindows()) {
+            commandRunner.addArgs("cmd", "/c", "dir", "/b", "build.gradle");
+        } else {
+            commandRunner.addArgs("ls", "build.gradle");
+        }
+        assertThatThrownBy(() -> commandRunner.runAsync("ls", mockFile))
+                .hasMessageContaining("Cannot run program \"ls\"")
+                .hasMessageContaining("error=2, No such file or directory")
+                .hasRootCauseMessage("error=2, No such file or directory")
+                .hasCauseInstanceOf(IOException.class);
+    }
+
+    @Test
+    public void runAsyncWithOutput() throws IOException, InterruptedException {
+        if (PlatformUtils.isWindows()) {
+            commandRunner.addArgs("cmd", "/c", "dir", "/b", "build.gradle");
+        } else {
+            commandRunner.addArgs("ls", "build.gradle");
+        }
+        Process process = commandRunner.runAsync("dir");
+        int result = process.waitFor();
+        assertThat(result).isEqualTo(0); // Successful execution
+        assertThat(commandRunner.getLastResponse()).isEqualTo("build.gradle");
+    }
+
+    @Test
+    public void runAsyncWithDirectoryAndOutput() throws IOException, InterruptedException {
+        Path tempDir = Files.createTempDirectory("command-runner-tests");
+        if (PlatformUtils.isWindows()) {
+            commandRunner.addArgs("cmd", "/c", "mkdir", "runner");
+        } else {
+            commandRunner.addArgs("mkdir", "runner");
+        }
+        Process process = commandRunner.runAsync("dir", tempDir.toFile());
+        int result = process.waitFor();
+        assertThat(result).isEqualTo(0); // Successful execution
+        assertThat(commandRunner.getLastResponse()).isEqualTo("");
     }
 
     @Test
