@@ -106,7 +106,13 @@ public class CommandRunnerTests {
     }
 
     @Test
-    public void processTest() throws IOException, InterruptedException {
+    public void runWithoutArgs() {
+        assertThatThrownBy(() -> commandRunner.run("dir"))
+                .hasMessage("No command line arguments provided");
+    }
+
+    @Test
+    public void runWithResult() throws IOException, InterruptedException {
         if (PlatformUtils.isWindows()) {
             commandRunner.addArgs("cmd", "/c", "dir", "/b", "build.gradle");
         } else {
@@ -118,7 +124,7 @@ public class CommandRunnerTests {
     }
 
     @Test
-    public void processLogTest() throws IOException, InterruptedException {
+    public void runWithDirectoryAndResult() throws IOException, InterruptedException {
         Path tempDir = Files.createTempDirectory("command-runner-tests");
         String output;
         if (PlatformUtils.isWindows()) {
