@@ -152,26 +152,52 @@ public class CommandRunner {
      */
     public int run(String processName, File workingDirectory) throws IOException, InterruptedException {
         Process process = setupProcess(processName, workingDirectory);
-        Thread logThread = mergeProcessOutput(process.getInputStream());
+        Thread mergeOutputThread = mergeProcessOutput(process.getInputStream());
         int result = process.waitFor();
-        logThread.join();
+        mergeOutputThread.join();
         logger.debug("Result for {}: {}", processName, result);
         if (result != 0) logger.error("Process {} failed with result: {}", processName, result);
         return result;
     }
 
     /**
+     * Runs a process asynchronously with a given set of command line arguments.
+     * By default, it merges the output of the process.
+     *
+     * @param processName the name of the process
+     * @return the {@link Process} object
+     * @throws IOException if an I/O error occurs
+     */
+    public Process runAsync(String processName) throws IOException {
+        return runAsync(processName, null, true);
+    }
+
+    /**
      * Runs a process asynchronously with a given set of command line arguments, in a given
-     * working directory.
+     * working directory. By default, it merges the output of the process.
      *
      * @param processName      the name of the process
      * @param workingDirectory a file with the working directory of the process
-     * @return the process object
+     * @return the {@link Process} object
      * @throws IOException if an I/O error occurs
      */
     public Process runAsync(String processName, File workingDirectory) throws IOException {
+        return runAsync(processName, workingDirectory, true);
+    }
+
+    /**
+     * Runs a process asynchronously with a given set of command line arguments, in a given
+     * working directory.
+     *
+     * @param processName the name of the process
+     * @param workingDirectory a file with the working directory of the process
+     * @param mergeOutput a boolean that sets the merge output mode
+     * @return the {@link Process} object
+     * @throws IOException if an I/O error occurs
+     */
+    public Process runAsync(String processName, File workingDirectory, boolean mergeOutput) throws IOException {
         Process process = setupProcess(processName, workingDirectory);
-        mergeProcessOutput(process.getInputStream());
+        if (mergeOutput) mergeProcessOutput(process.getInputStream());
         return process;
     }
 
