@@ -1,5 +1,8 @@
 ### 0.2.17-SNAPSHOT (TBD)
 
+### Features
+* Added `runAsync` method to the `CommandRunner` class in the `jpro-internal-util` module. This method can be used
+  to run a command asynchronously. This is useful for long-running commands that should not block the main thread.
 
 ----------------------
 
