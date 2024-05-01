@@ -190,6 +190,19 @@ public class CommandRunner {
     }
 
     /**
+     * Runs a process asynchronously with a given set of command line arguments.
+     *
+     * @param processName the name of the process
+     * @param mergeOutput a boolean that sets the merge output mode
+     * @return the {@link Process} object
+     * @throws IOException if an I/O error occurs
+     */
+    public Process runAsync(@Nullable String processName,
+                            boolean mergeOutput) throws IOException {
+        return runAsync(processName, null, mergeOutput);
+    }
+
+    /**
      * Runs a process asynchronously with a given set of command line arguments, in a given
      * working directory.
      *
