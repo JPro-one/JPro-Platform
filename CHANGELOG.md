@@ -1,4 +1,4 @@
-### 0.2.17-SNAPSHOT (TBD)
+### 0.2.17 (May 1, 2024)
 
 ### Features
 * Added `runAsync` method to the `CommandRunner` class in the `jpro-internal-util` module. This method can be used
