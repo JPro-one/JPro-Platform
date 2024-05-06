@@ -85,9 +85,10 @@ public class CommandRunnerTests {
         } else {
             commandRunner.addArgs("ls", "build.gradle");
         }
-        Process process = commandRunner.runAsync("dir");
+        Process process = commandRunner.runAsync("async-dir-list");
         int result = process.waitFor();
         assertThat(result).isEqualTo(0); // Successful execution
+        assertThat(commandRunner.getResponses().size()).isEqualTo(1);
         assertThat(commandRunner.getLastResponse()).isEqualTo("build.gradle");
     }
 
@@ -107,7 +108,7 @@ public class CommandRunnerTests {
 
     @Test
     public void runWithoutArgs() {
-        assertThatThrownBy(() -> commandRunner.run("dir"))
+        assertThatThrownBy(() -> commandRunner.run("no-args"))
                 .hasMessage("No command line arguments provided");
     }
 
@@ -118,7 +119,7 @@ public class CommandRunnerTests {
         } else {
             commandRunner.addArgs("ls", "build.gradle");
         }
-        assertThat(commandRunner.run("dir")).isEqualTo(0);
+        assertThat(commandRunner.run("dir-list")).isEqualTo(0);
         assertThat(commandRunner.getResponses().size()).isEqualTo(1);
         assertThat(commandRunner.getLastResponse()).isEqualTo("build.gradle");
     }
