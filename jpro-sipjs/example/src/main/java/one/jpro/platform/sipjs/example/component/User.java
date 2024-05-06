@@ -117,7 +117,7 @@ public class User extends VBox {
             session.set(null);
         });
         session.addListener((observable, oldValue, newValue) -> {
-            button.setDisable(session.get() == null);
+            button.setDisable(session.get() == null || !session.get().stateProperty().get().equals(Session.State.Established));
         });
         button.setDisable(session.get() == null);
         getChildren().add(button);
