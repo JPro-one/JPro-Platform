@@ -1,3 +1,8 @@
+### 0.3.1-SNAPSHOT (TBD)
+
+
+----------------------
+
 ### 0.3.0 (May 6, 2024)
 
 #### Improvements
@@ -10,7 +15,7 @@
 
 ### 0.2.17 (May 1, 2024)
 
-### Features
+#### Features
 * Added `runAsync` method to the `CommandRunner` class in the `jpro-internal-util` module. This method can be used
   to run a command asynchronously. This is useful for long-running commands that should not block the main thread.
 
@@ -18,7 +23,7 @@
 
 ### 0.2.16 (April 8, 2024)
 
-### Features
+#### Features
 * Added `setPrintToConsole` method to CommandRunner class in the `jpro-internal-util` module. This method can be used
   to set the print output of the command runner to the console. This is useful for debugging purposes.
 
@@ -30,7 +35,7 @@
 * Updated **SimpleFX** dependencies to version `3.2.32`.
 * Added `ensemble` running command in the documentation.
 
-### Features
+#### Features
 * Added native support to `jpro-media` module for the Linux `arm64` architecture.
 * Added `getAttribute(String key)` method to the User class in `jpro-auth-core` module. This will help developers to
 easily retrieve attributes from the user object. Add also `getEmail()` method to simplify the retrieval of the email
@@ -44,31 +49,31 @@ from the attribute.
 
 ### 0.2.14 (March 5, 2024)
 
-### Changes
+#### Changes
 * Renamed `jpro-sessions` module to `jpro-session`.
 
 ----------------------
 
 ### 0.2.13 (February 14, 2024)
 
-### Features
+#### Features
 * Added `jpro-internal-util` module to the platform. This module contains internal utilities that are used by other
   modules in the platform. `PlatformUtils` moved from `jpro-internal-openlink` to this module in the process.
 
 ----------------------
 ### 0.2.12 (February 7. 2024)
 
-### Improvements
+#### Improvements
 * Updated **SimpleFX** to version `3.2.30`.
 
-### Features
+#### Features
 * Added the `jpro-scenegraph` module, which can be used to create a human and AI friendly 
   String representation of a scene graph.
 
 ----------------------
 ### 0.2.11 (January 22, 2024)
 
-### Features
+#### Features
 * Added `basic` authentication API to the `jpro-auth-core` module. This API can be used to authenticate users
   with a username and password. Checkout the `jpro-auth-core` module documentation for more details or the provided
   example on how to use it.
@@ -76,12 +81,12 @@ from the attribute.
   username and password. Checkout the `jpro-auth-routing` module documentation for more details or the provided
   example on how to use it.
 
-### Changes
+#### Changes
 * Renamed authentication filter classes in the `jpro-auth-routing` module to be more consistent with the rest of the
   platform. Specifically, the `OAuth2Filter` class was renamed to `AuthOAuth2Filter` and the `JWTFilter` class was
   renamed to `AuthJWTFilter`.
 
-### Improvements
+#### Improvements
 * Updated JPro dependencies to version `2024.1.0`.
 * Updated **JavaFX** dependencies to version `17.0.10`.
 * Improved the `jpro-auth-core` module documentation.
