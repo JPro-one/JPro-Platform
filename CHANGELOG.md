@@ -1,5 +1,9 @@
 ### 0.2.18-SNAPSHOT (TBD)
 
+#### Improvements
+* Updated **JPro** to version `2024.2.0`.
+* Updated **JavaFX** dependencies to version `17.0.11`.
+* Updated **SimpleFX** dependencies to version `3.2.33`.
 
 ----------------------
 
