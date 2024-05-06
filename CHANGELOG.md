@@ -1,4 +1,21 @@
-### 0.2.16-SNAPSHOT (TBD)
+### 0.2.18-SNAPSHOT (TBD)
+
+#### Improvements
+* Updated **JPro** to version `2024.2.0`.
+* Updated **JavaFX** dependencies to version `17.0.11`.
+* Updated **SimpleFX** dependencies to version `3.2.33`.
+
+----------------------
+
+### 0.2.17 (May 1, 2024)
+
+### Features
+* Added `runAsync` method to the `CommandRunner` class in the `jpro-internal-util` module. This method can be used
+  to run a command asynchronously. This is useful for long-running commands that should not block the main thread.
+
+----------------------
+
+### 0.2.16 (April 8, 2024)
 
 ### Features
 * Added `setPrintToConsole` method to CommandRunner class in the `jpro-internal-util` module. This method can be used

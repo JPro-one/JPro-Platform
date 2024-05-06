@@ -1,5 +1,7 @@
 package one.jpro.platform.internal.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +40,7 @@ public class CommandRunner {
      * @param logger Logger instance for logging process activities.
      * @param args   Command line arguments to be executed by the process.
      */
-    public CommandRunner(Logger logger, String... args) {
+    public CommandRunner(Logger logger, @NotNull String... args) {
         this.logger = logger;
         Collections.addAll(this.args, args);
     }
@@ -69,7 +71,7 @@ public class CommandRunner {
      *
      * @param arg a string passed to the command line arguments
      */
-    public void addArg(String arg) {
+    public void addArg(@NotNull String arg) {
         args.add(arg);
     }
 
@@ -80,7 +82,7 @@ public class CommandRunner {
      *
      * @param arg a string passed to the command line arguments
      */
-    public void addSecretArg(String arg) {
+    public void addSecretArg(@Nullable String arg) {
         secretArgs.add(arg);
         args.add(arg);
     }
@@ -91,7 +93,7 @@ public class CommandRunner {
      *
      * @param args varargs list of arguments
      */
-    public void addArgs(String... args) {
+    public void addArgs(@NotNull String... args) {
         this.args.addAll(Arrays.asList(args));
     }
 
@@ -101,7 +103,7 @@ public class CommandRunner {
      *
      * @param args a collection of arguments
      */
-    public void addArgs(Collection<String> args) {
+    public void addArgs(@NotNull Collection<String> args) {
         this.args.addAll(args);
     }
 
@@ -125,7 +127,7 @@ public class CommandRunner {
      * @param key   a string with the environmental variable name
      * @param value a string with the environmental variable value
      */
-    public void addToEnv(String key, String value) {
+    public void addToEnv(@NotNull String key, @NotNull String value) {
         envVars.put(key, value);
     }
 
@@ -137,7 +139,7 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public int run(String processName) throws IOException, InterruptedException {
+    public int run(@Nullable String processName) throws IOException, InterruptedException {
         return run(processName, null);
     }
 
@@ -150,28 +152,71 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public int run(String processName, File workingDirectory) throws IOException, InterruptedException {
+    public int run(@Nullable String processName,
+                   @Nullable File workingDirectory) throws IOException, InterruptedException {
         Process process = setupProcess(processName, workingDirectory);
-        Thread logThread = mergeProcessOutput(process.getInputStream());
+        Thread mergeOutputThread = mergeProcessOutput(process.getInputStream());
         int result = process.waitFor();
-        logThread.join();
+        mergeOutputThread.join();
         logger.debug("Result for {}: {}", processName, result);
         if (result != 0) logger.error("Process {} failed with result: {}", processName, result);
         return result;
     }
 
     /**
+     * Runs a process asynchronously with a given set of command line arguments.
+     * By default, it merges the output of the process.
+     *
+     * @param processName the name of the process
+     * @return the {@link Process} object
+     * @throws IOException if an I/O error occurs
+     */
+    public Process runAsync(@Nullable String processName) throws IOException {
+        return runAsync(processName, null, true);
+    }
+
+    /**
      * Runs a process asynchronously with a given set of command line arguments, in a given
-     * working directory.
+     * working directory. By default, it merges the output of the process.
      *
      * @param processName      the name of the process
      * @param workingDirectory a file with the working directory of the process
-     * @return the process object
+     * @return the {@link Process} object
      * @throws IOException if an I/O error occurs
      */
-    public Process runAsync(String processName, File workingDirectory) throws IOException {
+    public Process runAsync(@Nullable String processName,
+                            @Nullable File workingDirectory) throws IOException {
+        return runAsync(processName, workingDirectory, true);
+    }
+
+    /**
+     * Runs a process asynchronously with a given set of command line arguments.
+     *
+     * @param processName the name of the process
+     * @param mergeOutput a boolean that sets the merge output mode
+     * @return the {@link Process} object
+     * @throws IOException if an I/O error occurs
+     */
+    public Process runAsync(@Nullable String processName,
+                            boolean mergeOutput) throws IOException {
+        return runAsync(processName, null, mergeOutput);
+    }
+
+    /**
+     * Runs a process asynchronously with a given set of command line arguments, in a given
+     * working directory.
+     *
+     * @param processName the name of the process
+     * @param workingDirectory a file with the working directory of the process
+     * @param mergeOutput a boolean that sets the merge output mode
+     * @return the {@link Process} object
+     * @throws IOException if an I/O error occurs
+     */
+    public Process runAsync(@Nullable String processName,
+                            @Nullable File workingDirectory,
+                            boolean mergeOutput) throws IOException {
         Process process = setupProcess(processName, workingDirectory);
-        mergeProcessOutput(process.getInputStream());
+        if (mergeOutput) mergeProcessOutput(process.getInputStream());
         return process;
     }
 
@@ -184,7 +229,7 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public boolean runTimed(String processName, long timeout) throws IOException, InterruptedException {
+    public boolean runTimed(@Nullable String processName, long timeout) throws IOException, InterruptedException {
         return runTimed(processName, null, timeout);
     }
 
@@ -199,7 +244,8 @@ public class CommandRunner {
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting
      */
-    public boolean runTimed(String processName, File workingDirectory, long timeout)
+    public boolean runTimed(@Nullable String processName,
+                            @Nullable File workingDirectory, long timeout)
             throws IOException, InterruptedException {
         Process process = setupProcess(processName, workingDirectory);
         Thread logThread = mergeProcessOutput(process.getInputStream());
@@ -215,6 +261,7 @@ public class CommandRunner {
      *
      * @return a single string with the whole output of the process
      */
+    @Nullable
     public String getResponse() {
         return processOutput.length() > 0 ?
                 processOutput.toString().replaceAll("\n", "") : null;
@@ -225,6 +272,7 @@ public class CommandRunner {
      *
      * @return a list with all the lines of the output
      */
+    @NotNull
     public List<String> getResponses() {
         return processOutput.length() > 0 ?
                 Arrays.asList(processOutput.toString().split("\n")) : Collections.emptyList();
@@ -248,7 +296,11 @@ public class CommandRunner {
      * @return the process object
      * @throws IOException if an I/O error occurs
      */
-    private Process setupProcess(String processName, File directory) throws IOException {
+    private Process setupProcess(final String processName, final File directory) throws IOException {
+        if (args.isEmpty()) {
+            throw new IllegalArgumentException("No command line arguments provided");
+        }
+
         ProcessBuilder pb = new ProcessBuilder(args).redirectErrorStream(true);
         if (interactive) pb.inheritIO();
         if (directory != null) pb.directory(directory);
