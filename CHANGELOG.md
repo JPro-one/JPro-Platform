@@ -1,4 +1,4 @@
-### 0.3.1-SNAPSHOT (TBD)
+### 0.3.1 (May 14, 2024)
 
 #### Bugfixes
 * Fixed the retrival of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
