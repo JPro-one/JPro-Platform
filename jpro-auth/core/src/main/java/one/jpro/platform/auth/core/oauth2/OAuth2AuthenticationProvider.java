@@ -669,15 +669,16 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         if (httpServer != null && redirectUri != null && redirectUri.charAt(0) == '/') {
             final int port = httpServer.getServerPort();
             String server = httpServer.getServerHost();
+            boolean isLocalAddress = false;
             final String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
-            if (options.isUseLoopbackIpAddress()) {
+            if (options.isUseLoopbackIpAddress() && server.equals("localhost")) {
                 server = loopbackAddress;
+                isLocalAddress = true;
             }
-            final boolean localAddress = server.equals("localhost") || server.equals(loopbackAddress);
             if (port > 0) {
                 server += ":" + port;
             }
-            final String serverUrl = localAddress ? "http://" + server : "https://" + server;
+            final String serverUrl = isLocalAddress ? "http://" + server : "https://" + server;
             redirectUri = serverUrl + redirectUri;
         }
         return redirectUri;

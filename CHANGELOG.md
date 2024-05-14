@@ -3,6 +3,7 @@
 #### Bugfixes
 * Fixed the retrival of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
 in the route is correctly matched with the request domain.
+* Fix the server url when `useLoopbackIpAddress` OAuth2 option is used.
 
 ----------------------
 
