@@ -10,6 +10,7 @@ buildscript {
         classpath "com.google.gradle:osdetector-gradle-plugin:$OSDETECTOR_PLUGIN_VERSION"
         classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
         classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
+        classpath "org.owasp:dependency-check-gradle:$DEPENDENCY_CHECK_PLUGIN_VERSION"
     }
 }
 
@@ -32,6 +33,7 @@ subprojects {
 configure(subprojects.findAll { it.name != 'example' }) {
     apply plugin: 'java-library'
     apply plugin: 'org.openjfx.javafxplugin'
+    apply plugin: 'org.owasp.dependencycheck'
 
     javafx {
         version = "$JAVAFX_VERSION"
@@ -64,6 +66,17 @@ configure(subprojects.findAll { it.name != 'example' }) {
             showStackTraces true
             exceptionFormat "full"
         }
+    }
+
+    dependencyCheck {
+        autoUpdate = true
+        format = 'ALL'
+
+        nvd {
+            apiKey = System.getenv("SANDEC_NVD_API_KEY")
+        }
+
+        outputDirectory = layout.buildDirectory.dir("reports/dependency-check").get().asFile
     }
 }
 
