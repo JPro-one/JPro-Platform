@@ -25,15 +25,12 @@ case class Request (
 
   def getUrl(): String = url
   def getProtocol(): String = protocol
-  def getDomain(): String = directory
+  def getDomain(): String = domain
   def getPort(): Int = port
   def getOriginalPath(): String = origPath
-
   def getPath(): String = path
-
   def getDirectory(): String = directory
   def getQueryParameter(key: String): Option[String] = queryParameters.get(key)
-
   def getQueryParameterOrElse(key: String, default: String): String = queryParameters.getOrElse(key, default)
 
   private lazy val immutableJavaMap: JMap[String, String] = {
@@ -45,7 +42,6 @@ case class Request (
   def getOldContent(): WeakReference[Node] = oldContent
 
   def getQueryParametersScala(): Map[String,String] = queryParameters
-
 
   def resolve(path: String): String = {
     assert(path.startsWith("/") || path.startsWith("./") || path.startsWith("../"), s"Path must start with / or ./ or ../ but was: ${path}")
