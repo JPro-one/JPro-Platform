@@ -22,9 +22,12 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
   }
 
   webAPI.addInstanceCloseListener(() => {
-    THIS.view.onClose()
-    THIS.view.setSessionManager(null)
-    markViewCollectable(THIS.view)
+    // if the session only has redirects, the view is null
+    if (THIS.view != null) {
+      THIS.view.onClose()
+      THIS.view.setSessionManager(null)
+      markViewCollectable(THIS.view)
+    }
   })
 
   def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = {

@@ -1,6 +1,9 @@
 ### 0.3.2-SNAPSHOT (TBD)
 
 
+#### Bugfixes
+* Fixed a NPE thrown if the session only has redirects in the `jpro-routing-core` module.
+
 ----------------------
 
 ### 0.3.1 (May 14, 2024)
