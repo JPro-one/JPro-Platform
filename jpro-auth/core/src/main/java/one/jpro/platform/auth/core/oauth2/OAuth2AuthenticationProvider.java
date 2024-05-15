@@ -663,17 +663,27 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         return false;
     }
 
+    /**
+     * Normalizes the given URI by converting a partial URI to a complete URI using the server's host and port
+     * information.
+     * <p>
+     * This method checks if the URI starts with a '/' character and, if so, appends the server's host and port
+     * information to create a complete URI. If the server's host is "localhost" and the options specify using
+     * the loopback IP address, the loopback address is used instead. Depending on whether the address is local,
+     * "http" or "https" is used for the scheme.</p>
+     *
+     * @param uri the URI string to be normalized, which may be a partial URI starting with '/'
+     * @return the normalized URI, including the server's host and port if applicable
+     */
     private String normalizeUri(String uri) {
         // Complete uri if is partial
         String redirectUri = uri;
         if (httpServer != null && redirectUri != null && redirectUri.charAt(0) == '/') {
             final int port = httpServer.getServerPort();
             String server = httpServer.getServerHost();
-            boolean isLocalAddress = false;
-            final String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
-            if (options.isUseLoopbackIpAddress() && server.equals("localhost")) {
-                server = loopbackAddress;
-                isLocalAddress = true;
+            boolean isLocalAddress = server.equals("localhost");
+            if (options.isUseLoopbackIpAddress() && isLocalAddress) {
+                server = InetAddress.getLoopbackAddress().getHostAddress();
             }
             if (port > 0) {
                 server += ":" + port;
