@@ -34,6 +34,9 @@ public class User extends VBox {
         options.addUri(sip);
         options.addDisplayName(displayName);
         userAgent = new UserAgent(options, webapi);
+        userAgent.getRegisterPromise().onPromiseError(e -> {
+            e.printStackTrace();
+        });
         InviterOptions.createVideoCall();
         userAgent.setOnInvite(invitation -> {
             //invitation.accept(InvitationAcceptOptions.createVideoOnlyCall());
@@ -51,6 +54,9 @@ public class User extends VBox {
         userAgent.makeCall(target, InviterOptions.createVideoOnlyCall()).thenAccept(session -> {
             this.session.set(session);
             handleSession(webapi, session, this);
+        }).exceptionally(e -> {
+            e.printStackTrace();
+            return null;
         });
     }
 
