@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -88,6 +89,7 @@ public class CommandRunnerTests {
         Process process = commandRunner.runAsync("async-dir-list");
         int result = process.waitFor();
         assertThat(result).isEqualTo(0); // Successful execution
+        Thread.sleep(TimeUnit.SECONDS.toMillis(3)); // Wait for the process output to be captured
         assertThat(commandRunner.getResponses().size()).isEqualTo(1);
         assertThat(commandRunner.getLastResponse()).isEqualTo("build.gradle");
     }
