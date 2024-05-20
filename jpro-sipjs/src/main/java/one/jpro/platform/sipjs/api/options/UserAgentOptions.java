@@ -55,9 +55,9 @@ public class UserAgentOptions {
      * Especially, the "uri" field is replaced with "UserAgent.makeURI(uri)" because thats how the sip.js library works
      */
     public JSVariable asJSVariable(WebAPI webapi) {
-        var jsVariable = webapi.executeScriptWithVariable("(" + toString() + ")");
+        var jsVariable = webapi.js().eval("(" + toString() + ")");
         // We have to replace "uri" with "UserAgent.makeURI(uri)" because thats how the sip.js library works
-        webapi.executeScript("" +
+        webapi.js().eval("" +
                 //"import { UserAgent } from \"sip.js/lib/platform/web\";" +
                 "var uri = " + jsVariable.getName() + ".uri; " +
                 jsVariable.getName() + ".uri = SIP.UserAgent.makeURI(uri);");

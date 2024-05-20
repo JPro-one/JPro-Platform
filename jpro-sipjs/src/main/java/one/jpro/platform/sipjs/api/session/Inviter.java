@@ -14,6 +14,6 @@ public class Inviter extends Session {
     }
 
     public void cancel() {
-        webapi.executeScript(session.getName() + ".cancel();");
+        webapi.js().eval(session.getName() + ".cancel();");
     }
 }

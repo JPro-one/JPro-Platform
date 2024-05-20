@@ -11,7 +11,7 @@ public class SipJSUtil {
      * @param webapi
      */
     public static void loadSipJS(WebAPI webapi) {
-        webapi.executeScript("window.root = typeof window !== 'undefined' ? window : this;");
+        webapi.js().eval("window.root = typeof window !== 'undefined' ? window : this;");
         webapi.loadJSFile(SipJSUtil.class.getResource("sip-0.21.2.js"));
     }
 }

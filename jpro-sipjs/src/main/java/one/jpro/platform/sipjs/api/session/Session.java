@@ -36,7 +36,7 @@ public class Session {
             str = str.substring(1, str.length() - 1);
             state.set(str);
         });
-        webapi.executeScript(session.getName() + ".stateChange.addListener(" + jsFun.getName() + ");");
+        webapi.js().eval(session.getName() + ".stateChange.addListener(" + jsFun.getName() + ");");
     }
 
     public StringProperty stateProperty() {
@@ -46,16 +46,16 @@ public class Session {
 
     public JSVariable getLocalStream() {
         // localMediaStream
-        return webapi.executeScriptWithVariable(session.getName() + ".sessionDescriptionHandler.localMediaStream");
+        return webapi.js().eval(session.getName() + ".sessionDescriptionHandler.localMediaStream");
     }
 
     public JSVariable getRemoteStream() {
         // remoteMediaStream
-        return webapi.executeScriptWithVariable(session.getName() + ".sessionDescriptionHandler.remoteMediaStream");
+        return webapi.js().eval(session.getName() + ".sessionDescriptionHandler.remoteMediaStream");
     }
 
     public void setupRemoteMedia(VideoFrame frame) {
-        webapi.executeScript("const remoteStream = new MediaStream();\n" +
+        webapi.js().eval("const remoteStream = new MediaStream();\n" +
                 session.getName()+".sessionDescriptionHandler.peerConnection.getReceivers().forEach((receiver) => {\n" +
                 "  if (receiver.track) {\n" +
                 "    remoteStream.addTrack(receiver.track);\n" +
@@ -71,7 +71,7 @@ public class Session {
      */
     public void switchToStream(MediaStream stream) {
         stream.js.thenAccept(js -> {
-            webapi.executeScript("var videoTrack = "+js.getName()+".getVideoTracks()[0];\n" +
+            webapi.js().eval("var videoTrack = "+js.getName()+".getVideoTracks()[0];\n" +
                     "var sender = "+session.getName()+".sessionDescriptionHandler.peerConnection.getSenders().find(function(s) {\n" +
                     "  return s.track.kind == videoTrack.kind;\n" +
                     "});\n" +
@@ -119,7 +119,7 @@ public class Session {
   }
 }
          */
-        webapi.executeScript("switch("+session.getName()+".state) {\n" +
+        webapi.js().eval("switch("+session.getName()+".state) {\n" +
                 "    case SessionState.Initial:\n" +
                 "    case SessionState.Establishing:\n" +
                 "      if ("+session.getName()+" instanceOf Inviter) {\n" +

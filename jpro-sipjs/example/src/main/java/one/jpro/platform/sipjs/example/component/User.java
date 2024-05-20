@@ -34,6 +34,9 @@ public class User extends VBox {
         options.addUri(sip);
         options.addDisplayName(displayName);
         userAgent = new UserAgent(options, webapi);
+        userAgent.getRegisterPromise().onError(e -> {
+            e.printStackTrace();
+        });
         userAgent.getRegisterPromise().onPromiseError(e -> {
             e.printStackTrace();
         });

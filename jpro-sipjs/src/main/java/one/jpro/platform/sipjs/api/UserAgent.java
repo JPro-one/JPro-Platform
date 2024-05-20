@@ -22,7 +22,7 @@ public class UserAgent {
     JSVariable jsUserAgent;
     JSVariable jsRegistrator;
 
-    PromiseJSVariable startPromise;
+    JSVariable startPromise;
     PromiseJSVariable registerPromise;
     UserAgentOptions options;
 
@@ -53,7 +53,7 @@ public class UserAgent {
         jsUserAgent = webapi.js().eval("new SIP.UserAgent(" + optionsVariable.getName() + ");");
         jsRegistrator = webapi.js().eval("new SIP.Registerer(" + jsUserAgent.getName() + ");");
 
-        startPromise = webapi.js().evalAsync(jsUserAgent.getName() + ".start();");
+        startPromise = webapi.js().eval(jsUserAgent.getName() + ".start();");
         registerPromise = webapi.js().evalAsync(startPromise.getName() + ".then(() => { " + jsRegistrator.getName() + ".register(); });");
 
 
@@ -68,9 +68,9 @@ public class UserAgent {
      */
     public CompletableFuture<Inviter> makeCall(String target, InviterOptions options) {
         return JSVariable.promiseToFuture(webapi, startPromise).thenApply((v) -> {
-            var jsTarget = webapi.executeScriptWithVariable("SIP.UserAgent.makeURI(\"" + target + "\");");
-            var jsInviter = webapi.executeScriptWithVariable("new SIP.Inviter(" + jsUserAgent.getName() + ", " + jsTarget.getName() + ");");
-            webapi.executeScript(jsInviter.getName() + ".invite(" + options.asJSVariable(webapi).getName() + ");");
+            var jsTarget = webapi.js().eval("SIP.UserAgent.makeURI(\"" + target + "\");");
+            var jsInviter = webapi.js().eval("new SIP.Inviter(" + jsUserAgent.getName() + ", " + jsTarget.getName() + ");");
+            webapi.js().eval(jsInviter.getName() + ".invite(" + options.asJSVariable(webapi).getName() + ");");
             return new Inviter(jsInviter, webapi);
         });
     }
