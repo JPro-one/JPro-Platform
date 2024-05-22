@@ -1,6 +1,5 @@
 package example.scala
 
-import example.colors.{ColorsApp, ColorsHTTP}
 import one.jpro.platform.routing.Route
 import one.jpro.platform.routing.server.RouteHTTP
 
