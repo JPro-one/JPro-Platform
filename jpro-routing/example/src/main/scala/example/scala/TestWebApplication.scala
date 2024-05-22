@@ -14,11 +14,13 @@ import simplefx.core._
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-class MyApp(stage: Stage) extends RouteNode(stage) {
+class TestWebApplication extends RouteApp {
 
-  stylesheets ::= "test.css"
+  override def createRoute(): Route = {
+    if(getRouteNode() != null) {
+      getRouteNode().stylesheets ::= "test.css"
+    }
 
-  setRoute(
     Route.empty()
       .and(get("", (r) => Response.view(new MainView)))
       .and(get("/", (r) => Response.view(new MainView)))
@@ -44,11 +46,9 @@ class MyApp(stage: Stage) extends RouteNode(stage) {
       .and(get("/it's\" tricky", (r) => Response.view(new MainView)))
       .filter(DevFilter.create)
       .filter(StatisticsFilter.create)
-  )
+  }
 
- // addTransition{ case (null,view2,true ) => PageTransition.InstantTransition }
- // addTransition{ case (view,view2,true ) => PageTransition.MoveDown }
- // addTransition{ case (view,view2,false) => PageTransition.MoveUp }
+
 }
 
 class Header(view: View, sessionManager: SessionManager) extends HBox {
@@ -368,15 +368,3 @@ class ParalaxPage extends Page {
 
 }
 
-
-
-object TestWebApplication extends App
-@SimpleFXApp class TestWebApplication {
-  val app = new MyApp(stage)
-  if(WebAPI.isBrowser) {
-    root = app
-  } else {
-    scene = new Scene(app, 1400,800)
-  }
-  app.start(SessionManager.getDefault(app,stage))
-}

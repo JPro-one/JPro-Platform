@@ -78,17 +78,22 @@ object Request {
     Request.fromString(s).copy(oldContent = oldViewW, origOldContent = oldViewW)
   }
   def fromString(s: String): Request = {
-    if(!isValidLink(s)) {
-      logger.warn("Warning - Invalid Link: " + s)
+    try {
+      if(!isValidLink(s)) {
+        logger.warn("Warning - Invalid Link: " + s)
+      }
+      val uri = new URI(s)
+      val rawQuery = uri.getRawQuery
+      val query: Map[String,String] = if(rawQuery == null || rawQuery == "") Map() else rawQuery.split("&").map(x => {
+        val Array(a,b) = x.split("=")
+        a -> b
+      }).toMap
+      val path = uri.getPath
+      val res = Request(s, uri.getScheme, uri.getHost, uri.getPort, path,path,"/", query,wref_null,wref_null)
+      res
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException("Could not parse Request from string: " + s, e)
     }
-    val uri = new URI(s)
-    val rawQuery = uri.getRawQuery
-    val query: Map[String,String] = if(rawQuery == null || rawQuery == "") Map() else rawQuery.split("&").map(x => {
-      val Array(a,b) = x.split("=")
-      a -> b
-    }).toMap
-    val path = uri.getPath
-    val res = Request(s, uri.getScheme, uri.getHost, uri.getPort, path,path,"/", query,wref_null,wref_null)
-    res
   }
 }

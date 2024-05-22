@@ -112,6 +112,16 @@ object AppCrawler {
     crawler.crawlAll()
   }
 
+  def routeToRouteNode(route: Route): RouteNode = {
+    val stage = new Stage
+    val routeNode = new RouteNode(stage)
+    stage.setScene(new Scene(routeNode))
+    val sm = new SessionManagerDesktop(routeNode)
+    routeNode.setRoute(route)
+    routeNode.start(sm)
+    routeNode
+  }
+
   def getImageURL(x: Image): String = {
     if(x.getUrl == null) return null;
     val url = simplifyAndEncode(x.getUrl)
@@ -185,6 +195,7 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
     val app: RouteNode = inFX(createApp.get())
     val result = inFX {
       LinkUtil.getSessionManager(app)
+      val request = Request.fromString(crawlNext)
       app.getRoute()(Request.fromString(crawlNext))
     }.future.await
     result match {
@@ -235,7 +246,12 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
   def crawlAll(): CrawlReportApp = {
 
     while (toIndex.nonEmpty) {
-      doStep()
+      try {
+        doStep()
+      } catch {
+        case ex: Throwable =>
+          logger.error("Error in crawlAll", ex)
+      }
     }
 
     CrawlReportApp((indexed -- redirects -- deadLinks).toList, reports.reverse, deadLinks.toList)
