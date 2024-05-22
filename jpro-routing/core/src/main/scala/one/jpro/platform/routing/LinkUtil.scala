@@ -29,7 +29,9 @@ object LinkUtil {
   }
 
   def getSessionManager(node: Node): SessionManager = {
-    SessionManagerContext.getContext(node)
+    val sm = SessionManagerContext.getContext(node)
+    assert(sm != null, "SessionManager was null")
+    sm
   }
 
   def setLink(node: Node, url: String): Unit = {
