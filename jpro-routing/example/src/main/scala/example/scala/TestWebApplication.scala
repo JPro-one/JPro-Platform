@@ -142,8 +142,8 @@ trait Page extends View { view =>
     }
   }
 
-  override def handleURL(x: String): Boolean = {
-    println("handleURL called: " + x)
+  override def handleRequest(x: Request): Boolean = {
+    println("handleRequest called: " + x)
     return false;
   }
 }

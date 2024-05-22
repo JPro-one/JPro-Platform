@@ -72,18 +72,23 @@ object Request {
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   private var wref_null = new WeakReference[Node](null)
-  def fromString(x: String): Request = {
-    if(!isValidLink(x)) {
-      logger.warn("Warning - Invalid Link: " + x)
+
+  def fromString(s: String, oldView: Node): Request = {
+    val oldViewW = new WeakReference(oldView)
+    Request.fromString(s).copy(oldContent = oldViewW, origOldContent = oldViewW)
+  }
+  def fromString(s: String): Request = {
+    if(!isValidLink(s)) {
+      logger.warn("Warning - Invalid Link: " + s)
     }
-    val uri = new URI(x)
+    val uri = new URI(s)
     val rawQuery = uri.getRawQuery
     val query: Map[String,String] = if(rawQuery == null || rawQuery == "") Map() else rawQuery.split("&").map(x => {
       val Array(a,b) = x.split("=")
       a -> b
     }).toMap
     val path = uri.getPath
-    val res = Request(x, uri.getScheme, uri.getHost, uri.getPort, path,path,"/", query,wref_null,wref_null)
+    val res = Request(s, uri.getScheme, uri.getHost, uri.getPort, path,path,"/", query,wref_null,wref_null)
     res
   }
 }
