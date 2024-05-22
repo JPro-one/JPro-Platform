@@ -22,11 +22,12 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     webAPI.executeScript("history.go(1);")
   }
 
-  webAPI.addInstanceCloseListener(() => {
-    THIS.view.onClose()
-    THIS.view.setSessionManager(null)
-    markViewCollectable(THIS.view)
-  })
+  if(webAPI != null) { // somtetimes webAPI is null, for example when crawling
+      THIS.view.onClose()
+      THIS.view.setSessionManager(null)
+      markViewCollectable(THIS.view)
+    })
+  }
 
   def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Unit = {
     assert(x != null, "Response was null for url: " + _url)
