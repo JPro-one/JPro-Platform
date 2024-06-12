@@ -1,8 +1,14 @@
 ### 0.3.2-SNAPSHOT (TBD)
 
+#### Improvements
+* Improved error handling in the `jpro-sipjs` module.
 
 #### Bugfixes
+* Fixed URI normalization for local addresses ikn the `jpro-auth-core` module.
 * Fixed a NPE thrown if the session only has redirects in the `jpro-routing-core` module.
+* Routing refreshes no longer adds a new entry to the browser's history.
+* Fixed hangup button in the SipJS Demos. If an error happens, getting a screen, it is now logged.
+Screen sharing button "toggles" now it's state - making it possible to switch back to video.
 
 ----------------------
 
