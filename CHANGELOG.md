@@ -1,4 +1,4 @@
-### 0.3.2-SNAPSHOT (TBD)
+### 0.3.2 (June 12, 2024)
 
 #### Improvements
 * Improved error handling in the `jpro-sipjs` module.
