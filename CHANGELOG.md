@@ -1,5 +1,8 @@
 ### 0.3.3-SNAPSHOT (TBD)
 
+#### Features
+* Implemented and added `jpro-mail` module to the platform. This module provides an API to send emails from a 
+JavaFX/JPro application.
 
 ----------------------
 
