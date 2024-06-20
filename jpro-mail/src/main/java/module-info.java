@@ -10,4 +10,6 @@ module one.jpro.platform.mail {
     requires jakarta.mail;
     requires org.jetbrains.annotations;
     requires org.eclipse.collections.impl;
+
+    exports one.jpro.platform.mail;
 }
