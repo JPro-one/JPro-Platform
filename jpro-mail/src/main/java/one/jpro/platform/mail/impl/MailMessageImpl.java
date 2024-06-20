@@ -231,6 +231,15 @@ public class MailMessageImpl implements MailMessage {
     }
 
     @Override
+    public void setText(String text) {
+        try {
+            message.setText(text);
+        } catch (MessagingException ex) {
+            throw new MailException("Failed to set the text to this message", ex);
+        }
+    }
+
+    @Override
     public Instant getSentDate() {
         try {
             return message.getSentDate().toInstant();
