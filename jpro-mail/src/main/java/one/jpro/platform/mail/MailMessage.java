@@ -72,6 +72,14 @@ public interface MailMessage {
     ImmutableList<String> getTo();
 
     /**
+     * Set the "To" attribute address in this message.
+     *
+     * @param address the primary recipient address
+     * @throws MailException if the primary recipient address fail to be set
+     */
+    void setTo(String address);
+
+    /**
      * Set the "To" attribute addresses in this message.
      *
      * @param addresses the primary recipient addresses

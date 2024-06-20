@@ -74,6 +74,11 @@ public class MailMessageImpl implements MailMessage {
     }
 
     @Override
+    public void setTo(String address) {
+        this.setTo(Lists.immutable.of(address));
+    }
+
+    @Override
     public void setTo(ImmutableList<String> addresses) {
         try {
             Address[] toAddresses = new InternetAddress[addresses.size()];
