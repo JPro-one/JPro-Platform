@@ -81,7 +81,7 @@ configure(subprojects.findAll { it.name != 'example' }) {
 }
 
 configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-auth:routing"), project("jpro-file"),
-           project("jpro-image-manager"), project("jpro-mdfx"), project("jpro-media"),
+           project("jpro-image-manager"), project("jpro-mail"), project("jpro-mdfx"), project("jpro-media"),
            project("jpro-scenegraph"), project("jpro-session"),
            project("jpro-html-scrollpane"), project("freeze-detector"), project("jpro-routing:core"),
            project("jpro-routing:dev"), project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),

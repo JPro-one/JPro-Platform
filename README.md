@@ -472,6 +472,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-auth:example:run -Psample=oauth
 ./gradlew jpro-file:example:run -Psample=text-editor
 ./gradlew jpro-file:example:run -Psample=file-uploader
+./gradlew jpro-mail:example:run -Psample=compose-mail
 ./gradlew jpro-media:example:run -Psample=media-player
 ./gradlew jpro-media:example:run -Psample=media-recorder
 ./gradlew jpro-media:example:run -Psample=media-recorder-and-player
@@ -488,6 +489,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
 ./gradlew jpro-file:example:jproRun -Psample=text-editor
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
+./gradlew jpro-mail:example:jproRun -Psample=compose-mail
 ./gradlew jpro-media:example:jproRun -Psample=media-player
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player

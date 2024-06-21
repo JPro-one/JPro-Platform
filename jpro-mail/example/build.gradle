@@ -1,0 +1,29 @@
+plugins {
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
+}
+
+dependencies {
+    implementation project(":jpro-mail")
+    implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
+    implementation "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
+    implementation "org.kordamp.ikonli:ikonli-material2-pack:$IKONLI_VERSION"
+    implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+javafx {
+    version = "$JAVAFX_VERSION"
+    modules = ['javafx.controls']
+}
+
+def examples = [
+        'compose-mail' : 'one.jpro.platform.mail.example.compose.ComposeMailSample'
+]
+
+mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["compose-mail"]
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = "one.jpro.platform.mail.example"
+}

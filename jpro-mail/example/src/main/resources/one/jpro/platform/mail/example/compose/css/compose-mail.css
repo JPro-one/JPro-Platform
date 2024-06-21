@@ -1,0 +1,24 @@
+.new-message-label {
+    -fx-font-family: 'Arial';
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+}
+
+.top-pane {
+    -fx-padding: 8;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+}
+
+.content-message-area {
+    -fx-wrap-text: true;
+}
+
+.bottom-pane {
+    -fx-padding: 8 0 0 0;
+    -fx-spacing: 8;
+}
+
+.root-pane {
+    -fx-padding: 0 12 12 12;
+}
