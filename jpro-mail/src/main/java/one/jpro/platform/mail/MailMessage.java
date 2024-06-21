@@ -218,10 +218,19 @@ public interface MailMessage {
      * A convenience method that sets the given String as this
      * part's content with a MIME type of "text/plain".
      *
-     * @param text the text that is the message's content.
+     * @param text the text that is the message's content
      * @throws MailException if the text fails to be set
      */
     void setText(String text);
+
+    /**
+     * A convenience method that sets the given String as this
+     * part's content with a MIME type of "text/html".
+     *
+     * @param htmlText the html content that is the message's content
+     * @throws MailException if the html content fails to be set
+     */
+    void setHtml(String htmlText);
 
     /**
      * Get the date this message was sent.

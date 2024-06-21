@@ -1,14 +1,13 @@
 package one.jpro.platform.mail.impl;
 
 import jakarta.mail.*;
-import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.*;
 import one.jpro.platform.mail.MailException;
 import one.jpro.platform.mail.MailMessage;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
@@ -21,9 +20,11 @@ import java.util.concurrent.CompletableFuture;
 public class MailMessageImpl implements MailMessage {
 
     private final Message message;
+    private final Multipart multipart;
 
     MailMessageImpl(Session session) {
         this.message = new MimeMessage(session);
+        this.multipart = new MimeMultipart();
     }
 
     @Override
@@ -241,6 +242,18 @@ public class MailMessageImpl implements MailMessage {
             message.setText(text);
         } catch (MessagingException ex) {
             throw new MailException("Failed to set the text to this message", ex);
+        }
+    }
+
+    @Override
+    public void setHtml(String htmlText) {
+        try {
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setContent(htmlText, "text/html; charset=utf-8");
+            multipart.addBodyPart(mimeBodyPart);
+            message.setContent(multipart);
+        } catch (MessagingException ex) {
+            throw new MailException("Failed to set the HTML content to this message", ex);
         }
     }
 
