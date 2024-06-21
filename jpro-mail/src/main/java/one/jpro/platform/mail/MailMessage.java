@@ -243,11 +243,22 @@ public interface MailMessage {
 
     /**
      * Adds a {@link File} as an attachment to this message with
+     * the given content ID.
+     *
+     * @param file the file to attach
+     * @param cid the "Content-ID" of the attachment
+     * @throws MailException if an error occurs while attaching the file
+     */
+    void addAttachment(File file, String cid);
+
+    /**
+     * Adds a {@link File} as an attachment to this message with
      * the given content type and encoding.
      *
      * @param file        the file to attach
      * @param contentType the content type of the file
      * @param encoding    the encoding of the file
+     * @throws MailException if an error occurs while attaching the file
      */
     void addAttachment(File file, String contentType, String encoding);
 
