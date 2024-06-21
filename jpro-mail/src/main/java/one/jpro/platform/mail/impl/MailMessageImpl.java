@@ -258,6 +258,30 @@ public class MailMessageImpl implements MailMessage {
     }
 
     @Override
+    public void addAttachment(File file) {
+        try {
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.attachFile(file);
+            multipart.addBodyPart(mimeBodyPart);
+            message.setContent(multipart);
+        } catch (Exception ex) {
+            throw new MailException("Failed to attach the file to this message", ex);
+        }
+    }
+
+    @Override
+    public void addAttachment(File file, String contentType, String encoding) {
+        try {
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.attachFile(file, contentType, encoding);
+            multipart.addBodyPart(mimeBodyPart);
+            message.setContent(multipart);
+        } catch (Exception ex) {
+            throw new MailException("Failed to attach the file to this message", ex);
+        }
+    }
+
+    @Override
     public Instant getSentDate() {
         try {
             return message.getSentDate().toInstant();

@@ -3,6 +3,7 @@ package one.jpro.platform.mail;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
@@ -231,6 +232,24 @@ public interface MailMessage {
      * @throws MailException if the html content fails to be set
      */
     void setHtml(String htmlText);
+
+    /**
+     * Adds a {@link File} as an attachment to this message.
+     *
+     * @param file the file to attach
+     * @throws MailException if an error occurs while attaching the file
+     */
+    void addAttachment(File file);
+
+    /**
+     * Adds a {@link File} as an attachment to this message with
+     * the given content type and encoding.
+     *
+     * @param file        the file to attach
+     * @param contentType the content type of the file
+     * @param encoding    the encoding of the file
+     */
+    void addAttachment(File file, String contentType, String encoding);
 
     /**
      * Get the date this message was sent.
