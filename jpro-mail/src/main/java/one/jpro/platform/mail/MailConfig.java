@@ -1,6 +1,7 @@
 package one.jpro.platform.mail;
 
 import one.jpro.platform.mail.impl.MailConfigImpl;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Properties;
 
@@ -139,6 +140,7 @@ public interface MailConfig {
      *
      * @return a new <code>MailConfig</code> instance.
      */
+    @NotNull
     public static MailConfig create() {
         return new MailConfigImpl();
     }
@@ -148,6 +150,7 @@ public interface MailConfig {
      *
      * @return a {@link Properties} object containing mail properties
      */
+    @NotNull
     Properties getProperties();
 
     /**

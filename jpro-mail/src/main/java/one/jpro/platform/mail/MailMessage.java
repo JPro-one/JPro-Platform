@@ -1,6 +1,7 @@
 package one.jpro.platform.mail;
 
 import org.eclipse.collections.api.list.ImmutableList;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
@@ -24,6 +25,7 @@ public interface MailMessage {
      * @param mailClient the {@link MailClient} that will create the {@link MailMessage}
      * @return a new MailMessage instance
      */
+    @NotNull
     static MailMessage create(MailClient mailClient) {
         return mailClient.createMessage();
     }

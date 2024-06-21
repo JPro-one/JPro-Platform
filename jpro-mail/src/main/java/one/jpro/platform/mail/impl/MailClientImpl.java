@@ -6,6 +6,7 @@ import jakarta.mail.Session;
 import one.jpro.platform.mail.MailClient;
 import one.jpro.platform.mail.MailConfig;
 import one.jpro.platform.mail.MailMessage;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Mail client implementation.
@@ -30,6 +31,7 @@ public class MailClientImpl implements MailClient {
         session = Session.getInstance(mailConfig.getProperties(), authenticator);
     }
 
+    @NotNull
     @Override
     public MailMessage createMessage() {
         return new MailMessageImpl(session);

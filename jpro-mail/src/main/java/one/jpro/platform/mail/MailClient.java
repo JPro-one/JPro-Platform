@@ -1,6 +1,7 @@
 package one.jpro.platform.mail;
 
 import one.jpro.platform.mail.impl.MailClientImpl;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The MailClient interface provides methods for creating and managing mail clients.
@@ -16,7 +17,8 @@ public interface MailClient {
      * @param mailConfig the {@link MailConfig} object containing the mail configuration
      * @return a new <code>MailClient</code> instance
      */
-    static MailClient create(MailConfig mailConfig) {
+    @NotNull
+    static MailClient create(@NotNull MailConfig mailConfig) {
         return new MailClientImpl(mailConfig);
     }
 
@@ -28,7 +30,10 @@ public interface MailClient {
      * @param password   the password for authentication
      * @return a new <code>MailClient</code> instance
      */
-    static MailClient create(MailConfig mailConfig, String username, String password) {
+    @NotNull
+    static MailClient create(@NotNull MailConfig mailConfig,
+                             @NotNull String username,
+                             @NotNull String password) {
         return new MailClientImpl(mailConfig, username, password);
     }
 
@@ -37,5 +42,6 @@ public interface MailClient {
      *
      * @return a new <code>MailMessage</code> instance
      */
+    @NotNull
     MailMessage createMessage();
 }
