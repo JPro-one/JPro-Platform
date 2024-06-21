@@ -22,7 +22,12 @@ import org.kordamp.ikonli.material2.Material2AL;
 import org.kordamp.ikonli.material2.Material2MZ;
 import org.slf4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -42,7 +47,16 @@ public class ComposeMailSample extends Application {
     private static final ImmutableList<String> TEST_MAIL_CC =
             Lists.immutable.of("fk@sandec.de", "th@sandec.de");
     private static final String TEST_MAIL_SUBJECT = "Test Mail Subject";
-    private static final String TEST_MAIL_MESSAGE = "Hello, this is a test mail sent using JPro Mail module.";
+
+    // HTML content and logo file for the email
+    private String htmlContent;
+    private File logoFile;
+
+    @Override
+    public void init() {
+        readHtmlFile();
+        readLogoFile();
+    }
 
     @Override
     public void start(Stage stage) {
@@ -105,7 +119,7 @@ public class ComposeMailSample extends Application {
 
         TextArea contentMessageArea = new TextArea();
         contentMessageArea.getStyleClass().add("content-message-area");
-        contentMessageArea.setText(TEST_MAIL_MESSAGE);
+        contentMessageArea.setText(htmlContent);
 
         MailConfig mailConfig = new GoogleMailConfig();
         mailConfig.setMailDebug(true);
@@ -126,7 +140,10 @@ public class ComposeMailSample extends Application {
             mailMessage.setCc(parseMailAddresses(ccTextField.getText()));
             mailMessage.setBcc(parseMailAddresses(bccTextField.getText()));
             mailMessage.setSubject(subjectTextField.getText());
-            mailMessage.setText(contentMessageArea.getText());
+            mailMessage.setHtml(contentMessageArea.getText());
+            mailMessage.addAttachment(logoFile, "<logo>");
+
+            // Set a date in the past for testing purposes only
             mailMessage.setSentDate(ZonedDateTime.now().minusDays(7).toInstant());
             mailMessage.send()
                     .thenAccept(result -> LOGGER.info("Mail sent successfully on {}", ZonedDateTime.now()))
@@ -170,5 +187,35 @@ public class ComposeMailSample extends Application {
             return Lists.immutable.empty();
         }
         return Lists.immutable.of(mailAddresses.split(",")).collect(String::trim);
+    }
+
+    /**
+     * Reads the HTML content from the specified resource file and assigns it to the htmlContent variable.
+     * <p>
+     * This method attempts to read an HTML file named "mail-template.html" project resources.
+     */
+    private void readHtmlFile() {
+        try (InputStream is = ComposeMailSample.class.getResourceAsStream("html/mail-template.html")) {
+            htmlContent = new String(is.readAllBytes());
+        } catch (IOException ex) {
+            LOGGER.error("Error reading HTML file", ex);
+        }
+    }
+
+    /**
+     * Reads the logo image from the specified resource file, creates a temporary file,
+     * and copies the image content to it.
+     * <p>
+     * This method attempts to read a logo image file located in the project resources directory.
+     * It then creates a temporary file to store the image content, ensuring the temporary file is deleted on exit.
+     */
+    private void readLogoFile() {
+        try (InputStream is = ComposeMailSample.class.getResourceAsStream("img/jpro-navy-orange-logo.png")) {
+            logoFile = File.createTempFile("jpro-logo", ".png");
+            logoFile.deleteOnExit();
+            Files.copy(is, logoFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception ex) {
+            LOGGER.error("Error loading logo file", ex);
+        }
     }
 }
