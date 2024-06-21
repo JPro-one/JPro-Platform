@@ -12,4 +12,5 @@ module one.jpro.platform.mail {
     requires org.eclipse.collections.impl;
 
     exports one.jpro.platform.mail;
+    exports one.jpro.platform.mail.config;
 }
