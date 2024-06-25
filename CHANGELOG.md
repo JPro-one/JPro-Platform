@@ -1,5 +1,8 @@
 ### 0.3.3-SNAPSHOT (TBD)
 
+#### Bugfixes
+* Export `jpro-routing:core` module from `jpro-routing:dev` module to make it available externally when only
+`jpro-routing:dev` is included in the project.
 
 ----------------------
 

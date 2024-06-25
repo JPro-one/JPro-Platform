@@ -61,7 +61,7 @@ configure([project(':jpro-routing:core')]) {
 
 configure([project(':jpro-routing:dev')]) {
     dependencies {
-        implementation project(':jpro-routing:core')
+        api project(':jpro-routing:core')
         api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
         api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
         api "org.kordamp.ikonli:ikonli-ionicons4-pack:$IKONLI_VERSION"
