@@ -9,6 +9,7 @@ open module one.jpro.platform.routing.dev {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.evaicons;
     requires org.kordamp.ikonli.ionicons4;
+    requires fr.brouillard.oss.cssfx;
     requires org.scenicview.scenicview;
 
     exports one.jpro.platform.routing.dev;

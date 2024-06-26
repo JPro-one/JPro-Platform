@@ -3,6 +3,7 @@ module one.jpro.platform.routing.core {
     requires transitive org.slf4j;
 
     requires transitive de.sandec.jnodes;
+    requires transitive de.sandec.jmemorybuddy;
     requires transitive jpro.webapi;
     requires transitive simplefx.core;
     requires transitive simplefx.extended;
@@ -10,7 +11,6 @@ module one.jpro.platform.routing.core {
     requires transitive simplefx.utility;
     requires transitive scala.library;
     requires transitive one.jpro.platform.internal.openlink;
-    requires transitive de.sandec.jmemorybuddy;
 
     exports one.jpro.platform.routing;
     exports one.jpro.platform.routing.crawl;
