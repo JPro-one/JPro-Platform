@@ -1,8 +1,9 @@
 ### 0.3.3-SNAPSHOT (TBD)
 
 #### Bugfixes
-* Export `jpro-routing:core` module from `jpro-routing:dev` module to make it available externally when only
-`jpro-routing:dev` is included in the project.
+* Export `jpro-routing-core` module from `jpro-routing-dev` module to make it available externally when only
+`jpro-routing-dev` is included in the project.
+* Fixed some dependency requirements in the `JPro Routing` modules.
 
 ----------------------
 
@@ -23,7 +24,7 @@ Screen sharing button "toggles" now it's state - making it possible to switch ba
 ### 0.3.1 (May 14, 2024)
 
 #### Bugfixes
-* Fixed the retrival of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
+* Fixed the retrieval of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
 in the route is correctly matched with the request domain.
 * Fix the server url when `useLoopbackIpAddress` OAuth2 option is used.
 
