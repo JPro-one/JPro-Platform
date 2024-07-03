@@ -477,6 +477,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-media:example:run -Psample=media-recorder
 ./gradlew jpro-media:example:run -Psample=media-recorder-and-player
 ./gradlew jpro-routing:example:run -Psample=colors
+./gradlew jpro-routing:example:run -Psample=popup
 ./gradlew jpro-routing:example:run -Psample=test
 ```
 
@@ -494,6 +495,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player
 ./gradlew jpro-routing:example:jproRun -Psample=colors
+./gradlew jpro-routing:example:jproRun -Psample=popup
 ./gradlew jpro-routing:example:jproRun -Psample=test
 ./gradlew jpro-webrtc:example:jproRun
 ./gradlew jpro-sipjs:example:jproRun

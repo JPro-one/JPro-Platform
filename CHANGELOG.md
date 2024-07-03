@@ -1,8 +1,21 @@
 ### 0.3.3-SNAPSHOT (TBD)
 
+<<<<<<< jpro-mail-module
 #### Features
 * Implemented and added `jpro-mail` module to the platform. This module provides an API to send emails from a 
 JavaFX/JPro application.
+=======
+#### Improvements
+* Updated **JPro** to version `2024.2.1`.
+* Updated **SimpleFX** dependencies to version `3.2.34`.
+* Added `popup` sample application to the examples list for the `jpro-routing-popup` module.
+
+#### Bugfixes
+* Export `jpro-routing-core` module from `jpro-routing-dev` module to make it available externally when only
+`jpro-routing-dev` is included in the project.
+* Fixed some dependency requirements in the `JPro Routing` modules.
+* Fixed the stylesheet path in the `jpro-routing-popup` module for the SimplePopup control.
+>>>>>>> main
 
 ----------------------
 
@@ -23,7 +36,7 @@ Screen sharing button "toggles" now it's state - making it possible to switch ba
 ### 0.3.1 (May 14, 2024)
 
 #### Bugfixes
-* Fixed the retrival of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
+* Fixed the retrieval of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
 in the route is correctly matched with the request domain.
 * Fix the server url when `useLoopbackIpAddress` OAuth2 option is used.
 
