@@ -27,7 +27,8 @@ public class SimplePopup extends StackPane {
      * @param closable a boolean indicating if the popup can be closed by the user
      */
     public SimplePopup(String title, Node content, List<Button> buttons, boolean closable) {
-        getStylesheets().add(getCSSFile());
+        getStylesheets().add(getClass()
+                .getResource("/one/jpro/platform/routing/popup/simplepopup/simplepopup.css").toExternalForm());
         getStyleClass().add("simple-popup-background");
         VBox popupBox = new VBox();
         getChildren().add(popupBox);
@@ -42,10 +43,6 @@ public class SimplePopup extends StackPane {
 
         Node buttonArea = createButtonArea(buttons);
         popupBox.getChildren().add(buttonArea);
-    }
-
-    public String getCSSFile() {
-        return "/one/jpro/routing/popup/simplepopup/simplepopup.css";
     }
 
     /**
