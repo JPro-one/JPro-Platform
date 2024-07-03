@@ -3,11 +3,13 @@
 #### Improvements
 * Updated **JPro** to version `2024.2.1`.
 * Updated **SimpleFX** dependencies to version `3.2.34`.
+* Added `popup` sample application to the examples list for the `jpro-routing-popup` module.
 
 #### Bugfixes
 * Export `jpro-routing-core` module from `jpro-routing-dev` module to make it available externally when only
 `jpro-routing-dev` is included in the project.
 * Fixed some dependency requirements in the `JPro Routing` modules.
+* Fixed the stylesheet path in the `jpro-routing-popup` module for the SimplePopup control.
 
 ----------------------
 

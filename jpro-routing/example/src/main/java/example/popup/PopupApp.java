@@ -1,62 +1,76 @@
 package example.popup;
 
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import one.jpro.platform.routing.Filters;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.popup.PopupAPI;
-import one.jpro.platform.routing.popup.simplepopup.SimplePopup;
 import one.jpro.platform.routing.popup.simplepopup.SimplePopups;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import simplefx.experimental.parts.FXFuture;
 
-import static one.jpro.platform.routing.Route.*;
+import static one.jpro.platform.routing.Route.get;
+import static one.jpro.platform.routing.Route.redirect;
 
+/**
+ * The {@code PopupApp} class extends {@code RouteApp} to demonstrate the use of popups in a JPro application.
+ * It showcases how to create and display simple informational popups and a loading screen based on asynchronous tasks.
+ */
 public class PopupApp extends RouteApp {
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(PopupApp.class);
 
-
+    @Override
     public Route createRoute() {
         return Route.empty()
                 .and(redirect("/", "/popup"))
                 .and(get("/popup", (r) -> Response.node(popupSampleButtons())))
+                .filter(Filters.FullscreenFilter(true))
                 .filter(DevFilter.create());
     }
 
+    /**
+     * Creates a {@code Node} containing buttons that demonstrate the popup functionality.
+     * One button shows a simple informational popup and the other displays a loading screen
+     * tied to a background task.
+     *
+     * @return A {@code Node} with configured buttons for demonstrating popup functionality.
+     */
     public Node popupSampleButtons() {
-        VBox result = new VBox();
+        VBox result = new VBox(8);
 
-        Button button1 = new Button("Show Popup1");
+        Button showPopupButton = new Button("Show Popup");
+        showPopupButton.setOnAction(event ->
+                PopupAPI.openPopup(getRouteNode(), SimplePopups.infoPopup("Title", "This is a simple popup")));
 
-        Button showLoading = new Button("Show Loading");
+        Button showLoadingScreen = new Button("Show Loading Screen");
+        showLoadingScreen.setOnAction(event ->
+                PopupAPI.showLoadingScreen(getRouteNode(), createWaitFuture(3000)));
 
-
-        button1.setOnAction(e -> {
-            SimplePopup popup = SimplePopups.infoPopup("Title", "This is a simple popup");
-            PopupAPI.openPopup(getRouteNode(), popup);
-        });
-
-        showLoading.setOnAction(e -> {
-            // Create Future, which takes 5 seconds to complete
-            FXFuture<Object> future = FXFuture.runBackground(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                return null;
-            });
-
-            PopupAPI.showLoadingScreen(getRouteNode(), future);
-        });
-
-        result.getChildren().addAll(button1, showLoading);
+        result.getChildren().addAll(showPopupButton, showLoadingScreen);
 
         return result;
+    }
+
+    /**
+     * Creates a {@code FXFuture} that takes a specified number of milliseconds to complete.
+     *
+     * @param millis the number of milliseconds to sleep
+     * @return A {@code FXFuture} object.
+     */
+    private FXFuture<Object> createWaitFuture(long millis) {
+        return FXFuture.runBackground(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException ex) {
+                LOGGER.error("An error occurred while sleeping", ex);
+            }
+            return null;
+        });
     }
 }
