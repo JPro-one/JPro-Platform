@@ -2,6 +2,7 @@
 
 #### Improvements
 * Updated **JPro** to version `2024.2.1`.
+* Updated **SimpleFX** dependencies to version `3.2.34`.
 
 #### Bugfixes
 * Export `jpro-routing-core` module from `jpro-routing-dev` module to make it available externally when only
