@@ -1,6 +1,6 @@
 plugins {
     id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
-    id "org.javamodularity.moduleplugin" version "$MODULE_PLUGIN_VERSION"
+    id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
     id 'org.openjfx.javafxplugin'
     id 'jpro-gradle-plugin'
 }
