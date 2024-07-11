@@ -1,4 +1,4 @@
-### 0.3.3-SNAPSHOT (TBD)
+### 0.4.0 (July 11, 2024)
 
 #### Features
 * Implemented and added `jpro-mail` module to the platform. This module provides an API to send emails from a 
