@@ -18,41 +18,41 @@ public interface MailConfig {
     /**
      * Property for enabling or disabling debugging.
      */
-    public static final String MAIL_DEBUG = "mail.debug";
+    String MAIL_DEBUG = "mail.debug";
 
     // SMTP properties
     /**
      * Default user name for SMTP.
      */
-    public static final String MAIL_SMTP_USER = "mail.smtp.user";
+    String MAIL_SMTP_USER = "mail.smtp.user";
 
     /**
      * The SMTP server to connect to.
      */
-    public static final String MAIL_SMTP_HOST = "mail.smtp.host";
+    String MAIL_SMTP_HOST = "mail.smtp.host";
 
     /**
      * The SMTP server port to connect to, if the connect() method doesn't explicitly specify one.
      * Defaults to <code>25</code>.
      */
-    public static final String MAIL_SMTP_PORT = "mail.smtp.port";
+    String MAIL_SMTP_PORT = "mail.smtp.port";
 
     /**
      * Socket connection timeout value in milliseconds. This timeout is implemented by java.net.Socket.
      * Default is infinite timeout.
      */
-    public static final String MAIL_SMTP_CONNECTIONTIMEOUT = "mail.smtp.connectiontimeout";
+    String MAIL_SMTP_CONNECTIONTIMEOUT = "mail.smtp.connectiontimeout";
 
     /**
      * Socket read timeout value in milliseconds. This timeout is implemented by java.net.Socket.
      * Default is infinite timeout.
      */
-    public static final String MAIL_SMTP_TIMEOUT = "mail.smtp.timeout";
+    String MAIL_SMTP_TIMEOUT = "mail.smtp.timeout";
 
     /**
      * If <code>true</code>, attempt to authenticate the user using the AUTH command. Defaults to <code>false</code>.
      */
-    public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+    String MAIL_SMTP_AUTH = "mail.smtp.auth";
 
     /**
      * If set, lists the authentication mechanisms to consider, and the order in which to consider them.
@@ -60,22 +60,22 @@ public interface MailConfig {
      * The default is "LOGIN PLAIN DIGEST-MD5 NTLM", which includes all the authentication mechanisms
      * supported by the current implementation except "XOAUTH2".
      */
-    public static final String MAIL_SMTP_AUTH_MECHANISMS = "mail.smtp.auth.mechanisms";
+    String MAIL_SMTP_AUTH_MECHANISMS = "mail.smtp.auth.mechanisms";
 
     /**
      * If <code>true</code>, prevents use of the "AUTH LOGIN" command. Default is <code>false</code>.
      */
-    public static final String MAIL_SMTP_AUTH_LOGIN_DISABLE = "mail.smtp.auth.login.disable";
+    String MAIL_SMTP_AUTH_LOGIN_DISABLE = "mail.smtp.auth.login.disable";
 
     /**
      * If <code>true</code>, prevents use of the <code>AUTH PLAIN</code> command. Default is <code>false</code>.
      */
-    public static final String MAIL_SMTP_AUTH_PLAIN_DISABLE = "mail.smtp.auth.plain.disable";
+    String MAIL_SMTP_AUTH_PLAIN_DISABLE = "mail.smtp.auth.plain.disable";
 
     /**
      * If <code>true</code>, prevents use of the "AUTH DIGEST-MD5" command. Default is <code>false</code>.
      */
-    public static final String MAIL_SMTP_AUTH_DIGEST_MD5_DISABLE = "mail.smtp.auth.digest-md5.disable";
+    String MAIL_SMTP_AUTH_DIGEST_MD5_DISABLE = "mail.smtp.auth.digest-md5.disable";
 
     /**
      * If <code>true</code>, prevents use of the "AUTHENTICATE XOAUTH2" command. Because the OAuth 2.0
@@ -83,7 +83,7 @@ public interface MailConfig {
      * Enable it by explicitly setting this property to "false" or by setting the "mail.smtp.auth.mechanisms" property
      * to "XOAUTH2".
      */
-    public static final String MAIL_SMTP_AUTH_XOAUTH2_DISABLE = "mail.smtp.auth.xoauth2.disable";
+    String MAIL_SMTP_AUTH_XOAUTH2_DISABLE = "mail.smtp.auth.xoauth2.disable";
 
     /**
      * If <code>true</code>, enables the use of the "STARTTLS" command (if supported by the server) to switch the
@@ -93,20 +93,20 @@ public interface MailConfig {
      * will trust the server's certificate.
      * Defaults to <code>false</code>.
      */
-    public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+    String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
 
     /**
      * If <code>true</code>, requires the use of the "STARTTLS" command. If the server doesn't support the
      * "STARTTLS" command, or the command fails, the connect method will fail.
      * Defaults to <code>false</code>.
      */
-    public static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required";
+    String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required";
 
     /**
      * If set to <code>true</code>, use SSL to connect and use the SSL port by default.
      * Defaults to <code>false</code> for the "smtp" protocol and <code>true</code> for the "smtps" protocol.
      */
-    public static final String MAIL_SMTP_SSL_ENABLE = "mail.smtp.ssl.enable";
+    String MAIL_SMTP_SSL_ENABLE = "mail.smtp.ssl.enable";
 
     /**
      * If set to <code>true</code>, check the server identity as specified by
@@ -114,7 +114,7 @@ public interface MailConfig {
      * content of the server's certificate are intended to prevent man-in-the-middle attacks.
      * Defaults to <code>false</code>.
      */
-    public static final String MAIL_SMTP_SSL_CHECKSERVERIDENTITY = "mail.smtp.ssl.checkserveridentity";
+    String MAIL_SMTP_SSL_CHECKSERVERIDENTITY = "mail.smtp.ssl.checkserveridentity";
 
     /**
      * If set, and a socket factory hasn't been specified, enables use of a
@@ -122,18 +122,18 @@ public interface MailConfig {
      * If set to "*", all hosts are trusted. If set to a whitespace separated list of hosts, those hosts are trusted.
      * Otherwise, trust depends on the certificate the server presents.
      */
-    public static final String MAIL_SMTP_SSL_TRUST = "mail.smtp.ssl.trust";
+    String MAIL_SMTP_SSL_TRUST = "mail.smtp.ssl.trust";
 
     // Default values
-    public static final boolean DEFAULT_MAIL_DEBUG = false;
-    public static final String DEFAULT_MAIL_SMTP_HOST = "";
-    public static final int DEFAULT_MAIL_SMTP_PORT = 25;
-    public static final boolean DEFAULT_MAIL_SMTP_AUTH = false;
-    public static final boolean DEFAULT_MAIL_SMTP_AUTH_DIGEST_MD5_DISABLE = false;
-    public static final boolean DEFAULT_MAIL_SMTP_AUTH_XOAUTH2_DISABLE = true;
-    public static final StartTLSOption DEFAULT_MAIL_SMTP_STARTTLS = StartTLSOption.DISABLED;
-    public static final boolean DEFAULT_MAIL_SMTP_SSL_ENABLE = false;
-    public static final boolean DEFAULT_MAIL_SMTP_SSL_CHECKSERVERIDENTITY = false;
+    boolean DEFAULT_MAIL_DEBUG = false;
+    String DEFAULT_MAIL_SMTP_HOST = "";
+    int DEFAULT_MAIL_SMTP_PORT = 25;
+    boolean DEFAULT_MAIL_SMTP_AUTH = false;
+    boolean DEFAULT_MAIL_SMTP_AUTH_DIGEST_MD5_DISABLE = false;
+    boolean DEFAULT_MAIL_SMTP_AUTH_XOAUTH2_DISABLE = true;
+    StartTLSOption DEFAULT_MAIL_SMTP_STARTTLS = StartTLSOption.DISABLED;
+    boolean DEFAULT_MAIL_SMTP_SSL_ENABLE = false;
+    boolean DEFAULT_MAIL_SMTP_SSL_CHECKSERVERIDENTITY = false;
 
     /**
      * Creates a new instance of MailConfig.
@@ -141,7 +141,7 @@ public interface MailConfig {
      * @return a new <code>MailConfig</code> instance.
      */
     @NotNull
-    public static MailConfig create() {
+    static MailConfig create() {
         return new MailConfigImpl();
     }
 
