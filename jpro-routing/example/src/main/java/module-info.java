@@ -6,7 +6,6 @@ module one.jpro.routing.example {
     requires one.jpro.platform.routing.core;
     requires one.jpro.platform.routing.dev;
     requires one.jpro.platform.routing.popup;
-    requires scala.library;
     requires simplefx.extended;
 
     exports example.colors;

@@ -6,9 +6,9 @@ module one.jpro.platform.routing.core {
     requires transitive de.sandec.jmemorybuddy;
     requires transitive jpro.webapi;
     requires transitive simplefx.core;
-    requires transitive simplefx.extended;
-    requires transitive simplefx.wrapping;
     requires transitive simplefx.utility;
+    requires transitive simplefx.wrapping;
+    requires transitive simplefx.extended;
     requires transitive scala.library;
     requires transitive one.jpro.platform.internal.openlink;
 
