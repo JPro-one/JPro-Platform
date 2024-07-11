@@ -48,7 +48,7 @@ email attributes such as sender, recipients, subject, and date, as well as metho
       // Setting the subject of the email
       mailMessage.setSubject("Meeting Reminder");
       // Setting the HTML content of the email
-      mailMessage.setHtml("<p>Dear team,</p><p>This is a reminder for the meeting scheduled at 3 PM tomorrow.</p><p>Best regards,<br>Joe</p>");
+      mailMessage.setHtml("<html><p>Dear team,</p><p>This is a reminder for the meeting scheduled at 3 PM tomorrow.</p><p>Best regards,<br>Joe</p></html>");
       // Adding an attachment to the email
       mailMessage.addAttachment(logoFile, "<logo>");
       // Sending the email
