@@ -93,7 +93,7 @@ a specified callback handler is invoked for further processing.
     ```
 
 ### Launch the examples
-[**Text Editor sample**](https://github.com/JPro-one/jpro-platform/blob/jpro-file-module/jpro-file/example/src/main/java/one/jpro/platform/file/example/editor/TextEditorSample.java)
+[**Text Editor sample**](https://github.com/JPro-one/jpro-platform/blob/main/jpro-file/example/src/main/java/one/jpro/platform/file/example/editor/TextEditorSample.java)
 * As desktop application
   ```shell
   ./gradlew jpro-file:example:run -Psample=text-editor
@@ -103,7 +103,7 @@ a specified callback handler is invoked for further processing.
   ./gradlew jpro-file:example:jproRun -Psample=text-editor
   ```
 
-[**File Uploader sample**](https://github.com/JPro-one/jpro-platform/blob/jpro-file-module/jpro-file/example/src/main/java/one/jpro/platform/file/example/upload/FileUploaderSample.java)
+[**File Uploader sample**](https://github.com/JPro-one/jpro-platform/blob/main/jpro-file/example/src/main/java/one/jpro/platform/file/example/upload/FileUploaderSample.java)
 * As desktop application
   ```shell
   ./gradlew jpro-file:example:run -Psample=file-uploader
