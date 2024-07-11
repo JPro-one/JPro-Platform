@@ -1,5 +1,10 @@
 ### 0.3.3-SNAPSHOT (TBD)
 
+<<<<<<< jpro-mail-module
+#### Features
+* Implemented and added `jpro-mail` module to the platform. This module provides an API to send emails from a 
+JavaFX/JPro application.
+=======
 #### Improvements
 * Updated **JPro** to version `2024.2.1`.
 * Updated **SimpleFX** dependencies to version `3.2.34`.
@@ -10,6 +15,7 @@
 `jpro-routing-dev` is included in the project.
 * Fixed some dependency requirements in the `JPro Routing` modules.
 * Fixed the stylesheet path in the `jpro-routing-popup` module for the SimplePopup control.
+>>>>>>> main
 
 ----------------------
 
