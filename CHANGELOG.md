@@ -1,5 +1,8 @@
 ### 0.4.1-SNAPSHOT (TBD)
 
+#### Improvements
+* Updated **JPro** to version `2024.3.1`.
+
 ----------------------
 
 ### 0.4.0 (July 11, 2024)
