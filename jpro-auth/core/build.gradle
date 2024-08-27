@@ -6,7 +6,7 @@ dependencies {
     implementation project(":internal:openlink")
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "com.auth0:java-jwt:$AUTH0_JAVAJWT_VERSION"
-    implementation "com.auth0:jwks-rsa:$AUTH0_JWKSRSA_VERSION"
+    implementation "one.jpro.platform.jpms:jwks-rsa:$AUTH0_JWKSRSA_VERSION"
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     api "org.json:json:$JSON_VERSION"
