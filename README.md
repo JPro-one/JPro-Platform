@@ -61,7 +61,7 @@ and OAuth2 (and to some extent OpenID Connect) implementation.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-auth-core</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -69,7 +69,7 @@ and OAuth2 (and to some extent OpenID Connect) implementation.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-auth-core:0.4.1")
+    implementation("one.jpro.platform:jpro-auth-core:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -82,7 +82,7 @@ Creates human and AI friendly String representations of JavaFX SceneGraphs.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-scenegraph</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -90,7 +90,7 @@ Creates human and AI friendly String representations of JavaFX SceneGraphs.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-scenegraph:0.4.1")
+    implementation("one.jpro.platform:jpro-scenegraph:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -103,7 +103,7 @@ This library provides a simple way to pick, drop, upload and download files in *
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-file</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -111,7 +111,7 @@ This library provides a simple way to pick, drop, upload and download files in *
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-file:0.4.1")
+    implementation("one.jpro.platform:jpro-file:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -147,7 +147,7 @@ to the desired size.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-image-manager</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -155,7 +155,7 @@ to the desired size.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-image-manager:0.4.1")
+    implementation("one.jpro.platform:jpro-image-manager:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -169,7 +169,7 @@ using SMTP and SMTPS protocols. It also provides a simple way to compose and sen
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-mail</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -177,7 +177,7 @@ using SMTP and SMTPS protocols. It also provides a simple way to compose and sen
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-mail:0.4.1")
+    implementation("one.jpro.platform:jpro-mail:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -192,7 +192,7 @@ all while utilizing the same codebase.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-media</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 
   <dependency>
@@ -213,7 +213,7 @@ plugins {
 }
 
 dependencies {
-    implementation("one.jpro.platform:jpro-media:0.4.1")
+    implementation("one.jpro.platform:jpro-media:0.4.2-SNAPSHOT")
     implementation "org.bytedeco:javacv-platform:1.5.10" // use compileOnly configuration when running/deploying with JPro
 }
 ```
@@ -231,7 +231,7 @@ Currently, there are three routing modules available:
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-core</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -239,7 +239,7 @@ Currently, there are three routing modules available:
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-core:0.4.1")
+    implementation("one.jpro.platform:jpro-routing-core:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -251,7 +251,7 @@ dependencies {
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-dev</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -259,7 +259,7 @@ dependencies {
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-dev:0.4.1")
+    implementation("one.jpro.platform:jpro-routing-dev:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -271,7 +271,7 @@ dependencies {
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-popup</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -279,7 +279,7 @@ dependencies {
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-popup:0.4.1")
+    implementation("one.jpro.platform:jpro-routing-popup:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -292,7 +292,7 @@ This library allows you to render Markdown formatted content in your **JPro/Java
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-mdfx</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -300,7 +300,7 @@ This library allows you to render Markdown formatted content in your **JPro/Java
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-mdfx:0.4.1")
+    implementation("one.jpro.platform:jpro-mdfx:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -315,7 +315,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-session</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -323,7 +323,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-session:0.4.1")
+    implementation("one.jpro.platform:jpro-session:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -344,7 +344,7 @@ capabilities.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-webrtc</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -352,7 +352,7 @@ capabilities.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-webrtc:0.4.1")
+    implementation("one.jpro.platform:jpro-webrtc:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -367,7 +367,7 @@ the embedded controls. The video can be played in full-screen mode.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-youtube</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -375,7 +375,7 @@ the embedded controls. The video can be played in full-screen mode.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-youtube:0.4.1")
+    implementation("one.jpro.platform:jpro-youtube:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -404,7 +404,7 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-html-scrollpane</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -412,7 +412,7 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-html-scrollpane:0.4.1")
+    implementation("one.jpro.platform:jpro-html-scrollpane:0.4.2-SNAPSHOT")
 }
 ```
 
@@ -431,14 +431,14 @@ bug-free and leak-free applications.
 <dependency>
   <groupId>one.jpro.platform</groupId>
   <artifactId>tree-showing</artifactId>
-  <version>0.4.1</version>
+  <version>0.4.2-SNAPSHOT</version>
 </dependency>
 ```
 
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation 'one.jpro.platform:tree-showing:0.4.1'
+    implementation 'one.jpro.platform:tree-showing:0.4.2-SNAPSHOT'
 }
 ```
 
@@ -470,7 +470,7 @@ This can be useful for debugging purposes, detecting deadlocks or other optimize
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>freeze-detector</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
   </dependency>
 </dependency>
 ```
@@ -478,7 +478,7 @@ This can be useful for debugging purposes, detecting deadlocks or other optimize
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation 'one.jpro.platform:freeze-detector:0.4.1'
+    implementation 'one.jpro.platform:freeze-detector:0.4.2-SNAPSHOT'
 }
 ```
 
