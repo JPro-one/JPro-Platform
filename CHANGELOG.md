@@ -1,4 +1,4 @@
-### 0.4.1-SNAPSHOT (TBD)
+### 0.4.1 (August 29, 2024)
 
 #### Features
 * Make the `jpro-auth-core` module JPMS compliant.
