@@ -4,7 +4,7 @@
 * Make the `jpro-auth-core` module JPMS compliant.
 
 #### Improvements
-* Updated **JPro** to version `2024.3.1`.
+* Updated **JPro** to version `2024.3.2`.
 * Updated **JavaFX** dependencies to version `17.0.12`.
 * Updated **SimpleFX** dependencies to version `3.2.36`.
 
