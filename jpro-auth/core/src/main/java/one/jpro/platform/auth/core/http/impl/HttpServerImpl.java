@@ -22,6 +22,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -143,7 +144,13 @@ public final class HttpServerImpl implements HttpServer {
     private byte[] getResourceAsBytes(@NotNull final String name) throws IOException {
         try (InputStream is = HttpServer.class.getResourceAsStream(name)) {
             if (is != null) {
-                return is.readAllBytes();
+                // Read all bytes from the input stream
+                byte[] bytes = is.readAllBytes();
+                // Convert bytes to a string, normalize line endings, and convert back to bytes
+                String content = new String(bytes, StandardCharsets.UTF_8);
+                String normalizedContent = content.replace("\r\n", "\n")
+                        .replace("\r", "\n");
+                return normalizedContent.getBytes(StandardCharsets.UTF_8);
             }
         }
         return SPACE;
