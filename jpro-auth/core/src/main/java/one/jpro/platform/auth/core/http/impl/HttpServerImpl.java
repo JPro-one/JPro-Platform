@@ -52,6 +52,8 @@ public final class HttpServerImpl implements HttpServer {
     static final byte[] CRLF = "\r\n".getBytes();
 
     private String uri;
+    private boolean isReusePortSupported;
+    private boolean isPortBound;
 
     @Nullable
     private final Stage stage;
@@ -116,11 +118,9 @@ public final class HttpServerImpl implements HttpServer {
         thread = new Thread(this::run, "http-server-thread");
         thread.setDaemon(true);
 
-        InetSocketAddress address = options.getHost() == null
-                ? new InetSocketAddress(options.getPort()) // wildcard address
-                : new InetSocketAddress(options.getHost(), options.getPort());
-
         serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.configureBlocking(false);
+
         final Set<SocketOption<?>> supportedOptions = serverSocketChannel.supportedOptions();
         if (options.isReuseAddr()) {
             if (supportedOptions.contains(StandardSocketOptions.SO_REUSEADDR)) {
@@ -132,13 +132,12 @@ public final class HttpServerImpl implements HttpServer {
         if (options.isReusePort()) {
             if (supportedOptions.contains(StandardSocketOptions.SO_REUSEPORT)) {
                 serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, options.isReusePort());
+                isReusePortSupported = true;
             } else {
+                isReusePortSupported = false;
                 logger.warn("The 'SO_REUSEPORT' option is not supported on this platform.");
             }
         }
-        serverSocketChannel.configureBlocking(false);
-        serverSocketChannel.bind(address, options.getAcceptLength());
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
     private byte[] getResourceAsBytes(@NotNull final String name) throws IOException {
@@ -152,6 +151,21 @@ public final class HttpServerImpl implements HttpServer {
 
     @Override
     public void start() {
+        if (!isReusePortSupported && isPortBound) {
+            // Reuse port is not supported, so we cannot bind the port again
+            return;
+        } else {
+            try {
+                final InetSocketAddress address = options.getHost() == null
+                        ? new InetSocketAddress(options.getPort()) // wildcard address
+                        : new InetSocketAddress(options.getHost(), options.getPort());
+                serverSocketChannel.bind(address, options.getAcceptLength());
+                serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+                isPortBound = true;
+            } catch (IOException ex) {
+                throw new HttpServerException(ex);
+            }
+        }
         thread.start();
         connectionEventLoops.forEach(ConnectionEventLoop::start);
         logger.info("Starting server on port: {}", getServerPort());
