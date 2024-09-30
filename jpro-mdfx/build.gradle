@@ -9,3 +9,12 @@ dependencies {
   implementation "com.vladsch.flexmark:flexmark-ext-tables:$FLEXMARK_VERSION"
   implementation "com.vladsch.flexmark:flexmark-ext-attributes:$FLEXMARK_VERSION"
 }
+
+javadoc {
+  options {
+    encoding = 'UTF-8'
+    version = true
+    author = true
+//        addStringOption('Xdoclint:none', '-quiet')
+  }
+}
