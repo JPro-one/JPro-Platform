@@ -1,20 +1,20 @@
 plugins {
-  id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
+    id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
 }
 
 dependencies {
-  implementation project(':jpro-youtube')
-  implementation "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$FLEXMARK_VERSION"
-  implementation "com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$FLEXMARK_VERSION"
-  implementation "com.vladsch.flexmark:flexmark-ext-tables:$FLEXMARK_VERSION"
-  implementation "com.vladsch.flexmark:flexmark-ext-attributes:$FLEXMARK_VERSION"
+    implementation project(':jpro-youtube')
+    implementation "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$FLEXMARK_VERSION"
+    implementation "com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$FLEXMARK_VERSION"
+    implementation "com.vladsch.flexmark:flexmark-ext-tables:$FLEXMARK_VERSION"
+    implementation "com.vladsch.flexmark:flexmark-ext-attributes:$FLEXMARK_VERSION"
 }
 
 javadoc {
-  options {
-    encoding = 'UTF-8'
-    version = true
-    author = true
-//        addStringOption('Xdoclint:none', '-quiet')
-  }
+    options {
+      encoding = 'UTF-8'
+      version = true
+      author = true
+  //    addStringOption('Xdoclint:none', '-quiet')
+    }
 }

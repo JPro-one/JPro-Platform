@@ -6,3 +6,12 @@ dependencies {
     implementation "org.eclipse.collections:eclipse-collections:$ECLIPSE_COLLECTIONS_VERSION"
     api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
 }
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        version = true
+        author = true
+//        addStringOption('Xdoclint:none', '-quiet')
+    }
+}
