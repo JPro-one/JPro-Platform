@@ -1,5 +1,5 @@
 # JPro Platform
-![Build](https://github.com/jpro-one/jpro-platform/actions/workflows/linux.yml/badge.svg)
+![Build](https://github.com/jpro-one/jpro-platform/actions/workflows/main.yml/badge.svg)
 [![JPro supported](https://img.shields.io/badge/JPro-supported-brightgreen.svg)](https://www.jpro.one/)
 
 The JPro Platform represents the foundation of cross-platform application development,

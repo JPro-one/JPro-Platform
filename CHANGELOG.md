@@ -3,6 +3,10 @@
 #### Improvements
 * Updated **JPro** to version `2024.3.3`.
 
+#### Bugfixes
+* Fixed the binding of the port in the local server implementation inside the `jpro-core` module to occur only when
+necessary, rather than during server creation.
+
 ----------------------
 
 ### 0.4.1 (August 29, 2024)

@@ -61,7 +61,7 @@ public class CommandRunnerTests {
         } else {
             commandRunner.addArgs("ls", "build.gradle");
         }
-        Process process = commandRunner.runAsync("ls");
+        Process process = commandRunner.runAsync("async-ls");
         assertThat(process.getClass()).isAssignableTo(Process.class);
     }
 
@@ -69,14 +69,19 @@ public class CommandRunnerTests {
     public void runAsyncWithMockDirectoryThrowsException() {
         if (PlatformUtils.isWindows()) {
             commandRunner.addArgs("cmd", "/c", "dir", "/b", "build.gradle");
+            assertThatThrownBy(() -> commandRunner.runAsync("async-cmd-dir", mockFile))
+                    .hasMessageContaining("Cannot run program \"cmd\"")
+                    .hasMessageContaining("CreateProcess error=267, The directory name is invalid")
+                    .hasRootCauseMessage("CreateProcess error=267, The directory name is invalid")
+                    .hasCauseInstanceOf(IOException.class);
         } else {
             commandRunner.addArgs("ls", "build.gradle");
+            assertThatThrownBy(() -> commandRunner.runAsync("async-ls", mockFile))
+                    .hasMessageContaining("Cannot run program \"ls\"")
+                    .hasMessageContaining("error=2, No such file or directory")
+                    .hasRootCauseMessage("error=2, No such file or directory")
+                    .hasCauseInstanceOf(IOException.class);
         }
-        assertThatThrownBy(() -> commandRunner.runAsync("ls", mockFile))
-                .hasMessageContaining("Cannot run program \"ls\"")
-                .hasMessageContaining("error=2, No such file or directory")
-                .hasRootCauseMessage("error=2, No such file or directory")
-                .hasCauseInstanceOf(IOException.class);
     }
 
     @Test
@@ -102,7 +107,7 @@ public class CommandRunnerTests {
         } else {
             commandRunner.addArgs("mkdir", "runner");
         }
-        Process process = commandRunner.runAsync("dir", tempDir.toFile());
+        Process process = commandRunner.runAsync("async-dir-list", tempDir.toFile());
         int result = process.waitFor();
         assertThat(result).isEqualTo(0); // Successful execution
         assertThat(commandRunner.getLastResponse()).isEqualTo("");
