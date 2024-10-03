@@ -30,7 +30,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
 
     private final FileChooser fileChooser = new FileChooser();
     private List<NativeFileSource> nativeFileSources = List.of();
-    private final ListChangeListener<ExtensionFilter> extensionListFiltersListener = change -> {
+    private final ListChangeListener<ExtensionFilter> extensionFiltersListChangeListener = change -> {
         while (change.next()) {
             if (change.wasAdded()) {
                 for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
@@ -57,7 +57,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
 
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(new WeakListChangeListener<>(extensionListFiltersListener));
+        getExtensionFilters().addListener(new WeakListChangeListener<>(extensionFiltersListChangeListener));
 
         // Define the action that should be performed when the user clicks on the node.
         node.addEventHandler(MouseEvent.MOUSE_CLICKED, actionEvent -> {

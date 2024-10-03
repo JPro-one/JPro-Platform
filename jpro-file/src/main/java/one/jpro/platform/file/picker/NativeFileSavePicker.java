@@ -4,6 +4,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
@@ -23,11 +25,30 @@ import java.util.function.Function;
  */
 public class NativeFileSavePicker extends BaseFileSavePicker {
 
-    private final FileChooser fileChooser;
+    private final FileChooser fileChooser = new FileChooser();
+    private final ListChangeListener<ExtensionFilter> extensionFiltersListChangeListener = change -> {
+        while (change.next()) {
+            if (change.wasAdded()) {
+                for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
+                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                            extensionFilter.description(), extensionFilter.extensions().stream()
+                            .map(ext -> "*" + ext).toList()));
+                }
+            } else if (change.wasRemoved()) {
+                for (ExtensionFilter extensionFilter : change.getRemoved()) {
+                    fileChooser.getExtensionFilters().removeIf(filter ->
+                            filter.getDescription().equals(extensionFilter.description()));
+                }
+            }
+        }
+    };
 
     public NativeFileSavePicker(Node node) {
         super(node);
-        fileChooser = new FileChooser();
+
+        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
+        // that can occur if observers are not unregistered from observed objects after use.
+        getExtensionFilters().addListener(new WeakListChangeListener<>(extensionFiltersListChangeListener));
     }
 
     @Override
