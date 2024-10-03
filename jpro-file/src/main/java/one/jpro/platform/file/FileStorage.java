@@ -26,7 +26,7 @@ public final class FileStorage {
     /**
      * Determines if the default file system supports POSIX file attribute views.
      */
-    private static final boolean isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+    static final boolean isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
 
     /**
      * The directory path to store temporary files. Defaults to a 'tmp' directory within a '.jpro' directory
