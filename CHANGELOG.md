@@ -3,6 +3,11 @@
 #### Improvements
 * Updated **JPro** to version `2024.3.3`.
 
+#### Features
+* Register an `extensionFilters` listener to the native (desktop) implementation FileSavePicker in the `jpro-file`
+module. The listener can be used to filter the files that are displayed in the file save picker dialog based on the file
+extension.
+
 #### Bugfixes
 * Fixed the binding of the port in the local server implementation inside the `jpro-core` module to occur only when
 necessary, rather than during server creation.
