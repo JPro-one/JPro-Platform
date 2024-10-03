@@ -3,6 +3,7 @@ package one.jpro.platform.file;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,16 +24,28 @@ import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
  */
 public final class FileStorage {
 
+    static final FileSystem DEFAULT_FILE_SYSTEM = FileSystems.getDefault();
+
     /**
      * Determines if the default file system supports POSIX file attribute views.
      */
-    private static final boolean isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+    static final boolean isPosix = DEFAULT_FILE_SYSTEM.supportedFileAttributeViews().contains("posix");
 
     /**
      * The directory path to store temporary files. Defaults to a 'tmp' directory within a '.jpro' directory
      * in the user's home directory.
      */
     public static final Path JPRO_TMP_DIR = Path.of(System.getProperty("user.home"), ".jpro", "tmp");
+
+    static {
+        try {
+            if (Files.notExists(JPRO_TMP_DIR)) {
+                Files.createDirectories(JPRO_TMP_DIR);
+            }
+        } catch (IOException e) {
+            throw new ExceptionInInitializerError("Failed to create JPRO temporary directory: " + e.getMessage());
+        }
+    }
 
     /**
      * Inner class to hold the default POSIX file and directory permissions.
@@ -58,11 +71,25 @@ public final class FileStorage {
         int lastIndexOf = fileName.lastIndexOf('.');
         if (lastIndexOf > 0) {
             s = fileName.substring(0, lastIndexOf) + fileType;
+        } else if (lastIndexOf == -1) {
+            s = fileName + fileType;
         }
+
+        // Create the directories if they don't exist
+        if (Files.notExists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException ex) {
+                throw new IllegalArgumentException("Invalid directory path: " + dir, ex);
+            }
+        }
+
         Path name = dir.getFileSystem().getPath(s);
-        // the generated name should be a simple file name
-        if (name.getParent() != null)
-            throw new IllegalArgumentException("Invalid fileName or fileType");
+        // Ensure the generated name is a simple file name
+        if (name.getParent() != null) {
+            throw new IllegalArgumentException("Invalid fileName: " + s + ", it should not contain directory separators.");
+        }
+
         return dir.resolve(name);
     }
 
@@ -85,13 +112,17 @@ public final class FileStorage {
         fileType = Objects.requireNonNullElse(fileType, ".tmp");
 
         FileAttribute<?>[] attrs = null;
-        if (isPosix && (dir.getFileSystem() == FileSystems.getDefault())) {
+        if (isPosix && (dir.getFileSystem() == DEFAULT_FILE_SYSTEM)) {
             attrs = new FileAttribute<?>[1];
             attrs[0] = PosixPermissions.filePermissions;
         }
 
-        Path path = generatePath(fileName, fileType, dir);
-        return Files.createFile(path, attrs);
+        final Path path = generatePath(fileName, fileType, dir);
+        if (Files.exists(path)) {
+            return path;
+        } else {
+            return (attrs != null) ? Files.createFile(path, attrs) : Files.createFile(path);
+        }
     }
 
     private FileStorage() {

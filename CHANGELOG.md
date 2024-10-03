@@ -6,6 +6,8 @@
 #### Bugfixes
 * Fixed the binding of the port in the local server implementation inside the `jpro-core` module to occur only when
 necessary, rather than during server creation.
+* Fixed exception thrown on Windows platform when using FileStorage class from `jpro-file` module to create temporary
+files.
 
 ----------------------
 
