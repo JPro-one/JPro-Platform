@@ -54,6 +54,7 @@ extension.
 necessary, rather than during server creation.
 * Fixed exception thrown on Windows platform when using FileStorage class from `jpro-file` module to create temporary
 files.
+* MDFX now properly handles escaped characters in the markdown text.
 
 ----------------------
 
