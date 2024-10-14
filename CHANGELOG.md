@@ -3,6 +3,7 @@
 #### Improvements
 * Updated **JPro** to version `2024.3.3`.
 * Updated **SimpleFX** dependencies to version `3.2.37`.
+* Updated **JNodes** dependencies to version `0.8.3`.
 
 #### Features
 * Register an `extensionFilters` listener to the native (desktop) implementation FileSavePicker in the `jpro-file`
