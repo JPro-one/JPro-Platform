@@ -3,8 +3,6 @@ name: CI build
 on: [push]
 
 env:
-  DISPLAY: ":99"
-  XVFB_PARAMS: "-screen 0 1920x1080x24 -nolisten unix"
   RUNNING_ON_CI: true
 
 jobs:
@@ -37,7 +35,7 @@ jobs:
       - name: Set up Virtual Display (for Linux)
         if: runner.os == 'Linux'
         run: |
-          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARAMS}} &
+          export DISPLAY=:99.0 && /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16;
 
       - name: Test
         run: |
