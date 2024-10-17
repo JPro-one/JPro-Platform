@@ -32,13 +32,11 @@ jobs:
           ./gradlew jar
           ./gradlew example:jar
 
-      - name: Set up Virtual Display (for Linux)
-        if: runner.os == 'Linux'
-        run: |
-          export DISPLAY=:99.0 && /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16;
-
       - name: Test
         run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            export DISPLAY=:99.0 && /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16;
+          fi
           ./gradlew test
         shell: bash
 
