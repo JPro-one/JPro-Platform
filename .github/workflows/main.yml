@@ -48,12 +48,6 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pacmd load-module module-null-sink sink_name=DummyOutput
 
-      - name: List Windows Optional Features
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Get-WindowsOptionalFeature -Online | Where-Object { $_.State -eq 'Disabled' } | Select-Object FeatureName
-
       - name: Enable Media Features (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
