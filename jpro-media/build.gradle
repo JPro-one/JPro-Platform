@@ -40,8 +40,8 @@ test {
 
     // Exclude media tests when running on CI
     if (runningOnCi) {
-        filter {
-            excludeTags 'media-recorder'
+        useJUnitPlatform {
+            excludeTags('media-recorder')
         }
     }
 }
