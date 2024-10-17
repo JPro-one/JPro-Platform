@@ -13,10 +13,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.recorder.MediaRecorder;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static one.jpro.platform.media.recorder.MediaRecorder.Status;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 /**
@@ -118,6 +116,8 @@ public class MediaRecorderTests {
     @Test
     @Order(1)
     public void media_recorder_enable(FxRobot robot) throws TimeoutException {
+        skipTestOnCI();
+
         log.debug("MediaRecorder => Testing enable functionality...");
         log.debug("Click on enable camera button");
         robot.clickOn(enableCamButton); // Enable camera (asynchronous operation)
@@ -137,6 +137,8 @@ public class MediaRecorderTests {
     @Test
     @Order(2)
     public void media_recorder_controls(FxRobot robot) throws TimeoutException {
+        skipTestOnCI();
+
         log.debug("MediaRecorder => Testing controls...");
         log.debug("Click on enable camera button");
         robot.clickOn(enableCamButton); // Enable camera (asynchronous operation)
@@ -198,6 +200,8 @@ public class MediaRecorderTests {
     @Test
     @Order(3)
     public void media_recorder_stress(FxRobot robot) throws TimeoutException {
+        skipTestOnCI();
+
         log.debug("MediaRecorder => Stress test started...");
         log.debug("Click on enable camera button");
         robot.clickOn(enableCamButton); // Enable camera (asynchronous operation)
@@ -261,5 +265,14 @@ public class MediaRecorderTests {
         WaitForAsyncUtils.waitFor(timeout, timeUnit, mediaRecorder.statusProperty().isEqualTo(status));
         assertThat(mediaRecorder.getStatus()).isEqualByComparingTo(status);
         WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    private void skipTestOnCI() {
+        final String runningOnCI = System.getenv("RUNNING_ON_CI");
+        if (runningOnCI != null && !runningOnCI.isBlank()) {
+            log.warn("MediaRecorder is not supported on the CI.");
+            assumeFalse(runningOnCI.equalsIgnoreCase("true"),
+                    "MediaRecorder is not supported on the CI.");
+        }
     }
 }

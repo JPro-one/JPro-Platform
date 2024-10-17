@@ -2,6 +2,9 @@ name: CI build
 
 on: [push]
 
+env:
+  RUNNING_ON_CI: true
+
 jobs:
   builds:
     name: '${{ matrix.os }} with Java ${{ matrix.jdk }}'
