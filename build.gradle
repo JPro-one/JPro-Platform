@@ -43,9 +43,7 @@ configure(subprojects.findAll { it.name != 'example' }) {
 
     dependencies {
         testImplementation "org.junit.jupiter:junit-jupiter:$JUNIT_VERSION"
-        testImplementation "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-        testImplementation "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
 
         testImplementation "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
         testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"

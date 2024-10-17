@@ -1,4 +1,4 @@
-package one.jpro.platform.media;
+package one.jpro.platform.media.test;
 
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
@@ -11,6 +11,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.recorder.MediaRecorder;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;

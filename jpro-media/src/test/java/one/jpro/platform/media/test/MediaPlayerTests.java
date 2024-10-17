@@ -1,4 +1,4 @@
-package one.jpro.platform.media;
+package one.jpro.platform.media.test;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -15,6 +15,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.platform.media.MediaSource;
+import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.player.MediaPlayer;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -147,6 +149,7 @@ public class MediaPlayerTests {
         scene = new Scene(rootPane, 800, 540);
         stage.setScene(scene);
         stage.show();
+        stage.toFront();
     }
 
     @Test

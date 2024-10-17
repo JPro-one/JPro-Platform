@@ -1,8 +1,3 @@
-import one.jpro.platform.media.MediaSource;
-import one.jpro.platform.media.MediaView;
-import one.jpro.platform.media.player.MediaPlayer;
-import one.jpro.platform.media.recorder.MediaRecorder;
-
 /**
  * Defines APIs for playback and recording of video and audio content.
  * <p>
@@ -17,8 +12,8 @@ import one.jpro.platform.media.recorder.MediaRecorder;
  * @author Besmir Beqiri
  */
 module one.jpro.platform.media {
-    requires javafx.controls;
-    requires javafx.media;
+    requires transitive javafx.controls;
+    requires transitive javafx.media;
     requires javafx.swing;
     requires jpro.webapi;
     requires org.json;
