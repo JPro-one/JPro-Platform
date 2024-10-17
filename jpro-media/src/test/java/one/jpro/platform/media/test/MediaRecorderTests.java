@@ -35,6 +35,7 @@ import static org.testfx.assertions.api.Assertions.assertThat;
  */
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("media-recorder")
 public class MediaRecorderTests {
 
     private final Logger log = LoggerFactory.getLogger(MediaRecorderTests.class);
@@ -113,7 +114,6 @@ public class MediaRecorderTests {
     }
 
     @Test
-    @Tag("media-recorder")
     @Order(1)
     public void media_recorder_enable(FxRobot robot) throws TimeoutException {
         log.debug("MediaRecorder => Testing enable functionality...");
@@ -133,7 +133,6 @@ public class MediaRecorderTests {
     }
 
     @Test
-    @Tag("media-recorder")
     @Order(2)
     public void media_recorder_controls(FxRobot robot) throws TimeoutException {
         log.debug("MediaRecorder => Testing controls...");
@@ -195,7 +194,6 @@ public class MediaRecorderTests {
     }
 
     @Test
-    @Tag("media-recorder")
     @Order(3)
     public void media_recorder_stress(FxRobot robot) throws TimeoutException {
         log.debug("MediaRecorder => Stress test started...");
