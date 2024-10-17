@@ -48,6 +48,19 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pacmd load-module module-null-sink sink_name=DummyOutput
 
+      - name: Install Media Features (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Enable-WindowsOptionalFeature -Online -FeatureName MediaPlayback -All
+          Enable-WindowsOptionalFeature -Online -FeatureName MediaFoundation -All
+
+      - name: Set JavaFX Media Backend to WMF (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:JDK_JAVA_OPTIONS = "-Djfxmedia.platforms=Windows"
+
       - name: Compile
         run: |
           ./gradlew jar
