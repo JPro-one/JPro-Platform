@@ -48,12 +48,17 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pacmd load-module module-null-sink sink_name=DummyOutput
 
+      - name: List Windows Optional Features
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-WindowsOptionalFeature -Online | Where-Object { $_.State -eq 'Disabled' } | Select-Object FeatureName
+
       - name: Install Media Features (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           Enable-WindowsOptionalFeature -Online -FeatureName MediaPlayback -All
-          Enable-WindowsOptionalFeature -Online -FeatureName MediaFoundation -All
 
       - name: Set JavaFX Media Backend to WMF (Windows)
         if: runner.os == 'Windows'
