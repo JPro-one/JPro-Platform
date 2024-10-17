@@ -1,4 +1,4 @@
-package one.jpro.platform.media;
+package one.jpro.platform.media.test;
 
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
@@ -11,11 +11,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.recorder.MediaRecorder;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +35,7 @@ import static org.testfx.assertions.api.Assertions.assertThat;
  */
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("media-recorder")
 public class MediaRecorderTests {
 
     private final Logger log = LoggerFactory.getLogger(MediaRecorderTests.class);

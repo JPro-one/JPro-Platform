@@ -1,4 +1,4 @@
-package one.jpro.platform.media;
+package one.jpro.platform.media.test;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -15,6 +15,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import one.jpro.platform.media.MediaSource;
+import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.player.MediaPlayer;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -147,6 +149,7 @@ public class MediaPlayerTests {
         scene = new Scene(rootPane, 800, 540);
         stage.setScene(scene);
         stage.show();
+        stage.toFront();
     }
 
     @Test
@@ -267,9 +270,9 @@ public class MediaPlayerTests {
 
         log.debug("Seek to 360 seconds by clicking on seek slider");
         final Duration seekTime = Duration.seconds(360);
-        seekViaRobot(robot, seekTime);
-        log.debug("Check current time is greater or equal to 360 seconds");
-        assertThat(mediaPlayer.getCurrentTime()).isGreaterThanOrEqualTo(seekTime);
+        seekViaRobot(robot, seekTime); // We can't expect this seek method to be precise
+        log.debug("Check if the difference between the requested seek time and the current one is less than 200 milliseconds");
+        assertThat(seekTime.subtract(mediaPlayer.getCurrentTime())).isLessThan(Duration.millis(200));
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();

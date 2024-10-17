@@ -8,8 +8,12 @@ dependencies {
     api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     api "org.json:json:$JSON_VERSION"
 
-    testImplementation "org.testfx:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:testfx-core:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
     testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
+    testImplementation "org.bytedeco:javacpp-platform:$JAVACPP_VERSION"
+    testRuntimeOnly "org.bytedeco:flandmark-platform:1.07-1.5.8"
 }
 
 compileJava {
@@ -18,12 +22,28 @@ compileJava {
 
 test {
     jvmArgs = [
+            "-Dtestfx.headless=true", "-Djava.awt.headless=true",
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-opens", "javafx.graphics/com.sun.glass.ui=org.testfx.core",
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media",
-            "--add-exports", "javafx.graphics/com.sun.javafx.application=testfx.core",
-            "--add-opens", "javafx.graphics/com.sun.javafx.application=testfx.core"
+            "--add-exports", "javafx.base/com.sun.javafx.logging=org.testfx.monocle",
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.javafx.util=org.testfx.monocle",
+            "--add-exports", "javafx.graphics/com.sun.glass.ui=org.testfx.monocle"
     ]
 
-    onlyIf { !Boolean.getBoolean("ciTest") }
+    // Check if the RUNNING_ON_CI environment variable is set to 'true'
+    def runningOnCi = System.getenv('RUNNING_ON_CI') == 'true'
+
+    // Pass the environment variable to the test JVM as a system property
+    systemProperty 'RUNNING_ON_CI', runningOnCi
+
+    // Exclude media tests when running on CI
+    if (runningOnCi) {
+        useJUnitPlatform {
+            excludeTags('media-recorder')
+        }
+    }
 }
 
 javadoc {

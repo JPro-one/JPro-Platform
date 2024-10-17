@@ -1,0 +1,19 @@
+dependencies {
+    api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+
+    testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:testfx-core:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
+}
+
+test {
+    jvmArgs = [
+            "-Dtestfx.headless=true", "-Djava.awt.headless=true",
+            "--add-opens", "javafx.graphics/com.sun.glass.ui=org.testfx.core",
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.glass.ui=org.testfx.monocle",
+            "--add-exports", "javafx.graphics/com.sun.javafx.util=org.testfx.monocle",
+            "--add-exports", "javafx.base/com.sun.javafx.logging=org.testfx.monocle"
+    ]
+}
