@@ -3,6 +3,8 @@ name: CI build
 on: [push]
 
 env:
+  DISPLAY: ":99"
+  XVFB_PARAMS: "-screen 0 1920x1080x24 -nolisten unix"
   RUNNING_ON_CI: true
 
 jobs:
@@ -31,6 +33,11 @@ jobs:
         run: |
           ./gradlew jar
           ./gradlew example:jar
+
+      - name: Set up Virtual Display (for Linux)
+        if: runner.os == 'Linux'
+        run: |
+          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARAMS}} &
 
       - name: Test
         run: |
