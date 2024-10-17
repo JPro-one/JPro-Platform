@@ -48,18 +48,17 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pacmd load-module module-null-sink sink_name=DummyOutput
 
-      - name: Enable Media Features (Windows)
+      - name: Install GStreamer (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Enable-WindowsOptionalFeature -Online -FeatureName MediaPlayback -All
-          Enable-WindowsOptionalFeature -Online -FeatureName ServerMediaFoundation -All
+          choco install gstreamer -y
 
-      - name: Set JavaFX Media Backend to WMF (Windows)
+      - name: Set JavaFX Media Backend to GStreamer
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $env:JDK_JAVA_OPTIONS = "-Djfxmedia.platforms=Windows"
+            $env:JDK_JAVA_OPTIONS = "-Djfxmedia.platforms=GStreamer"
 
       - name: Compile
         run: |
