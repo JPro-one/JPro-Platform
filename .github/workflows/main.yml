@@ -5,7 +5,6 @@ on: [push]
 env:
   DISPLAY: ":99"
   XVFB_PARAMS: "-screen 0 1920x1080x24"
-  RUNNING_ON_CI: true
 
 jobs:
   builds:
@@ -54,11 +53,12 @@ jobs:
         run: |
           Get-WindowsOptionalFeature -Online | Where-Object { $_.State -eq 'Disabled' } | Select-Object FeatureName
 
-      - name: Install Media Features (Windows)
+      - name: Enable Media Features (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           Enable-WindowsOptionalFeature -Online -FeatureName MediaPlayback -All
+          Enable-WindowsOptionalFeature -Online -FeatureName ServerMediaFoundation -All
 
       - name: Set JavaFX Media Backend to WMF (Windows)
         if: runner.os == 'Windows'
