@@ -4,6 +4,11 @@
 * Updated **JPro** to version `2024.3.3`.
 * Updated **SimpleFX** dependencies to version `3.2.37`.
 * Updated **JNodes** dependencies to version `0.8.3`.
+* Enable TestFX unit tests on the CI pipeline and use Monocle to enable the `headless` mode.
+* Integrate modularized versions of `TestFX` and `Monocle` into our testing infrastructure in alignment with the Java
+Platform Module System.
+* Integrate modularized versions of `eclipse-collections-api` and `eclipse-collections` libraries to the platform to
+produce JPMS-compliant modules.
 
 #### Features
 * Register an `extensionFilters` listener to the native (desktop) implementation FileSavePicker in the `jpro-file`
@@ -21,7 +26,7 @@ files.
 ### 0.4.1 (August 29, 2024)
 
 #### Features
-* Make the `jpro-auth-core` module JPMS compliant.
+* Make the `jpro-auth-core` module JPMS-compliant.
 
 #### Improvements
 * Updated **JPro** to version `2024.3.2`.
