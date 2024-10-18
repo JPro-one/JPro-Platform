@@ -17,6 +17,8 @@ module one.jpro.platform.auth.core {
     requires one.jpro.platform.internal.openlink;
 
     opens one.jpro.platform.auth.core;
+    opens one.jpro.platform.auth.core.authentication;
+    opens one.jpro.platform.auth.core.basic;
 
     exports one.jpro.platform.auth.core;
     exports one.jpro.platform.auth.core.api;
