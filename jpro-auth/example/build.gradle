@@ -13,7 +13,7 @@ dependencies {
     implementation project(':jpro-session')
 
     implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
-    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+    implementation "one.jpro.platform.jpms:cssfx:$CSSFX_VERSION"
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
