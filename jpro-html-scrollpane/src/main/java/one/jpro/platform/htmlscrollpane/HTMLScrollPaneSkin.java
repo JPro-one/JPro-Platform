@@ -2,7 +2,7 @@ package one.jpro.platform.htmlscrollpane;
 
 import com.jpro.webapi.HTMLView;
 import com.jpro.webapi.WebAPI;
-import de.sandec.jmemorybuddy.CleanupDetector;
+import one.jpro.jmemorybuddy.CleanupDetector;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;

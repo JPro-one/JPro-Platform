@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.sessionmanager
 
 import com.jpro.webapi.WebAPI
-import de.sandec.jmemorybuddy.JMemoryBuddyLive
+import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
 import one.jpro.platform.routing.{HistoryEntry, Response, ResponseResult, RouteNode, View}

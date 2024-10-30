@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.crawl
 
-import de.sandec.jmemorybuddy.JMemoryBuddy
+import one.jpro.jmemorybuddy.JMemoryBuddy
 import one.jpro.platform.routing.crawl.AppCrawler.CrawlReportApp
 import one.jpro.platform.routing.{RouteNode, View}
 import org.slf4j.{Logger, LoggerFactory}

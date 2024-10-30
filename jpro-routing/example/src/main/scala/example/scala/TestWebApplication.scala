@@ -1,7 +1,7 @@
 package example.scala
 
 import com.jpro.webapi.{HTMLView, WebAPI}
-import de.sandec.jmemorybuddy.JMemoryBuddyLive
+import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import one.jpro.platform.routing.LinkUtil._
 import one.jpro.platform.routing.Route._
 import one.jpro.platform.routing.sessionmanager.SessionManager

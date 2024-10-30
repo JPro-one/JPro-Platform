@@ -1,6 +1,6 @@
 package one.jpro.platform.treeshowing;
 
-import de.sandec.jmemorybuddy.JMemoryBuddy;
+import one.jpro.jmemorybuddy.JMemoryBuddy;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.Group;

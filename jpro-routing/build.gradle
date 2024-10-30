@@ -27,7 +27,7 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
     dependencies {
         api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
         api "SANDEC:jnodes:$JNODES_VERSION"
-        api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+        api "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
         api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     }
 }
