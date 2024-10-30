@@ -2,17 +2,27 @@ name: CI Release
 
 on:
   release:
+    types: [published]    # Triggers when a release is published
+  workflow_dispatch:      # Allows manual triggering of the workflow
 
 env:
   BRANCH_NAME: ${{github.ref_name}}
   TRUNK_BRANCH_NAME: 'main'
+  SANDEC_ARTIFACTORY_USERNAME: ${{secrets.SANDEC_ARTIFACTORY_USERNAME}}
+  SANDEC_ARTIFACTORY_PASSWORD: ${{secrets.SANDEC_ARTIFACTORY_PASSWORD}}
+  SANDEC_SIGNING_KEY_ID: ${{secrets.SANDEC_SIGNING_KEY_ID}}
+  SANDEC_SIGNING_SECRET_KEY: ${{secrets.SANDEC_SIGNING_SECRET_KEY}}
+  SANDEC_SIGNING_PASSWORD: ${{secrets.SANDEC_SIGNING_PASSWORD}}
+  SANDEC_SONATYPE_USERNAME: ${{secrets.SANDEC_SONATYPE_USERNAME}}
+  SANDEC_SONATYPE_PASSWORD: ${{secrets.SANDEC_SONATYPE_PASSWORD}}
+  MAVEN_CENTRAL_AUTH_TOKEN: ${{secrets.MAVEN_CENTRAL_AUTH_TOKEN}}
   MAVEN_CENTRAL_PUBLISHING_TYPE: 'USER_MANAGED'
 
 jobs:
   release:
     name: 'Release'
-    runs-on: ubuntu-24.04
-    if: github.repository.owner == 'JPro-one'
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'JPro-one'
     steps:
       - name: Verify Branch
         if: env.BRANCH_NAME != env.TRUNK_BRANCH_NAME
