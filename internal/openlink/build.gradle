@@ -12,3 +12,14 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter:$MOCKITO_VERSION")
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Open Link'
+                description = 'A module that helps launching the default browser of the running platform.'
+            }
+        }
+    }
+}

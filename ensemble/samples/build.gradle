@@ -18,24 +18,13 @@ javafx {
     modules = [ 'javafx.graphics', 'javafx.controls','javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
 }
 
-apply plugin: 'maven-publish'
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId "one.jpro.samples"
-            artifactId project.name
-            version JPRO_PLATFORM_VERSION
-        }
-    }
-    repositories {
-        maven {
-            name = "artifactory"
-            url = "https://sandec.jfrog.io/artifactory/repo"
-            credentials {
-                username System.getenv("SANDEC_ARTIFACTORY_USERNAME")
-                password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//            groupId "one.jpro.samples"
+//            artifactId project.name
+//            version JPRO_PLATFORM_VERSION
+//        }
+//    }
+//}

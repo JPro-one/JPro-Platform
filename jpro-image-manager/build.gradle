@@ -3,3 +3,14 @@ dependencies {
     implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "org.json:json:$JSON_VERSION"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Image Manager'
+                description = 'A utility module for JPro/JavaFX applications that simplifies image loading and caching.'
+            }
+        }
+    }
+}

@@ -15,3 +15,14 @@ javadoc {
 //        addStringOption('Xdoclint:none', '-quiet')
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Mail'
+                description = 'A module that provides platform-independent and protocol-independent API for sending emails.'
+            }
+        }
+    }
+}

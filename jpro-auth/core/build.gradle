@@ -16,18 +16,10 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             pom {
-                packaging = 'jar'
                 name = 'JPro Auth Core'
-                description = 'Core library for authenticating and authorizing users.'
-                url = 'https://www.jpro.one'
-
-                developers {
-                    developer {
-                        id = 'besidev'
-                        name = 'Besmir Beqiri'
-                        email = 'bb@sandec.de'
-                    }
-                }
+                description = 'A module for adding advanced authentication and authorization to JPro/JavaFX ' +
+                        'applications, supporting OAuth 2.0, OpenID Connect, integration with multiple identity ' +
+                        'providers and asynchronous operations for enhanced performance.'
             }
         }
     }

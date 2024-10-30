@@ -5,3 +5,14 @@ dependencies {
 
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Session'
+                description = 'A module that provides a simple implementation of a session manager for JavaFX/JPro applications.'
+            }
+        }
+    }
+}

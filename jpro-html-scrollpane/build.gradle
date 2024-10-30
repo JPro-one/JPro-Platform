@@ -4,3 +4,16 @@ dependencies {
   implementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
   implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
 }
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      pom {
+        name = 'JPro Auth Core'
+        description = 'A module for adding advanced authentication and authorization to JPro/JavaFX ' +
+                'applications, supporting OAuth 2.0, OpenID Connect, integration with multiple identity ' +
+                'providers and asynchronous operations for enhanced performance.'
+      }
+    }
+  }
+}

@@ -10,3 +10,14 @@ dependencies {
     testImplementation "org.assertj:assertj-core:$ASSERTJ_VERSION"
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Utils'
+                description = 'A utility module offering essential tools for process management and platform-specific functionalities'
+            }
+        }
+    }
+}

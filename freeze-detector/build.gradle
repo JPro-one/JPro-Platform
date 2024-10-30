@@ -17,3 +17,15 @@ test {
             "--add-exports", "javafx.base/com.sun.javafx.logging=org.testfx.monocle"
     ]
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'Freeze Detector'
+                description = 'A module that allows you to track whether the JavaFX Application Thread is frozen for ' +
+                        'a given time, useful for debugging purposes, detecting deadlocks, or optimizing performance.'
+            }
+        }
+    }
+}

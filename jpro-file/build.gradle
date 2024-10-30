@@ -37,19 +37,9 @@ publishing {
             }
 
             pom {
-                packaging = 'jar'
                 name = 'JPro File'
-                description = 'A library for handling file related operations in JavaFX applications ' +
+                description = 'A module for handling file related operations in JPro/JavaFX applications ' +
                         'running natively and via JPro server.'
-                url = 'https://www.jpro.one'
-
-                developers {
-                    developer {
-                        id = 'besidev'
-                        name = 'Besmir Beqiri'
-                        email = 'bb@sandec.de'
-                    }
-                }
             }
         }
     }

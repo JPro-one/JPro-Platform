@@ -18,3 +18,14 @@ javadoc {
   //    addStringOption('Xdoclint:none', '-quiet')
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Markdown'
+                description = 'A module that allows you to render Markdown formatted content in your JPro/JavaFX applications.'
+            }
+        }
+    }
+}

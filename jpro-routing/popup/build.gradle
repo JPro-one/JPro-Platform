@@ -6,3 +6,14 @@ dependencies {
     api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
     api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Routing Popup'
+                description = 'A module that provides utility methods for managing popups in a JPro/JavaFX application.'
+            }
+        }
+    }
+}
