@@ -11,6 +11,7 @@ buildscript {
         classpath "org.openjfx:javafx-plugin:$JAVAFX_PLUGIN_VERSION"
         classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
         classpath "org.owasp:dependency-check-gradle:$DEPENDENCY_CHECK_PLUGIN_VERSION"
+        classpath "tech.yanand.gradle:maven-central-publish:$MAVEN_CENTRAL_PUBLISH_PLUGIN_VERSION"
     }
 }
 
@@ -85,24 +86,21 @@ configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-aut
            project("jpro-routing:dev"), project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
            project("internal:openlink"), project("internal:util")]) {
     apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+    apply plugin: 'tech.yanand.maven-central-publish'
+
+    // Check if the parent of the current project is a subproject
+    def isParentASubproject = project.parent != null && project.parent != rootProject
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                from components.java
-                groupId "one.jpro.platform"
-                version JPRO_PLATFORM_VERSION
+                groupId = 'one.jpro.platform'
+                artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
+                version = JPRO_PLATFORM_VERSION
 
-                def projectParentPathname = project.projectDir.parent
-                if (projectParentPathname.contains('jpro-auth')) {
-                    artifactId "jpro-auth-" + project.name
-                } else if (projectParentPathname.contains('jpro-routing')) {
-                    artifactId "jpro-routing-" + project.name
-                } else if (projectParentPathname.contains('internal')) {
-                    artifactId "jpro-internal-" + project.name
-                } else {
-                    artifactId project.name
-                }
+                // Ensure only one component is included in the publication
+                from components.java
 
                 pom {
                     licenses {
@@ -116,6 +114,11 @@ configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-aut
                         connection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
                         developerConnection = 'scm:git:https://github.com/JPro-one/jpro-platform.git'
                         url = "https://github.com/JPro-one/jpro-platform/tree/main/$project.name"
+                    }
+
+                    issueManagement {
+                        system = 'GitHub'
+                        url = 'https://github.com/JPro-one/JPro-Platform/issues'
                     }
                 }
             }
@@ -135,6 +138,26 @@ configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-aut
                     password System.getenv("SANDEC_ARTIFACTORY_PASSWORD")
                 }
             }
+            maven {
+                name = 'publish-bundle'
+                url = layout.buildDirectory.dir('publish-bundle')
+            }
         }
+    }
+
+    signing {
+        useInMemoryPgpKeys (
+                System.getenv("SANDEC_SIGNING_KEY_ID"),
+                System.getenv("SANDEC_SIGNING_SECRET_KEY"),
+                System.getenv("SANDEC_SIGNING_PASSWORD")
+        )
+
+        sign publishing.publications.mavenJava
+    }
+
+    mavenCentral {
+        repoDir = layout.buildDirectory.dir('publish-bundle')
+        authToken = System.getenv("MAVEN_CENTRAL_AUTH_TOKEN")
+        publishingType = System.getenv("MAVEN_CENTRAL_PUBLISHING_TYPE") ?: 'USER_MANAGED'
     }
 }
