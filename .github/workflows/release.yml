@@ -1,0 +1,38 @@
+name: CI Release
+
+on:
+  release:
+
+env:
+  BRANCH_NAME: ${{github.ref_name}}
+  TRUNK_BRANCH_NAME: 'main'
+  MAVEN_CENTRAL_PUBLISHING_TYPE: 'USER_MANAGED'
+
+jobs:
+  release:
+    name: 'Release'
+    runs-on: ubuntu-24.04
+    if: github.repository.owner == 'JPro-one'
+    steps:
+      - name: Verify Branch
+        if: env.BRANCH_NAME != env.TRUNK_BRANCH_NAME
+        run: |
+          echo "ERROR: Attempting to release from branch ${{env.BRANCH_NAME}}. Release from ${{env.TRUNK_BRANCH_NAME}} branch only"
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Publish to Sandec Public Repository
+        run: |
+          ./gradlew clean publish
+
+      - name: Publish to Maven Central Sonatype
+        run: |
+          ./gradlew publishToMavenCentralPortal
