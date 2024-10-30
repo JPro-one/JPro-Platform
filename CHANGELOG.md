@@ -1,7 +1,7 @@
 ### 0.4.3 (TBA)
 
 #### Improvements
-* Configure publishing of the all JPro Platform modules to the Maven Central repository.
+* Configure publishing of the all `JPro Platform` modules to the Maven Central repository.
 
 ----------------------
 

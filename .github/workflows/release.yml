@@ -6,8 +6,6 @@ on:
   workflow_dispatch:      # Allows manual triggering of the workflow
 
 env:
-  BRANCH_NAME: ${{github.ref_name}}
-  TRUNK_BRANCH_NAME: 'main'
   SANDEC_ARTIFACTORY_USERNAME: ${{secrets.SANDEC_ARTIFACTORY_USERNAME}}
   SANDEC_ARTIFACTORY_PASSWORD: ${{secrets.SANDEC_ARTIFACTORY_PASSWORD}}
   SANDEC_SIGNING_KEY_ID: ${{secrets.SANDEC_SIGNING_KEY_ID}}
@@ -24,12 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'JPro-one'
     steps:
-      - name: Verify Branch
-        if: env.BRANCH_NAME != env.TRUNK_BRANCH_NAME
-        run: |
-          echo "ERROR: Attempting to release from branch ${{env.BRANCH_NAME}}. Release from ${{env.TRUNK_BRANCH_NAME}} branch only"
-          exit 1
-
       - name: Checkout
         uses: actions/checkout@v4
 
