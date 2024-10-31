@@ -96,7 +96,13 @@ configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-aut
         publications {
             mavenJava(MavenPublication) {
                 groupId = 'one.jpro.platform'
-                artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
+
+                if (project.path.startsWith(":internal")) {
+                    artifactId = "jpro-${isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"}"
+                } else {
+                    artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
+                }
+
                 version = JPRO_PLATFORM_VERSION
 
                 // Ensure only one component is included in the publication
