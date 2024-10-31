@@ -1,4 +1,4 @@
-### 0.4.3 (TBA)
+### 0.4.3 (October 31, 2024)
 
 #### Improvements
 * Configure publishing of the all `JPro Platform` modules to the Maven Central repository.

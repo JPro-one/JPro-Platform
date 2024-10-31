@@ -2,8 +2,8 @@ name: CI Release
 
 on:
   release:
-    types: [published]    # Triggers when a release is published
-  workflow_dispatch:      # Allows manual triggering of the workflow
+    types: [published]
+  workflow_dispatch:
 
 env:
   SANDEC_ARTIFACTORY_USERNAME: ${{secrets.SANDEC_ARTIFACTORY_USERNAME}}
