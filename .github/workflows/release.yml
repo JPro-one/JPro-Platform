@@ -31,6 +31,11 @@ jobs:
           distribution: 'temurin'
           java-version: 21
 
+      - name: Print Release Version
+        run: |
+          RELEASE_VERSION=$(grep '^JPRO_PLATFORM_VERSION' gradle.properties | cut -d'=' -f2)
+          echo "Release Version: $RELEASE_VERSION"
+
       - name: Publish to Sandec Public Repository
         run: |
           ./gradlew clean publish
