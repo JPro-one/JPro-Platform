@@ -149,14 +149,6 @@ public class MediaPlayerTests {
         stage.toFront();
     }
 
-    @AfterEach
-    void tearDown() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer = null;
-        }
-    }
-
     @Test
     @Order(1)
     void media_player_controls(FxRobot robot) throws TimeoutException {
@@ -460,7 +452,7 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(0.0);
         log.debug("Checks passed");
 
-        robot.clickOn(playButton);
+        clickPlayButton(robot);
 
         log.debug("Waiting for media player to play for additional 5 seconds...");
         final Duration currentTime1 = mediaPlayer.getCurrentTime();
@@ -473,7 +465,7 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(1.0);
         log.debug("Checks passed");
 
-        robot.clickOn(pauseButton);
+        clickPauseButton(robot);
 
         log.debug("Check initial playback rate and current rate in paused state...");
         assertThat(mediaPlayer.getRate()).isEqualTo(1.0);
@@ -483,7 +475,7 @@ public class MediaPlayerTests {
         log.debug("Set playback rate to 4.0");
         mediaPlayer.setRate(4.0);
 
-        robot.clickOn(playButton);
+        clickPlayButton(robot);
 
         log.debug("Waiting for media player to play for additional 20 seconds...");
         final Duration currentTime2 = mediaPlayer.getCurrentTime();
@@ -519,11 +511,11 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(4.0);
         log.debug("Checks passed");
 
-        robot.clickOn(pauseButton);
+        clickPauseButton(robot);
         TimeUnit.SECONDS.sleep(1);
         log.debug("Set playback rate to 10.0");
         mediaPlayer.setRate(10.0); // more than 8.0, is clamp to 8.0
-        robot.clickOn(playButton);
+        clickPlayButton(robot);
 
         log.debug("Waiting for media player to play for additional 30 seconds...");
         final Duration currentTime5 = mediaPlayer.getCurrentTime();
@@ -537,7 +529,7 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(10.0);
         log.debug("Checks passed");
 
-        robot.clickOn(stopButton);
+        clickStopButton(robot);
 
         log.debug("Check playback rate and current rate in stopped state...");
         assertThat(mediaPlayer.getRate()).isEqualTo(10.0);
@@ -565,6 +557,18 @@ public class MediaPlayerTests {
         WaitForAsyncUtils.waitForFxEvents();
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
+        assertThat(stopButton.isDisable()).isFalse();
+        log.debug("Checks passed");
+    }
+
+    private void clickPauseButton(FxRobot robot) throws TimeoutException {
+        log.debug("Click on pause button");
+        robot.clickOn(pauseButton);
+        waitForStatus(Status.PAUSED);
+        log.debug("Run additional checks...");
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(playButton.isDisable()).isFalse();
+        assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isFalse();
         log.debug("Checks passed");
     }
