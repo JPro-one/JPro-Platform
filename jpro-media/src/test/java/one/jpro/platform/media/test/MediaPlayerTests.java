@@ -18,10 +18,7 @@ import javafx.util.Duration;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.player.MediaPlayer;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,6 +147,14 @@ public class MediaPlayerTests {
         stage.setScene(scene);
         stage.show();
         stage.toFront();
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer = null;
+        }
     }
 
     @Test
