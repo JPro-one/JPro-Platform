@@ -47,6 +47,9 @@ configure(subprojects.findAll { it.name != 'example' }) {
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
 
         testImplementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
+        testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"
+        testImplementation "one.jpro.platform.jpms:testfx-core:$TESTFX_VERSION"
+        testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
         testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
         testImplementation "org.mockito:mockito-junit-jupiter:$MOCKITO_VERSION"
         testImplementation "org.hamcrest:hamcrest:$HAMCREST_VERSION"
@@ -79,12 +82,11 @@ configure(subprojects.findAll { it.name != 'example' }) {
     }
 }
 
-configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-auth:routing"), project("jpro-file"),
+configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpro-file"),
            project("jpro-image-manager"), project("jpro-mail"), project("jpro-mdfx"), project("jpro-media"),
-           project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"),
-           project("jpro-html-scrollpane"), project("freeze-detector"), project("jpro-routing:core"),
-           project("jpro-routing:dev"), project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
-           project("internal:openlink"), project("internal:util")]) {
+           project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"), project("jpro-utils"),
+           project("jpro-html-scrollpane"), project("jpro-routing:core"), project("jpro-routing:dev"),
+           project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube")]) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
     apply plugin: 'tech.yanand.maven-central-publish'
@@ -96,13 +98,7 @@ configure([project("tree-showing"), project("jpro-auth:core"), project("jpro-aut
         publications {
             mavenJava(MavenPublication) {
                 groupId = 'one.jpro.platform'
-
-                if (project.path.startsWith(":internal")) {
-                    artifactId = "jpro-${isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"}"
-                } else {
-                    artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
-                }
-
+                artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
                 version = JPRO_PLATFORM_VERSION
 
                 // Ensure only one component is included in the publication

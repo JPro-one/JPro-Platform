@@ -1,5 +1,9 @@
 ### 0.4.4-SNAPSHOT (TBD)
 
+#### Features
+* Merge the content of `internal-openlink`, `internal-util`, `freeze-detector` and `tree-showing` modules under the
+`jpro-utils` module. This module will offer essential tools to enhance the development of **JPro/JavaFX** applications.
+
 ----------------------
 
 ### 0.4.3 (October 31, 2024)

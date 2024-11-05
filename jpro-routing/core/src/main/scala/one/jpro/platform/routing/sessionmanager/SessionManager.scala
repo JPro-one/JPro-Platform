@@ -9,7 +9,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
-import one.jpro.platform.internal.openlink.OpenLink
+import one.jpro.platform.utils.OpenLink
 
 import java.net.URI
 import java.util.function.Consumer

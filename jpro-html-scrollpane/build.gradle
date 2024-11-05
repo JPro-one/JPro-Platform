@@ -1,5 +1,5 @@
 dependencies {
-  implementation project(":tree-showing")
+  api project(":jpro-utils")
   implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
   implementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
   implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
@@ -9,10 +9,8 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       pom {
-        name = 'JPro Auth Core'
-        description = 'A module for adding advanced authentication and authorization to JPro/JavaFX ' +
-                'applications, supporting OAuth 2.0, OpenID Connect, integration with multiple identity ' +
-                'providers and asynchronous operations for enhanced performance.'
+        name = 'JPro HTML Scrollpane Skin'
+        description = 'A module containing a ScrollPane skin for HTML content'
       }
     }
   }

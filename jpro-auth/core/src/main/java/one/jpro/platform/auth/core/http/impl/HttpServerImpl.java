@@ -6,7 +6,7 @@ import one.jpro.platform.auth.core.http.HttpOptions;
 import one.jpro.platform.auth.core.http.HttpServer;
 import one.jpro.platform.auth.core.http.HttpServerException;
 import one.jpro.platform.auth.core.http.HttpStatus;
-import one.jpro.platform.internal.openlink.OpenLink;
+import one.jpro.platform.utils.OpenLink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
