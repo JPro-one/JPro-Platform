@@ -1,6 +1,6 @@
 dependencies {
     api project(':jpro-routing:core')
-    api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    api "one.jpro:jpro-webapi:$JPRO_VERSION"
     api "SANDEC:jnodes:$JNODES_VERSION"
     api "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
     api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"

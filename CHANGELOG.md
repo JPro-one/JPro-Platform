@@ -1,7 +1,7 @@
 ### 0.4.4-SNAPSHOT (TBD)
 
 #### Improvements
-* Updated **JPro** to version `2024.4.0`.
+* Updated **JPro** to version `2024.4.1`.
 
 ----------------------
 

@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     implementation "org.json:json:$JSON_VERSION"
