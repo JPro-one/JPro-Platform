@@ -1,7 +1,8 @@
-### 0.4.4-SNAPSHOT (TBD)
+### 0.4.4 (November 8, 2024)
 
 #### Improvements
-* Updated **JPro** to version `2024.4.1`.
+* Updated **JPro** to version `2024.4.1`. Starting with this release `jpro-webapi` module is pulled from Maven Central
+Repository.
 
 ----------------------
 
