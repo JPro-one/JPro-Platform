@@ -3,6 +3,7 @@ package one.jpro.platform.file.picker;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -16,12 +17,9 @@ import java.util.function.Function;
  */
 abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePicker {
 
-    /**
-     * {@inheritDoc}
-     */
     BaseFileSavePicker(Node node) {
         super(node);
-        node.setOnMouseClicked(mouseEvent -> showDialog());
+        node.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> showDialog());
     }
 
     abstract void showDialog();
