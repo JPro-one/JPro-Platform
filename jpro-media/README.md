@@ -37,7 +37,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'one.jpro.platform:jpro-media:0.4.4-SNAPSHOT'
+    implementation 'one.jpro.platform:jpro-media:0.4.5-SNAPSHOT'
 
     // use compileOnly configuration when running/deploying with JPro, 
     // since the platform specific libraries are no more needed
@@ -72,7 +72,7 @@ the `release` zipped file. Even the `jpro:run` task is faster since these files 
     <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-media</artifactId>
-        <version>0.4.4-SNAPSHOT</version>
+        <version>0.4.5-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>org.bytedeco</groupId>

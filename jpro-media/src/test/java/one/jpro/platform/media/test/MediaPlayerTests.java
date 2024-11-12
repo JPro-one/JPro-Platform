@@ -18,10 +18,7 @@ import javafx.util.Duration;
 import one.jpro.platform.media.MediaSource;
 import one.jpro.platform.media.MediaView;
 import one.jpro.platform.media.player.MediaPlayer;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -455,7 +452,7 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(0.0);
         log.debug("Checks passed");
 
-        robot.clickOn(playButton);
+        clickPlayButton(robot);
 
         log.debug("Waiting for media player to play for additional 5 seconds...");
         final Duration currentTime1 = mediaPlayer.getCurrentTime();
@@ -468,7 +465,7 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(1.0);
         log.debug("Checks passed");
 
-        robot.clickOn(pauseButton);
+        clickPauseButton(robot);
 
         log.debug("Check initial playback rate and current rate in paused state...");
         assertThat(mediaPlayer.getRate()).isEqualTo(1.0);
@@ -478,7 +475,7 @@ public class MediaPlayerTests {
         log.debug("Set playback rate to 4.0");
         mediaPlayer.setRate(4.0);
 
-        robot.clickOn(playButton);
+        clickPlayButton(robot);
 
         log.debug("Waiting for media player to play for additional 20 seconds...");
         final Duration currentTime2 = mediaPlayer.getCurrentTime();
@@ -514,11 +511,11 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(4.0);
         log.debug("Checks passed");
 
-        robot.clickOn(pauseButton);
+        clickPauseButton(robot);
         TimeUnit.SECONDS.sleep(1);
         log.debug("Set playback rate to 10.0");
         mediaPlayer.setRate(10.0); // more than 8.0, is clamp to 8.0
-        robot.clickOn(playButton);
+        clickPlayButton(robot);
 
         log.debug("Waiting for media player to play for additional 30 seconds...");
         final Duration currentTime5 = mediaPlayer.getCurrentTime();
@@ -532,7 +529,7 @@ public class MediaPlayerTests {
         assertThat(mediaPlayer.getCurrentRate()).isEqualTo(10.0);
         log.debug("Checks passed");
 
-        robot.clickOn(stopButton);
+        clickStopButton(robot);
 
         log.debug("Check playback rate and current rate in stopped state...");
         assertThat(mediaPlayer.getRate()).isEqualTo(10.0);
@@ -560,6 +557,18 @@ public class MediaPlayerTests {
         WaitForAsyncUtils.waitForFxEvents();
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
+        assertThat(stopButton.isDisable()).isFalse();
+        log.debug("Checks passed");
+    }
+
+    private void clickPauseButton(FxRobot robot) throws TimeoutException {
+        log.debug("Click on pause button");
+        robot.clickOn(pauseButton);
+        waitForStatus(Status.PAUSED);
+        log.debug("Run additional checks...");
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(playButton.isDisable()).isFalse();
+        assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isFalse();
         log.debug("Checks passed");
     }

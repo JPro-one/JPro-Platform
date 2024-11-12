@@ -1,6 +1,6 @@
 dependencies {
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "org.json:json:$JSON_VERSION"
 }
 

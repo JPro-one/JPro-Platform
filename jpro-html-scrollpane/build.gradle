@@ -1,6 +1,6 @@
 dependencies {
   api project(":jpro-utils")
-  implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+  implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
   implementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
   implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
 }
