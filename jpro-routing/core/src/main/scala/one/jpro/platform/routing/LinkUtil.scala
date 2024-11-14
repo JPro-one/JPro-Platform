@@ -12,7 +12,7 @@ import org.slf4j.{Logger, LoggerFactory}
 object LinkUtil {
 
   private var openLinkExternalFun: String => Unit = { link =>
-    import one.jpro.platform.internal.openlink.OpenLink
+    import one.jpro.platform.utils.OpenLink
     OpenLink.openURL(link)
   }
   def setOpenLinkExternalFun(x: String => Unit): Unit = {

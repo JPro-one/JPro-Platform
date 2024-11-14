@@ -34,8 +34,8 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 
 configure([project(':jpro-routing:core')]) {
     dependencies {
+        api project(":jpro-utils")
         api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
-        api project(":internal:openlink")
     }
 
     publishing {

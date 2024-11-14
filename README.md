@@ -327,6 +327,27 @@ dependencies {
 }
 ```
 
+## JPro Utils
+This library offers essential tools for various functionalities to enhance the development of **JPro/JavaFX** applications.
+
+#### Maven configuration
+```xml
+<dependency>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-utils</artifactId>
+    <version>0.4.5-SNAPSHOT</version>
+  </dependency>
+</dependency>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation 'one.jpro.platform:jpro-utils:0.4.5-SNAPSHOT'
+}
+```
+
 ## JPro WebRTC
 This library provides an API to use WebRTC in **JPro/JavaFX** applications. This technology allows for the direct 
 exchange of audio, video, and data between web browsers or devices, facilitating features like video conferencing,
@@ -413,72 +434,6 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
 ```groovy
 dependencies {
     implementation("one.jpro.platform:jpro-html-scrollpane:0.4.5-SNAPSHOT")
-}
-```
-
-## TreeShowing
-#### Motivation
-In JavaFX, when a node could be collected - it's often prevented by ongoing animation or background tasks.
-For this reason, it's often necessary to stop the animation or background task, 
-when a node is no longer used.
-Internally in JavaFX, the property "treeShowing" is used, to check whether a Node is still used.
-But as an end-user, this property is not accessible in their application.
-With this project, we want to make the property available to the common JavaFX Developer - allowing them to write
-bug-free and leak-free applications.
-
-#### Maven configuration
-```xml
-<dependency>
-  <groupId>one.jpro.platform</groupId>
-  <artifactId>tree-showing</artifactId>
-  <version>0.4.5-SNAPSHOT</version>
-</dependency>
-```
-
-#### Gradle configuration
-```groovy
-dependencies {
-    implementation 'one.jpro.platform:tree-showing:0.4.5-SNAPSHOT'
-}
-```
-
-#### Typical Usage:
-```
-Timeline myTimeline = new Timeline();
-myTimeline.setCycleCount(Timeline.INDEFINITE);
-Node node = <MyNode>
-treeShowing = TreeShowing.treeShowing(node);
-treeShowing.addListener((p,o,showing) -> {
-  if(showing) {
-    myTimeline.start();
-  } else {
-    myTimeline.stop();
-  }
-});
-if(treeShowing.get()) {
-  myTimeline.start();
-}
-```
-
-## Freeze Detector
-This library allows you to track whether the JavaFX Application Thread is frozen for a given time.
-This can be useful for debugging purposes, detecting deadlocks or other optimize performance.
-
-#### Maven configuration
-```xml
-<dependency>
-  <dependency>
-    <groupId>one.jpro.platform</groupId>
-    <artifactId>freeze-detector</artifactId>
-    <version>0.4.5-SNAPSHOT</version>
-  </dependency>
-</dependency>
-```
-
-#### Gradle configuration
-```groovy
-dependencies {
-    implementation 'one.jpro.platform:freeze-detector:0.4.5-SNAPSHOT'
 }
 ```
 

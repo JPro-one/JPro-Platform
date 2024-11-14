@@ -16,7 +16,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
-import one.jpro.platform.treeshowing.TreeShowing;
+import one.jpro.platform.utils.TreeShowing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +25,74 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The {@code HTMLScrollPaneSkin} class provides a custom skin for the JavaFX {@link ScrollPane}
+ * control, enabling the integration of HTML content within the scroll pane. This skin leverages
+ * the {@link HTMLView} component to render HTML content and manages resource cleanup to prevent
+ * memory leaks by monitoring the visibility of the associated {@code ScrollPane} using the
+ * {@link TreeShowing} utility.
+ *
+ * <p>
+ * In JavaFX applications, embedding HTML content within UI components like {@code ScrollPane}
+ * can lead to resource retention issues if animations or background tasks continue running
+ * after the node is no longer visible. The {@code HTMLScrollPaneSkin} addresses this by:
+ * </p>
+ *
+ * <ul>
+ *   <li>Embedding an {@code HTMLView} within the scroll pane to display HTML content.</li>
+ *   <li>Monitoring the {@code ScrollPane}'s visibility using {@code TreeShowing} to manage
+ *       animations and background tasks effectively.</li>
+ *   <li>Implementing workarounds for internal JavaFX behaviors to ensure proper resource cleanup.</li>
+ * </ul>
+ *
+ * <p>
+ * By using {@code HTMLScrollPaneSkin}, developers can seamlessly integrate HTML content into
+ * scrollable regions of their JavaFX applications while maintaining optimal memory and resource
+ * management.
+ * </p>
+ *
+ * <p>
+ * <strong>Example Usage:</strong>
+ * </p>
+ *
+ * <pre>{@code
+ * import javafx.application.Application;
+ * import javafx.scene.Scene;
+ * import javafx.scene.control.ScrollPane;
+ * import javafx.stage.Stage;
+ *
+ * public class HTMLScrollPaneExample extends Application {
+ *     @Override
+ *     public void start(Stage primaryStage) {
+ *         ScrollPane scrollPane = new ScrollPane();
+ *
+ *         // Apply the custom HTMLScrollPaneSkin
+ *         scrollPane.setSkin(new HTMLScrollPaneSkin(scrollPane, "additional-attributes"));
+ *
+ *         Scene scene = new Scene(scrollPane, 800, 600);
+ *         primaryStage.setScene(scene);
+ *         primaryStage.setTitle("HTMLScrollPaneSkin Example");
+ *         primaryStage.show();
+ *     }
+ *
+ *     public static void main(String[] args) {
+ *         launch(args);
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p>
+ * In this example, a {@code ScrollPane} is created and assigned the {@code HTMLScrollPaneSkin}
+ * with additional attributes. The skin manages the embedding of HTML content and ensures that
+ * resources are properly cleaned up when the scroll pane is no longer part of the scene graph.
+ * </p>
+ *
+ * @see ScrollPane
+ * @see HTMLView
+ * @see TreeShowing
+ *
+ * @author Florian Kirmaier
+ */
 public class HTMLScrollPaneSkin extends SkinBase<ScrollPane> {
 
     private static final Logger logger = LoggerFactory.getLogger(HTMLScrollPaneSkin.class);

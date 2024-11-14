@@ -8,6 +8,10 @@
 * Updated **JPro** to version `2024.4.1`. Starting with this release `jpro-webapi` module is pulled from Maven Central
 Repository.
 
+#### Features
+* Merge the content of `internal-openlink`, `internal-util`, `freeze-detector` and `tree-showing` modules under the
+`jpro-utils` module. This module will offer essential tools to enhance the development of **JPro/JavaFX** applications.
+
 ----------------------
 
 ### 0.4.3 (October 31, 2024)
