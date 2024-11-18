@@ -25,13 +25,15 @@ development and deployment.
 significant savings in development time, resources, and costs.
 ____
 
-To use them, you need the following repository:
+All release builds are now available on [Maven Central](https://central.sonatype.com/search?namespace=one.jpro.platform).
+
+To use the snapshot builds, you need the following repository:
 - For Maven:
 
 ```xml
 <repositories>
   <repository>
-    <id>jpro - sandec repository</id>
+    <id>jpro-sandec-repository</id>
     <url>https://sandec.jfrog.io/artifactory/repo/</url>
   </repository>
 </repositories>
