@@ -11,7 +11,7 @@ dependencies {
 }
 
 javafx {
-    version = "$JAVAFX_VERSION"
+    version = "$JAVAFX_EXAMPLES_VERSION"
     modules = ['javafx.controls']
 }
 
