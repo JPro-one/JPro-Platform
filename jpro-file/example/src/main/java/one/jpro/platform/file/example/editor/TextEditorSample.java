@@ -60,7 +60,9 @@ public class TextEditorSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextEditorSample.class);
 
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
-    private static final ExtensionFilter TEXT_EXTENSION_FILTER = ExtensionFilter.of("Text files", ".txt", ".srt", ".md", ".csv");
+    private static final ExtensionFilter SUBTITLE_EXTENSION_FILTER = ExtensionFilter.of("Subtitle files", ".srt");
+    private static final ExtensionFilter MARKDOWN_EXTENSION_FILTER = ExtensionFilter.of("Markdown files", ".md");
+    private static final ExtensionFilter CSV_EXTENSION_FILTER = ExtensionFilter.of("CSV files", ".csv");
     private final ObjectProperty<File> lastOpenedFile = new SimpleObjectProperty<>(this, "lastOpenedFile");
 
     @Override
@@ -77,7 +79,7 @@ public class TextEditorSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-        Label dropLabel = new Label("Drop " + TEXT_EXTENSION_FILTER.description().toLowerCase() + " here!");
+        Label dropLabel = new Label("Drop " + SUBTITLE_EXTENSION_FILTER.description().toLowerCase() + " here!");
         StackPane dropPane = new StackPane(dropLabel);
         dropPane.getStyleClass().add("drop-pane");
 
@@ -85,7 +87,7 @@ public class TextEditorSample extends Application {
         StackPane contentPane = new StackPane(textArea, dropPane);
 
         FileDropper fileDropper = FileDropper.create(contentPane);
-        fileDropper.setExtensionFilter(TEXT_EXTENSION_FILTER);
+        fileDropper.setExtensionFilter(SUBTITLE_EXTENSION_FILTER);
         fileDropper.setOnDragEntered(event -> {
             dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, true);
             contentPane.getChildren().setAll(textArea, dropPane);
@@ -106,7 +108,8 @@ public class TextEditorSample extends Application {
 
         Button openButton = new Button("Open", new FontIcon(Material2AL.FOLDER_OPEN));
         FileOpenPicker fileOpenPicker = FileOpenPicker.create(openButton);
-        fileOpenPicker.setSelectedExtensionFilter(TEXT_EXTENSION_FILTER);
+        fileOpenPicker.getExtensionFilters().addAll(SUBTITLE_EXTENSION_FILTER,
+                MARKDOWN_EXTENSION_FILTER, CSV_EXTENSION_FILTER);
         fileOpenPicker.setOnFilesSelected(fileSources -> {
             openFile(fileSources, textArea);
             contentPane.getChildren().setAll(textArea);
@@ -134,7 +137,8 @@ public class TextEditorSample extends Application {
         fileSavePicker.initialFileNameProperty().bind(lastOpenedFile.map(file ->
                 FilenameUtils.getName(file.getName())).orElse("subtitle"));
         fileSavePicker.initialDirectoryProperty().bind(lastOpenedFile.map(File::getParentFile));
-        fileSavePicker.setSelectedExtensionFilter(TEXT_EXTENSION_FILTER);
+        fileSavePicker.getExtensionFilters().addAll(SUBTITLE_EXTENSION_FILTER,
+                MARKDOWN_EXTENSION_FILTER, CSV_EXTENSION_FILTER);
         fileSavePicker.setOnFileSelected(file -> saveToFile(textArea).apply(file));
 
         BorderPane rootPane = new BorderPane(contentPane);
