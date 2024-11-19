@@ -72,6 +72,15 @@ abstract class BaseFilePicker implements FilePicker {
         selectedExtensionFilterProperty().setValue(filter);
     }
 
+    final ExtensionFilter findSelectedFilter() {
+        ExtensionFilter selectedFilter = getSelectedExtensionFilter();
+        if (selectedFilter == null || !extensionFilters.contains(selectedFilter)) {
+            return extensionFilters.isEmpty() ? null : extensionFilters.get(0);
+        } else {
+            return selectedFilter;
+        }
+    }
+
     final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
         fileChooser.selectedExtensionFilterProperty()
                 .addListener(new WeakChangeListener<>(getNativeSelectedExtensionFilterChangeListener()));
