@@ -1,16 +1,13 @@
 package one.jpro.platform.file.picker;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import one.jpro.platform.file.ExtensionFilter;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -25,30 +22,22 @@ import java.util.function.Function;
  */
 public class NativeFileSavePicker extends BaseFileSavePicker {
 
-    private final FileChooser fileChooser = new FileChooser();
-    private final ListChangeListener<ExtensionFilter> extensionFiltersListChangeListener = change -> {
-        while (change.next()) {
-            if (change.wasAdded()) {
-                for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
-                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-                            extensionFilter.description(), extensionFilter.extensions().stream()
-                            .map(ext -> "*" + ext).toList()));
-                }
-            } else if (change.wasRemoved()) {
-                for (ExtensionFilter extensionFilter : change.getRemoved()) {
-                    fileChooser.getExtensionFilters().removeIf(filter ->
-                            filter.getDescription().equals(extensionFilter.description()));
-                }
-            }
-        }
-    };
+    private final FileChooser fileChooser;
 
     public NativeFileSavePicker(Node node) {
         super(node);
 
+        // Initialize the FileChooser
+        fileChooser = new FileChooser();
+
+        // Initializes synchronization between the FileChooser's selectedExtensionFilterProperty
+        // and the FilePicker's selectedExtensionFilter property.
+        synchronizeSelectedExtensionFilter(fileChooser);
+
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(new WeakListChangeListener<>(extensionFiltersListChangeListener));
+        getExtensionFilters().addListener(
+                new WeakListChangeListener<>(getNativeExtensionFilterListChangeListener(fileChooser)));
     }
 
     @Override
@@ -88,43 +77,6 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
     @Override
     public final ObjectProperty<File> initialDirectoryProperty() {
         return fileChooser.initialDirectoryProperty();
-    }
-
-    @Override
-    public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
-        if (selectedExtensionFilter == null) {
-            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {
-
-                @Override
-                protected void invalidated() {
-                    final ExtensionFilter selectedExtensionFilter = get();
-                    if (selectedExtensionFilter != null) {
-                        // check if the extension filter is already added to the file chooser
-                        final var optionalExtensionFilter = fileChooser.getExtensionFilters().stream()
-                                .filter(extensionFilter -> extensionFilter.getDescription()
-                                        .equals(selectedExtensionFilter.description()))
-                                .findFirst();
-                        if (optionalExtensionFilter.isPresent()) {
-                            fileChooser.setSelectedExtensionFilter(optionalExtensionFilter.get());
-                        } else {
-                            // add the extension filter which will automatically add the extension
-                            // filter to the file chooser due to the registered listener
-                            getExtensionFilters().add(selectedExtensionFilter);
-
-                            // Retrieve the extension filter from the file chooser and set it as
-                            // the selected extension filter
-                            fileChooser.getExtensionFilters().stream()
-                                    .filter(extensionFilter -> extensionFilter.getDescription()
-                                            .equals(selectedExtensionFilter.description()))
-                                    .findFirst().ifPresent(fileChooser::setSelectedExtensionFilter);
-                        }
-                    } else {
-                        fileChooser.setSelectedExtensionFilter(null);
-                    }
-                }
-            };
-        }
-        return selectedExtensionFilter;
     }
 
     @Override
