@@ -118,14 +118,6 @@ public class WebFileSavePicker extends BaseFileSavePicker {
     }
 
     @Override
-    public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
-        if (selectedExtensionFilter == null) {
-            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter");
-        }
-        return selectedExtensionFilter;
-    }
-
-    @Override
     final void showDialog() {
         final String fileName = getInitialFileName() == null ? "filename" : getInitialFileName();
         final ExtensionFilter extensionFilter = findSelectedFilter();
