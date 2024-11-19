@@ -55,6 +55,10 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
     public NativeFileOpenPicker(Node node) {
         super(node);
 
+        // Initializes synchronization between the FileChooser's selectedExtensionFilterProperty
+        // and the FilePicker's selectedExtensionFilter property.
+        synchronizeSelectedExtensionFilter(fileChooser);
+
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
         getExtensionFilters().addListener(new WeakListChangeListener<>(extensionFiltersListChangeListener));

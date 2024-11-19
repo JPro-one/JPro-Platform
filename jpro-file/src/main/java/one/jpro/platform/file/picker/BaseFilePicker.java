@@ -2,9 +2,12 @@ package one.jpro.platform.file.picker;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.stage.FileChooser;
 import one.jpro.platform.file.ExtensionFilter;
 
 import java.util.Objects;
@@ -17,6 +20,10 @@ import java.util.Objects;
 abstract class BaseFilePicker implements FilePicker {
 
     private final Node node;
+
+    // Flags to prevent infinite synchronization loops
+    private boolean updatingFromFileChooser = false;
+    private boolean updatingFromProperty = false;
 
     /**
      * Constructs a new instance with the specified Node.
@@ -63,5 +70,59 @@ abstract class BaseFilePicker implements FilePicker {
     @Override
     public final void setSelectedExtensionFilter(final ExtensionFilter filter) {
         selectedExtensionFilterProperty().setValue(filter);
+    }
+
+    final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
+        fileChooser.selectedExtensionFilterProperty()
+                .addListener(new WeakChangeListener<>(getNativeSelectedExtensionFilterChangeListener()));
+        selectedExtensionFilterProperty()
+                .addListener(new WeakChangeListener<>(getSelectedExtensionFilterChangeListener(fileChooser)));
+    }
+
+    private ChangeListener<FileChooser.ExtensionFilter> getNativeSelectedExtensionFilterChangeListener() {
+        return (observable, oldFilter, newFilter) -> {
+            if (updatingFromProperty) {
+                return;
+            }
+            updatingFromFileChooser = true;
+            try {
+                ExtensionFilter extensionFilter = null;
+                if (newFilter != null) {
+                    for (ExtensionFilter ef : extensionFilters) {
+                        if (newFilter.getDescription().equals(ef.description())) {
+                            extensionFilter = ef;
+                            break;
+                        }
+                    }
+                }
+                setSelectedExtensionFilter(extensionFilter);
+            } finally {
+                updatingFromFileChooser = false;
+            }
+        };
+    }
+
+    private ChangeListener<ExtensionFilter> getSelectedExtensionFilterChangeListener(FileChooser fileChooser) {
+        return (observable, oldFilter, newFilter) -> {
+            if (updatingFromFileChooser) {
+                return;
+            }
+
+            updatingFromProperty = true;
+            try {
+                FileChooser.ExtensionFilter extensionFilter = null;
+                if (newFilter != null) {
+                    for (FileChooser.ExtensionFilter ef : fileChooser.getExtensionFilters()) {
+                        if (newFilter.description().equals(ef.getDescription())) {
+                            extensionFilter = ef;
+                            break;
+                        }
+                    }
+                }
+                fileChooser.setSelectedExtensionFilter(extensionFilter);
+            } finally {
+                updatingFromProperty = false;
+            }
+        };
     }
 }
