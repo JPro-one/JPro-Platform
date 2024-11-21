@@ -4,6 +4,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import one.jpro.platform.file.util.NodeUtils;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +19,7 @@ import java.util.function.Function;
  * @see WebFileSavePicker
  *
  * @author Besmir Beqiri
+ * @author Indrit Beqiri
  */
 abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePicker {
 
@@ -31,7 +33,7 @@ abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePick
      */
     BaseFileSavePicker(Node node) {
         super(node);
-        node.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> showDialog());
+        NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, mouseEvent -> showDialog());
     }
 
     /**

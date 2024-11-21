@@ -12,6 +12,7 @@ import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.event.DataTransfer;
 import one.jpro.platform.file.event.FileDragEvent;
+import one.jpro.platform.file.util.NodeUtils;
 
 import java.io.File;
 import java.util.List;
@@ -23,13 +24,14 @@ import java.util.function.Consumer;
  * specializes it for selecting files from the native file system.
  *
  * @author Besmir Beqiri
+ * @author Indrit Beqiri
  */
 public class NativeFileDropper extends BaseFileDropper {
 
     public NativeFileDropper(Node node) {
         super(node);
 
-        node.addEventHandler(DragEvent.DRAG_OVER, dragEvent -> {
+        NodeUtils.addEventHandler(node, DragEvent.DRAG_OVER, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 List<File> files = dragEvent.getDragboard().getFiles();
                 if (hasSupportedExtension(files)) {
@@ -42,7 +44,7 @@ public class NativeFileDropper extends BaseFileDropper {
             }
         });
 
-        node.addEventHandler(DragEvent.DRAG_ENTERED, dragEvent -> {
+        NodeUtils.addEventHandler(node, DragEvent.DRAG_ENTERED, dragEvent -> {
             FileDragEvent fileDragEvent = new FileDragEvent(NativeFileDropper.this,
                     getNode(), FileDragEvent.FILE_DRAG_ENTERED);
             if (dragEvent.getDragboard().hasFiles()) {
@@ -51,10 +53,12 @@ public class NativeFileDropper extends BaseFileDropper {
             }
             Event.fireEvent(NativeFileDropper.this, fileDragEvent);
         });
-        node.addEventHandler(DragEvent.DRAG_EXITED, dragEvent -> Event.fireEvent(NativeFileDropper.this,
-                new FileDragEvent(NativeFileDropper.this, getNode(), FileDragEvent.FILE_DRAG_EXITED)));
 
-        node.addEventHandler(DragEvent.DRAG_DROPPED, dragEvent -> {
+        NodeUtils.addEventHandler(node, DragEvent.DRAG_EXITED, dragEvent ->
+                Event.fireEvent(NativeFileDropper.this,
+                        new FileDragEvent(NativeFileDropper.this, getNode(), FileDragEvent.FILE_DRAG_EXITED)));
+
+        NodeUtils.addEventHandler(node, DragEvent.DRAG_DROPPED, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
                 List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
