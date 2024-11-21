@@ -12,6 +12,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
+import one.jpro.platform.file.util.NodeUtils;
 
 import java.io.File;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
  * the native file system.
  *
  * @author Besmir Beqiri
+ * @author Indrit Beqiri
  */
 public class NativeFileOpenPicker extends BaseFileOpenPicker {
 
@@ -50,7 +52,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
                 new WeakListChangeListener<>(getNativeExtensionFilterListChangeListener(fileChooser)));
 
         // Define the action that should be performed when the user clicks on the node.
-        node.addEventHandler(MouseEvent.MOUSE_CLICKED, actionEvent -> {
+        NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, actionEvent -> {
             Window window = node.getScene().getWindow();
             if (getSelectionMode() == SelectionMode.MULTIPLE) {
                 final List<File> files = fileChooser.showOpenMultipleDialog(window);
