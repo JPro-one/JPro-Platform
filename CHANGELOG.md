@@ -1,4 +1,4 @@
-### 0.4.5 (TBD)
+### 0.5.0 (November 25, 2024)
 
 #### Improvements
 * Synchronize selected extension filter for the native file choosers in the `jpro-file` module.
