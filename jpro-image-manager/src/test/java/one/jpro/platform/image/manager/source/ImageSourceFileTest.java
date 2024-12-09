@@ -36,6 +36,7 @@ public class ImageSourceFileTest {
         JSONObject json = new JSONObject();
         json.put("type", "ImageSourceFile");
         json.put("path", ImageUtils.escapeJson(testImageFile.getAbsolutePath()));
+        json.put("modified", testImageFile.lastModified());
 
         assertTrue(imageSource.toJSON().similar(json));
     }

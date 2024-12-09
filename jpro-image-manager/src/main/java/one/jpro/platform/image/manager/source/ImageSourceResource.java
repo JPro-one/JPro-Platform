@@ -73,6 +73,7 @@ public class ImageSourceResource implements ImageSource {
         try {
             URL resourceUrl = getClass().getResource(resourcePath);
             if (resourceUrl != null) {
+                // we don't access any stream here, so we don't need to close it
                 URLConnection conn = resourceUrl.openConnection();
                 json.put("modified", conn.getLastModified());
             }
