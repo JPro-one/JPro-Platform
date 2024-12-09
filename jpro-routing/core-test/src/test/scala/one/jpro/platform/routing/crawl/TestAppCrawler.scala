@@ -33,12 +33,10 @@ class TestAppCrawler {
 
   @Test
   def testCrawlApp(): Unit = {
-    def app = new RouteNode(null) {
-      setRoute(Route.empty()
+    def route = Route.empty()
         .and(Route.get("/", r => Response.view(new Page1)))
-        .and(Route.get("/page2", r => Response.view(new Page2))))
-    }
-    val result = AppCrawler.crawlApp("http://localhost", () => app)
+        .and(Route.get("/page2", r => Response.view(new Page2)))
+    val result = AppCrawler.crawlRoute("http://localhost", () => route)
 
     assert(result.pages.contains("/"), result.pages)
     assert(result.pages.contains("/page2"), result.pages)
@@ -48,17 +46,15 @@ class TestAppCrawler {
 
   @Test
   def testEmptyImage(): Unit = {
-    def app = new RouteNode(null) {
-      setRoute(Route.empty()
+    def route = Route.empty()
         .and(Route.get("/", r => Response.view(new View {
           override def title: String = ""
 
           override def description: String = ""
 
           override def content: all.Node = new ImageView(null: Image)
-        }))))
-    }
-    val result = AppCrawler.crawlApp("http://localhost", () => app)
+        })))
+    val result = AppCrawler.crawlRoute("http://localhost", () => route)
   }
 
   @Test
@@ -99,16 +95,19 @@ class TestAppCrawler {
   }
 
   @Test
-  def testImageInStyle (): Unit = inFX {
-    val view = new View {
+  def testImageInStyle (): Unit = {
+    def view = new View {
       override def title: String = ""
       override def description: String = ""
       val content: Node = new Region() {
         style = "-fx-background-image: url('/testfiles/test.jpg');"
       }
     }
-    val r = AppCrawler.crawlPage(view)
-    assert(r.pictures.nonEmpty)
+    val r = AppCrawler.crawlRoute("http://localhost", () =>
+      Route.empty().and(Route.get("/", r => Response.view(view)))
+    )
+    assert(r.pages.length == 1)
+    assert(r.reports.head.pictures.nonEmpty)
   }
 
   @Test
