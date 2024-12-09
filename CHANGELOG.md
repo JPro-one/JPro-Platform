@@ -10,6 +10,7 @@
 #### Bugfixes
 * Resolved an issue in the native implementation of `FileOpenPicker` and `FileSavePicker` within the `jpro-file` module
 that prevented the addition of duplicate event handlers to the provided node.
+* MDFX now properly handles escaped characters in the markdown text.
 
 ----------------------
 
@@ -54,7 +55,6 @@ extension.
 necessary, rather than during server creation.
 * Fixed exception thrown on Windows platform when using FileStorage class from `jpro-file` module to create temporary
 files.
-* MDFX now properly handles escaped characters in the markdown text.
 
 ----------------------
 
