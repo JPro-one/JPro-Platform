@@ -81,11 +81,10 @@ public class ImageDefinition implements JsonConvertible {
 
     /**
      * Computes and returns a hash string representation for this instance.
-     * Note: This method currently returns the default hashCode as a string, which might not guarantee uniqueness.
      *
      * @return A string representing the hash of this instance.
      */
     String getHashString() {
-        return Integer.toString(hashCode());
+        return ImageManager.computeImageDefinitionHash(this);
     }
 }
