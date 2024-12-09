@@ -1,5 +1,6 @@
 package one.jpro.platform.mdfx.impl;
 
+import com.vladsch.flexmark.util.sequence.Escaping;
 import one.jpro.platform.mdfx.MarkdownView;
 import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.ext.attributes.AttributeNode;
@@ -385,12 +386,12 @@ public class MDFXNodeHelper extends VBox {
         public void visit(com.vladsch.flexmark.ast.Text text) {
             visitor.visitChildren(text);
 
-            String wholeText = text.getChars().normalizeEOL();
+            String wholeText = Escaping.unescapeString(text.getChars().normalizeEOL());
 
             String[] textsSplit;
             if (nodePerWord) {
                 // split with " " but keep the " " in the array
-                textsSplit = text.getChars().normalizeEOL().split("(?<= )");
+                textsSplit = wholeText.split("(?<= )");
                 // Combine split texts, which only contain a space:
                 for (int i = 0; i <= textsSplit.length - 1; i += 1) {
                     if (textsSplit[i].equals(" ")) {
@@ -408,7 +409,7 @@ public class MDFXNodeHelper extends VBox {
                 }
             } else {
                 textsSplit = new String[1];
-                textsSplit[0] = text.getChars().normalizeEOL();
+                textsSplit[0] = wholeText;
             }
             final String[] textsSplitFinal = textsSplit;
 
