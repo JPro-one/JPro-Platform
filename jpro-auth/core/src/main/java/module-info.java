@@ -8,15 +8,17 @@ module one.jpro.platform.auth.core {
     requires transitive javafx.controls;
     requires transitive org.json;
     requires transitive org.slf4j;
+    requires transitive one.jpro.platform.utils;
 
     requires org.jetbrains.annotations;
     requires java.net.http;
     requires jpro.webapi;
     requires jwks.rsa;
     requires com.auth0.jwt;
-    requires one.jpro.platform.internal.openlink;
 
     opens one.jpro.platform.auth.core;
+    opens one.jpro.platform.auth.core.authentication;
+    opens one.jpro.platform.auth.core.basic;
 
     exports one.jpro.platform.auth.core;
     exports one.jpro.platform.auth.core.api;

@@ -24,9 +24,12 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
   if(webAPI != null) { // somtetimes webAPI is null, for example when crawling
     webAPI.addInstanceCloseListener(() => {
-      THIS.view.onClose()
-      THIS.view.setSessionManager(null)
-      markViewCollectable(THIS.view)
+      // if the session only has redirects, the view is null
+      if (THIS.view != null) {
+        THIS.view.onClose()
+        THIS.view.setSessionManager(null)
+        markViewCollectable(THIS.view)
+      }
     })
   }
 

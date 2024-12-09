@@ -1,12 +1,116 @@
-### 0.3.2-SNAPSHOT (TBD)
+### 0.5.1-SNAPSHOT (TBD)
 
+----------------------
+
+### 0.5.0 (November 25, 2024)
+
+#### Improvements
+* Synchronize selected extension filter for the native file choosers in the `jpro-file` module.
+
+#### Bugfixes
+* Resolved an issue in the native implementation of `FileOpenPicker` and `FileSavePicker` within the `jpro-file` module
+that prevented the addition of duplicate event handlers to the provided node.
+* MDFX now properly handles escaped characters in the markdown text.
+
+----------------------
+
+### 0.4.4 (November 8, 2024)
+
+#### Improvements
+* Updated **JPro** to version `2024.4.1`. Starting with this release `jpro-webapi` module is pulled from Maven Central
+Repository.
+
+#### Features
+* Merge the content of `internal-openlink`, `internal-util`, `freeze-detector` and `tree-showing` modules under the
+`jpro-utils` module. This module will offer essential tools to enhance the development of **JPro/JavaFX** applications.
+
+----------------------
+
+### 0.4.3 (October 31, 2024)
+
+#### Improvements
+* Configure publishing of the all `JPro Platform` modules to the Maven Central repository.
+
+----------------------
+
+### 0.4.2 (October 18, 2024)
+
+#### Improvements
+* Updated **JPro** to version `2024.3.3`.
+* Updated **SimpleFX** dependencies to version `3.2.37`.
+* Updated **JNodes** dependencies to version `0.8.3`.
+* Enable TestFX unit tests on the CI pipeline and use Monocle to enable the `headless` mode.
+* Integrate modularized versions of `TestFX` and `Monocle` into our testing infrastructure in alignment with the Java
+Platform Module System.
+* Integrate modularized versions of `eclipse-collections-api` and `eclipse-collections` libraries to the platform to
+produce JPMS-compliant modules.
+
+#### Features
+* Register an `extensionFilters` listener to the native (desktop) implementation FileSavePicker in the `jpro-file`
+module. The listener can be used to filter the files that are displayed in the file save picker dialog based on the file
+extension.
+
+#### Bugfixes
+* Fixed the binding of the port in the local server implementation inside the `jpro-core` module to occur only when
+necessary, rather than during server creation.
+* Fixed exception thrown on Windows platform when using FileStorage class from `jpro-file` module to create temporary
+files.
+
+----------------------
+
+### 0.4.1 (August 29, 2024)
+
+#### Features
+* Make the `jpro-auth-core` module JPMS-compliant.
+
+#### Improvements
+* Updated **JPro** to version `2024.3.2`.
+* Updated **JavaFX** dependencies to version `17.0.12`.
+* Updated **SimpleFX** dependencies to version `3.2.36`.
+
+----------------------
+
+### 0.4.0 (July 11, 2024)
+
+#### Features
+* Implemented and added `jpro-mail` module to the platform. This module provides an API to send emails from a 
+JavaFX/JPro application.
+
+#### Improvements
+* Updated **JPro** to version `2024.3.0`.
+* Updated **SimpleFX** dependencies to version `3.2.35`. The `SimpleFX` modules are in compliance with the Java 
+Platform Module System.
+* Updated **JMemoryBuddy** dependency to version `0.5.5`. This module is also now in compliance with the Java Platform
+Module System.
+* Updated **JNodes** dependencies to version `0.8.2`.
+* Added `popup` sample application to the examples list for the `jpro-routing-popup` module.
+
+#### Bugfixes
+* Export `jpro-routing-core` module from `jpro-routing-dev` module to make it available externally when only
+`jpro-routing-dev` is included in the project.
+* Fixed some dependency requirements in the `JPro Routing` modules.
+* Fixed the stylesheet path in the `jpro-routing-popup` module for the SimplePopup control.
+
+----------------------
+
+### 0.3.2 (June 12, 2024)
+
+#### Improvements
+* Improved error handling in the `jpro-sipjs` module.
+
+#### Bugfixes
+* Fixed URI normalization for local addresses ikn the `jpro-auth-core` module.
+* Fixed a NPE thrown if the session only has redirects in the `jpro-routing-core` module.
+* Routing refreshes no longer adds a new entry to the browser's history.
+* Fixed hangup button in the SipJS Demos. If an error happens, getting a screen, it is now logged.
+Screen sharing button "toggles" now it's state - making it possible to switch back to video.
 
 ----------------------
 
 ### 0.3.1 (May 14, 2024)
 
 #### Bugfixes
-* Fixed the retrival of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
+* Fixed the retrieval of the domain from the request in the Request class in the `jpro-routing-core` module. Now `domain`
 in the route is correctly matched with the request domain.
 * Fix the server url when `useLoopbackIpAddress` OAuth2 option is used.
 

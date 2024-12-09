@@ -1,6 +1,7 @@
 package one.jpro.platform.sipjs.api;
 
 import com.jpro.webapi.JSVariable;
+import com.jpro.webapi.PromiseJSVariable;
 import com.jpro.webapi.WebAPI;
 import one.jpro.platform.sipjs.SipJSUtil;
 import one.jpro.platform.sipjs.api.options.InviterOptions;
@@ -22,6 +23,7 @@ public class UserAgent {
     JSVariable jsRegistrator;
 
     JSVariable startPromise;
+    PromiseJSVariable registerPromise;
     UserAgentOptions options;
 
     Consumer<Invitation> onInvite;
@@ -46,13 +48,13 @@ public class UserAgent {
             var inventation = new Invitation(invite, webapi);
             onInvite.accept(inventation);
         });
-        webapi.executeScript(optionsVariable.getName() + ".delegate = { onInvite: " + onInviteJS.getName() + " };");
+        webapi.js().eval(optionsVariable.getName() + ".delegate = { onInvite: " + onInviteJS.getName() + " };");
 
-        jsUserAgent = webapi.executeScriptWithVariable("new SIP.UserAgent(" + optionsVariable.getName() + ");");
-        jsRegistrator = webapi.executeScriptWithVariable("new SIP.Registerer(" + jsUserAgent.getName() + ");");
+        jsUserAgent = webapi.js().eval("new SIP.UserAgent(" + optionsVariable.getName() + ");");
+        jsRegistrator = webapi.js().eval("new SIP.Registerer(" + jsUserAgent.getName() + ");");
 
-        startPromise = webapi.executeScriptWithVariable(jsUserAgent.getName() + ".start();");
-        webapi.executeScript(startPromise.getName() + ".then(() => { " + jsRegistrator.getName() + ".register(); });");
+        startPromise = webapi.js().eval(jsUserAgent.getName() + ".start();");
+        registerPromise = webapi.js().evalAsync(startPromise.getName() + ".then(() => { " + jsRegistrator.getName() + ".register(); });");
 
 
         //webapi.executeScript(jsUserAgent.getName() + ".onInvite.addListener(" + jsFun.getName() + ");");
@@ -66,9 +68,9 @@ public class UserAgent {
      */
     public CompletableFuture<Inviter> makeCall(String target, InviterOptions options) {
         return JSVariable.promiseToFuture(webapi, startPromise).thenApply((v) -> {
-            var jsTarget = webapi.executeScriptWithVariable("SIP.UserAgent.makeURI(\"" + target + "\");");
-            var jsInviter = webapi.executeScriptWithVariable("new SIP.Inviter(" + jsUserAgent.getName() + ", " + jsTarget.getName() + ");");
-            webapi.executeScript(jsInviter.getName() + ".invite(" + options.asJSVariable(webapi).getName() + ");");
+            var jsTarget = webapi.js().eval("SIP.UserAgent.makeURI(\"" + target + "\");");
+            var jsInviter = webapi.js().eval("new SIP.Inviter(" + jsUserAgent.getName() + ", " + jsTarget.getName() + ");");
+            webapi.js().eval(jsInviter.getName() + ".invite(" + options.asJSVariable(webapi).getName() + ");");
             return new Inviter(jsInviter, webapi);
         });
     }
@@ -79,6 +81,15 @@ public class UserAgent {
      */
     public void setOnInvite(Consumer<Invitation> onInvite) {
         this.onInvite = onInvite;
+    }
+
+    /**
+     * Gets the register promise.
+     * It might contains errors.
+     * @return
+     */
+    public PromiseJSVariable getRegisterPromise() {
+        return registerPromise;
     }
 
 }

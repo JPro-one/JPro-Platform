@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.crawl
 
-import de.sandec.jmemorybuddy.JMemoryBuddy
+import one.jpro.jmemorybuddy.JMemoryBuddy
 import javafx.stage.Stage
 import one.jpro.platform.routing.crawl.AppCrawler.CrawlReportApp
 import one.jpro.platform.routing.sessionmanager.SessionManagerDesktop

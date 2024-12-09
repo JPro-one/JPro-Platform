@@ -1,0 +1,28 @@
+dependencies {
+    implementation "jakarta.mail:jakarta.mail-api:$JAKARTA_MAIL_API_VERSION"
+    runtimeOnly "org.eclipse.angus:angus-mail:$ECLIPSE_ANGUS_MAIL_VERSION"
+    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
+    api "one.jpro.platform.jpms:eclipse-collections-api:$ECLIPSE_COLLECTIONS_VERSION"
+    implementation "one.jpro.platform.jpms:eclipse-collections:$ECLIPSE_COLLECTIONS_VERSION"
+    api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+}
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        version = true
+        author = true
+//        addStringOption('Xdoclint:none', '-quiet')
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Mail'
+                description = 'A module that provides platform-independent and protocol-independent API for sending emails.'
+            }
+        }
+    }
+}

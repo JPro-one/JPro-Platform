@@ -1,40 +1,42 @@
 * {
-    -color-shadow-default: #88888880;
+    SHADOW_COLOR_DEFAULT: #88888880;
 }
 
-
 .simple-popup-background {
-  -fx-background-color: #0000001c;
+    -fx-background-color: #0000001c;
 }
 
 .simple-popup-content {
-  -fx-background-color:white;
-  -fx-background-radius: 16;
-  -fx-effect: dropshadow(three-pass-box, -color-shadow-default, 16px, 0.5, 0, 2);
-  -fx-padding: 24;
-  -fx-spacing: 32;
-  -fx-min-width: 400;
-  -fx-min-height: 400;
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(three-pass-box, SHADOW_COLOR_DEFAULT, 16px, 0.5, 0, 2);
+    -fx-padding: 24;
+    -fx-spacing: 32;
+    -fx-min-width: 400;
+    -fx-min-height: 400;
 }
 
 .simple-popup-title {
-  -fx-font-size: 24;
-  -fx-font-weight: bold;
+    -fx-font-size: 24;
+    -fx-font-weight: bold;
 }
 
 .simple-popup-top-area {
-  -fx-padding: -12 -12 0 -12;
+    -fx-padding: -12 -12 0 -12;
 }
+
 .simple-popup-close-button {
-  -fx-background-color: #00000000;
-  -fx-background-radius: 16;
-  -fx-padding: 4;
+    -fx-background-color: #00000000;
+    -fx-background-radius: 16;
+    -fx-padding: 4;
 }
+
 .simple-popup-close-button .ikonli-font-icon {
-  -fx-icon-size: 28;
+    -fx-icon-size: 28;
 }
+
 .simple-popup-close-button:hover {
-  -fx-background-color: #00000022;
+    -fx-background-color: #00000022;
 }
 
 .simple-popup-button-area {
@@ -43,5 +45,5 @@
 }
 
 .simple-popup-text {
-  -fx-font-size: 16;
+    -fx-font-size: 16;
 }

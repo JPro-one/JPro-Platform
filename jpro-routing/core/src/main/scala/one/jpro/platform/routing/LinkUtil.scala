@@ -12,7 +12,7 @@ import org.slf4j.{Logger, LoggerFactory}
 object LinkUtil {
 
   private var openLinkExternalFun: String => Unit = { link =>
-    import one.jpro.platform.internal.openlink.OpenLink
+    import one.jpro.platform.utils.OpenLink
     OpenLink.openURL(link)
   }
   def setOpenLinkExternalFun(x: String => Unit): Unit = {
@@ -88,7 +88,7 @@ object LinkUtil {
   def refresh(node: Node): Unit = {
     val man = LinkUtil.getSessionManager(node)
     assert(man.url != null, "current url was null")
-    man.gotoURL(man.url)
+    man.gotoURL(man.url, false, true)
   }
 
   private object LinkDesktop {

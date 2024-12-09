@@ -13,10 +13,10 @@ public class Invitation extends Session {
     }
 
     public void accept(InvitationAcceptOptions options) {
-        webapi.executeScript(session.getName() + ".accept(" + options.asJSVariable(webapi).getName() + ");");
+        webapi.js().eval(session.getName() + ".accept(" + options.asJSVariable(webapi).getName() + ");");
     }
 
     public void reject() {
-        webapi.executeScript(session.getName() + ".reject();");
+        webapi.js().eval(session.getName() + ".reject();");
     }
 }

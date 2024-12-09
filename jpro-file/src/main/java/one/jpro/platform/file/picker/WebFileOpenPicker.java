@@ -5,9 +5,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
-import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.util.NodeUtils;
@@ -40,6 +40,11 @@ public class WebFileOpenPicker extends BaseFileOpenPicker {
         multiFileUploader = NodeUtils.getPropertyValue(node, NodeUtils.MULTI_FILE_UPLOADER_KEY,
                 WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnClick(true);
+
+        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
+        // that can occur if observers are not unregistered from observed objects after use.
+        getExtensionFilters().addListener(
+                new WeakListChangeListener<>(getWebExtensionFilterListChangeListener(multiFileUploader)));
     }
 
     // title property
@@ -91,25 +96,6 @@ public class WebFileOpenPicker extends BaseFileOpenPicker {
             initialDirectory = new SimpleObjectProperty<>(this, "initialDirectory");
         }
         return initialDirectory;
-    }
-
-    @Override
-    public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
-        if (selectedExtensionFilter == null) {
-            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {
-
-                @Override
-                protected void invalidated() {
-                    final ExtensionFilter selectedExtensionFilter = get();
-                    multiFileUploader.supportedExtensions().clear();
-                    if (selectedExtensionFilter != null) {
-                        selectedExtensionFilter.extensions()
-                                .forEach(multiFileUploader.supportedExtensions()::add);
-                    }
-                }
-            };
-        }
-        return selectedExtensionFilter;
     }
 
     @Override

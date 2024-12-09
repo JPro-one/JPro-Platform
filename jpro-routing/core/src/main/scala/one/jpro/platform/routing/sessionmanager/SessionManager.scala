@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.sessionmanager
 
 import com.jpro.webapi.WebAPI
-import de.sandec.jmemorybuddy.JMemoryBuddyLive
+import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
 import one.jpro.platform.routing.{HistoryEntry, Request, Response, ResponseResult, RouteNode, View}
@@ -9,7 +9,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
-import one.jpro.platform.internal.openlink.OpenLink
+import one.jpro.platform.utils.OpenLink
 
 import java.net.URI
 import java.util.function.Consumer

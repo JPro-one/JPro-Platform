@@ -34,6 +34,12 @@ public class User extends VBox {
         options.addUri(sip);
         options.addDisplayName(displayName);
         userAgent = new UserAgent(options, webapi);
+        userAgent.getRegisterPromise().onError(e -> {
+            e.printStackTrace();
+        });
+        userAgent.getRegisterPromise().onPromiseError(e -> {
+            e.printStackTrace();
+        });
         InviterOptions.createVideoCall();
         userAgent.setOnInvite(invitation -> {
             //invitation.accept(InvitationAcceptOptions.createVideoOnlyCall());
@@ -51,6 +57,9 @@ public class User extends VBox {
         userAgent.makeCall(target, InviterOptions.createVideoOnlyCall()).thenAccept(session -> {
             this.session.set(session);
             handleSession(webapi, session, this);
+        }).exceptionally(e -> {
+            e.printStackTrace();
+            return null;
         });
     }
 
@@ -116,19 +125,37 @@ public class User extends VBox {
             session.get().bye();
             session.set(null);
         });
-        session.addListener((observable, oldValue, newValue) -> {
+        Runnable updateDisable = () -> {
             button.setDisable(session.get() == null || !session.get().stateProperty().get().equals(Session.State.Established));
+        };
+        session.addListener((observable, oldValue, newValue) -> {
+            if(newValue != null) {
+                newValue.stateProperty().addListener((observable1, oldValue1, newValue1) -> {
+                    updateDisable.run();
+                });
+            }
+            updateDisable.run();
         });
         button.setDisable(session.get() == null);
         getChildren().add(button);
     }
 
+    boolean isScreenSharing = false;
     public void makeScreenShareButton() {
         // Active when session is not null
         var button = new Button("Screen Share");
         button.getStyleClass().add("call-button");
         button.setOnAction(event -> {
-            var stream = MediaStream.getScreenStream(webapi);
+            isScreenSharing = !isScreenSharing;
+            var stream = isScreenSharing ? MediaStream.getScreenStream(webapi)
+                    : MediaStream.getCameraStream(webapi);
+            stream.js.exceptionally(e -> {
+                System.out.println("Error getting video stream");
+                e.printStackTrace();
+                return null;
+            });
+            button.setText(isScreenSharing ? "Stop Screen Share" : "Screen Share");
+
             session.get().switchToStream(stream);
             localVideoElement.setStream(stream);
         });
@@ -137,8 +164,6 @@ public class User extends VBox {
         });
         button.setDisable(session.get() == null);
         getChildren().add(button);
-
-
     }
 
 
