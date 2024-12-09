@@ -20,6 +20,8 @@ import java.nio.file.Files;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
@@ -93,8 +95,12 @@ class ImageManagerTest {
 
         var image1 = manager.loadImage(imageDef2);
         String hash1 = imageDef2.getHashString();
+        System.out.println("ModifiedDate1: " + imageDef2File.lastModified());
 
         Files.copy(file2.toPath(), imageDef2File.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("ModifiedDate2: " + imageDef2File.lastModified());
+        Files.setLastModifiedTime(imageDef2File.toPath(), FileTime.from(Instant.now()));
+        System.out.println("ModifiedDate3: " + imageDef2File.lastModified());
 
         var image2 = manager.loadImage(imageDef2);
         String hash2 = imageDef2.getHashString();
