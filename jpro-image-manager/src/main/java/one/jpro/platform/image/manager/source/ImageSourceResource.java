@@ -67,8 +67,18 @@ public class ImageSourceResource implements ImageSource {
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
-        // Escaping might be necessary depending on the structure of resourcePath.
         json.put("resourcePath", ImageUtils.escapeJson(resourcePath));
+        // get last modified date
+        // It's important, so the images get recreated, when the files in the jar are updated
+        try {
+            URL resourceUrl = getClass().getResource(resourcePath);
+            if (resourceUrl != null) {
+                URLConnection conn = resourceUrl.openConnection();
+                json.put("modified", conn.getLastModified());
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Error obtaining modification date for resource: " + resourcePath, ex);
+        }
         return json;
     }
 
