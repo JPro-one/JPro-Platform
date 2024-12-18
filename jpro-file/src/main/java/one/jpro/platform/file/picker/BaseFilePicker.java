@@ -14,6 +14,7 @@ import javafx.stage.FileChooser;
 import one.jpro.platform.file.ExtensionFilter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 import static one.jpro.platform.file.ExtensionFilter.toJavaFXExtensionFilter;
@@ -110,9 +111,9 @@ abstract class BaseFilePicker implements FilePicker {
      */
     final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
         fileChooser.selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(getNativeSelectedExtensionFilterChangeListener()));
+                .addListener(getNativeSelectedExtensionFilterChangeListener());
         selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(getSelectedExtensionFilterChangeListener(fileChooser)));
+                .addListener(getSelectedExtensionFilterChangeListener(fileChooser));
     }
 
     /**
@@ -217,19 +218,10 @@ abstract class BaseFilePicker implements FilePicker {
     @NotNull
     final ListChangeListener<ExtensionFilter> getWebExtensionFilterListChangeListener(WebAPI.MultiFileUploader multiFileUploader) {
         return change -> {
-            while (change.next()) {
-                if (change.wasAdded()) {
-                    for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
-                        extensionFilter.extensions()
-                                .forEach(multiFileUploader.supportedExtensions()::add);
-                    }
-                } else if (change.wasRemoved()) {
-                    for (ExtensionFilter extensionFilter : change.getRemoved()) {
-                        extensionFilter.extensions()
-                                .forEach(multiFileUploader.supportedExtensions()::remove);
-                    }
-                }
-            }
+            var list = change.getList().stream().flatMap(ext -> ext.extensions().stream()).toList();
+            // Quick trick to remove duplicates
+            var set = new HashSet<String>(list);
+            multiFileUploader.supportedExtensions().setAll(set.stream().toList());
         };
     }
 }

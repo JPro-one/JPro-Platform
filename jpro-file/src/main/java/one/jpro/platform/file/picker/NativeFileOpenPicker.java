@@ -4,7 +4,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
@@ -46,10 +45,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         // and the FilePicker's selectedExtensionFilter property.
         synchronizeSelectedExtensionFilter(fileChooser);
 
-        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(
-                new WeakListChangeListener<>(getNativeExtensionFilterListChangeListener(fileChooser)));
+        getExtensionFilters().addListener(getNativeExtensionFilterListChangeListener(fileChooser));
 
         // Define the action that should be performed when the user clicks on the node.
         NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, actionEvent -> {
