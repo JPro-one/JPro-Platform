@@ -3,7 +3,6 @@ package one.jpro.platform.file.picker;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
@@ -34,10 +33,7 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
         // and the FilePicker's selectedExtensionFilter property.
         synchronizeSelectedExtensionFilter(fileChooser);
 
-        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(
-                new WeakListChangeListener<>(getNativeExtensionFilterListChangeListener(fileChooser)));
+        getExtensionFilters().addListener(getNativeExtensionFilterListChangeListener(fileChooser));
     }
 
     @Override

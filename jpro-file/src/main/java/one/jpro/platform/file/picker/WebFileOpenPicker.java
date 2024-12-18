@@ -5,7 +5,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.FileSource;
@@ -41,10 +40,7 @@ public class WebFileOpenPicker extends BaseFileOpenPicker {
                 WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnClick(true);
 
-        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(
-                new WeakListChangeListener<>(getWebExtensionFilterListChangeListener(multiFileUploader)));
+        getExtensionFilters().addListener(getWebExtensionFilterListChangeListener(multiFileUploader));
     }
 
     // title property

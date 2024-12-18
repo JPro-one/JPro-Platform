@@ -2,7 +2,6 @@ package one.jpro.platform.file.dropper;
 
 import com.jpro.webapi.WebAPI;
 import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -56,10 +55,7 @@ public class WebFileDropper extends BaseFileDropper {
             }
         };
 
-        // Wrap the listener into a WeakInvalidationListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        final WeakInvalidationListener weakFileDragOverListener = new WeakInvalidationListener(fileDragOverListener);
-        multiFileUploader.fileDragOverProperty().addListener(weakFileDragOverListener);
+        multiFileUploader.fileDragOverProperty().addListener(fileDragOverListener);
     }
 
     @Override
