@@ -1,11 +1,9 @@
 package one.jpro.platform.file.picker;
 
-import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -103,26 +101,13 @@ abstract class BaseFilePicker implements FilePicker {
     }
 
     /**
-     * Synchronizes the selected {@link ExtensionFilter} between this file picker and the native {@link FileChooser}.
-     * This ensures that changes in one are reflected in the other without causing infinite update loops.
-     *
-     * @param fileChooser the native file chooser to synchronize with; must not be {@code null}
-     */
-    final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
-        fileChooser.selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(getNativeSelectedExtensionFilterChangeListener()));
-        selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(getSelectedExtensionFilterChangeListener(fileChooser)));
-    }
-
-    /**
      * Creates a {@link ChangeListener} that listens for changes in the native {@link FileChooser}'s
      * selected extension filter and updates the corresponding property in this file picker.
      *
      * @return a change listener for the native file chooser's selected extension filter
      */
     @NotNull
-    private ChangeListener<FileChooser.ExtensionFilter> getNativeSelectedExtensionFilterChangeListener() {
+    final ChangeListener<FileChooser.ExtensionFilter> getNativeSelectedExtensionFilterChangeListener() {
         return (observable, oldFilter, newFilter) -> {
             if (updatingFromProperty) {
                 return;
@@ -152,7 +137,7 @@ abstract class BaseFilePicker implements FilePicker {
      * @return a change listener for the native file chooser's selected extension filter
      */
     @NotNull
-    private ChangeListener<ExtensionFilter> getSelectedExtensionFilterChangeListener(FileChooser fileChooser) {
+    final ChangeListener<ExtensionFilter> getSelectedExtensionFilterChangeListener(FileChooser fileChooser) {
         return (observable, oldFilter, newFilter) -> {
             if (updatingFromFileChooser) {
                 return;
@@ -198,35 +183,6 @@ abstract class BaseFilePicker implements FilePicker {
                     for (ExtensionFilter extensionFilter : change.getRemoved()) {
                         fileChooser.getExtensionFilters().removeIf(filter ->
                                 filter.getDescription().equals(extensionFilter.description()));
-                    }
-                }
-            }
-        };
-    }
-
-    /**
-     * Creates a {@link ListChangeListener} that listens for changes in the list of {@link ExtensionFilter}
-     * instances and updates the web-based file uploader's supported extensions accordingly.
-     * <p>
-     * This listener handles both additions and removals of extension filters.
-     * </p>
-     *
-     * @param multiFileUploader the web file uploader whose supported extensions will be updated; must not be {@code null}
-     * @return a list change listener for updating the web file uploader's supported extensions
-     */
-    @NotNull
-    final ListChangeListener<ExtensionFilter> getWebExtensionFilterListChangeListener(WebAPI.MultiFileUploader multiFileUploader) {
-        return change -> {
-            while (change.next()) {
-                if (change.wasAdded()) {
-                    for (ExtensionFilter extensionFilter : change.getAddedSubList()) {
-                        extensionFilter.extensions()
-                                .forEach(multiFileUploader.supportedExtensions()::add);
-                    }
-                } else if (change.wasRemoved()) {
-                    for (ExtensionFilter extensionFilter : change.getRemoved()) {
-                        extensionFilter.extensions()
-                                .forEach(multiFileUploader.supportedExtensions()::remove);
                     }
                 }
             }

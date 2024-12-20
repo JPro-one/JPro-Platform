@@ -4,12 +4,16 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.util.NodeUtils;
@@ -28,7 +32,13 @@ import java.util.function.Consumer;
  */
 public class NativeFileOpenPicker extends BaseFileOpenPicker {
 
-    private final FileChooser fileChooser;
+    private final FileChooser fileChooser = new FileChooser();
+    private final ChangeListener<FileChooser.ExtensionFilter> nativeSelectedExtensionFilterChangeListener =
+            getNativeSelectedExtensionFilterChangeListener();
+    private final ChangeListener<ExtensionFilter> selectedExtensionFilterChangeListener =
+            getSelectedExtensionFilterChangeListener(fileChooser);
+    private final ListChangeListener<ExtensionFilter> nativeExtensionFilterListChangeListener =
+            getNativeExtensionFilterListChangeListener(fileChooser);
     private List<NativeFileSource> nativeFileSources = List.of();
 
     /**
@@ -39,17 +49,13 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
     public NativeFileOpenPicker(Node node) {
         super(node);
 
-        // Initialize the FileChooser
-        fileChooser = new FileChooser();
-
         // Initializes synchronization between the FileChooser's selectedExtensionFilterProperty
         // and the FilePicker's selectedExtensionFilter property.
         synchronizeSelectedExtensionFilter(fileChooser);
 
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(
-                new WeakListChangeListener<>(getNativeExtensionFilterListChangeListener(fileChooser)));
+        getExtensionFilters().addListener(new WeakListChangeListener<>(nativeExtensionFilterListChangeListener));
 
         // Define the action that should be performed when the user clicks on the node.
         NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, actionEvent -> {
@@ -80,6 +86,19 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
                 }
             }
         });
+    }
+
+    /**
+     * Synchronizes the selected {@link ExtensionFilter} between this file picker and the native {@link FileChooser}.
+     * This ensures that changes in one are reflected in the other without causing infinite update loops.
+     *
+     * @param fileChooser the native file chooser to synchronize with; must not be {@code null}
+     */
+    final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
+        fileChooser.selectedExtensionFilterProperty()
+                .addListener(new WeakChangeListener<>(nativeSelectedExtensionFilterChangeListener));
+        selectedExtensionFilterProperty()
+                .addListener(new WeakChangeListener<>(selectedExtensionFilterChangeListener));
     }
 
     @Override
