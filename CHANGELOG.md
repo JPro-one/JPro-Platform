@@ -1,5 +1,8 @@
 ### 0.5.1-SNAPSHOT (TBD)
 
+#### Bugfixes
+* Fixed weak listeners setup in `jpro-file` module.
+
 ----------------------
 
 ### 0.5.0 (November 25, 2024)
