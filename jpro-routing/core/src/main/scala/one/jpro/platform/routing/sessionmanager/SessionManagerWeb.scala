@@ -7,6 +7,7 @@ import simplefx.all._
 
 
 class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends SessionManager { THIS =>
+  assert(webApp != null, "webApp must not be null!")
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -21,16 +22,18 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     webAPI.executeScript("history.go(1);")
   }
 
-  webAPI.addInstanceCloseListener(() => {
-    // if the session only has redirects, the view is null
-    if (THIS.view != null) {
-      THIS.view.onClose()
-      THIS.view.setSessionManager(null)
-      markViewCollectable(THIS.view)
-    }
-  })
+  if(webAPI != null) { // somtetimes webAPI is null, for example when crawling
+    webAPI.addInstanceCloseListener(() => {
+      // if the session only has redirects, the view is null
+      if (THIS.view != null) {
+        THIS.view.onClose()
+        THIS.view.setSessionManager(null)
+        markViewCollectable(THIS.view)
+      }
+    })
+  }
 
-  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Unit = {
     assert(x != null, "Response was null for url: " + _url)
     val url = _url
     x match {
@@ -78,40 +81,20 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
         webAPI.executeScript(s"""document.title = "${view.title.replace("\"","\\\"")}";""")
         webAPI.executeScript(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${view.description.replace("\"","\\\"")}");""")
         webAPI.executeScript(s"history.replaceState($initialState, null, null)")
-        if(ganalytics && track) {
-          webAPI.executeScript(s"""
-                                  |ga('set', {
-                                  |  page: "${view.url.replace("\"","\\\"")}",
-                                  |  title: "${view.title.replace("\"","\\\"")}"
-                                  |});
-                                  |
-          |// send it for tracking
-                                  |ga('send', 'pageview');
-          """.stripMargin)
-        }
-        if(gtags && track) {
-          assert(trackingID.nonEmpty)
-          webAPI.executeScript(s"""
-                                  |gtag('config', '$trackingID', {
-                                  |  'page_title' : "${view.title.replace("\"","\\\"")}",
-                                  |  'page_location': "${view.title.replace("\"","\\\"")}"
-                                  |});""".stripMargin)
-        }
-
     }
   }
 
-  def gotoFullEncodedURL(x: String, pushState: Boolean = true, track: Boolean = true): Unit = {
+  def gotoFullEncodedURL(x: String, pushState: Boolean = true): Unit = {
     // We no longer decode - we should only process proper URLs
     // If the URL is not proper, we will get a warning when creating the Request.
-    gotoURL(x, pushState, track)
+    gotoURL(x, pushState)
   }
 
   def start(): Unit = {
-    gotoFullEncodedURL(webAPI.getBrowserURL, false, false)
+    gotoFullEncodedURL(webAPI.getBrowserURL, false)
     logger.debug("registering popstate")
     webAPI.registerJavaFunction("popstatejava", (s: String) => {
-      gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""), false)
+      gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""))
     })
     webAPI.registerJavaFunction("jproGotoURL", (s: String) => {
       gotoURL(s.drop(1).dropRight(1).replace("\\\"", "\""))

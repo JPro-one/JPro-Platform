@@ -29,7 +29,9 @@ object LinkUtil {
   }
 
   def getSessionManager(node: Node): SessionManager = {
-    SessionManagerContext.getContext(node)
+    val sm = SessionManagerContext.getContext(node)
+    assert(sm != null, "SessionManager was null")
+    sm
   }
 
   def setLink(node: Node, url: String): Unit = {
@@ -86,7 +88,7 @@ object LinkUtil {
   def refresh(node: Node): Unit = {
     val man = LinkUtil.getSessionManager(node)
     assert(man.url != null, "current url was null")
-    man.gotoURL(man.url, false, true)
+    man.gotoURL(man.url, false)
   }
 
   private object LinkDesktop {
