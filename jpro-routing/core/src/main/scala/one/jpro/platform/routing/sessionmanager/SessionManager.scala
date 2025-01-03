@@ -32,39 +32,43 @@ trait SessionManager { THIS =>
   @Bind var url: String = null
   @Bind var view: View = null
 
+  def getURL(): String = url
+
   def goBack(): Unit
   def goForward(): Unit
   def isExternal(x: String): Boolean = x.startsWith("http")
-  def gotoURL(url: String): Unit = {
+  def gotoURL(url: String): Response = {
     if(isExternal(url)) {
       if(WebAPI.isBrowser) {
         this.asInstanceOf[SessionManagerWeb].webAPI.executeScript(s"""window.location.href = "$url";""")
       } else {
         SessionManager.externalLinkImpl.accept(url)
       }
+      Response.redirect(url)
     } else {
       gotoURL(url,true)
     }
   }
-  def gotoURL(url: String, pushState: Boolean = true): Unit = {
+  def gotoURL(url: String, pushState: Boolean = true): Response = {
     val url2 = SessionManager.mergeURLs(THIS.url, url)
     try {
-      logger.debug(s"goto: $url")
-      val request = getRequest(url)
+      logger.debug(s"goto: $url2")
+      val request = getRequest(url2)
       val newView = if(view != null && view.handleRequest(request)) Response(FXFuture(view)) else {
         webApp.getRoute()(request)
       }
-      newView.future.map { response =>
+      Response.fromFuture(newView.future.map { response =>
         assert(response != null, s"Response for $url2 was null")
         this.url = url2
         gotoURL(url2, response, pushState)
-      }
+      })
     } catch {
       case ex: Exception =>
         logger.error(s"Error while loading the path $url2", ex)
+        Response.error(ex)
     }
   }
-  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Unit
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response
 
   def getRequest(url: String): Request = {
     val node = if(view == null) null else view.realContent
