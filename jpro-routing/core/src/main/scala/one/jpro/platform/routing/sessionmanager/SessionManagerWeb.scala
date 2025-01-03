@@ -33,13 +33,14 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     })
   }
 
-  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response = {
     assert(x != null, "Response was null for url: " + _url)
     val url = _url
     x match {
       case Redirect(url) =>
         if(isExternal(url)) {
           this.asInstanceOf[SessionManagerWeb].webAPI.executeScript(s"""window.location.href = "$url";""")
+          Response.fromResult(x)
         } else {
           gotoURL(url)
         }
@@ -81,6 +82,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
         webAPI.executeScript(s"""document.title = "${view.title.replace("\"","\\\"")}";""")
         webAPI.executeScript(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${view.description.replace("\"","\\\"")}");""")
         webAPI.executeScript(s"history.replaceState($initialState, null, null)")
+        Response.fromResult(x)
     }
   }
 

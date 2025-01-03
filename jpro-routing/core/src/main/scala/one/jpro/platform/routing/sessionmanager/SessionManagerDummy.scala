@@ -8,8 +8,8 @@ class SessionManagerDummy(val webApp: RouteNode) extends SessionManager {
 
   override def goForward(): Unit = ()
 
-  override def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Unit = {
-
+  override def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response = {
+    Response.fromResult(x)
   }
 
   override def start(): Unit = ()

@@ -26,7 +26,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     gotoURL(historyCurrent.path, false)
   }
 
-  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response = {
     x match {
       case Redirect(url) =>
         logger.debug(s"redirect: ${_url} -> $url")
@@ -54,6 +54,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
           }
           historyCurrent = HistoryEntry(url, view.title)
         }
+        Response.view(view)
     }
   }
   val container = new StackPane()
