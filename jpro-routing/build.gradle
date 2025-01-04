@@ -118,7 +118,8 @@ configure(project(':jpro-routing:example')) {
     def examples = [
             'colors': 'example.colors.ColorsApp',
             'popup' : 'example.popup.PopupApp',
-            'test'  : 'example.scala.TestWebApplication'
+            'test'  : 'example.scala.TestWebApplication',
+            'extensions': 'example.scala.TestExtensions'
     ]
     mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["colors"]
 

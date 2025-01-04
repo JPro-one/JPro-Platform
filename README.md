@@ -476,6 +476,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:jproRun -Psample=colors
 ./gradlew jpro-routing:example:jproRun -Psample=popup
 ./gradlew jpro-routing:example:jproRun -Psample=test
+./gradlew jpro-routing:example:jproRun -Psample=extensions
 ./gradlew jpro-webrtc:example:jproRun
 ./gradlew jpro-sipjs:example:jproRun
 ```
