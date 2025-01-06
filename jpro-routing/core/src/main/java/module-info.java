@@ -19,4 +19,6 @@ module one.jpro.platform.routing.core {
     exports one.jpro.platform.routing.sessionmanager;
     exports one.jpro.platform.routing.extensions.linkheader;
     exports one.jpro.platform.routing.server;
+
+    opens one.jpro.platform.routing.extensions.linkheader.css;
 }
