@@ -36,7 +36,7 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
   def setRoute(x: Route): Unit = newRoute = x
 
 
-  def start(sessionManager: SessionManager) = {
+  def start(sessionManager: SessionManager): Response = {
     SessionManagerContext.setContext(this, sessionManager)
     sessionManager.start()
   }
