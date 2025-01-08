@@ -86,14 +86,13 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     }
   }
 
-  def gotoFullEncodedURL(x: String, pushState: Boolean = true): Unit = {
+  def gotoFullEncodedURL(x: String, pushState: Boolean = true): Response = {
     // We no longer decode - we should only process proper URLs
     // If the URL is not proper, we will get a warning when creating the Request.
     gotoURL(x, pushState)
   }
 
-  def start(): Unit = {
-    gotoFullEncodedURL(webAPI.getBrowserURL, false)
+  def start(): Response = {
     logger.debug("registering popstate")
     webAPI.registerJavaFunction("popstatejava", (s: String) => {
       gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""))
@@ -102,7 +101,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
       gotoURL(s.drop(1).dropRight(1).replace("\\\"", "\""))
     })
 
-    webAPI.executeScript(
+    webAPI.js().eval(
       s"""var scheduled = false
          |window.addEventListener("scroll", function(e) {
          |  if(!scheduled) {
@@ -126,7 +125,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     // that we have to move back to the saved scrollPosition.
     // we have to check, whether the ws is still alive, shortly after popstate.
     // we have to save the old scrollY immediately, so we remember it faster, than the safari resets it.
-    webAPI.executeScript("""
+    webAPI.js().eval("""
                            |window.addEventListener('popstate', function(e) {
                            |  window.setTimeout(function(){console.log("popstate called!")},3000);
                            |  var scrollY = 0;
@@ -142,11 +141,13 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
                            |  }, 1);
                            |  jpro.popstatejava(location.href);
                            |});""".stripMargin)
-    webAPI.executeScript(
+    webAPI.js().eval(
       // Back off, browser, I got this...
       """if ('scrollRestoration' in history) {
         |  history.scrollRestoration = 'manual';
         |}
       """.stripMargin)
+
+    gotoFullEncodedURL(webAPI.getBrowserURL, false)
   }
 }

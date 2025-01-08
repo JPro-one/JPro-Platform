@@ -75,7 +75,7 @@ trait SessionManager { THIS =>
     Request.fromString(url, node)
   }
 
-  def start(): Unit
+  def start(): Response
 
   def markViewCollectable(view: View): Unit = {
     JMemoryBuddyLive.markCollectable(s"Page url: ${view.url} title: ${view.title}", view.realContent)

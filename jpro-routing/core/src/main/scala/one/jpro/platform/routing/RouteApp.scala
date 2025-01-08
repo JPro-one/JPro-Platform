@@ -6,6 +6,9 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.stage.{Stage, StageStyle}
 import one.jpro.platform.routing.sessionmanager.SessionManager
+import simplefx.core._
+import simplefx.all._
+import simplefx.experimental.FXFuture
 
 abstract class RouteApp extends Application {
 
@@ -21,6 +24,9 @@ abstract class RouteApp extends Application {
   def getWebAPI(): WebAPI = if(WebAPI.isBrowser) WebAPI.getWebAPI(getStage()) else null
 
   override def start(stage: Stage): Unit = {
+    startFuture(stage)
+  }
+  def startFuture(stage: Stage): Response = {
     _stage = stage
     stage.initStyle(stageStyle())
     routeNode = new RouteNode(stage)

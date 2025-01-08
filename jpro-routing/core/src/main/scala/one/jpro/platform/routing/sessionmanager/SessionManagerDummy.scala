@@ -12,5 +12,5 @@ class SessionManagerDummy(val webApp: RouteNode) extends SessionManager {
     Response.fromResult(x)
   }
 
-  override def start(): Unit = ()
+  override def start(): Response = Response.empty()
 }

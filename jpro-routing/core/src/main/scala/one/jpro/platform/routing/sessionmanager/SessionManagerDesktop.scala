@@ -81,7 +81,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     }
   }
 
-  def start(): Unit = {
+  def start(): Response = {
     gotoURL("/", pushState = true)
   }
 }
