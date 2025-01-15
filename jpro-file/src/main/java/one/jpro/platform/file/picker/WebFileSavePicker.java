@@ -141,7 +141,6 @@ public class WebFileSavePicker extends BaseFileSavePicker {
                             if (!tempFile.delete()) {
                                 logger.warn("Could not delete temporary file {}", tempFile.getAbsolutePath());
                             }
-                            logger.error("Error while downloading file", ex);
                             return CompletableFuture.failedFuture(ex);
                         });
             } catch (IOException ex) {
