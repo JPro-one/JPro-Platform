@@ -22,6 +22,22 @@ object Filters {
       })
     }
   }
+  def title(title: String): Filter = { route => { request =>
+      val r = route.apply(request)
+
+      Response(r.future.map {
+        case x: View =>
+          new View {
+            override def title: String = title
+            override def description: String = x.description
+            override def content: all.Node = x.realContent
+
+            override def fullscreen: Boolean = x.fullscreen
+          }
+        case x => x
+      })
+    }
+  }
 
   def errorPage(): Filter = errorPage((request, ex) => Response.node(new Label("Error: " + ex.getMessage)))
   def errorPage(biFunction: BiFunction[Request, Throwable, Response]): Filter = {
