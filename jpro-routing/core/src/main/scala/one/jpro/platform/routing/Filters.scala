@@ -61,4 +61,26 @@ object Filters {
     route.and(function)
   }
 
+  def errorPage(): Filter = errorPage((request, ex) => Response.node(new Label("Error: " + ex.getMessage)))
+  def errorPage(biFunction: BiFunction[Request, Throwable, Response]): Filter = {
+    route => { request =>
+      try {
+        val r = route.apply(request)
+        Response.fromFuture(r.future.map(x => Response.fromResult(x)).exceptionally { ex =>
+          biFunction.apply(request, ex)
+        })
+      } catch {
+        case ex: Throwable =>
+          biFunction.apply(request, ex)
+      }
+    }
+  }
+
+  def notFoundPage(): Filter = {
+    notFoundPage((request) => Response.node(new Label("Not Found: " + request.getPath())))
+  }
+  def notFoundPage(function: Route): Filter = { route =>
+    route.and(function)
+  }
+
 }
