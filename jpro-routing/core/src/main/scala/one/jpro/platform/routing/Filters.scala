@@ -24,11 +24,12 @@ object Filters {
   }
   def title(title: String): Filter = { route => { request =>
       val r = route.apply(request)
+      val _title = title
 
       Response(r.future.map {
         case x: View =>
           new View {
-            override def title: String = title
+            override def title: String = _title
             override def description: String = x.description
             override def content: all.Node = x.realContent
 
