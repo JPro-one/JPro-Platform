@@ -1,6 +1,7 @@
 ### 0.5.1-SNAPSHOT (TBD)
 
 #### Improvements
+* Updated **JavaFX** dependencies to version `17.0.13`.
 * Updated **SimpleFX** dependencies to version `3.2.40`.
 
 #### Bugfixes
