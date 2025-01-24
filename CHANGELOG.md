@@ -1,5 +1,8 @@
 ### 0.5.1-SNAPSHOT (TBD)
 
+#### Improvements
+* Updated **SimpleFX** dependencies to version `3.2.40`.
+
 #### Bugfixes
 * Fixed weak listeners setup in `jpro-file` module.
 
