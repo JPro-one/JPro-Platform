@@ -1,11 +1,18 @@
 ### 0.5.1-SNAPSHOT (TBD)
 
+#### Features
+* Routing, added `Filters.title(String title)` method to set the title of the page.
+* Added simple Filters for error and notfound pages.
+* Markdown: Added utility class `MDFXUtil.java`.
+
 #### Improvements
 * Updated **JavaFX** dependencies to version `17.0.13`.
 * Updated **SimpleFX** dependencies to version `3.2.40`.
 
 #### Bugfixes
 * Fixed weak listeners setup in `jpro-file` module.
+* MDFX now properly handles escaped characters in the markdown text.
+* Fixed issue with the ImageManager. Sometimes the image didn't update correctly.
 
 ----------------------
 
@@ -17,7 +24,6 @@
 #### Bugfixes
 * Resolved an issue in the native implementation of `FileOpenPicker` and `FileSavePicker` within the `jpro-file` module
 that prevented the addition of duplicate event handlers to the provided node.
-* MDFX now properly handles escaped characters in the markdown text.
 
 ----------------------
 
