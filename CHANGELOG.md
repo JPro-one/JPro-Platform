@@ -1,4 +1,4 @@
-### 0.5.1-SNAPSHOT (TBD)
+### 0.5.1 (January 31, 2025)
 
 #### Features
 * Routing, added `Filters.title(String title)` method to set the title of the page.
