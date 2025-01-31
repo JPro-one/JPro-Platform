@@ -6,6 +6,7 @@
 * Markdown: Added utility class `MDFXUtil.java`.
 
 #### Improvements
+* Updated **JPro** to version `2025.1.0`.
 * Updated **JavaFX** dependencies to version `17.0.13`.
 * Updated **SimpleFX** dependencies to version `3.2.40`.
 
