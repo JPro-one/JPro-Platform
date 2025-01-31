@@ -1,3 +1,7 @@
+### 0.5.2-SNAPSHOT (TBD)
+
+----------------------
+
 ### 0.5.1 (January 31, 2025)
 
 #### Features
@@ -7,7 +11,7 @@
 
 #### Improvements
 * Updated **JPro** to version `2025.1.0`.
-* Updated **JavaFX** dependencies to version `17.0.13`.
+* Updated **JavaFX** dependencies to version `17.0.14`.
 * Updated **SimpleFX** dependencies to version `3.2.40`.
 
 #### Bugfixes
