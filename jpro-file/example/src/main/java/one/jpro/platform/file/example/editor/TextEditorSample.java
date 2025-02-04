@@ -118,17 +118,23 @@ public class TextEditorSample extends Application {
         });
 
         Button openDirectory = new Button("Open Directory", new FontIcon(Material2AL.FOLDER_OPEN));
-        DirectoryOpenPicker directoryOpenPicker = DirectoryOpenPicker.create(openDirectory);
-        directoryOpenPicker.setOnFilesSelected(fileSources -> {
-            fileSources.stream().findFirst().ifPresent(fileSource -> {
-                // Note: We only test whether choosing a directory works
-                System.out.println("Chosen directory: " + fileSource.uploadFileAsync().join().getAbsolutePath());
+        if(!WebAPI.isBrowser()) {
+            DirectoryOpenPicker directoryOpenPicker = DirectoryOpenPicker.create(openDirectory);
+            directoryOpenPicker.setOnFilesSelected(fileSources -> {
+                fileSources.stream().findFirst().ifPresent(fileSource -> {
+                    // Note: We only test whether choosing a directory works
+                    LOGGER.info("Chosen directory: " + fileSource.uploadFileAsync().join().getAbsolutePath());
+                });
             });
-        });
+        }
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox controlsBox = new HBox(newButton, openButton, openDirectory, spacer);
+        HBox controlsBox = new HBox(newButton, openButton);
+        if(!WebAPI.isBrowser()) {
+            controlsBox.getChildren().add(openDirectory);
+        }
+        controlsBox.getChildren().add(spacer);
         controlsBox.getStyleClass().add("controls-box");
 
         final Button saveAsButton;
