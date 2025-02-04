@@ -162,6 +162,6 @@ abstract class BaseFileDropper implements FileDropper {
         final ExtensionFilter extensionFilter = getExtensionFilter();
         return extensionFilter == null || files.stream()
                 .anyMatch(file -> extensionFilter.extensions().stream()
-                        .anyMatch(extension -> file.getName().endsWith(extension)));
+                        .anyMatch(extension -> file.getName().toLowerCase().endsWith(extension)));
     }
 }

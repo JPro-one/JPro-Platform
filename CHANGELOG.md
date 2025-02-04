@@ -1,4 +1,9 @@
 ### 0.5.2-SNAPSHOT (TBD)
+#### Features
+* Added DirectoryOpenPicker to the jpro-file module. This allows the user to select a directory instead of a file.
+
+#### Bufixes
+* Fixed issue, with jpro-file. FileDropper file extensions are now handled case-insensitive, like in the rest of jpro-file.
 
 ----------------------
 

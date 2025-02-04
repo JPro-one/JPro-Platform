@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.dropper.FileDropper;
+import one.jpro.platform.file.picker.DirectoryOpenPicker;
 import one.jpro.platform.file.picker.FileOpenPicker;
 import one.jpro.platform.file.picker.FileSavePicker;
 import org.apache.commons.io.FilenameUtils;
@@ -115,9 +116,24 @@ public class TextEditorSample extends Application {
             contentPane.getChildren().setAll(textArea);
         });
 
+        Button openDirectory = new Button("Open Directory", new FontIcon(Material2AL.FOLDER_OPEN));
+        if(!WebAPI.isBrowser()) {
+            DirectoryOpenPicker directoryOpenPicker = DirectoryOpenPicker.create(openDirectory);
+            directoryOpenPicker.setOnFilesSelected(fileSources -> {
+                fileSources.stream().findFirst().ifPresent(fileSource -> {
+                    // Note: We only test whether choosing a directory works
+                    LOGGER.info("Chosen directory: " + fileSource.uploadFileAsync().join().getAbsolutePath());
+                });
+            });
+        }
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox controlsBox = new HBox(newButton, openButton, spacer);
+        HBox controlsBox = new HBox(newButton, openButton);
+        if(!WebAPI.isBrowser()) {
+            controlsBox.getChildren().add(openDirectory);
+        }
+        controlsBox.getChildren().add(spacer);
         controlsBox.getStyleClass().add("controls-box");
 
         final Button saveAsButton;
