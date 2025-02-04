@@ -63,7 +63,7 @@ public class NativeFileDropper extends BaseFileDropper {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
                 List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
                         .filter(file -> extensionFilter != null && extensionFilter.extensions().stream()
-                                .anyMatch(extension -> file.getName().endsWith(extension)))
+                                .anyMatch(extension -> file.getName().toLowerCase().endsWith(extension)))
                         .map(NativeFileSource::new)
                         .toList();
 
