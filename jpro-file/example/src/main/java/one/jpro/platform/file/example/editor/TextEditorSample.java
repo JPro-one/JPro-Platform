@@ -89,7 +89,6 @@ public class TextEditorSample extends Application {
 
         FileDropper fileDropper = FileDropper.create(contentPane);
         fileDropper.setExtensionFilter(SUBTITLE_EXTENSION_FILTER);
-        // Nah?
         fileDropper.setOnDragEntered(event -> {
             dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, true);
             contentPane.getChildren().setAll(textArea, dropPane);

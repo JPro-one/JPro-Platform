@@ -7,17 +7,17 @@ import one.jpro.platform.file.MultipleFileSelector;
 import java.util.Objects;
 
 /**
- * {@link FilePicker} interface extension for file open operations.
+ * {@link DirectoryOpenPicker} interface extension for directory open operations.
  *
  * @author Florian Kirmaier
  */
 public interface DirectoryOpenPicker extends FileOpenPicker {
 
     /**
-     * Creates a file picker.
+     * Creates a directory picker.
      * It only works in desktop applications.
      *
-     * @param node the associated node for this file picker
+     * @param node the associated node for this directory picker
      * @return a {@link DirectoryOpenPicker} object.
      * @throws NullPointerException if the node is null
      */
