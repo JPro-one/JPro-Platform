@@ -63,7 +63,7 @@ publishing {
         mavenJava(MavenPublication) {
             // Add README.md as an artifact named DOCUMENTATION.md
             artifact(source: file('build/docs/DOCUMENTATION.md')) {
-                classifier 'documentation'
+                classifier 'DOCUMENTATION'
                 extension 'md'
             }
 
