@@ -15,11 +15,11 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
   webApp <++ container
 
   def goBack(): Unit = {
-    webAPI.executeScript("history.go(-1);")
+    webAPI.js().eval("history.go(-1);")
   }
 
   def goForward(): Unit = {
-    webAPI.executeScript("history.go(1);")
+    webAPI.js().eval("history.go(1);")
   }
 
   if(webAPI != null) { // somtetimes webAPI is null, for example when crawling
@@ -39,7 +39,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     x match {
       case Redirect(url) =>
         if(isExternal(url)) {
-          this.asInstanceOf[SessionManagerWeb].webAPI.executeScript(s"""window.location.href = "$url";""")
+          this.asInstanceOf[SessionManagerWeb].webAPI.js().eval(s"""window.location.href = "$url";""")
           Response.fromResult(x)
         } else {
           gotoURL(url)
@@ -61,27 +61,27 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
 
         if(pushState) {
-          //webAPI.executeScript(s"""var doc = document.documentElement;
+          //webAPI.js().eval(s"""var doc = document.documentElement;
           //                        |history.replaceState({
           //                        |marker: "goto",
           //                        |scrollTop: (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0)
           //                        |}, null, null);
           //                        |""".stripMargin)
-          webAPI.executeScript(s"""history.pushState(null, null, "${view.url.replace("\"","\\\"")}");""")
+          webAPI.js().eval(s"""history.pushState(null, null, "${view.url.replace("\"","\\\"")}");""")
         }
         val initialState = if(view.saveScrollPosition) "{saveScroll: true}" else "{saveScroll: false}"
 
-        webAPI.executeScript(
+        webAPI.js().eval(
           """var scrollY = 0;
             |if(history.state != null) {
             |  scrollY = history.state.scrollTop || 0;
             |}
             |scroll(0,scrollY)
           """.stripMargin)
-        webAPI.executeScript(s"""document.getElementsByTagName("jpro-app")[0].sfxelem.setFXHeight(${!view.fullscreen})""")
-        webAPI.executeScript(s"""document.title = "${view.title.replace("\"","\\\"")}";""")
-        webAPI.executeScript(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${view.description.replace("\"","\\\"")}");""")
-        webAPI.executeScript(s"history.replaceState($initialState, null, null)")
+        webAPI.js().eval(s"""document.getElementsByTagName("jpro-app")[0].sfxelem.setFXHeight(${!view.fullscreen})""")
+        webAPI.js().eval(s"""document.title = "${Option(view.title).getOrElse("").replace("\"","\\\"")}";""")
+        webAPI.js().eval(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${Option(view.description).getOrElse("").replace("\"","\\\"")}");""")
+        webAPI.js().eval(s"history.replaceState($initialState, null, null)")
         Response.fromResult(x)
     }
   }
