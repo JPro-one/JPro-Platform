@@ -36,12 +36,8 @@ public class NativeFileDropper extends BaseFileDropper {
         super(node);
 
         NodeUtils.addEventHandler(node, DragEvent.DRAG_OVER, dragEvent -> {
-            logger.debug("Drag over event detected: {}", dragEvent);
-            logger.debug("Dragboard has files: {}", dragEvent.getDragboard().hasFiles());
             if (dragEvent.getDragboard().hasFiles()) {
                 List<File> files = dragEvent.getDragboard().getFiles();
-                logger.debug("Files: {}", files);
-                logger.debug("hasSupportedExtension: {}", hasSupportedExtension(files));
                 if (hasSupportedExtension(files)) {
                     dragEvent.acceptTransferModes(TransferMode.COPY);
                     setFilesDragOver(true);
