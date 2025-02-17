@@ -12,7 +12,10 @@ import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.event.DataTransfer;
 import one.jpro.platform.file.event.FileDragEvent;
+import one.jpro.platform.file.picker.NativeFileOpenPicker;
 import one.jpro.platform.file.util.NodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -27,13 +30,18 @@ import java.util.function.Consumer;
  * @author Indrit Beqiri
  */
 public class NativeFileDropper extends BaseFileDropper {
+    private static final Logger logger = LoggerFactory.getLogger(NativeFileDropper.class);
 
     public NativeFileDropper(Node node) {
         super(node);
 
         NodeUtils.addEventHandler(node, DragEvent.DRAG_OVER, dragEvent -> {
+            logger.debug("Drag over event detected: {}", dragEvent);
+            logger.debug("Dragboard has files: {}", dragEvent.getDragboard().hasFiles());
             if (dragEvent.getDragboard().hasFiles()) {
                 List<File> files = dragEvent.getDragboard().getFiles();
+                logger.debug("Files: {}", files);
+                logger.debug("hasSupportedExtension: {}", hasSupportedExtension(files));
                 if (hasSupportedExtension(files)) {
                     dragEvent.acceptTransferModes(TransferMode.COPY);
                     setFilesDragOver(true);
@@ -61,9 +69,16 @@ public class NativeFileDropper extends BaseFileDropper {
         NodeUtils.addEventHandler(node, DragEvent.DRAG_DROPPED, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
+                var allowDirectory = extensionFilter.allowDirectory();
                 List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
                         .filter(file -> extensionFilter != null && extensionFilter.extensions().stream()
-                                .anyMatch(extension -> file.getName().toLowerCase().endsWith(extension)))
+                                .anyMatch(extension -> {
+                                    if(file.isDirectory()) {
+                                        return allowDirectory;
+                                    } else {
+                                        return file.getName().toLowerCase().endsWith(extension);
+                                    }
+                                }))
                         .map(NativeFileSource::new)
                         .toList();
 

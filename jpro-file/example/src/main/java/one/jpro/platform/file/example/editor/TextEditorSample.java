@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.dropper.FileDropper;
-import one.jpro.platform.file.picker.DirectoryOpenPicker;
 import one.jpro.platform.file.picker.FileOpenPicker;
 import one.jpro.platform.file.picker.FileSavePicker;
 import org.apache.commons.io.FilenameUtils;
@@ -62,6 +61,7 @@ public class TextEditorSample extends Application {
 
     private static final PseudoClass FILES_DRAG_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("files-drag-over");
     private static final ExtensionFilter SUBTITLE_EXTENSION_FILTER = ExtensionFilter.of("Subtitle files", ".srt");
+    private static final ExtensionFilter SUBTITLE_EXTENSION_FILTER_OR_DIR = ExtensionFilter.of("Subtitle files", true, ".srt");
     private static final ExtensionFilter MARKDOWN_EXTENSION_FILTER = ExtensionFilter.of("Markdown files", ".md");
     private static final ExtensionFilter CSV_EXTENSION_FILTER = ExtensionFilter.of("CSV files", ".csv");
     private final ObjectProperty<File> lastOpenedFile = new SimpleObjectProperty<>(this, "lastOpenedFile");
@@ -88,7 +88,7 @@ public class TextEditorSample extends Application {
         StackPane contentPane = new StackPane(textArea, dropPane);
 
         FileDropper fileDropper = FileDropper.create(contentPane);
-        fileDropper.setExtensionFilter(SUBTITLE_EXTENSION_FILTER);
+        fileDropper.setExtensionFilter(SUBTITLE_EXTENSION_FILTER_OR_DIR);
         fileDropper.setOnDragEntered(event -> {
             dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, true);
             contentPane.getChildren().setAll(textArea, dropPane);
@@ -118,7 +118,8 @@ public class TextEditorSample extends Application {
 
         Button openDirectory = new Button("Open Directory", new FontIcon(Material2AL.FOLDER_OPEN));
         if(!WebAPI.isBrowser()) {
-            DirectoryOpenPicker directoryOpenPicker = DirectoryOpenPicker.create(openDirectory);
+            FileOpenPicker directoryOpenPicker = FileOpenPicker.create(openDirectory);
+            directoryOpenPicker.getExtensionFilters().add(ExtensionFilter.DIRECTORY);
             directoryOpenPicker.setOnFilesSelected(fileSources -> {
                 fileSources.stream().findFirst().ifPresent(fileSource -> {
                     // Note: We only test whether choosing a directory works
@@ -174,9 +175,14 @@ public class TextEditorSample extends Application {
                 fileSource.uploadFileAsync()
                         .thenCompose(file -> {
                             try {
-                                final String fileContent = new String(Files.readAllBytes(file.toPath()));
-                                Platform.runLater(() -> textArea.setText(fileContent));
-                                return CompletableFuture.completedFuture(file);
+                                if(file.isDirectory()) {
+                                    LOGGER.info("Chosen directory: " + file.getAbsolutePath());
+                                    return CompletableFuture.completedFuture(file);
+                                } else {
+                                    final String fileContent = new String(Files.readAllBytes(file.toPath()));
+                                    Platform.runLater(() -> textArea.setText(fileContent));
+                                    return CompletableFuture.completedFuture(file);
+                                }
                             } catch (IOException ex) {
                                 LOGGER.error("Error reading file: {}", file.getAbsolutePath(), ex);
                                 return CompletableFuture.failedFuture(ex);

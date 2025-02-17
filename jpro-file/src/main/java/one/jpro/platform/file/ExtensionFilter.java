@@ -15,9 +15,10 @@ import java.util.List;
  * @param extensions  a list of the accepted file name extensions
  * @author Besmir Beqiri
  */
-public record ExtensionFilter(String description, List<String> extensions) {
+public record ExtensionFilter(String description, boolean allowDirectory, List<String> extensions) {
 
-    public static final ExtensionFilter ANY = new ExtensionFilter("All Files", List.of("."));
+    public static final ExtensionFilter ANY = new ExtensionFilter("All Files", false, List.of("."));
+    public static final ExtensionFilter DIRECTORY = new ExtensionFilter("Directory", true, List.of());
 
     /**
      * Compact constructor for {@code ExtensionFilter}.
@@ -37,8 +38,8 @@ public record ExtensionFilter(String description, List<String> extensions) {
      * @throws NullPointerException     if the description or the extension are {@code null}
      * @throws IllegalArgumentException if the description or the extension are empty
      */
-    public ExtensionFilter(String description, String extension) {
-        this(description, List.of(extension));
+    public ExtensionFilter(String description, String... extension) {
+        this(description, false, List.of(extension));
     }
 
     /**
@@ -54,23 +55,23 @@ public record ExtensionFilter(String description, List<String> extensions) {
      * @throws IllegalArgumentException if the description or the extensions are empty
      */
     public static ExtensionFilter of(String description, String... extensions) {
-        return new ExtensionFilter(description, List.of(extensions));
+        return new ExtensionFilter(description, false, List.of(extensions));
     }
 
     /**
      * Creates an {@code ExtensionFilter} with the specified description
-     * and the file name extension.
+     * and the file name extensions.
      * <p>
      * File name extension should be specified in the {@code *.<extension>} format.
      *
      * @param description the textual description for the filter
-     * @param extension   the accepted file name extension
+     * @param extensions  an array of the accepted file name extensions
      * @return the created {@code ExtensionFilter}
-     * @throws NullPointerException     if the description or the extension is {@code null}
-     * @throws IllegalArgumentException if the description or the extension is empty
+     * @throws NullPointerException     if the description or the extensions are {@code null}
+     * @throws IllegalArgumentException if the description or the extensions are empty
      */
-    public static ExtensionFilter of(String description, String extension) {
-        return new ExtensionFilter(description, extension);
+    public static ExtensionFilter of(String description, boolean allowDirectory, String... extensions) {
+        return new ExtensionFilter(description, allowDirectory, List.of(extensions));
     }
 
     /**
@@ -92,7 +93,7 @@ public record ExtensionFilter(String description, List<String> extensions) {
      */
     public static ExtensionFilter fromJavaFXExtensionFilter(FileChooser.ExtensionFilter extensionFilter) {
         if (extensionFilter == null) return null;
-        return new ExtensionFilter(extensionFilter.getDescription(),
+        return new ExtensionFilter(extensionFilter.getDescription(), false,
                 extensionFilter.getExtensions().stream()
                         .filter(ext -> ext.startsWith("*"))
                         .map(ext -> ext.substring(1)).toList());
@@ -117,10 +118,6 @@ public record ExtensionFilter(String description, List<String> extensions) {
 
         if (extensions == null) {
             throw new NullPointerException("Extensions must not be null");
-        }
-
-        if (extensions.isEmpty()) {
-            throw new IllegalArgumentException("At least one extension must be defined");
         }
 
         for (String extension : extensions) {
