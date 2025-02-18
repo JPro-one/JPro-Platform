@@ -56,12 +56,10 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
 
     /**
      * Creates and configures a {@link FileChooser} for saving files.
-     * <p>
-     * This method sets up the file chooser with the extension filters defined in the base class.
      *
      * @return a configured {@link FileChooser} instance.
      */
-    private FileChooser createFileChooser() {
+    FileChooser createFileChooser() {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)

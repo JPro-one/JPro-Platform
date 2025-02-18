@@ -112,7 +112,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
      *
      * @return a configured {@code FileChooser} instance.
      */
-    private FileChooser createFileChooser() {
+    FileChooser createFileChooser() {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
@@ -126,7 +126,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
      *
      * @return a configured {@code DirectoryChooser} instance.
      */
-    private DirectoryChooser createDirectoryChooser() {
+    DirectoryChooser createDirectoryChooser() {
         final DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.titleProperty().bind(titleProperty());
         return directoryChooser;
