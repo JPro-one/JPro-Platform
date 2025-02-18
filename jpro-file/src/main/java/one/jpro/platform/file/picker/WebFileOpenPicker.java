@@ -3,8 +3,6 @@ package one.jpro.platform.file.picker;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
@@ -14,7 +12,6 @@ import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.util.NodeUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

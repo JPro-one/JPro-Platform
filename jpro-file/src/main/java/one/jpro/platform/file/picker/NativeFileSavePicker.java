@@ -1,15 +1,7 @@
 package one.jpro.platform.file.picker;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
-import javafx.collections.ListChangeListener;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import one.jpro.platform.file.ExtensionFilter;
@@ -27,13 +19,18 @@ import java.util.function.Function;
  */
 public class NativeFileSavePicker extends BaseFileSavePicker {
 
+    /**
+     * Constructs a new {@link NativeFileSavePicker} associated with the given JavaFX node.
+     *
+     * @param node the JavaFX node that will trigger the file save dialog.
+     */
     public NativeFileSavePicker(Node node) {
         super(node);
     }
 
     @Override
     final void showDialog() {
-        var fileChooser = createFileChooser();
+        final var fileChooser = createFileChooser();
         // Basic configuration
         fileChooser.setTitle("Save file as...");
 
@@ -57,8 +54,15 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
         }
     }
 
+    /**
+     * Creates and configures a {@link FileChooser} for saving files.
+     * <p>
+     * This method sets up the file chooser with the extension filters defined in the base class.
+     *
+     * @return a configured {@link FileChooser} instance.
+     */
     private FileChooser createFileChooser() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
                 .toList());

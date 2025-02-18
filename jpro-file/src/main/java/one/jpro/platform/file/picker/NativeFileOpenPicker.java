@@ -2,12 +2,6 @@ package one.jpro.platform.file.picker;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
-import javafx.collections.ListChangeListener;
-import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
@@ -28,14 +22,16 @@ import java.util.function.Consumer;
 /**
  * Represents a {@link FileOpenPicker} implementation for JavaFX desktop/mobile
  * applications. This class specializes for selecting and opening files from
- * the native file system.
+ * the native file system. Depending on the configuration (e.g. extension filters and
+ * selection mode), it will display either a {@link FileChooser} or a {@link DirectoryChooser}.
  *
  * @author Besmir Beqiri
  * @author Indrit Beqiri
  * @author Florian Kirmaier
  */
 public class NativeFileOpenPicker extends BaseFileOpenPicker {
-    private static final Logger logger = LoggerFactory.getLogger(NativeFileOpenPicker.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NativeFileOpenPicker.class);
 
     private List<NativeFileSource> nativeFileSources = List.of();
 
@@ -50,11 +46,11 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         // Define the action that should be performed when the user clicks on the node.
         NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, actionEvent -> {
             Window window = node.getScene().getWindow();
-            var useDirectory = getExtensionFilters().stream().anyMatch(x -> x.allowDirectory());
-            var hasFilesTypes = getExtensionFilters().stream().anyMatch(x -> x.extensions().size() > 0);
+            var useDirectory = getExtensionFilters().stream().anyMatch(ExtensionFilter::allowDirectory);
+            var hasFilesTypes = getExtensionFilters().stream().anyMatch(x -> !x.extensions().isEmpty());
 
             if (useDirectory && hasFilesTypes) {
-                logger.warn("You can't use directory and file types at the same time. Directory will be used.");
+                LOGGER.warn("You can't use directory and file types at the same time. Directory will be used.");
             }
             if (useDirectory) {
                 DirectoryChooser directoryChooser = createDirectoryChooser();
@@ -62,6 +58,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
                 if (file != null) {
                     // Create a list of native file sources from the selected file.
                     nativeFileSources = List.of(new NativeFileSource(file));
+
                     // Invoke the onFilesSelected consumer.
                     Consumer<List<? extends FileSource>> onFilesSelectedConsumer = getOnFilesSelected();
                     if (onFilesSelectedConsumer != null) {
@@ -106,8 +103,13 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         return selectionMode;
     }
 
-    FileChooser createFileChooser() {
-        FileChooser fileChooser = new FileChooser();
+    /**
+     * Creates and configures a {@link FileChooser} based on the current extension filters and title.
+     *
+     * @return a configured {@code FileChooser} instance.
+     */
+    private FileChooser createFileChooser() {
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
                 .toList());
@@ -115,8 +117,13 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         return fileChooser;
     }
 
+    /**
+     * Creates and configures a {@link DirectoryChooser} based on the current title property.
+     *
+     * @return a configured {@code DirectoryChooser} instance.
+     */
     private DirectoryChooser createDirectoryChooser() {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
+        final DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.titleProperty().bind(titleProperty());
         return directoryChooser;
     }

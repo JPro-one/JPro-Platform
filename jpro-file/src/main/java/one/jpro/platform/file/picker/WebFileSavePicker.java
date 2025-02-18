@@ -4,8 +4,6 @@ import com.jpro.webapi.WebAPI;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileStorage;
