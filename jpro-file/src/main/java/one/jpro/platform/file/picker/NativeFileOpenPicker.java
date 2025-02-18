@@ -106,7 +106,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         return selectionMode;
     }
 
-    private FileChooser createFileChooser() {
+    FileChooser createFileChooser() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
