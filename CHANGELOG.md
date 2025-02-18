@@ -1,5 +1,9 @@
 ### 0.5.3-SNAPSHOT (TBD)
 
+#### Features
+* Reworked how `jpro-file` handles directories. Extension Filters now have the flag `allowDirectory`.
+Removed the `DirectoryOpenPicker`. The `FileOpenPicker`, `FileSavePicker` and `FileDropper` now handle directories.
+
 ----------------------
 
 ### 0.5.2 (February 4, 2025)

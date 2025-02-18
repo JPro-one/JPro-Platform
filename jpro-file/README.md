@@ -112,3 +112,8 @@ a specified callback handler is invoked for further processing.
   ```shell
   ./gradlew jpro-file:example:jproRun -Psample=file-uploader
   ```
+  
+### Limitations
+Some combination of features only work limited. These are the following:
+ * The `FileOpenPicker` and `FileSavePicker` can only open directories or files, but never both at the same time.
+ * On the web, the `FileOpenPicker`, `FileSavePicker` and `FileDropper` can only handle files, not directories.
