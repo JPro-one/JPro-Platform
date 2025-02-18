@@ -2,6 +2,7 @@ package one.jpro.platform.file.picker;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -12,6 +13,7 @@ import javafx.stage.FileChooser;
 import one.jpro.platform.file.ExtensionFilter;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.Objects;
 
 import static one.jpro.platform.file.ExtensionFilter.toJavaFXExtensionFilter;
@@ -47,6 +49,14 @@ abstract class BaseFilePicker implements FilePicker {
     StringProperty initialFileName;
 
     @Override
+    public final StringProperty initialFileNameProperty() {
+        if (initialFileName == null) {
+            initialFileName = new SimpleStringProperty(this, "initialFileName");
+        }
+        return initialFileName;
+    }
+
+    @Override
     public final String getInitialFileName() {
         return (initialFileName == null) ? null : initialFileName.get();
     }
@@ -54,6 +64,46 @@ abstract class BaseFilePicker implements FilePicker {
     @Override
     public final void setInitialFileName(final String value) {
         initialFileNameProperty().setValue(value);
+    }
+
+    ObjectProperty<File> initialDirectory;
+
+    @Override
+    public final ObjectProperty<File> initialDirectoryProperty() {
+        if (initialDirectory == null) {
+            initialDirectory = new SimpleObjectProperty<>(this, "initialDirectory");
+        }
+        return initialDirectory;
+    }
+
+    @Override
+    public final File getInitialDirectory() {
+        return (initialDirectory != null) ? initialDirectory.get() : null;
+    }
+
+    @Override
+    public final void setInitialDirectory(final File value) {
+        initialDirectoryProperty().set(value);
+    }
+
+    StringProperty title;
+
+    @Override
+    public final String getTitle() {
+        return title.get();
+    }
+
+    @Override
+    public final void setTitle(final String value) {
+        titleProperty().set(value);
+    }
+
+    @Override
+    public final StringProperty titleProperty() {
+        if (title == null) {
+            title = new SimpleStringProperty(this, "title");
+        }
+        return title;
     }
 
     private final ObservableList<ExtensionFilter> extensionFilters = FXCollections.observableArrayList();

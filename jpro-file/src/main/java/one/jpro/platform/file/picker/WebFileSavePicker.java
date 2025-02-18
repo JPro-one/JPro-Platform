@@ -34,57 +34,6 @@ public class WebFileSavePicker extends BaseFileSavePicker {
         super(node);
     }
 
-    // title property
-    private StringProperty title;
-
-    @Override
-    public final String getTitle() {
-        return (title != null) ? title.get() : null;
-    }
-
-    @Override
-    public final void setTitle(String value) {
-        titleProperty().set(value);
-    }
-
-    @Override
-    public final StringProperty titleProperty() {
-        if (title == null) {
-            title = new SimpleStringProperty(this, "title");
-        }
-        return title;
-    }
-
-    // initial file name property
-    @Override
-    public final StringProperty initialFileNameProperty() {
-        if (initialFileName == null) {
-            initialFileName = new SimpleStringProperty(this, "initialFileName");
-        }
-        return initialFileName;
-    }
-
-    // initial directory property
-    private ObjectProperty<File> initialDirectory;
-
-    @Override
-    public final File getInitialDirectory() {
-        return (initialDirectory != null) ? initialDirectory.get() : null;
-    }
-
-    @Override
-    public final void setInitialDirectory(final File value) {
-        initialDirectoryProperty().set(value);
-    }
-
-    @Override
-    public final ObjectProperty<File> initialDirectoryProperty() {
-        if (initialDirectory == null) {
-            initialDirectory = new SimpleObjectProperty<>(this, "initialDirectory");
-        }
-        return initialDirectory;
-    }
-
     // temp directory property
     private ObjectProperty<File> tempDirectory;
 

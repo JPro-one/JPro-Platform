@@ -9,6 +9,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import one.jpro.platform.file.ExtensionFilter;
@@ -26,80 +27,13 @@ import java.util.function.Function;
  */
 public class NativeFileSavePicker extends BaseFileSavePicker {
 
-    private final FileChooser fileChooser = new FileChooser();
-    private final ChangeListener<FileChooser.ExtensionFilter> nativeSelectedExtensionFilterChangeListener =
-            getNativeSelectedExtensionFilterChangeListener();
-    private final ChangeListener<ExtensionFilter> selectedExtensionFilterChangeListener =
-            getSelectedExtensionFilterChangeListener(fileChooser);
-    private final ListChangeListener<ExtensionFilter> nativeExtensionFilterListChangeListener =
-            getNativeExtensionFilterListChangeListener(fileChooser);
-
     public NativeFileSavePicker(Node node) {
         super(node);
-
-        // Initializes synchronization between the FileChooser's selectedExtensionFilterProperty
-        // and the FilePicker's selectedExtensionFilter property.
-        synchronizeSelectedExtensionFilter(fileChooser);
-
-        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(new WeakListChangeListener<>(nativeExtensionFilterListChangeListener));
-    }
-
-    /**
-     * Synchronizes the selected {@link ExtensionFilter} between this file picker and the native {@link FileChooser}.
-     * This ensures that changes in one are reflected in the other without causing infinite update loops.
-     *
-     * @param fileChooser the native file chooser to synchronize with; must not be {@code null}
-     */
-    final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
-        fileChooser.selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(nativeSelectedExtensionFilterChangeListener));
-        selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(selectedExtensionFilterChangeListener));
-    }
-
-    @Override
-    public final String getTitle() {
-        return fileChooser.getTitle();
-    }
-
-    @Override
-    public final void setTitle(final String value) {
-        fileChooser.setTitle(value);
-    }
-
-    @Override
-    public final StringProperty titleProperty() {
-        return fileChooser.titleProperty();
-    }
-
-    @Override
-    public final StringProperty initialFileNameProperty() {
-        if (initialFileName == null) {
-            initialFileName = new SimpleStringProperty(this, "initialFileName");
-            fileChooser.initialFileNameProperty().bind(initialFileName);
-        }
-        return initialFileName;
-    }
-
-    @Override
-    public final File getInitialDirectory() {
-        return fileChooser.getInitialDirectory();
-    }
-
-    @Override
-    public final void setInitialDirectory(final File value) {
-        fileChooser.setInitialDirectory(value);
-    }
-
-    @Override
-    public final ObjectProperty<File> initialDirectoryProperty() {
-        return fileChooser.initialDirectoryProperty();
     }
 
     @Override
     final void showDialog() {
+        var fileChooser = createFileChooser();
         // Basic configuration
         fileChooser.setTitle("Save file as...");
 
@@ -121,5 +55,13 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
                 onFileSelected.apply(saveToFile);
             }
         }
+    }
+
+    private FileChooser createFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
+                .map(ExtensionFilter::toJavaFXExtensionFilter)
+                .toList());
+        return fileChooser;
     }
 }

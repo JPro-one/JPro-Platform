@@ -11,12 +11,15 @@ import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.util.NodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -29,16 +32,11 @@ import java.util.function.Consumer;
  *
  * @author Besmir Beqiri
  * @author Indrit Beqiri
+ * @author Florian Kirmaier
  */
 public class NativeFileOpenPicker extends BaseFileOpenPicker {
+    private static final Logger logger = LoggerFactory.getLogger(NativeFileOpenPicker.class);
 
-    private final FileChooser fileChooser = new FileChooser();
-    private final ChangeListener<FileChooser.ExtensionFilter> nativeSelectedExtensionFilterChangeListener =
-            getNativeSelectedExtensionFilterChangeListener();
-    private final ChangeListener<ExtensionFilter> selectedExtensionFilterChangeListener =
-            getSelectedExtensionFilterChangeListener(fileChooser);
-    private final ListChangeListener<ExtensionFilter> nativeExtensionFilterListChangeListener =
-            getNativeExtensionFilterListChangeListener(fileChooser);
     private List<NativeFileSource> nativeFileSources = List.of();
 
     /**
@@ -49,18 +47,29 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
     public NativeFileOpenPicker(Node node) {
         super(node);
 
-        // Initializes synchronization between the FileChooser's selectedExtensionFilterProperty
-        // and the FilePicker's selectedExtensionFilter property.
-        synchronizeSelectedExtensionFilter(fileChooser);
-
-        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
-        // that can occur if observers are not unregistered from observed objects after use.
-        getExtensionFilters().addListener(new WeakListChangeListener<>(nativeExtensionFilterListChangeListener));
-
         // Define the action that should be performed when the user clicks on the node.
         NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, actionEvent -> {
             Window window = node.getScene().getWindow();
-            if (getSelectionMode() == SelectionMode.MULTIPLE) {
+            var useDirectory = getExtensionFilters().stream().anyMatch(x -> x.allowDirectory());
+            var hasFilesTypes = getExtensionFilters().stream().anyMatch(x -> x.extensions().size() > 0);
+
+            if (useDirectory && hasFilesTypes) {
+                logger.warn("You can't use directory and file types at the same time. Directory will be used.");
+            }
+            if (useDirectory) {
+                DirectoryChooser directoryChooser = createDirectoryChooser();
+                final File file = directoryChooser.showDialog(window);
+                if (file != null) {
+                    // Create a list of native file sources from the selected file.
+                    nativeFileSources = List.of(new NativeFileSource(file));
+                    // Invoke the onFilesSelected consumer.
+                    Consumer<List<? extends FileSource>> onFilesSelectedConsumer = getOnFilesSelected();
+                    if (onFilesSelectedConsumer != null) {
+                        onFilesSelectedConsumer.accept(nativeFileSources);
+                    }
+                }
+            } else if (getSelectionMode() == SelectionMode.MULTIPLE) {
+                FileChooser fileChooser = createFileChooser();
                 final List<File> files = fileChooser.showOpenMultipleDialog(window);
                 if (files != null && !files.isEmpty()) {
                     // Create a list of native file sources from the selected files.
@@ -73,6 +82,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
                     }
                 }
             } else {
+                FileChooser fileChooser = createFileChooser();
                 final File file = fileChooser.showOpenDialog(window);
                 if (file != null) {
                     // Create a list of native file sources from the selected file.
@@ -88,63 +98,26 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         });
     }
 
-    /**
-     * Synchronizes the selected {@link ExtensionFilter} between this file picker and the native {@link FileChooser}.
-     * This ensures that changes in one are reflected in the other without causing infinite update loops.
-     *
-     * @param fileChooser the native file chooser to synchronize with; must not be {@code null}
-     */
-    final void synchronizeSelectedExtensionFilter(FileChooser fileChooser) {
-        fileChooser.selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(nativeSelectedExtensionFilterChangeListener));
-        selectedExtensionFilterProperty()
-                .addListener(new WeakChangeListener<>(selectedExtensionFilterChangeListener));
-    }
-
-    @Override
-    public final String getTitle() {
-        return fileChooser.getTitle();
-    }
-
-    @Override
-    public final void setTitle(final String value) {
-        fileChooser.setTitle(value);
-    }
-
-    @Override
-    public final StringProperty titleProperty() {
-        return fileChooser.titleProperty();
-    }
-
-    @Override
-    public final StringProperty initialFileNameProperty() {
-        if (initialFileName == null) {
-            initialFileName = new SimpleStringProperty(this, "initialFileName");
-            fileChooser.initialFileNameProperty().bind(initialFileName);
-        }
-        return initialFileName;
-    }
-
-    @Override
-    public final File getInitialDirectory() {
-        return fileChooser.getInitialDirectory();
-    }
-
-    @Override
-    public final void setInitialDirectory(final File value) {
-        fileChooser.setInitialDirectory(value);
-    }
-
-    @Override
-    public final ObjectProperty<File> initialDirectoryProperty() {
-        return fileChooser.initialDirectoryProperty();
-    }
-
     @Override
     public final ObjectProperty<SelectionMode> selectionModeProperty() {
         if (selectionMode == null) {
             selectionMode = new SimpleObjectProperty<>(this, "selectionMode", SelectionMode.SINGLE);
         }
         return selectionMode;
+    }
+
+    private FileChooser createFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
+                .map(ExtensionFilter::toJavaFXExtensionFilter)
+                .toList());
+        fileChooser.titleProperty().bind(titleProperty());
+        return fileChooser;
+    }
+
+    private DirectoryChooser createDirectoryChooser() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.titleProperty().bind(titleProperty());
+        return directoryChooser;
     }
 }
