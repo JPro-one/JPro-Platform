@@ -36,8 +36,7 @@ import java.util.function.Consumer;
  */
 public class NativeFileOpenPicker extends BaseFileOpenPicker {
     private static final Logger logger = LoggerFactory.getLogger(NativeFileOpenPicker.class);
-    //private final ChangeListener<FileChooser.ExtensionFilter> nativeSelectedExtensionFilterChangeListener =
-    //        getNativeSelectedExtensionFilterChangeListener();
+
     private List<NativeFileSource> nativeFileSources = List.of();
 
     /**

@@ -86,7 +86,7 @@ abstract class BaseFilePicker implements FilePicker {
         initialDirectoryProperty().set(value);
     }
 
-    StringProperty title = new SimpleStringProperty(this, "title");
+    StringProperty title;
 
     @Override
     public final String getTitle() {
@@ -100,6 +100,9 @@ abstract class BaseFilePicker implements FilePicker {
 
     @Override
     public final StringProperty titleProperty() {
+        if (title == null) {
+            title = new SimpleStringProperty(this, "title");
+        }
         return title;
     }
 
