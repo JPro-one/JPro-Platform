@@ -25,6 +25,10 @@ import java.util.function.Consumer;
  * the native file system. Depending on the configuration (e.g. extension filters and
  * selection mode), it will display either a {@link FileChooser} or a {@link DirectoryChooser}.
  *
+ * @see FileChooser
+ * @see DirectoryChooser
+ * @see NativeFileSource
+ *
  * @author Besmir Beqiri
  * @author Indrit Beqiri
  * @author Florian Kirmaier
