@@ -2,6 +2,7 @@ package one.jpro.platform.auth.core.oauth2;
 
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Encoders;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.AuthenticationException;
 import one.jpro.platform.auth.core.http.HttpMethod;
@@ -136,7 +137,7 @@ public class OAuth2API {
         if (confidentialClient) {
             String basic = options.getClientId() + ":" + options.getClientSecret();
             headers.put("Authorization", "Basic " +
-                    BASE64_ENCODER.encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+                    Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
         }
 
         // Send authorization params in the body
@@ -212,7 +213,7 @@ public class OAuth2API {
         if (confidentialClient) {
             String basic = options.getClientId() + ":" + options.getClientSecret();
             headers.put("Authorization", "Basic " +
-                    BASE64_ENCODER.encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+                    Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
         }
 
         final JSONObject form = new JSONObject()
@@ -270,7 +271,7 @@ public class OAuth2API {
         if (confidentialClient) {
             String basic = options.getClientId() + ":" + options.getClientSecret();
             headers.put("Authorization", "Basic " +
-                    BASE64_ENCODER.encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+                    Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
         }
 
         final JSONObject form = new JSONObject()

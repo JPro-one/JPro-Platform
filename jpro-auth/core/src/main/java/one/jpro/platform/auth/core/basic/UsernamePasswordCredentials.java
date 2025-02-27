@@ -1,5 +1,6 @@
 package one.jpro.platform.auth.core.basic;
 
+import io.jsonwebtoken.io.Encoders;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
@@ -12,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 
-import static one.jpro.platform.auth.core.utils.AuthUtils.BASE64_ENCODER;
 import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
 
 /**
@@ -124,7 +124,7 @@ public class UsernamePasswordCredentials implements Credentials {
             result.append(password);
         }
 
-        return "Basic " + BASE64_ENCODER.encodeToString(result.toString().getBytes(StandardCharsets.UTF_8));
+        return "Basic " + Encoders.BASE64URL.encode(result.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
