@@ -13,8 +13,7 @@ module one.jpro.platform.auth.core {
     requires org.jetbrains.annotations;
     requires java.net.http;
     requires jpro.webapi;
-    requires jwks.rsa;
-    requires com.auth0.jwt;
+    requires jjwt.api;
 
     opens one.jpro.platform.auth.core;
     opens one.jpro.platform.auth.core.authentication;
