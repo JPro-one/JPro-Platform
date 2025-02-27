@@ -10,7 +10,6 @@ import java.net.URLEncoder;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -21,8 +20,6 @@ import java.util.stream.Collectors;
  */
 public interface AuthUtils {
 
-    Base64.Encoder BASE64_ENCODER = Base64.getUrlEncoder();
-    Base64.Decoder BASE64_DECODER = Base64.getUrlDecoder();
     PasswordEncoder BCRYPT_PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     /**

@@ -1,8 +1,11 @@
 ### 0.5.3-SNAPSHOT (TBD)
 
 #### Features
-* Reworked how `jpro-file` handles directories. Extension Filters now have the flag `allowDirectory`.
-Removed the `DirectoryOpenPicker`. The `FileOpenPicker`, `FileSavePicker` and `FileDropper` now handle directories.
+* `JWT Handling Migration`: Transition from Auth0 to JJWT (Java JWT) for managing JSON Web Tokens. This migration
+improves functionality and maintainability by eliminating third-party dependencies, such as Guava.
+* `Directory Handling Enhancements`: Redefined the behavior of `jpro-file` for handling directories. Extension Filters
+now include an `allowDirectory` flag. Additionally, the `DirectoryOpenPicker` has been removed; instead, the
+`FileOpenPicker`, `FileSavePicker`, and `FileDropper` components now support directory operations.
 
 ----------------------
 
