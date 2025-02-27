@@ -1,4 +1,4 @@
-### 0.5.3-SNAPSHOT (TBD)
+### 0.5.3 (February 27, 2025)
 
 #### Features
 * `JWT Handling Migration`: Transition from Auth0 to JJWT (Java JWT) for managing JSON Web Tokens. This migration
