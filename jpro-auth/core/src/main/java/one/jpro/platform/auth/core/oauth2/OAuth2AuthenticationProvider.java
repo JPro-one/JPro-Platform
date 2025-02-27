@@ -1,15 +1,11 @@
 package one.jpro.platform.auth.core.oauth2;
 
-import com.auth0.jwk.Jwk;
-import com.auth0.jwk.JwkException;
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.UrlJwkProvider;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.jpro.webapi.WebAPI;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoders;
+import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.Jwks;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.*;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
@@ -18,7 +14,6 @@ import one.jpro.platform.auth.core.jwt.JWTOptions;
 import one.jpro.platform.auth.core.jwt.TokenCredentials;
 import one.jpro.platform.auth.core.jwt.TokenExpiredException;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
-import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -26,13 +21,22 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.security.interfaces.RSAPublicKey;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Base class for creating an OAuth2 authentication provider.
@@ -42,8 +46,6 @@ import java.util.concurrent.CompletableFuture;
 public class OAuth2AuthenticationProvider implements AuthenticationProvider<Credentials> {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthenticationProvider.class);
-
-    private static final Base64.Decoder BASE64_DECODER = AuthUtils.BASE64_DECODER;
 
     @Nullable
     private final Stage stage;
@@ -155,10 +157,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     return CompletableFuture.completedFuture(newUser);
                 } catch (TokenExpiredException | IllegalStateException ex) {
                     logger.error(ex.getMessage(), ex);
-//                    return CompletableFuture.failedFuture(ex);
-                } catch (JwkException ex) {
-                    logger.error(ex.getMessage(), ex);
-//                    return CompletableFuture.failedFuture(new RuntimeException(ex.getMessage(), ex));
+                    // Fall through to introspection if supported
                 }
 
                 // the token is not JWT format or this authentication provider is not configured to use JWTs
@@ -170,8 +169,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     // this provider doesn't allow introspection, this means we are not able
                     // to perform any authentication
                     return CompletableFuture.failedFuture(
-                            new RuntimeException("Can't authenticate `access_token`: " +
-                                    "Provider doesn't support token introspection"));
+                            new RuntimeException("Can't authenticate `access_token`: "
+                                    + "Provider doesn't support token introspection"));
                 }
 
                 // perform the introspection in accordance to RFC7662
@@ -199,8 +198,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                                 return CompletableFuture.completedFuture(newUser);
                             } catch (TokenExpiredException | IllegalStateException ex) {
                                 return CompletableFuture.failedFuture(ex);
-                            } catch (JwkException ex) {
-                                return CompletableFuture.failedFuture(new RuntimeException(ex.getMessage(), ex));
                             }
                         });
             }
@@ -216,7 +213,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             if (queryParams.has("code")) {
                 oauth2Credentials.setCode(queryParams.getString("code"));
                 if (oauth2Credentials.getCode() == null || oauth2Credentials.getCode().isBlank()) {
-                    return CompletableFuture.failedFuture(new RuntimeException("Authorization code is missing"));
+                    return CompletableFuture.failedFuture(
+                            new RuntimeException("Authorization code is missing"));
                 }
             }
 
@@ -228,18 +226,16 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
             // Create a new JSONObject to hold the parameters
             final JSONObject params = new JSONObject();
-            final OAuth2Flow flow;
-            if (oauth2Credentials.getFlow() != null) {
-                flow = oauth2Credentials.getFlow();
-            } else {
-                flow = options.getFlow();
-            }
+            final OAuth2Flow flow = oauth2Credentials.getFlow() != null
+                    ? oauth2Credentials.getFlow()
+                    : options.getFlow();
 
             // Validate credentials
             oauth2Credentials.validate(flow);
 
-            if (options.getSupportedGrantTypes() != null && !options.getSupportedGrantTypes().isEmpty() &&
-                    !options.getSupportedGrantTypes().contains(flow.getGrantType())) {
+            if (options.getSupportedGrantTypes() != null
+                    && !options.getSupportedGrantTypes().isEmpty()
+                    && !options.getSupportedGrantTypes().contains(flow.getGrantType())) {
                 return CompletableFuture.failedFuture(
                         new RuntimeException("Provided flow is not supported by provider"));
             }
@@ -279,7 +275,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     if (oauth2Credentials.getAssertion() != null) {
                         params.put("assertion", oauth2Credentials.getAssertion());
                     }
-
                     if (oauth2Credentials.getScopes() != null) {
                         params.put("scope", String.join(options.getScopeSeparator(), oauth2Credentials.getScopes()));
                     }
@@ -300,8 +295,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                             return CompletableFuture.completedFuture(newUser);
                         } catch (TokenExpiredException | IllegalStateException ex) {
                             return CompletableFuture.failedFuture(ex);
-                        } catch (JwkException ex) {
-                            return CompletableFuture.failedFuture(new RuntimeException(ex.getMessage(), ex));
                         }
                     });
         } catch (ClassCastException | CredentialValidationException ex) {
@@ -313,7 +306,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * Creates a OAuth2 authentication provider for OpenID Connect Discovery. The discovery will use the given
      * site in the configuration options and attempt to load the well-known descriptor.
      *
-     * @return an {@link OAuth2AuthenticationProvider} instance.
+     * @return an {@link OpenIDAuthenticationProvider} instance.
      */
     public CompletableFuture<OpenIDAuthenticationProvider> discover() {
         return api.discover(stage, options);
@@ -327,8 +320,12 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @return a {@link CompletableFuture} with the introspection response information in JSON format.
      */
     public CompletableFuture<JSONObject> introspect(User user, String tokenType) {
-        return api.tokenIntrospection(tokenType, user.toJSON().getJSONObject(User.KEY_ATTRIBUTES)
-                .optJSONObject("auth").get(tokenType).toString());
+        return api.tokenIntrospection(tokenType,
+                user.toJSON()
+                        .getJSONObject(User.KEY_ATTRIBUTES)
+                        .optJSONObject("auth")
+                        .get(tokenType)
+                        .toString());
     }
 
     /**
@@ -339,10 +336,14 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @throws IllegalStateException if the user does not have a refresh token
      */
     public CompletableFuture<User> refresh(User user) throws IllegalStateException {
-        final String refreshToken = user.toJSON().getJSONObject(User.KEY_ATTRIBUTES)
-                .optJSONObject("auth").optString("refresh_token");
+        final String refreshToken = user.toJSON()
+                .getJSONObject(User.KEY_ATTRIBUTES)
+                .optJSONObject("auth")
+                .optString("refresh_token");
+
         if (refreshToken == null || refreshToken.isBlank()) {
-            return CompletableFuture.failedFuture(new IllegalStateException("refresh_token is null or missing"));
+            return CompletableFuture.failedFuture(
+                    new IllegalStateException("refresh_token is null or missing"));
         }
 
         return api.token("refresh_token", new JSONObject().put("refresh_token", refreshToken))
@@ -354,8 +355,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         return CompletableFuture.completedFuture(newUser);
                     } catch (TokenExpiredException | IllegalStateException ex) {
                         return CompletableFuture.failedFuture(ex);
-                    } catch (JwkException ex) {
-                        return CompletableFuture.failedFuture(new RuntimeException(ex.getMessage(), ex));
                     }
                 });
     }
@@ -369,8 +368,12 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @return a {@link CompletableFuture} that completes when the token is revoked.
      */
     public CompletableFuture<Void> revoke(User user, String tokenType) {
-        return api.tokenRevocation(tokenType, user.toJSON().getJSONObject(User.KEY_ATTRIBUTES)
-                .optJSONObject("auth").get(tokenType).toString());
+        return api.tokenRevocation(tokenType,
+                user.toJSON()
+                        .getJSONObject(User.KEY_ATTRIBUTES)
+                        .optJSONObject("auth")
+                        .get(tokenType)
+                        .toString());
     }
 
     /**
@@ -382,7 +385,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      */
     public CompletableFuture<JSONObject> userInfo(final @NotNull User user) {
         Objects.requireNonNull(user, "User must not be null");
-        final JSONObject authJSON = user.toJSON().getJSONObject(User.KEY_ATTRIBUTES).getJSONObject("auth");
+        final JSONObject authJSON = user.toJSON()
+                .getJSONObject(User.KEY_ATTRIBUTES)
+                .getJSONObject("auth");
 
         return api.userInfo(authJSON.getString("access_token"))
                 .thenCompose(json -> {
@@ -402,9 +407,6 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                             verifyToken(json.getString("token"), false);
                         } catch (TokenExpiredException | IllegalStateException ex) {
                             return CompletableFuture.failedFuture(ex);
-                        } catch (JwkException ex) {
-                            return CompletableFuture.failedFuture(
-                                    new AuthenticationException(ex.getMessage(), ex));
                         }
                     }
 
@@ -426,22 +428,26 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         return api.logout(accessToken, refreshToken);
     }
 
-    private User createUser(@NotNull final JSONObject json) throws JwkException,
-            TokenExpiredException, IllegalStateException {
+    /**
+     * Creates a {@link User} from the given JSON object containing at least the "access_token" (and optionally "id_token").
+     *
+     * @param json the token data JSON
+     * @return a User object
+     * @throws TokenExpiredException if the token is expired
+     * @throws IllegalStateException if the token has invalid claims
+     */
+    private User createUser(@NotNull final JSONObject json)
+            throws TokenExpiredException, IllegalStateException {
         Objects.requireNonNull(json, "json can not be null");
 
         final JSONObject userJSON = new JSONObject();
         final JSONObject authJSON = new JSONObject(json.toString());
 
         if (json.has("access_token")) {
-            // attempt to create a user from the json object
+            // attempt to verify the token
             final String token = json.getString("access_token");
-
-            // verify if the user is not expired
-            // this may happen if the user tokens have been issued for future use for example
-            final JSONObject verifiedAccessToken;
             try {
-                verifiedAccessToken = verifyToken(token, false);
+                final JSONObject verifiedAccessToken = verifyToken(token, false);
                 // Store JWT authorization
                 authJSON.put("accessToken", verifiedAccessToken);
 
@@ -454,8 +460,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 }
 
                 authJSON.put("claimToken", "accessToken");
-            } catch (JWTDecodeException | IllegalStateException ex) {
-                logger.trace("Cannot decode access token:", ex);
+            } catch (JwtException | IllegalStateException ex) {
+                logger.error("Cannot decode/verify access token:", ex);
             }
         }
 
@@ -463,11 +469,11 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             // attempt to create a user from the json object
             final String token = json.getString("id_token");
 
-            // verify if the user is not expired
-            // this may happen if the user tokens have been issued for future use for example
-            final JSONObject verifiedIdToken;
             try {
-                verifiedIdToken = verifyToken(token, true);
+                // verify if the user is not expired
+                // this may happen if the user tokens have been issued for future use for example
+                final JSONObject verifiedIdToken = verifyToken(token, true);
+
                 // Store JWT authorization
                 authJSON.put("idToken", verifiedIdToken);
 
@@ -478,8 +484,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 } else if (payload.has("email")) {
                     userJSON.put(Authentication.KEY_NAME, payload.getString("email"));
                 }
-            } catch (JWTDecodeException | IllegalStateException ex) {
-                logger.trace("Cannot decode id token:", ex);
+            } catch (JwtException | IllegalStateException ex) {
+                logger.error("Cannot decode/verify id token:", ex);
             }
         }
 
@@ -497,61 +503,86 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * @param token   the token string
      * @param idToken set to <code>true</code> if this token is an id_token, otherwise <code>false</code>
      * @return a {@link JSONObject} holding the Json Web Token information related to this token.
-     * @throws JwkException          if no jwk can be found using the given token kid
      * @throws TokenExpiredException if the token has expired
      * @throws IllegalStateException if the basic validation fails
      */
-    private JSONObject verifyToken(String token, boolean idToken) throws JwkException,
-            TokenExpiredException, IllegalStateException {
-        final JWTOptions jwtOptions = options.getJWTOptions();
+    private JSONObject verifyToken(String token, boolean idToken)
+            throws TokenExpiredException, IllegalStateException {
 
-        JSONObject json;
+        final JSONObject json = new JSONObject();
+        json.put("token", token);
+        json.put("token_type", idToken ? "id_token" : "access_token");
+
         try {
-            final DecodedJWT decodedToken = JWT.decode(token);
             if (options.isVerifyToken()) {
-                final String alg = decodedToken.getAlgorithm();
-                Algorithm algorithm = Algorithm.none();
-                // TODO: Add support for other algorithms
-                switch (alg) {
-                    case "HS256":
-                        algorithm = Algorithm.HMAC256(options.getClientSecret());
-                        break;
-                    case "RS256":
-                        JwkProvider jwkProvider;
-                        try {
-                            jwkProvider = new UrlJwkProvider(URI.create(options.getJwkPath()).toURL());
-//                        jwkProvider = new JwkProviderBuilder(options.getJwkPath())
-//                                .cached(options.getJWTOptions().getCacheSize(), options.getJWTOptions().getExpiresIn())
-//                                .build();
-                        } catch (MalformedURLException ex) {
-                            throw new IllegalStateException("Invalid JWK path: " + options.getJwkPath());
-                        }
-                        final Jwk jwk = jwkProvider.get(decodedToken.getKeyId());
-                        algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
-                        break;
-                }
+                // Build a parser
+                try (HttpClient httpClient = HttpClient.newHttpClient()) {
+                    // Parse and verify signature/claims
+                    final String webKeys = httpClient.send(
+                            HttpRequest.newBuilder(URI.create(options.getJwkPath())).build(),
+                            HttpResponse.BodyHandlers.ofString()).body();
+                    final Map<String, ? extends Key> keyMap = Jwks.setParser().build()
+                            .parse(webKeys).getKeys().stream()
+                            .collect(toMap(Identifiable::getId, Jwk::toKey));
+                    final JwtParser jwtParser = Jwts.parser()
+                            .keyLocator(header ->
+                                    keyMap.get(header.getOrDefault("kid", "").toString()))
+                            .build();
+                    final Jws<Claims> jws = jwtParser.parseSignedClaims(token);
 
-                // Allow only secure algorithms
-                if (Algorithm.none().equals(algorithm)) {
-                    throw new IllegalStateException("Algorithm \"none\" not allowed");
-                }
+                    // Header info
+                    Optional.ofNullable(jws.getHeader())
+                            .ifPresent(header -> json.put("header", new JSONObject(jws.getHeader())));
 
-                final JWTVerifier verifier = JWT.require(algorithm).build();
-                final DecodedJWT verifiedToken = verifier.verify(token);
-                json = jwtToJson(verifiedToken, idToken ? "id_token" : "access_token");
+                    // Payload info
+                    Optional.ofNullable(jws.getPayload())
+                            .ifPresent(payload -> json.put("payload", new JSONObject(jws.getPayload())));
+
+                    // Signature info
+                    Optional.ofNullable(jws.getDigest())
+                            .ifPresent(digest -> json.put("signature", Encoders.BASE64URL.encode(digest)));
+                } catch (ExpiredJwtException e) {
+                    throw new TokenExpiredException(e.getMessage(),
+                            e.getClaims() != null
+                                    ? e.getClaims().getExpiration().toInstant() : Instant.now());
+                } catch (JwtException e) {
+                    throw new IllegalStateException(e.getMessage());
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e.getMessage());
+                }
             } else {
-                json = jwtToJson(decodedToken, idToken ? "id_token" : "access_token");
+                // Decode header and claims without verifying the signature
+                final String[] parts = token.split("\\.");
+                if (parts.length < 2) {
+                    throw new IllegalStateException("Invalid JWT token");
+                }
+
+                // Decode the JWT token header and payload
+                final String headerString = new String(Decoders.BASE64URL.decode(parts[0]), StandardCharsets.UTF_8);
+                json.put("header", new JSONObject(headerString));
+                final String payloadString = new String(Decoders.BASE64URL.decode(parts[1]), StandardCharsets.UTF_8);
+                json.put("payload", new JSONObject(payloadString));
+
+                // Retrieve signature if available
+                if (parts.length > 2) {
+                    final String signature = parts[2];
+                    json.put("signature", signature);
+                }
             }
-        } catch (com.auth0.jwt.exceptions.TokenExpiredException tex) {
-            throw new TokenExpiredException(tex.getMessage(), tex.getExpiredOn());
+        } catch (ExpiredJwtException e) {
+            throw new TokenExpiredException(e.getMessage(),
+                    e.getClaims() != null
+                            ? e.getClaims().getExpiration().toInstant() : Instant.now());
+        } catch (JwtException e) {
+            throw new IllegalStateException(e.getMessage());
         }
-//        catch (com.auth0.jwt.exceptions.JWTDecodeException dex) {
-//            throw new IllegalStateException(dex.getMessage());
-//        }
+
+        final JWTOptions jwtOptions = options.getJWTOptions();
+        final JSONObject payload = json.getJSONObject("payload");
 
         // validate the audience
-        if (json.has("aud")) {
-            final JSONArray audience = json.getJSONArray("aud");
+        if (payload.has(Claims.AUDIENCE)) {
+            final JSONArray audience = payload.getJSONArray(Claims.AUDIENCE);
             if (audience == null || audience.isEmpty()) {
                 throw new IllegalStateException("User audience is null or empty");
             }
@@ -583,28 +614,28 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
         // validate the issuer
         if (jwtOptions.getIssuer() != null) {
-            if (!jwtOptions.getIssuer().equals(json.getString("iss"))) {
+            if (!jwtOptions.getIssuer().equals(payload.getString(Claims.ISSUER))) {
                 throw new IllegalStateException("Invalid JWT issuer, expected: " + jwtOptions.getIssuer() +
-                        ", actual: " + json.getString("iss"));
+                        ", actual: " + payload.getString(Claims.ISSUER));
             }
         }
 
         // validate authorised party
         if (idToken) {
-            if (json.has("azp")) {
-                if (!options.getClientId().equals(json.getString("azp"))) {
+            if (payload.has("azp")) {
+                if (!options.getClientId().equals(payload.getString("azp"))) {
                     throw new IllegalStateException("Invalid authorised party, expected: " + options.getClientId() +
-                            ", actual: " + json.getString("azp"));
+                            ", actual: " + payload.getString("azp"));
                 }
 
-                final JSONArray audience = json.getJSONArray("aud");
+                final JSONArray audience = payload.getJSONArray(Claims.AUDIENCE);
                 if (audience != null && audience.length() > 1) {
                     // In reference to: https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
                     // If the ID Token contains multiple audiences, the Client SHOULD verify that an azp Claim is present.
                     final List<String> audList = audience.toList().stream()
                             .map(Object::toString)
                             .toList();
-                    if (audList.contains(json.getString("azp"))) {
+                    if (audList.contains(payload.getString("azp"))) {
                         throw new IllegalStateException("ID token with multiple audiences, " +
                                 "doesn't contain the azp Claim value");
                     }
@@ -616,42 +647,11 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     }
 
     /**
-     * Returns a JSON representation of a Json Web Token.
+     * Returns {@code true} if the given user has expired based on the "exp" property in the "auth" object.
      *
-     * @param jwt       represents a Json Web Token that was decoded from its string representation
-     * @param tokenType a string representation of the type of this token, like "access_token" or "id_token"
-     * @return a {@link JSONObject} holding the JWT information.
+     * @param user the user
+     * @return {@code true} if the user is expired; {@code false} otherwise
      */
-    private JSONObject jwtToJson(DecodedJWT jwt, String tokenType) {
-        final JSONObject json = new JSONObject();
-        // Decoded JWT info
-        json.put("token", jwt.getToken());
-        json.put("token_type", tokenType);
-        Optional.ofNullable(jwt.getHeader())
-                .ifPresent(header -> {
-                    final String decodedHeader = new String(BASE64_DECODER.decode(header));
-                    json.put("header", new JSONObject(decodedHeader));
-                });
-        Optional.ofNullable(jwt.getPayload())
-                .ifPresent(payload -> {
-                    final String decodedPayload = new String(BASE64_DECODER.decode(payload));
-                    json.put("payload", new JSONObject(decodedPayload));
-                });
-        Optional.ofNullable(jwt.getSignature()).ifPresent(signature -> json.put("signature", signature));
-
-        // Payload info
-        Optional.ofNullable(jwt.getIssuer()).ifPresent(issuer -> json.put("iss", issuer));
-        Optional.ofNullable(jwt.getSubject()).ifPresent(subject -> json.put("sub", subject));
-        Optional.ofNullable(jwt.getAudience()).ifPresent(audience -> json.put("aud", new JSONArray(audience)));
-        Optional.ofNullable(jwt.getExpiresAt()).map(Date::getTime).ifPresent(exp -> json.put("exp", exp));
-        Optional.ofNullable(jwt.getIssuedAt()).map(Date::getTime).ifPresent(iat -> json.put("iat", iat));
-        Optional.ofNullable(jwt.getNotBefore()).map(Date::getTime).ifPresent(nbr -> json.put("nbr", nbr));
-        Optional.ofNullable(jwt.getId()).ifPresent(kid -> json.put("kid", kid));
-        Optional.ofNullable(jwt.getClaim("azp")).ifPresent(azp -> json.put("azp", azp.asString()));
-        Optional.ofNullable(jwt.getClaims()).ifPresent(claimMap -> json.put("claims", new JSONArray(claimMap.keySet())));
-        return json;
-    }
-
     private boolean hasExpired(User user) {
         if (user.getAttributes().containsKey("auth")) {
             JSONObject jwtInfo = (JSONObject) user.getAttributes().get("auth");

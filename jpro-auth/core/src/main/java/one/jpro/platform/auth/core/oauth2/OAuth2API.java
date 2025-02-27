@@ -1,13 +1,12 @@
 package one.jpro.platform.auth.core.oauth2;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import io.jsonwebtoken.Jwe;
+import io.jsonwebtoken.Jwts;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.authentication.AuthenticationException;
 import one.jpro.platform.auth.core.http.HttpMethod;
 import one.jpro.platform.auth.core.jwt.JWTOptions;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
-import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -25,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static one.jpro.platform.auth.core.utils.AuthUtils.BASE64_ENCODER;
+import static one.jpro.platform.auth.core.utils.AuthUtils.*;
 
 /**
  * OAuth2 API provides the required functionalities to interact with an OAuth2 provider.
@@ -114,7 +113,7 @@ public class OAuth2API {
             }
         }
 
-        return options.getAuthorizationPath() + '?' + AuthUtils.jsonToQuery(query);
+        return options.getAuthorizationPath() + '?' + jsonToQuery(query);
     }
 
     /**
@@ -165,7 +164,7 @@ public class OAuth2API {
         }
 
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-        final String payload = AuthUtils.jsonToQuery(form);
+        final String payload = jsonToQuery(form);
 
         // specify preferred accepted content type
         headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
@@ -178,11 +177,11 @@ public class OAuth2API {
 
                     JSONObject json;
                     final var header = response.headers();
-                    if (AuthUtils.containsValue(header, "application/json")) {
+                    if (containsValue(header, "application/json")) {
                         json = new JSONObject(response.body());
-                    } else if (AuthUtils.containsValue(header, "application/x-www-form-urlencoded")
-                            || AuthUtils.containsValue(header, "text/plain")) {
-                        json = AuthUtils.queryToJson(response.body());
+                    } else if (containsValue(header, "application/x-www-form-urlencoded")
+                            || containsValue(header, "text/plain")) {
+                        json = queryToJson(response.body());
                     } else {
                         return CompletableFuture.failedFuture(
                                 new RuntimeException("Cannot handle content type: "
@@ -191,9 +190,9 @@ public class OAuth2API {
 
                     if (json == null || json.has("error")) {
                         return CompletableFuture.failedFuture(
-                                new RuntimeException(AuthUtils.extractErrorDescription(json)));
+                                new RuntimeException(extractErrorDescription(json)));
                     } else {
-                        AuthUtils.processNonStandardHeaders(json, response, options.getScopeSeparator());
+                        processNonStandardHeaders(json, response, options.getScopeSeparator());
                         return CompletableFuture.completedFuture(json);
                     }
                 });
@@ -222,7 +221,7 @@ public class OAuth2API {
                 .put("token_type_hint", tokenType);
 
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-        final String payload = AuthUtils.jsonToQuery(form);
+        final String payload = jsonToQuery(form);
         // specify preferred accepted accessToken type
         headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
@@ -233,20 +232,20 @@ public class OAuth2API {
                     }
 
                     JSONObject json;
-                    if (AuthUtils.containsValue(response.headers(), "application/json")) {
+                    if (containsValue(response.headers(), "application/json")) {
                         json = new JSONObject(response.body());
-                    } else if (AuthUtils.containsValue(response.headers(), "application/x-www-form-urlencoded") ||
-                            AuthUtils.containsValue(response.headers(), "text/plain")) {
-                        json = AuthUtils.queryToJson(response.body());
+                    } else if (containsValue(response.headers(), "application/x-www-form-urlencoded") ||
+                            containsValue(response.headers(), "text/plain")) {
+                        json = queryToJson(response.body());
                     } else return CompletableFuture.failedFuture(
                             new RuntimeException("Cannot handle accessToken type: "
                                     + response.headers().allValues("Content-Type")));
 
                     if (json == null || json.has("error")) {
                         return CompletableFuture.failedFuture(
-                                new RuntimeException(AuthUtils.extractErrorDescription(json)));
+                                new RuntimeException(extractErrorDescription(json)));
                     } else {
-                        AuthUtils.processNonStandardHeaders(json, response, options.getScopeSeparator());
+                        processNonStandardHeaders(json, response, options.getScopeSeparator());
                         return CompletableFuture.completedFuture(json);
                     }
                 });
@@ -278,7 +277,7 @@ public class OAuth2API {
                 .put("token", token)
                 .put("token_type_hint", tokenType);
 
-        final String payload = AuthUtils.jsonToQuery(form);
+        final String payload = jsonToQuery(form);
         // specify the preferred accepted accessToken type
         headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
@@ -309,7 +308,7 @@ public class OAuth2API {
         }
 
         if (extraParams != null) {
-            path += "?" + AuthUtils.jsonToQuery(extraParams);
+            path += "?" + jsonToQuery(extraParams);
         }
 
         headers.put("Authorization", "Bearer " + accessToken);
@@ -326,25 +325,26 @@ public class OAuth2API {
 
                     // userInfo is expected to be a JWT
                     JSONObject userInfo;
-                    if (AuthUtils.containsValue(response.headers(), "application/json")) {
+                    if (containsValue(response.headers(), "application/json")) {
                         userInfo = new JSONObject(body);
-                    } else if (AuthUtils.containsValue(response.headers(), "applications/jwt")) {
+                    } else if (containsValue(response.headers(), "applications/jwt")) {
                         // userInfo is expected to be a JWT
-                        final DecodedJWT decodedJWT = JWT.decode(body);
-                        final JSONObject jwtHeader = new JSONObject(decodedJWT.getHeader());
-                        final JSONObject jwtPayload = new JSONObject(decodedJWT.getPayload());
+                        final Jwe<byte[]> jwt = Jwts.parser().build()
+                                .parseEncryptedContent(body);
+                        final JSONObject jwtHeader = new JSONObject(jwt.getHeader());
+                        final JSONObject jwtPayload = new JSONObject(jwt.getPayload());
                         userInfo = new JSONObject().put("header", jwtHeader).put("payload", jwtPayload);
-                    } else if (AuthUtils.containsValue(response.headers(), "application/x-www-form-urlencoded")
-                            || AuthUtils.containsValue(response.headers(), "text/plain")) {
+                    } else if (containsValue(response.headers(), "application/x-www-form-urlencoded")
+                            || containsValue(response.headers(), "text/plain")) {
                         // attempt to convert url encoded string to json
-                        userInfo = AuthUtils.queryToJson(body);
+                        userInfo = queryToJson(body);
                     } else {
                         return CompletableFuture.failedFuture(
                                 new AuthenticationException("Cannot handle Content-Type: "
                                         + response.headers().allValues("Content-Type")));
                     }
 
-                    AuthUtils.processNonStandardHeaders(userInfo, response, options.getScopeSeparator());
+                    processNonStandardHeaders(userInfo, response, options.getScopeSeparator());
                     return CompletableFuture.completedFuture(userInfo);
                 });
     }
@@ -365,15 +365,15 @@ public class OAuth2API {
                     }
 
                     JSONObject json;
-                    if (AuthUtils.containsValue(response.headers(), "application/jwk-set+json") ||
-                            AuthUtils.containsValue(response.headers(), "application/json")) {
+                    if (containsValue(response.headers(), "application/jwk-set+json") ||
+                            containsValue(response.headers(), "application/json")) {
                         json = new JSONObject(response.body());
                     } else return CompletableFuture.failedFuture(
                             new RuntimeException("Cannot handle content type: "
                                     + response.headers().allValues("Content-Type")));
 
                     if (json.has("error")) {
-                        return CompletableFuture.failedFuture(new RuntimeException(AuthUtils.extractErrorDescription(json)));
+                        return CompletableFuture.failedFuture(new RuntimeException(extractErrorDescription(json)));
                     } else {
                         // process the cache headers as recommended by: https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys
                         List<String> cacheControl = response.headers().allValues(CACHE_CONTROL);
@@ -432,7 +432,7 @@ public class OAuth2API {
                                         + response.statusCode() + "] " + response.body()));
                     }
 
-                    if (!AuthUtils.containsValue(response.headers(), "application/json")) {
+                    if (!containsValue(response.headers(), "application/json")) {
                         return CompletableFuture.failedFuture(
                                 new RuntimeException("Cannot handle content type: "
                                         + response.headers().allValues("Content-Type")));
@@ -443,7 +443,7 @@ public class OAuth2API {
                     // some providers return errors as JSON
                     if (json.has("error")) {
                         return CompletableFuture.failedFuture(
-                                new RuntimeException(AuthUtils.extractErrorDescription(json)));
+                                new RuntimeException(extractErrorDescription(json)));
                     }
 
                     config.setAuthorizationPath(json.optString("authorization_endpoint", null));
@@ -625,7 +625,7 @@ public class OAuth2API {
         }
 
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-        final String payload = AuthUtils.jsonToQuery(form);
+        final String payload = jsonToQuery(form);
         headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
 
         return fetch(HttpMethod.POST, options.getLogoutPath(), headers, payload)
@@ -706,7 +706,7 @@ public class OAuth2API {
                             return CompletableFuture.failedFuture(
                                     new RuntimeException("Status code: " + response.statusCode()));
                         } else {
-                            if (AuthUtils.containsValue(response.headers(), "application/json")) {
+                            if (containsValue(response.headers(), "application/json")) {
                                 // if value is json, extract error, error_descriptions
                                 JSONObject error = new JSONObject(response.body());
                                 if (!error.optString("error").isEmpty()) {
