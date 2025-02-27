@@ -1,5 +1,6 @@
 package one.jpro.platform.auth.core.basic;
 
+import io.jsonwebtoken.io.Encoders;
 import one.jpro.platform.auth.core.authentication.CredentialValidationException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import static one.jpro.platform.auth.core.utils.AuthUtils.BASE64_ENCODER;
 import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -67,7 +67,7 @@ public class UsernamePasswordCredentialsTests {
         UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials("username", "password");
 
-        String authHeader = "Basic " + BASE64_ENCODER.encodeToString((credentials.getUsername() + ":"
+        String authHeader = "Basic " + Encoders.BASE64URL.encode((credentials.getUsername() + ":"
                 + credentials.getPassword()).getBytes(StandardCharsets.UTF_8));
         assertThat(credentials.toHttpAuthorization()).isEqualTo(authHeader);
     }
