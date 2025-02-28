@@ -1,7 +1,7 @@
-### 0.5.4 (TDB)
+### 0.5.4 (February 28, 2025)
 
 #### Improvements
-Integrate the modularized versions of `jjwt-api`, `jjwt-impl` and `jjwt-orgjson` libraries into to `jpro-auth-core` to 
+* Integrate the modularized versions of `jjwt-api`, `jjwt-impl` and `jjwt-orgjson` libraries into to `jpro-auth-core` to
 produce a fully JPMS-compliant module.
 
 ----------------------
