@@ -5,9 +5,9 @@ plugins {
 dependencies {
     api project(":jpro-utils")
     implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
-    implementation "io.jsonwebtoken:jjwt-api:$JJWT_VERSION"
-    runtimeOnly "io.jsonwebtoken:jjwt-impl:$JJWT_VERSION"
-    runtimeOnly "io.jsonwebtoken:jjwt-orgjson:$JJWT_VERSION"
+    implementation "one.jpro.platform.jpms:jjwt-api:$JJWT_VERSION"
+    runtimeOnly "one.jpro.platform.jpms:jjwt-impl:$JJWT_VERSION"
+    runtimeOnly "one.jpro.platform.jpms:jjwt-orgjson:$JJWT_VERSION"
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     api "org.json:json:$JSON_VERSION"
