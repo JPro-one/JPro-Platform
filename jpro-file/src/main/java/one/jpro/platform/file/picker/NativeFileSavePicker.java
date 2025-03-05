@@ -61,6 +61,8 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
      */
     FileChooser createFileChooser() {
         final FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(getInitialDirectory());
+        fileChooser.setInitialFileName(getInitialFileName());
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
                 .toList());
