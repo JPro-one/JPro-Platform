@@ -114,6 +114,8 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
      */
     FileChooser createFileChooser() {
         final FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(getInitialDirectory());
+        fileChooser.setInitialFileName(getInitialFileName());
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
                 .toList());
@@ -128,6 +130,7 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
      */
     DirectoryChooser createDirectoryChooser() {
         final DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(getInitialDirectory());
         directoryChooser.titleProperty().bind(titleProperty());
         return directoryChooser;
     }
