@@ -40,10 +40,13 @@ public class NativeFileOpenPickerTest {
             Label label = new Label();
             NativeFileOpenPicker picker = new NativeFileOpenPicker(label);
             var file = new File("test");
+            var initialFileName = "test.txt";
             picker.setInitialDirectory(file);
+            picker.setInitialFileName("test.txt");
             var chooser = picker.createFileChooser();
 
             Assertions.assertEquals(file, chooser.getInitialDirectory());
+            Assertions.assertEquals(initialFileName, chooser.getInitialFileName());
         });
     }
 
