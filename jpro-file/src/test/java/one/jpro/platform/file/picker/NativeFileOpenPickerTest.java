@@ -35,7 +35,7 @@ public class NativeFileOpenPickerTest {
     }
 
     @Test
-    public void testInitialDirectory() {
+    public void testInitialDirectoryAndInitialFileName() {
         inFX(() -> {
             Label label = new Label();
             NativeFileOpenPicker picker = new NativeFileOpenPicker(label);
