@@ -1,5 +1,8 @@
 ### 0.5.5 (TBD)
 
+#### Features
+* Added methods Filters.description and Filters.titleAndDescription
+
 ----------------------
 
 ### 0.5.4 (February 28, 2025)

@@ -39,6 +39,41 @@ object Filters {
       })
     }
   }
+  def description(description: String): Filter = { route => { request =>
+      val r = route.apply(request)
+      val _description = description
+
+      Response(r.future.map {
+        case x: View =>
+          new View {
+            override def title: String = x.title
+            override def description: String = _description
+            override def content: all.Node = x.realContent
+
+            override def fullscreen: Boolean = x.fullscreen
+          }
+        case x => x
+      })
+    }
+  }
+  def titleAndDescription(title: String, description: String): Filter = { route => { request =>
+      val r = route.apply(request)
+      val _title = title
+      val _description = description
+
+      Response(r.future.map {
+        case x: View =>
+          new View {
+            override def title: String = _title
+            override def description: String = _description
+            override def content: all.Node = x.realContent
+
+            override def fullscreen: Boolean = x.fullscreen
+          }
+        case x => x
+      })
+    }
+  }
 
   def errorPage(): Filter = errorPage((request, ex) => Response.node(new Label("Error: " + ex.getMessage)))
   def errorPage(biFunction: BiFunction[Request, Throwable, Response]): Filter = {
