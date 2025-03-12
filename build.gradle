@@ -1,3 +1,37 @@
+def subprojectsWithDocs = [
+        "jpro-auth",
+        "jpro-file",
+        "jpro-media",
+        "jpro-routing"
+]
+
+tasks.register('combineDocumentation') {
+    description = "Combines multiple subproject README.md files into a single DOCUMENTATION.md"
+    group = "Documentation"
+
+    // We'll store the final file in build/docs/DOCUMENTATION.md
+    def outputFile = layout.buildDirectory.file("docs/DOCUMENTATION.md")
+    outputs.file(outputFile)
+
+    doLast {
+        def combined = new StringBuilder()
+        def readmeFile = file("$rootDir/README.md")
+        combined.append(readmeFile.text).append("\n\n")
+        subprojectsWithDocs.each { subprojectName ->
+            def subProjectReadmeFile = file("$rootDir/$subprojectName/README.md")
+            if (subProjectReadmeFile.exists()) {
+                combined.append(subProjectReadmeFile.text).append("\n\n")
+            }
+        }
+
+        // Ensure the docs folder exists
+        outputFile.get().asFile.parentFile.mkdirs()
+
+        // Write the final file
+        outputFile.get().asFile.text = combined.toString()
+    }
+}
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -86,7 +120,8 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
            project("jpro-image-manager"), project("jpro-mail"), project("jpro-mdfx"), project("jpro-media"),
            project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"), project("jpro-utils"),
            project("jpro-html-scrollpane"), project("jpro-routing:core"), project("jpro-routing:dev"),
-           project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube")]) {
+           project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
+           rootProject]) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
     apply plugin: 'tech.yanand.maven-central-publish'
@@ -101,8 +136,24 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                 artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
                 version = JPRO_PLATFORM_VERSION
 
-                // Ensure only one component is included in the publication
-                from components.java
+                if (artifactId == rootProject.name) { // Only the root project
+                    // Attach the combined DOCUMENTATION.md
+                    artifact(tasks.named("combineDocumentation")) {
+                        // So Gradle knows it must run combineDocumentation first
+                        builtBy tasks.named("combineDocumentation")
+                        classifier = 'DOCUMENTATION'
+                        extension = 'md'
+                    }
+
+                    // Attach the root CHANGELOG.md
+                    artifact("$rootDir/CHANGELOG.md") {
+                        classifier = 'CHANGELOG'
+                        extension = 'md'
+                    }
+                } else {
+                    // Ensure only one component is included in the publication
+                    from components.java
+                }
 
                 pom {
                     url = 'https://www.jpro.one'
@@ -138,9 +189,11 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
             }
         }
 
-        java {
-            withSourcesJar()
-            withJavadocJar()
+        if (project.name != rootProject.name) { // Only the subprojects
+            java {
+                withSourcesJar()
+                withJavadocJar()
+            }
         }
 
         repositories {
