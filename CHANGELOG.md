@@ -1,7 +1,10 @@
 ### 0.5.5 (TBD)
 
 #### Features
-* Added methods Filters.description and Filters.titleAndDescription
+* Introduced new methods `Filters.description` and `Filters.titleAndDescription` to enhance filtering capabilities.
+
+#### Bugfixes
+* Fixed a regression that prevented file choosers from initializing with the correct directory and file name.
 
 ----------------------
 
