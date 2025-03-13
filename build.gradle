@@ -180,6 +180,9 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                 }
 
                 pom {
+                    name = 'JPro Platform'
+                    description = 'JPro Platform is a collection of modules that allows you to create ' +
+                            'cross-platform JavaFX application applications that also run in the browser.'
                     url = 'https://www.jpro.one'
 
                     licenses {
