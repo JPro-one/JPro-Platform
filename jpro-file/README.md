@@ -78,7 +78,7 @@ a specified callback handler is invoked for further processing.
 - Gradle
     ```groovy
     dependencies {
-        implementation("one.jpro.platform:jpro-file:0.5.5-SNAPSHOT")
+        implementation("one.jpro.platform:jpro-file:0.5.5")
     }
     ```
 - Maven
@@ -87,7 +87,7 @@ a specified callback handler is invoked for further processing.
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-file</artifactId>
-        <version>0.5.5-SNAPSHOT</version>
+        <version>0.5.5</version>
       </dependency>
     </dependencies>
     ```

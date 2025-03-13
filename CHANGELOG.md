@@ -1,4 +1,4 @@
-### 0.5.5 (TBD)
+### 0.5.5 (March 13, 2025)
 
 #### Features
 * Introduced new methods `Filters.description` and `Filters.titleAndDescription` to enhance filtering capabilities.
