@@ -101,7 +101,7 @@ processes. Add the following configuration to your project based on the build to
 - Gradle
     ```groovy
     dependencies {
-          implementation("one.jpro.platform:jpro-auth:0.5.5")
+          implementation("one.jpro.platform:jpro-auth:0.5.6-SNAPSHOT")
     }
     ```
 - Maven
@@ -110,7 +110,7 @@ processes. Add the following configuration to your project based on the build to
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-auth-core</artifactId>
-        <version>0.5.5</version>
+        <version>0.5.6-SNAPSHOT</version>
       </dependency>
     </dependencies>
     ```
@@ -121,7 +121,7 @@ the authentication process. Add the following configuration to your project base
 - Gradle
     ```groovy
     dependencies {
-          implementation("one.jpro.platform:jpro-auth-routing:0.5.5")
+          implementation("one.jpro.platform:jpro-auth-routing:0.5.6-SNAPSHOT")
     }
     ```
 - Maven
@@ -130,7 +130,7 @@ the authentication process. Add the following configuration to your project base
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-auth-routing</artifactId>
-        <version>0.5.5</version>
+        <version>0.5.6-SNAPSHOT</version>
       </dependency>
     </dependencies>
     ```

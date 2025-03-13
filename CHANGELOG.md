@@ -1,3 +1,7 @@
+### 0.5.6 (TBD)
+
+----------------------
+
 ### 0.5.5 (March 13, 2025)
 
 #### Features
@@ -134,7 +138,7 @@ JavaFX/JPro application.
 * Updated **JPro** to version `2024.3.0`.
 * Updated **SimpleFX** dependencies to version `3.2.35`. The `SimpleFX` modules are in compliance with the Java 
 Platform Module System.
-* Updated **JMemoryBuddy** dependency to version `0.5.5`. This module is also now in compliance with the Java Platform
+* Updated **JMemoryBuddy** dependency to version `0.5.6-SNAPSHOT`. This module is also now in compliance with the Java Platform
 Module System.
 * Updated **JNodes** dependencies to version `0.8.2`.
 * Added `popup` sample application to the examples list for the `jpro-routing-popup` module.
