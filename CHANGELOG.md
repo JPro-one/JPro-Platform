@@ -4,7 +4,8 @@
 * Introduced new methods `Filters.description` and `Filters.titleAndDescription` to enhance filtering capabilities.
 
 #### Bugfixes
-* Fixed a regression that prevented file choosers from initializing with the correct directory and file name.
+* Fixed a regression introduced in version `0.5.3` that prevented file choosers from initializing with the correct
+directory and file name.
 
 ----------------------
 

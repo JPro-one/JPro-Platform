@@ -32,6 +32,29 @@ tasks.register('combineDocumentation') {
     }
 }
 
+tasks.register('copyChangelog') {
+    description = "Copy the root CHANGELOG.md to the build/docs directory"
+    group = "Documentation"
+
+    // Define the final output file location
+    def changelogOutputFile = layout.buildDirectory.file("docs/CHANGELOG.md")
+
+    // Mark it as an output, so Gradle knows about this file
+    outputs.file(changelogOutputFile)
+
+    doLast {
+        // Ensure the parent folder exists
+        changelogOutputFile.get().asFile.parentFile.mkdirs()
+
+        // Copy from the root CHANGELOG.md to the target location
+        file("$rootDir/CHANGELOG.md").withInputStream { input ->
+            changelogOutputFile.get().asFile.withOutputStream { output ->
+                output << input
+            }
+        }
+    }
+}
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -146,7 +169,8 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                     }
 
                     // Attach the root CHANGELOG.md
-                    artifact("$rootDir/CHANGELOG.md") {
+                    artifact(tasks.named("copyChangelog")) {
+                        builtBy tasks.named("copyChangelog")
                         classifier = 'CHANGELOG'
                         extension = 'md'
                     }
