@@ -3,14 +3,17 @@ plugins {
 }
 
 dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     compileOnly "org.bytedeco:javacv-platform:$JAVACV_VERSION"
-    runtimeOnly 'org.bytedeco:flandmark-platform:1.07-1.5.8'
-    api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
-    api "org.json:json:$JSON_VERSION"
+    implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+    implementation "org.json:json:$JSON_VERSION"
 
-    testImplementation "org.testfx:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:testfx-core:$TESTFX_VERSION"
+    testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
     testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
+    testImplementation "org.bytedeco:javacpp-platform:$JAVACPP_VERSION"
+    testRuntimeOnly "org.bytedeco:flandmark-platform:1.07-1.5.8"
 }
 
 compileJava {
@@ -19,12 +22,28 @@ compileJava {
 
 test {
     jvmArgs = [
+            "-Dtestfx.headless=true", "-Dtestfx.robot=glass", "-Djava.awt.headless=true",
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-opens", "javafx.graphics/com.sun.glass.ui=org.testfx.core",
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media",
-            "--add-exports", "javafx.graphics/com.sun.javafx.application=testfx.core",
-            "--add-opens", "javafx.graphics/com.sun.javafx.application=testfx.core"
+            "--add-exports", "javafx.base/com.sun.javafx.logging=org.testfx.monocle",
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.javafx.util=org.testfx.monocle",
+            "--add-exports", "javafx.graphics/com.sun.glass.ui=org.testfx.monocle"
     ]
 
-    onlyIf { !Boolean.getBoolean("ciTest") }
+    // Check if the RUNNING_ON_CI environment variable is set to 'true'
+    def runningOnCi = System.getenv('RUNNING_ON_CI') == 'true'
+
+    // Pass the environment variable to the test JVM as a system property
+    systemProperty 'RUNNING_ON_CI', runningOnCi
+
+    // Exclude media tests when running on CI
+    if (runningOnCi) {
+        useJUnitPlatform {
+            excludeTags('media-recorder')
+        }
+    }
 }
 
 javadoc {
@@ -44,24 +63,13 @@ publishing {
         mavenJava(MavenPublication) {
             // Add README.md as an artifact named DOCUMENTATION.md
             artifact(source: file('build/docs/DOCUMENTATION.md')) {
-                classifier 'documentation'
+                classifier 'DOCUMENTATION'
                 extension 'md'
             }
 
             pom {
-                packaging = 'jar'
                 name = 'JPro Media'
-                description = 'A library for playing audio and video files in JavaFX applications running natively ' +
-                        'and via JPro server.'
-                url = 'https://www.jpro.one'
-
-                developers {
-                    developer {
-                        id = 'besidev'
-                        name = 'Besmir Beqiri'
-                        email = 'bb@sandec.de'
-                    }
-                }
+                description = 'A module for playing audio and video files in JPro/JavaFX applications.'
             }
         }
     }

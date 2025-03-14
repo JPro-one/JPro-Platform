@@ -20,3 +20,7 @@
     -fx-border: transparent;
     /*-fx-background-color: transparent;*/
 }
+
+.devfilter-focus-label {
+  -fx-max-width: 200;
+}

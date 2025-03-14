@@ -12,11 +12,11 @@ dependencies {
 }
 
 javafx {
-    version = "$JAVAFX_VERSION"
+    version = "$JAVAFX_EXAMPLES_VERSION"
     modules = ['javafx.graphics', 'javafx.controls']
 }
 
-mainClassName = 'one.jpro.platform.sessions.example.SessionManagerSample'
+mainClassName = 'one.jpro.platform.session.example.SessionManagerSample'
 
 application {
     mainClass = "$mainClassName"

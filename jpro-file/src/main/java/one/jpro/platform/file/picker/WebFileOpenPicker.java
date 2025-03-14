@@ -3,8 +3,8 @@ package one.jpro.platform.file.picker;
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.ExtensionFilter;
@@ -12,9 +12,10 @@ import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.util.NodeUtils;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -27,6 +28,7 @@ import java.util.function.Consumer;
 public class WebFileOpenPicker extends BaseFileOpenPicker {
 
     private final WebAPI.MultiFileUploader multiFileUploader;
+    private final ListChangeListener<ExtensionFilter> webExtensionFilterListChangeListener;
     private List<WebFileSource> webFileSources = List.of();
 
     /**
@@ -40,76 +42,18 @@ public class WebFileOpenPicker extends BaseFileOpenPicker {
         multiFileUploader = NodeUtils.getPropertyValue(node, NodeUtils.MULTI_FILE_UPLOADER_KEY,
                 WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnClick(true);
-    }
 
-    // title property
-    private StringProperty title;
+        webExtensionFilterListChangeListener = change -> {
+            final List<String> supportedExtensionsList = change.getList().stream()
+                    .flatMap(ext -> ext.extensions().stream())
+                    .toList();
+            final Set<String> supportedExtensionsSet = new HashSet<>(supportedExtensionsList); // Remove duplicates
+            multiFileUploader.supportedExtensions().setAll(supportedExtensionsSet.stream().toList());
+        };
 
-    @Override
-    public final String getTitle() {
-        return (title != null) ? title.get() : null;
-    }
-
-    @Override
-    public final void setTitle(String value) {
-        titleProperty().set(value);
-    }
-
-    @Override
-    public final StringProperty titleProperty() {
-        if (title == null) {
-            title = new SimpleStringProperty(this, "title");
-        }
-        return title;
-    }
-
-    // initial file name property
-    @Override
-    public final StringProperty initialFileNameProperty() {
-        if (initialFileName == null) {
-            initialFileName = new SimpleStringProperty(this, "initialFileName");
-        }
-        return initialFileName;
-    }
-
-    // initial directory property
-    private ObjectProperty<File> initialDirectory;
-
-    @Override
-    public final File getInitialDirectory() {
-        return (initialDirectory != null) ? initialDirectory.get() : null;
-    }
-
-    @Override
-    public final void setInitialDirectory(final File value) {
-        initialDirectoryProperty().set(value);
-    }
-
-    @Override
-    public final ObjectProperty<File> initialDirectoryProperty() {
-        if (initialDirectory == null) {
-            initialDirectory = new SimpleObjectProperty<>(this, "initialDirectory");
-        }
-        return initialDirectory;
-    }
-
-    @Override
-    public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
-        if (selectedExtensionFilter == null) {
-            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {
-
-                @Override
-                protected void invalidated() {
-                    final ExtensionFilter selectedExtensionFilter = get();
-                    multiFileUploader.supportedExtensions().clear();
-                    if (selectedExtensionFilter != null) {
-                        selectedExtensionFilter.extensions()
-                                .forEach(multiFileUploader.supportedExtensions()::add);
-                    }
-                }
-            };
-        }
-        return selectedExtensionFilter;
+        // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
+        // that can occur if observers are not unregistered from observed objects after use.
+        getExtensionFilters().addListener(new WeakListChangeListener<>(webExtensionFilterListChangeListener));
     }
 
     @Override

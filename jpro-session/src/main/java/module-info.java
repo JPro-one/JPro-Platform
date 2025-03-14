@@ -1,3 +1,8 @@
+/**
+ * Module descriptor for the Session module.
+ *
+ * @author Besmir Beqiri
+ */
 module one.jpro.platform.session {
     requires javafx.controls;
     requires jpro.webapi;

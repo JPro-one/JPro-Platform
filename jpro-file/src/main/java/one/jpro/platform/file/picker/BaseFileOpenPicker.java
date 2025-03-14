@@ -34,7 +34,7 @@ abstract class BaseFileOpenPicker extends BaseFilePicker implements FileOpenPick
 
     @Override
     public final void setSelectionMode(final SelectionMode value) {
-        selectionModeProperty().setValue(value);
+        selectionModeProperty().set(value);
     }
 
     // on files selected property
@@ -47,7 +47,7 @@ abstract class BaseFileOpenPicker extends BaseFilePicker implements FileOpenPick
 
     @Override
     public final void setOnFilesSelected(Consumer<List<? extends FileSource>> value) {
-        onFilesSelectedProperty().setValue(value);
+        onFilesSelectedProperty().set(value);
     }
 
     @Override

@@ -1,7 +1,18 @@
 dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
 
     testRuntimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Session'
+                description = 'A module that provides a simple implementation of a session manager for JavaFX/JPro applications.'
+            }
+        }
+    }
 }

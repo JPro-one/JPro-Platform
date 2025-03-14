@@ -1,5 +1,16 @@
 dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     api project(':jpro-webrtc') // mainly to avoid duplicated code
     api "org.json:json:$JSON_VERSION"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro SipJS'
+                description = 'A module that takes care of SIP signaling for web applications running with JPro.'
+            }
+        }
+    }
 }

@@ -16,7 +16,7 @@ import one.jpro.platform.routing.filter.container.ContainerFactory
 import one.jpro.platform.routing.sessionmanager.SessionManager
 
 class TestExtensionsApp(stage: Stage) extends RouteNode(stage) {
-  stylesheets <++ "/com/jpro/routing/extensions/linkheader/css/linkheader.css"
+  stylesheets <++ "/one/jpro/platform/routing/extensions/linkheader/css/linkheader.css"
   
   setRoute(
     Route.empty() /* StartRoute? */

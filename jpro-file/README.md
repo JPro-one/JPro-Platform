@@ -78,7 +78,7 @@ a specified callback handler is invoked for further processing.
 - Gradle
     ```groovy
     dependencies {
-        implementation("one.jpro.platform:jpro-file:0.2.14-SNAPSHOT")
+        implementation("one.jpro.platform:jpro-file:0.5.6-SNAPSHOT")
     }
     ```
 - Maven
@@ -87,13 +87,13 @@ a specified callback handler is invoked for further processing.
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-file</artifactId>
-        <version>0.2.14-SNAPSHOT</version>
+        <version>0.5.6-SNAPSHOT</version>
       </dependency>
     </dependencies>
     ```
 
 ### Launch the examples
-[**Text Editor sample**](https://github.com/JPro-one/jpro-platform/blob/jpro-file-module/jpro-file/example/src/main/java/one/jpro/platform/file/example/editor/TextEditorSample.java)
+[**Text Editor sample**](https://github.com/JPro-one/jpro-platform/blob/main/jpro-file/example/src/main/java/one/jpro/platform/file/example/editor/TextEditorSample.java)
 * As desktop application
   ```shell
   ./gradlew jpro-file:example:run -Psample=text-editor
@@ -103,7 +103,7 @@ a specified callback handler is invoked for further processing.
   ./gradlew jpro-file:example:jproRun -Psample=text-editor
   ```
 
-[**File Uploader sample**](https://github.com/JPro-one/jpro-platform/blob/jpro-file-module/jpro-file/example/src/main/java/one/jpro/platform/file/example/upload/FileUploaderSample.java)
+[**File Uploader sample**](https://github.com/JPro-one/jpro-platform/blob/main/jpro-file/example/src/main/java/one/jpro/platform/file/example/upload/FileUploaderSample.java)
 * As desktop application
   ```shell
   ./gradlew jpro-file:example:run -Psample=file-uploader
@@ -112,3 +112,8 @@ a specified callback handler is invoked for further processing.
   ```shell
   ./gradlew jpro-file:example:jproRun -Psample=file-uploader
   ```
+  
+### Limitations
+Some combination of features only work limited. These are the following:
+ * The `FileOpenPicker` and `FileSavePicker` can only open directories or files, but never both at the same time.
+ * On the web, the `FileOpenPicker`, `FileSavePicker` and `FileDropper` can only handle files, not directories.

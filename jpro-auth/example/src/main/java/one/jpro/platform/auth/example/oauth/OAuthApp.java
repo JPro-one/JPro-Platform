@@ -1,15 +1,19 @@
 package one.jpro.platform.auth.example.oauth;
 
 import atlantafx.base.theme.CupertinoLight;
+import com.jpro.webapi.WebAPI;
+import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
 import one.jpro.platform.auth.routing.AuthOAuth2Filter;
+import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Filter;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.routing.dev.StatisticsFilter;
+import one.jpro.platform.session.SessionManager;
 
 import java.net.URL;
 import java.util.Optional;
@@ -23,8 +27,17 @@ import static one.jpro.platform.routing.Route.get;
  */
 public class OAuthApp extends BaseOAuthApp {
 
+    private static final SessionManager sessionManager = new SessionManager("oauth-app");
+
+    ObservableMap<String, String> session;
+    private UserSession userSession;
+
     @Override
     public Route createRoute() {
+        session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
+                : sessionManager.getSession("user-session");
+        userSession = new UserSession(session);
+
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
                 .ifPresent(getScene()::setUserAgentStylesheet);
@@ -92,13 +105,16 @@ public class OAuthApp extends BaseOAuthApp {
      * @return A {@link Filter} object configured for OAuth2 authentication flow.
      */
     private Filter oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
-        return AuthOAuth2Filter.create(openIDAuthProvider, user -> {
-            setUser(user);
+        return AuthOAuth2Filter.create(openIDAuthProvider, userSession, user -> {
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);
         }, error -> {
             setError(error);
             return Response.redirect(AUTH_ERROR_PATH);
         });
+    }
+
+    public UserSession getUserSession() {
+        return userSession;
     }
 }

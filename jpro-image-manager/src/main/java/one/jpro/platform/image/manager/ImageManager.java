@@ -151,7 +151,7 @@ public class ImageManager {
      * @param imageDefinition the image definition
      * @return the computed MD5 hash as a string
      */
-    private String computeImageDefinitionHash(ImageDefinition imageDefinition) {
+    public static String computeImageDefinitionHash(ImageDefinition imageDefinition) {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             byte[] hashBytes = digest.digest(imageDefinition.toJSON().toString().getBytes(StandardCharsets.UTF_8));

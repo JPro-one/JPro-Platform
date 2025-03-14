@@ -1,0 +1,11 @@
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Scenegraph'
+                description = 'A module that serializes a scene graph to a string representation making it both ' +
+                        'human and AI friendly.'
+            }
+        }
+    }
+}

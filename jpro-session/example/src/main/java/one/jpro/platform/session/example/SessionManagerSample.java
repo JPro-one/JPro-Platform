@@ -31,7 +31,8 @@ public class SessionManagerSample extends Application {
     }
 
     public Parent createRoot(Stage stage) {
-        ObservableMap<String,String> session = sm.getSession(WebAPI.getWebAPI(stage));
+        ObservableMap<String,String> session = (WebAPI.isBrowser()) ? sm.getSession(WebAPI.getWebAPI(stage))
+                : sm.getSession("user-session");
 
         VBox rootPane = new VBox();
         rootPane.setAlignment(Pos.CENTER);

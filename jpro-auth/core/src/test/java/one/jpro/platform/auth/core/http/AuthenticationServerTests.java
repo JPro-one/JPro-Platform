@@ -33,19 +33,20 @@ public class AuthenticationServerTests {
             assertEquals(HttpStatus.OK, HttpStatus.fromCode(httpResponse.statusCode()));
             assertEquals(HttpMethod.GET, HttpMethod.valueOf(request.method()));
             assertEquals(URI.create("http://localhost:8080/auth?foo&bar=HTTP/1.1"), request.uri());
-            assertEquals("<!DOCTYPE html>\n" +
-                    "<html lang=\"en\">\n" +
-                    "<head>\n" +
-                    "    <meta http-equiv=\"Content-Type\" content=\"text/html\" charset=\"UTF-8\">\n" +
-                    "    <title>Authentication</title>\n" +
-                    "</head>\n" +
-                    "<body>\n" +
-                    "    <div style=\"text-align: center; font-family: sans-serif; margin-top: 20px;\">\n" +
-                    "        <h3>Authentication Successful</h3>\n" +
-                    "        <i>Please close the page.</i>\n" +
-                    "    </div>\n" +
-                    "</body>\n" +
-                    "</html>", httpResponse.body());
+            assertEquals("""
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+                        <title>Authentication</title>
+                    </head>
+                    <body>
+                        <div style="text-align: center; font-family: sans-serif; margin-top: 20px;">
+                            <h3>Authentication Successful</h3>
+                            <i>Please close the page.</i>
+                        </div>
+                    </body>
+                    </html>""", httpResponse.body());
             assertEquals("{ {content-length=[350], content-type=[text/html]} }",
                     "{ " + httpResponse.headers().map() + " }");
             assertEquals("localhost", httpServer.getServerHost());

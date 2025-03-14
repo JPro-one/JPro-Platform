@@ -7,6 +7,7 @@ import simplefx.core._
 import simplefx.util.ReflectionUtil
 
 class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS =>
+  assert(webApp != null, "webApp must not be null!")
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -14,7 +15,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     historyForward = historyCurrent :: historyForward
     historyCurrent = historyBackward.head
     historyBackward = historyBackward.tail
-    gotoURL(historyCurrent.path, false, true)
+    gotoURL(historyCurrent.path, false)
   }
 
   def goForward(): Unit = {
@@ -22,10 +23,10 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     historyBackward = historyCurrent :: historyBackward
     historyCurrent = historyForward.head
     historyForward = historyForward.tail
-    gotoURL(historyCurrent.path, false, true)
+    gotoURL(historyCurrent.path, false)
   }
 
-  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response = {
     x match {
       case Redirect(url) =>
         logger.debug(s"redirect: ${_url} -> $url")
@@ -53,6 +54,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
           }
           historyCurrent = HistoryEntry(url, view.title)
         }
+        Response.view(view)
     }
   }
   val container = new StackPane()
@@ -79,7 +81,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     }
   }
 
-  def start(): Unit = {
+  def start(): Response = {
     gotoURL("/", pushState = true)
   }
 }

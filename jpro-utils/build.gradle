@@ -1,0 +1,35 @@
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
+    implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+
+    testImplementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
+}
+
+test {
+    jvmArgs = [
+            "-Dtestfx.headless=true", "-Djava.awt.headless=true",
+            "--add-opens", "javafx.graphics/com.sun.glass.ui=org.testfx.core",
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.glass.ui=org.testfx.monocle",
+            "--add-exports", "javafx.graphics/com.sun.javafx.util=org.testfx.monocle",
+            "--add-exports", "javafx.base/com.sun.javafx.logging=org.testfx.monocle"
+    ]
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Utils'
+                description = 'A utility module offering essential tools for various functionalities to enhance the ' +
+                        'development of **JPro/JavaFX** applications'
+            }
+        }
+    }
+}

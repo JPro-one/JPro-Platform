@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Non-persistent implementation of {@code UserDetailsManager} which is backed
@@ -23,7 +24,7 @@ public class InMemoryUserManager implements UserManager {
     private final Map<String, User> users;
 
     public InMemoryUserManager() {
-        users = new HashMap<>();
+        users = new ConcurrentHashMap<>();
     }
 
     public InMemoryUserManager(@NotNull final Collection<User> users) {

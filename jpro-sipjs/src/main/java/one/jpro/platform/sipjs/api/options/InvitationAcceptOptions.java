@@ -50,6 +50,6 @@ public class InvitationAcceptOptions {
     }
 
     public JSVariable asJSVariable(WebAPI webapi) {
-        return webapi.executeScriptWithVariable("(" + asJSONObject().toString() + ")");
+        return webapi.js().eval("(" + asJSONObject().toString() + ")");
     }
 }

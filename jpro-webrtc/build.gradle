@@ -1,3 +1,14 @@
 dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro WebRTC'
+                description = 'A module that makes easy to add real-time communication capabilities to your web applications running with JPro.'
+            }
+        }
+    }
 }

@@ -60,7 +60,7 @@ object RouteUtils {
   }}
 
   def viewFromNode(x: Node): View = new View {
-    override def title: String = "view-from-node"
+    override def title: String = null
     override def description: String = ""
     override def content: all.Node = x
   }

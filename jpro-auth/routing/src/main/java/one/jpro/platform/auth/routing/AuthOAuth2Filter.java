@@ -8,6 +8,7 @@ import one.jpro.platform.auth.core.oauth2.OAuth2Credentials;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.routing.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Objects;
@@ -33,7 +34,26 @@ public interface AuthOAuth2Filter {
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {
         final var credentials = openidAuthProvider.getCredentials();
-        return create(openidAuthProvider, credentials, userFunction, errorFunction);
+        return create(openidAuthProvider, null, credentials, userFunction, errorFunction);
+    }
+
+    /**
+     * Creates {@link Route} filter from a given {@link OAuth2AuthenticationProvider},
+     * {@link OAuth2Credentials} and functions for handling successful and error cases.
+     *
+     * @param openidAuthProvider the OpenID authentication provider
+     * @param userSession        the user session, when null the user will not be stored in the session
+     * @param userFunction       operation on the given user argument
+     * @param errorFunction      operation on the given error argument
+     * @return a {@link Filter} object
+     */
+    static Filter create(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
+                         @NotNull UserSession userSession,
+                         @NotNull Function<User, Response> userFunction,
+                         @NotNull Function<Throwable, Response> errorFunction) {
+        Objects.requireNonNull(userSession, "userSession can not be null");
+        final var credentials = openidAuthProvider.getCredentials();
+        return create(openidAuthProvider, userSession, credentials, userFunction, errorFunction);
     }
 
     /**
@@ -41,12 +61,14 @@ public interface AuthOAuth2Filter {
      * {@link OAuth2Credentials} and functions for handling successful and error cases.
      *
      * @param authProvider  an OAuth2 authentication provider
+     * @param userSession   the user session, when null the user will not be stored in the session
      * @param credentials   an OAuth2 credentials
      * @param userFunction  operation on the given user argument
      * @param errorFunction operation on the given error argument
      * @return a {@link Filter} object
      */
     static Filter create(@NotNull OAuth2AuthenticationProvider authProvider,
+                         @Nullable UserSession userSession,
                          @NotNull OAuth2Credentials credentials,
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {
@@ -58,7 +80,12 @@ public interface AuthOAuth2Filter {
         return (route) -> (request) -> {
             if (request.getPath().equals(credentials.getRedirectUri())) {
                 return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
-                        .flatMap(r -> userFunction.apply(r).future())
+                        .flatMap(r -> {
+                            if(userSession != null) {
+                                userSession.setUser(r);
+                            }
+                            return userFunction.apply(r).future();
+                        })
                         .flatExceptionally(r -> errorFunction.apply(r).future()));
             } else {
                 return route.apply(request);

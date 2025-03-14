@@ -14,8 +14,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.nio.file.Files;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
@@ -26,6 +32,9 @@ class ImageManagerTest {
 
     ImageManager manager;
     ImageDefinition def;
+    File imageDef2File;
+    ImageDefinition imageDef2;
+
 
 
     @BeforeEach
@@ -44,6 +53,12 @@ class ImageManagerTest {
         ImageTransformer transformer = new ImageTransformerFitWidth(200);
         ImageEncoder encoder = new ImageEncoderPNG();
         def = new ImageDefinition(source, transformer, encoder);
+
+        imageDef2File = new File("testImage.png");
+        ImageSource source2 = new ImageSourceFile(imageDef2File);
+        ImageTransformer transformer2 = new ImageTransformerFitWidth(200);
+        ImageEncoder encoder2 = new ImageEncoderPNG();
+        imageDef2 = new ImageDefinition(source2, transformer2, encoder2);
     }
 
     @Test
@@ -66,6 +81,45 @@ class ImageManagerTest {
         File imageFileAfter = new File(manager.getCacheDir(), hashAfter + "/image.png");
 
         assertEquals(imageFileBefore.lastModified(), imageFileAfter.lastModified(), "Image was created again.");
+    }
+
+    @Test
+    void testImageRecreateOnChange() throws IOException {
+        // Copy file1 to imageDef2File
+        File file1 = new File(getClass().getResource("/testImage.png").getFile());
+        File file2 = new File(getClass().getResource("/logo.png").getFile());
+        assertTrue(file1.exists());
+        assertTrue(file2.exists());
+
+        Files.copy(file1.toPath(), imageDef2File.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        var image1 = manager.loadImage(imageDef2);
+        String hash1 = imageDef2.getHashString();
+        System.out.println("ModifiedDate1: " + imageDef2File.lastModified());
+
+        Files.copy(file2.toPath(), imageDef2File.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("ModifiedDate2: " + imageDef2File.lastModified());
+        Files.setLastModifiedTime(imageDef2File.toPath(), FileTime.from(Instant.now()));
+        System.out.println("ModifiedDate3: " + imageDef2File.lastModified());
+
+        var image2 = manager.loadImage(imageDef2);
+        String hash2 = imageDef2.getHashString();
+
+        System.out.println("hash1: " + hash1);
+        System.out.println("hash2: " + hash2);
+        assertNotEquals(hash1, hash2, "changed image file should have different hash");
+
+        File imageFile1 = image1.getFile();
+        File imageFile2 = image2.getFile();
+
+        assertTrue(imageFile1.exists());
+        assertTrue(imageFile2.exists());
+
+        System.out.println("imageFile1: " + imageFile1.lastModified());
+        System.out.println("imageFile2: " + imageFile2.lastModified());
+
+        assertNotEquals(imageFile1.lastModified(), imageFile2.lastModified(),
+                "Image was not created again.");
     }
 
     @Test

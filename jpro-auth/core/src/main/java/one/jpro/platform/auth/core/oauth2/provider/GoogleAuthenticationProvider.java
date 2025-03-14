@@ -1,5 +1,6 @@
 package one.jpro.platform.auth.core.oauth2.provider;
 
+import io.jsonwebtoken.io.Encoders;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.http.HttpMethod;
 import one.jpro.platform.auth.core.oauth2.OAuth2API;
@@ -96,7 +97,7 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
             if (confidentialClient) {
                 String basic = options.getClientId() + ":" + options.getClientSecret();
                 headers.put("Authorization", "Basic " +
-                        AuthUtils.BASE64_ENCODER.encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
+                        Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
             }
 
             final String path = options.getIntrospectionPath() + "?" + tokenType + "=" + token;

@@ -1,5 +1,5 @@
 dependencies {
-    implementation "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
@@ -32,24 +32,14 @@ publishing {
         mavenJava(MavenPublication) {
             // Add README.md as an artifact named DOCUMENTATION.md
             artifact(source: file('build/docs/DOCUMENTATION.md')) {
-                classifier 'documentation'
+                classifier 'DOCUMENTATION'
                 extension 'md'
             }
 
             pom {
-                packaging = 'jar'
                 name = 'JPro File'
-                description = 'A library for handling file related operations in JavaFX applications ' +
+                description = 'A module for handling file related operations in JPro/JavaFX applications ' +
                         'running natively and via JPro server.'
-                url = 'https://www.jpro.one'
-
-                developers {
-                    developer {
-                        id = 'besidev'
-                        name = 'Besmir Beqiri'
-                        email = 'bb@sandec.de'
-                    }
-                }
             }
         }
     }

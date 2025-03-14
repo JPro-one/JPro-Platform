@@ -1,8 +1,13 @@
 plugins {
     id 'org.bytedeco.gradle-javacpp-platform' version "$JAVACPP_VERSION"
-    id "org.javamodularity.moduleplugin" version "$MODULE_PLUGIN_VERSION"
+    id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
     id 'org.openjfx.javafxplugin'
     id 'jpro-gradle-plugin'
+}
+
+ext {
+    // Add more needed platforms here
+    javacppPlatform = 'linux-x86_64,linux-arm64,macosx-x86_64,macosx-arm64,windows-x86_64'
 }
 
 dependencies {
@@ -19,7 +24,7 @@ dependencies {
 mainClassName = 'one.jpro.platform.example.Main'
 
 javafx {
-    version = "$JAVAFX_VERSION"
+    version = "$JAVAFX_EXAMPLES_VERSION"
     modules = ['javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web']
 }
 

@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.dev
 
 import com.jpro.webapi.WebAPI
-import de.sandec.jmemorybuddy.JMemoryBuddyLive
+import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import fr.brouillard.oss.cssfx.CSSFX
 import one.jpro.platform.routing.filter.container.ContainerFilter
 import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}

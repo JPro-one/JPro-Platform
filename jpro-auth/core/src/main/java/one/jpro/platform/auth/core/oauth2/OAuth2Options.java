@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  */
 public class OAuth2Options implements Options {
 
-    private static final Logger log = LoggerFactory.getLogger(OAuth2Options.class);
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2Options.class);
 
     private static final OAuth2Flow FLOW = OAuth2Flow.AUTH_CODE;
     private static final String AUTHORIZATION_PATH = "/oauth/authorize";
@@ -1173,7 +1173,7 @@ public class OAuth2Options implements Options {
                 if (clientAssertion == null && clientAssertionType == null) {
                     // not using client assertion
                     if (clientId == null) {
-                        log.debug("If you are using Client OAuth2 Resource Owner flow, please specify [clientId]");
+                        logger.debug("If you are using Client OAuth2 Resource Owner flow, please specify [clientId]");
                     }
                 } else {
                     if (clientAssertion == null || clientAssertionType == null) {

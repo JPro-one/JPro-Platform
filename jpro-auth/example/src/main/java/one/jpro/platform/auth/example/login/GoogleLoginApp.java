@@ -4,18 +4,17 @@ import atlantafx.base.theme.CupertinoLight;
 import com.jpro.webapi.WebAPI;
 import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
-import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.example.login.page.ErrorPage;
 import one.jpro.platform.auth.example.login.page.LoginPage;
 import one.jpro.platform.auth.example.login.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.routing.AuthOAuth2Filter;
+import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
 import one.jpro.platform.routing.dev.DevFilter;
 import one.jpro.platform.session.SessionManager;
-import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.Optional;
@@ -49,10 +48,13 @@ public class GoogleLoginApp extends RouteApp {
     private static final SessionManager sessionManager = new SessionManager("google-login-app");
     ObservableMap<String, String> session;
 
+    public UserSession userSession;
+
     @Override
     public Route createRoute() {
         session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI())
                 : sessionManager.getSession("user-session");
+        userSession = new UserSession(session);
 
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
@@ -70,32 +72,13 @@ public class GoogleLoginApp extends RouteApp {
                 .and(Route.get("/", request -> Response.node(new LoginPage(googleAuthProvider))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
-                .filter(AuthOAuth2Filter.create(googleAuthProvider, user -> {
-                    setUser(user);
-                    return Response.redirect("/user/signed-in");
-                }, error -> Response.node(new ErrorPage(error))))
+                .filter(AuthOAuth2Filter.create(googleAuthProvider, userSession,
+                        user -> Response.redirect("/user/signed-in"),
+                        error -> Response.node(new ErrorPage(error))))
                 .filter(DevFilter.create());
     }
 
-    public final User getUser() {
-        final var userJsonString = session.get("user");
-        if (userJsonString != null) {
-            final JSONObject userJson = new JSONObject(userJsonString);
-            return new User(userJson);
-        } else {
-            return null;
-        }
-    }
-
-    public final void setUser(User value) {
-        if (value != null) {
-            session.put("user", value.toJSON().toString());
-        } else {
-            session.remove("user");
-        }
-    }
-
     private boolean isUserAuthenticated() {
-        return getUser() != null;
+        return userSession.getUser() != null;
     }
 }
