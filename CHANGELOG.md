@@ -1,11 +1,10 @@
-### 0.5.6 (TBD)
+### 0.5.6 (March 14, 2025)
 
 #### Bugfixes
 * Fix initialization values for native file choosers in the `jpro-file` module before displaying dialogs.
 * Modify `NodeUtils.addEventHandler` in the `jpro-file` module to replace the existing handler with the new one.
 * Update `ExtensionFilter.toJavaFXExtensionFilter` in the `jpro-file` module to support extension filters for
 directories.
-
 
 ----------------------
 
@@ -145,7 +144,7 @@ JavaFX/JPro application.
 * Updated **JPro** to version `2024.3.0`.
 * Updated **SimpleFX** dependencies to version `3.2.35`. The `SimpleFX` modules are in compliance with the Java 
 Platform Module System.
-* Updated **JMemoryBuddy** dependency to version `0.5.6-SNAPSHOT`. This module is also now in compliance with the Java Platform
+* Updated **JMemoryBuddy** dependency to version `0.5.6`. This module is also now in compliance with the Java Platform
 Module System.
 * Updated **JNodes** dependencies to version `0.8.2`.
 * Added `popup` sample application to the examples list for the `jpro-routing-popup` module.
