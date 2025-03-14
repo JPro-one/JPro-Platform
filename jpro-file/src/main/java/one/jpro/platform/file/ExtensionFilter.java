@@ -81,6 +81,9 @@ public record ExtensionFilter(String description, boolean allowDirectory, List<S
      */
     public static FileChooser.ExtensionFilter toJavaFXExtensionFilter(ExtensionFilter extensionFilter) {
         if (extensionFilter == null) return null;
+        if (extensionFilter.allowDirectory()) {
+            return new FileChooser.ExtensionFilter(extensionFilter.description(), "*");
+        }
         return new FileChooser.ExtensionFilter(extensionFilter.description(),
                 extensionFilter.extensions().stream().map(ext -> "*" + ext).toList());
     }
