@@ -214,7 +214,6 @@ object StatisticsFilter {
   }
 
   def create(): Filter = {
-    CSSFX.start()
     ContainerFilter.create(StatisticsFilterContainerFactory)
   }
 }
