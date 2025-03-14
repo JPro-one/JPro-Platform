@@ -30,9 +30,8 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
 
     @Override
     final void showDialog() {
-        final var fileChooser = createFileChooser();
         // Basic configuration
-        fileChooser.setTitle("Save file as...");
+        final FileChooser fileChooser = createFileChooser();
 
         // Retrieve scene and window references from the node
         final Scene scene = getNode().getScene();
@@ -61,11 +60,13 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
      */
     FileChooser createFileChooser() {
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(getInitialDirectory());
-        fileChooser.setInitialFileName(getInitialFileName());
+        fileChooser.titleProperty().bind(titleProperty());
+        fileChooser.initialDirectoryProperty().bind(initialDirectoryProperty());
+        fileChooser.initialFileNameProperty().bind(initialFileNameProperty());
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
                 .toList());
+        setNativeSelectedExtensionFilter(fileChooser, getSelectedExtensionFilter());
         return fileChooser;
     }
 }

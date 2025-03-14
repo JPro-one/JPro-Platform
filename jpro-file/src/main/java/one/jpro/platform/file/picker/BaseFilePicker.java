@@ -7,6 +7,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.stage.FileChooser;
 import one.jpro.platform.file.ExtensionFilter;
 
 import java.io.File;
@@ -36,7 +37,17 @@ abstract class BaseFilePicker implements FilePicker {
     }
 
     // initial file name property
-    StringProperty initialFileName;
+    private StringProperty initialFileName;
+
+    @Override
+    public final String getInitialFileName() {
+        return (initialFileName == null) ? null : initialFileName.get();
+    }
+
+    @Override
+    public final void setInitialFileName(final String value) {
+        initialFileNameProperty().set(value);
+    }
 
     @Override
     public final StringProperty initialFileNameProperty() {
@@ -46,25 +57,7 @@ abstract class BaseFilePicker implements FilePicker {
         return initialFileName;
     }
 
-    @Override
-    public final String getInitialFileName() {
-        return (initialFileName == null) ? null : initialFileName.get();
-    }
-
-    @Override
-    public final void setInitialFileName(final String value) {
-        initialFileNameProperty().setValue(value);
-    }
-
-    ObjectProperty<File> initialDirectory;
-
-    @Override
-    public final ObjectProperty<File> initialDirectoryProperty() {
-        if (initialDirectory == null) {
-            initialDirectory = new SimpleObjectProperty<>(this, "initialDirectory");
-        }
-        return initialDirectory;
-    }
+    private ObjectProperty<File> initialDirectory;
 
     @Override
     public final File getInitialDirectory() {
@@ -76,7 +69,15 @@ abstract class BaseFilePicker implements FilePicker {
         initialDirectoryProperty().set(value);
     }
 
-    StringProperty title;
+    @Override
+    public final ObjectProperty<File> initialDirectoryProperty() {
+        if (initialDirectory == null) {
+            initialDirectory = new SimpleObjectProperty<>(this, "initialDirectory");
+        }
+        return initialDirectory;
+    }
+
+    private StringProperty title;
 
     @Override
     public final String getTitle() {
@@ -104,7 +105,7 @@ abstract class BaseFilePicker implements FilePicker {
     }
 
     // selected extension filter property
-    ObjectProperty<ExtensionFilter> selectedExtensionFilter;
+    private ObjectProperty<ExtensionFilter> selectedExtensionFilter;
 
     @Override
     public final ExtensionFilter getSelectedExtensionFilter() {
@@ -112,8 +113,8 @@ abstract class BaseFilePicker implements FilePicker {
     }
 
     @Override
-    public final void setSelectedExtensionFilter(final ExtensionFilter filter) {
-        selectedExtensionFilterProperty().setValue(filter);
+    public final void setSelectedExtensionFilter(final ExtensionFilter value) {
+        selectedExtensionFilterProperty().set(value);
     }
 
     @Override
@@ -138,5 +139,26 @@ abstract class BaseFilePicker implements FilePicker {
         } else {
             return selectedFilter;
         }
+    }
+
+    /**
+     * Sets the native {@link FileChooser.ExtensionFilter} in the provided {@link FileChooser}
+     * based on the given {@link ExtensionFilter}. This is needed to keep the underlying
+     * {@code FileChooser} in sync with the selected {@link ExtensionFilter} in this picker.
+     *
+     * @param fileChooser the file chooser whose selected filter will be updated
+     * @param newFilter   the new {@link ExtensionFilter} to apply
+     */
+    final void setNativeSelectedExtensionFilter(FileChooser fileChooser, ExtensionFilter newFilter) {
+        FileChooser.ExtensionFilter extensionFilter = null;
+        if (newFilter != null) {
+            for (FileChooser.ExtensionFilter ef : fileChooser.getExtensionFilters()) {
+                if (newFilter.description().equals(ef.getDescription())) {
+                    extensionFilter = ef;
+                    break;
+                }
+            }
+        }
+        fileChooser.setSelectedExtensionFilter(extensionFilter);
     }
 }

@@ -108,30 +108,37 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
     }
 
     /**
-     * Creates and configures a {@link FileChooser} based on the current extension filters and title.
+     * Creates and configures a new {@link FileChooser} instance.
+     * <p>
+     * The file chooser's title, initial directory, and initial file name are bound to the corresponding
+     * properties of this picker. Additionally, it applies the extension filters defined in the picker to
+     * filter the visible files.
      *
      * @return a configured {@code FileChooser} instance.
      */
     FileChooser createFileChooser() {
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(getInitialDirectory());
-        fileChooser.setInitialFileName(getInitialFileName());
+        fileChooser.titleProperty().bind(titleProperty());
+        fileChooser.initialDirectoryProperty().bind(initialDirectoryProperty());
+        fileChooser.initialFileNameProperty().bind(initialFileNameProperty());
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)
                 .toList());
-        fileChooser.titleProperty().bind(titleProperty());
+        setNativeSelectedExtensionFilter(fileChooser, getSelectedExtensionFilter());
         return fileChooser;
     }
 
     /**
-     * Creates and configures a {@link DirectoryChooser} based on the current title property.
+     * Creates and configures a new {@link DirectoryChooser} instance.
+     * <p>
+     * The directory chooser's title and initial directory are bound to the corresponding properties of this picker.
      *
      * @return a configured {@code DirectoryChooser} instance.
      */
     DirectoryChooser createDirectoryChooser() {
         final DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setInitialDirectory(getInitialDirectory());
         directoryChooser.titleProperty().bind(titleProperty());
+        directoryChooser.initialDirectoryProperty().bind(initialDirectoryProperty());
         return directoryChooser;
     }
 }
