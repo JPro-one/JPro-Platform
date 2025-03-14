@@ -53,7 +53,7 @@ abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePick
 
     @Override
     public final void setOnFileSelected(Function<File, CompletableFuture<Void>> value) {
-        onFileSelectedProperty().setValue(value);
+        onFileSelectedProperty().set(value);
     }
 
     @Override

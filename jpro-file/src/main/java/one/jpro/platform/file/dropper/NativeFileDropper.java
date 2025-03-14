@@ -12,7 +12,6 @@ import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.event.DataTransfer;
 import one.jpro.platform.file.event.FileDragEvent;
-import one.jpro.platform.file.picker.NativeFileOpenPicker;
 import one.jpro.platform.file.util.NodeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +64,7 @@ public class NativeFileDropper extends BaseFileDropper {
         NodeUtils.addEventHandler(node, DragEvent.DRAG_DROPPED, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
-                var allowDirectory = extensionFilter.allowDirectory();
+                var allowDirectory = extensionFilter != null && extensionFilter.allowDirectory();
                 List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
                         .filter(file -> extensionFilter != null && extensionFilter.extensions().stream()
                                 .anyMatch(extension -> {
