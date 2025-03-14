@@ -1,5 +1,12 @@
 ### 0.5.6 (TBD)
 
+#### Bugfixes
+* Fix initialization values for native file choosers in the `jpro-file` module before displaying dialogs.
+* Modify `NodeUtils.addEventHandler` in the `jpro-file` module to replace the existing handler with the new one.
+* Update `ExtensionFilter.toJavaFXExtensionFilter` in the `jpro-file` module to support extension filters for
+directories.
+
+
 ----------------------
 
 ### 0.5.5 (March 13, 2025)
