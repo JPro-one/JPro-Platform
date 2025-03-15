@@ -52,6 +52,8 @@ public class MDFXNodeHelper extends VBox {
     int gridy = 0;
     TextFlow flow = null;
 
+    List<Node> childrenCurrentRow = new LinkedList<>();
+
     boolean isListOrdered = false;
     int orderedListCounter = 0;
 
@@ -429,6 +431,7 @@ public class MDFXNodeHelper extends VBox {
             grid.getStyleClass().add("markdown-table-table");
             gridx = 0;
             gridy = -1;
+            childrenCurrentRow.clear();
             root.getChildren().add(grid);
 
             visitor.visitChildren(customNode);
@@ -448,13 +451,20 @@ public class MDFXNodeHelper extends VBox {
         public void visit(TableBody customNode) {
             if (!shouldShowContent()) return;
             visitor.visitChildren(customNode);
+            childrenCurrentRow.forEach(node -> {
+                node.getStyleClass().add("bottom");
+            });
+            childrenCurrentRow.clear();
         }
 
         public void visit(TableRow customNode) {
             if (customNode.getRowNumber() != 0) {
                 gridx = 0;
                 gridy += 1;
+                childrenCurrentRow.clear();
                 visitor.visitChildren(customNode);
+                childrenCurrentRow.get(0).getStyleClass().add("left");
+                childrenCurrentRow.get(childrenCurrentRow.size() - 1).getStyleClass().add("right");
             }
         }
 
@@ -465,6 +475,7 @@ public class MDFXNodeHelper extends VBox {
             flow.getStyleClass().add("markdown-table-cell");
             if (gridy == 0) {
                 flow.getStyleClass().add("markdown-table-cell-top");
+                flow.getStyleClass().add("top");
             }
             if (gridy % 2 == 0) {
                 flow.getStyleClass().add("markdown-table-odd");
@@ -473,6 +484,7 @@ public class MDFXNodeHelper extends VBox {
             }
             grid.add(flow, gridx, gridy);
             gridx += 1;
+            childrenCurrentRow.add(flow);
             visitor.visitChildren(customNode);
         }
 

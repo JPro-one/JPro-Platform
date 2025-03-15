@@ -1,3 +1,7 @@
+### 0.5.7-SNAPSHOT (TBD)
+* Added for `jpro-mdfx` new StyleClasses `top`, `right`, `bottom`, `left` to the `MarkdownView` class.
+These can be used to style tables in markdown.
+
 ### 0.5.6 (March 14, 2025)
 
 #### Bugfixes
