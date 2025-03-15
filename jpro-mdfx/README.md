@@ -25,9 +25,9 @@ Feature Overview:
 
 You can personalize the looking of your markdown via css.
 [Minimal default-file](https://github.com/jpro-one/markdown-javafx-renderer/blob/master/src/main/resources/com/sandec/mdfx/mdfx-default.css)
-To use your own css, you have to overwrite the `getDefaultStylehsheets`.
+To use your own css, you have to overwrite the `getDefaultStylesheets`.
 ```java
-protected List<String> getDefaultStylehsheets() {
+protected List<String> getDefaultStylesheets() {
     return List.of("/your-css.css");
 }
 ```
