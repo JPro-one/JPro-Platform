@@ -52,7 +52,8 @@ public class MDFXUtil {
                     }
                     currentChapter.addSubchapter(headingText);
                 } else {
-                    // For heading level 3+ we ignore or you can handle differently if needed
+                    // We add other chapters
+                    currentChapter.appendContentToCurrentSubchapterOrChapter(node.getChars().toString());
                 }
             } else {
                 // If it's not a heading, it's part of the current chapter/subchapter content
