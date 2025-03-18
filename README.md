@@ -161,7 +161,7 @@ dependencies {
 }
 ```
 
-## [JPro Mail](https://github.com/JPro-one/jpro-platform/tree/main/jpro-mail)
+## JPro Mail
 This library provides a simple way to send emails in **JPro/JavaFX** applications. It allows you to send emails
 using SMTP and SMTPS protocols. It also provides a simple way to compose and send emails with attachments.
 
@@ -183,7 +183,7 @@ dependencies {
 }
 ```
 
-## [JPro Media](https://github.com/JPro-one/jpro-platform/tree/main/jpro-media)
+## JPro Media
 This library is designed for audio and video playback and recording within JavaFX applications.
 It seamlessly operates on both desktop and mobile devices, as well as in web browsers via **JPro**, 
 all while utilizing the same codebase.
