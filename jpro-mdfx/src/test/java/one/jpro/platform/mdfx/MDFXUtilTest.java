@@ -106,4 +106,21 @@ public class MDFXUtilTest {
         var mdChapter = sub.getFullMD();
         Assertions.assertTrue(mdChapter.contains("###"));
     }
+
+    @Test
+    public void testContentBeforeChapter() {
+        String md = "### 3\n" +
+                "# Chapter One\n" +
+                "## 2\n" +
+                "### 3\n" +
+                "Text for sub-1.\n";
+
+        List<MDFXUtil.Chapter> chapters = MDFXUtil.getChapters(md);
+        Assertions.assertEquals(1, chapters.size(), "Should have 2 chapters");
+        Assertions.assertEquals(1, chapters.get(0).getSubchapters().size(), "Should have 2 chapters");
+
+        var sub = chapters.get(0).getSubchapters().get(0);
+        var mdChapter = sub.getFullMD();
+        Assertions.assertTrue(mdChapter.contains("###"));
+    }
 }

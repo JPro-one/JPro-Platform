@@ -53,7 +53,9 @@ public class MDFXUtil {
                     currentChapter.addSubchapter(headingText);
                 } else {
                     // We add other chapters
-                    currentChapter.appendContentToCurrentSubchapterOrChapter(node.getChars().toString());
+                    if(currentChapter != null) {
+                        currentChapter.appendContentToCurrentSubchapterOrChapter(node.getChars().toString());
+                    }
                 }
             } else {
                 // If it's not a heading, it's part of the current chapter/subchapter content
