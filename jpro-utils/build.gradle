@@ -6,6 +6,7 @@ java {
 dependencies {
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+    implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
 
     testImplementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
 }
