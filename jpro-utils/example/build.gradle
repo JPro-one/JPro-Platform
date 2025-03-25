@@ -1,0 +1,22 @@
+plugins {
+    id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
+}
+
+
+dependencies {
+    implementation project(":jpro-utils")
+}
+
+mainClassName = 'one.jpro.platform.utils.example.CopyExample'
+
+javafx {
+    version = "$JAVAFX_EXAMPLES_VERSION"
+    modules = ['javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web']
+}
+
+application {
+    mainClass = "$mainClassName"
+    mainModule = 'one.jpro.platform.utils.example'
+}
