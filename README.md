@@ -285,8 +285,9 @@ dependencies {
 }
 ```
 
-## JPro Markdown (formerly MDFX)
-This library allows you to render Markdown formatted content in your **JPro/JavaFX** applications.
+## JPro Markdown
+Formerly known as MDFX, this library allows you to render Markdown formatted content in your **JPro/JavaFX**
+applications.
 
 #### Maven configuration
 ```xml
