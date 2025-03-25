@@ -211,12 +211,13 @@ class MainView extends Page {
         LinkUtil.setLink(this, "/red")
       }
     }
+    /*
     this <++ new Button("Copy Text") {
       CopyUtil.setCopyOnClick(this, "Hello \"World\"!")
     }
     this <++ new Button("Copy Text2") {
       CopyUtil.setCopyOnClick(this, "Hello \n\n'`\"World\"!")
-    }
+    }*/
     this <++ new Label(" label 123") { font = new Font(60)}
     this <++ new Label(" label 123") { font = new Font(60)}
     this <++ addGoogle

@@ -3,8 +3,12 @@
 ## All Versions
 
 ### 0.5.7-SNAPSHOT (TBD)
+#### Features
 * Added for `jpro-mdfx` new StyleClasses `top`, `right`, `bottom`, `left` to the `MarkdownView` class.
 These can be used to style tables in markdown.
+* Moved CopyUtil from jpro-routing-core to jpro-utils. It's now written in Java and doesn't add Scala dependencies.
+
+#### Bufixes
 * Fixed bug in `jpro-mdfx`, when using MDFXUtil to extract chapters, some header like H3 were removed.
 
 ### 0.5.6 (March 14, 2025)
