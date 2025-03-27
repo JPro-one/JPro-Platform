@@ -116,7 +116,7 @@ public class UserPlatformExample extends Application {
         // Register the shortcut based on the meta key from UserPlatform.
         KeyCombination shortcut = new KeyCodeCombination(
                 KeyCode.U,
-                userPlatformFromAPI.isMac() ? KeyCombination.META_DOWN : KeyCombination.CONTROL_DOWN
+                userPlatformFromAPI.getModifierKeyCombination()
         );
 
         // Add accelerator to the scene.
@@ -144,7 +144,7 @@ public class UserPlatformExample extends Application {
         sb.append("isDesktop: ").append(platform.isDesktop()).append("\n");
         sb.append("isMobile: ").append(platform.isMobile()).append("\n");
         sb.append("isWeb: ").append(platform.isWeb()).append("\n");
-        sb.append("MetaKey: ").append(getKeyCodeName(platform.getMetaKey())).append("\n");
+        sb.append("MetaKey: ").append(getKeyCodeName(platform.getModifierKey())).append("\n");
         return sb.toString();
     }
 

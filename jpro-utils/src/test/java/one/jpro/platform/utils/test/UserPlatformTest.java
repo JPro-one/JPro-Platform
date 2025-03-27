@@ -21,6 +21,7 @@ public class UserPlatformTest {
         Assertions.assertFalse(platform.isWindows());
         Assertions.assertFalse(platform.isLinux());
         Assertions.assertTrue(platform.isDesktop());
+        Assertions.assertEquals(platform.getModifierKey(), KeyCode.META);
     }
 
     @Test
@@ -30,6 +31,7 @@ public class UserPlatformTest {
         Assertions.assertFalse(platform.isWindows());
         Assertions.assertFalse(platform.isLinux());
         Assertions.assertTrue(platform.isDesktop());
+        Assertions.assertEquals(platform.getModifierKey(), KeyCode.META);
     }
 
     @Test
@@ -39,7 +41,48 @@ public class UserPlatformTest {
         Assertions.assertFalse(platform.isWindows());
         Assertions.assertFalse(platform.isLinux());
         Assertions.assertTrue(platform.isDesktop());
-
-        Assertions.assertEquals(platform.getMetaKey() == KeyCode.COMMAND);
+        Assertions.assertEquals(platform.getModifierKey(), KeyCode.META);
     }
+
+    @Test
+    public void testWin1() {
+        var platform = UserPlatform.simulateWeb("Windows", "Win32");
+        Assertions.assertFalse(platform.isMac());
+        Assertions.assertTrue(platform.isWindows());
+        Assertions.assertFalse(platform.isLinux());
+        Assertions.assertTrue(platform.isDesktop());
+        Assertions.assertEquals(platform.getModifierKey(), KeyCode.CONTROL);
+    }
+    @Test
+    public void testWin2() {
+        var platform = UserPlatform.simulateWeb(null, "Win32");
+        Assertions.assertFalse(platform.isMac());
+        Assertions.assertTrue(platform.isWindows());
+        Assertions.assertFalse(platform.isLinux());
+        Assertions.assertTrue(platform.isDesktop());
+        Assertions.assertEquals(platform.getModifierKey(), KeyCode.CONTROL);
+    }
+
+    @Test
+    public void testIphone() {
+        var platform = UserPlatform.simulateWeb(null, "iPhone");
+        Assertions.assertFalse(platform.isMac());
+        Assertions.assertFalse(platform.isWindows());
+        Assertions.assertFalse(platform.isLinux());
+        Assertions.assertTrue(platform.isIOS());
+        Assertions.assertFalse(platform.isDesktop());
+    }
+
+    /*
+    @Test
+    public void testAndroid() {
+        // TODO
+        // From android, not really useful.
+        var platform = UserPlatform.simulateWeb(null, "Linux armv81");
+        Assertions.assertFalse(platform.isMac());
+        Assertions.assertFalse(platform.isWindows());
+        Assertions.assertTrue(platform.isLinux());
+        Assertions.assertFalse(platform.isIOS());
+        Assertions.assertFalse(platform.isDesktop());
+    }*/
 }

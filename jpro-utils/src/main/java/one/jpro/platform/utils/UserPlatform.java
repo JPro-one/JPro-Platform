@@ -2,6 +2,7 @@ package one.jpro.platform.utils;
 
 import com.jpro.webapi.WebAPI;
 import javafx.scene.input.KeyCode; // Assumes JavaFX is on the classpath
+import javafx.scene.input.KeyCombination;
 
 
 /**
@@ -130,23 +131,43 @@ public class UserPlatform {
     }*/
 
     /**
-     * Returns the meta key for the current platform.
+     * Returns the modifier key for the current platform.
      * For Mac OS it returns {@code KeyCode.META}, otherwise {@code KeyCode.CONTROL}.
      *
      * @return the meta key code
      */
-    public KeyCode getMetaKey() {
+    public KeyCode getModifierKey() {
         return isMac() ? KeyCode.META : KeyCode.CONTROL;
     }
 
     /**
-     * Returns the meta key for the platform determined by the given WebAPI.
+     * Returns the modifier key combination for the current platform.
+     * For Mac OS it returns {@code KeyCombination.META_DOWN}, otherwise {@code KeyCombination.CONTROL_DOWN}.
+     *
+     * @return the meta key code
+     */
+    public KeyCombination.Modifier getModifierKeyCombination() {
+        return isMac() ? KeyCombination.META_DOWN : KeyCombination.CONTROL_DOWN;
+    }
+
+    /**
+     * Returns the modifier key for the platform determined by the given WebAPI.
      *
      * @param webAPI the WebAPI to determine the platform
      * @return the meta key code
      */
-    public KeyCode getMetaKey(WebAPI webAPI) {
+    public KeyCode getModifierKey(WebAPI webAPI) {
         return isMac(webAPI) ? KeyCode.META : KeyCode.CONTROL;
+    }
+
+    /**
+     * Returns the modifier key combination for the platform determined by the given WebAPI.
+     *
+     * @param webAPI the WebAPI to determine the platform
+     *  @return the meta key code
+     */
+    public KeyCombination.Modifier getModifierKeyCombination(WebAPI webAPI) {
+        return isMac(webAPI) ? KeyCombination.META_DOWN : KeyCombination.CONTROL_DOWN;
     }
 
     /**
