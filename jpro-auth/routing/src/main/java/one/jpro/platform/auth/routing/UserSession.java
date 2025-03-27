@@ -49,4 +49,20 @@ public class UserSession {
             session.remove("user");
         }
     }
+
+    /**
+     * Removes the user object from the session.
+     */
+    public final void logout() {
+        session.remove("user");
+    }
+
+    /**
+     * Checks if the user is logged in.
+     *
+     * @return true if the user is logged in, false otherwise
+     */
+    public final boolean isLoggedIn() {
+        return getUser() != null;
+    }
 }
