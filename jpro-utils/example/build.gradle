@@ -9,7 +9,12 @@ dependencies {
     implementation project(":jpro-utils")
 }
 
-mainClassName = 'one.jpro.platform.utils.example.CopyExample'
+def examples = [
+        'copy' : 'one.jpro.platform.utils.example.CopyExample',
+        'user-platform' : 'one.jpro.platform.utils.example.UserPlatformExample'
+]
+
+mainClassName = examples.getOrDefault(project.getProperties().get("sample"), "UnknownApp")
 
 javafx {
     version = "$JAVAFX_EXAMPLES_VERSION"
