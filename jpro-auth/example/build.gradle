@@ -26,7 +26,8 @@ javafx {
 def examples = [
         'basic-login' : 'one.jpro.platform.auth.example.basic.BasicLoginApp',
         'google-login': 'one.jpro.platform.auth.example.login.GoogleLoginApp',
-        'oauth'       : 'one.jpro.platform.auth.example.oauth.OAuthApp'
+        'oauth'       : 'one.jpro.platform.auth.example.oauth.OAuthApp',
+        'playground'  : 'one.jpro.platform.auth.example.playground.PlaygroundLogin'
 ]
 
 mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["google-login"]
