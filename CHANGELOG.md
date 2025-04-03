@@ -1,6 +1,6 @@
 # Changelog
 
-## All Versions
+## 0.5.x
 
 ### 0.5.7-SNAPSHOT (TBD)
 #### Features
@@ -91,6 +91,8 @@ that prevented the addition of duplicate event handlers to the provided node.
 
 ----------------------
 
+## 0.4.x
+
 ### 0.4.4 (November 8, 2024)
 
 #### Improvements
@@ -169,6 +171,8 @@ Module System.
 * Fixed the stylesheet path in the `jpro-routing-popup` module for the SimplePopup control.
 
 ----------------------
+
+## Old Versions
 
 ### 0.3.2 (June 12, 2024)
 
