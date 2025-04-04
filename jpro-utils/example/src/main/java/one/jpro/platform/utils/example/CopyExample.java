@@ -10,6 +10,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import one.jpro.platform.utils.CopyUtil;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class CopyExample extends Application {
 
     @Override
@@ -32,8 +35,16 @@ public class CopyExample extends Application {
             CopyUtil.setCopyOnClick(copyButton, newText);
         });
 
+        var nullButton = new Button("Set to null");
+        nullButton.setOnAction(e -> {
+            CopyUtil.setCopyOnClick(copyButton, null);
+        });
+
+        var copyException = new Button("Copy Exception");
+        CopyUtil.setCopyOnClick(copyException, getExceptionText());
+
         // Use a VBox to layout the UI components neatly.
-        VBox root = new VBox(15, instructionLabel, textField, copyButton);
+        VBox root = new VBox(15, instructionLabel, textField, copyButton, nullButton, copyException);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-padding: 20; -fx-background-color: #f4f4f4;");
 
@@ -45,5 +56,14 @@ public class CopyExample extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public String getExceptionText() {
+        var e = new Exception();
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String exceptionAsString = sw.toString();
+        return exceptionAsString;
     }
 }

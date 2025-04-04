@@ -460,6 +460,8 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:run -Psample=colors
 ./gradlew jpro-routing:example:run -Psample=popup
 ./gradlew jpro-routing:example:run -Psample=test
+./gradlew jpro-utils:example:run -Psample=copy
+./gradlew jpro-utils:example:run -Psample=user-platform
 ```
 
 - As JPro application
@@ -482,6 +484,8 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:jproRun -Psample=extensions
 ./gradlew jpro-webrtc:example:jproRun
 ./gradlew jpro-sipjs:example:jproRun
+./gradlew jpro-utils:example:jproRun -Psample=copy
+./gradlew jpro-utils:example:jproRun -Psample=user-platform
 ```
 
 - Run the [ensemble](https://www.jfx-ensemble.com/) website

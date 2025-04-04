@@ -1,12 +1,13 @@
 # Changelog
 
-## All Versions
+## 0.5.x
 
 ### 0.5.7-SNAPSHOT (TBD)
 #### Features
 * Added for `jpro-mdfx` new StyleClasses `top`, `right`, `bottom`, `left` to the `MarkdownView` class.
 These can be used to style tables in markdown.
 * Moved CopyUtil from jpro-routing-core to jpro-utils. It's now written in Java and doesn't add Scala dependencies.
+* Added the `UserPlatform` class to `jpro-util`. It now detects the user’s platform and determines the appropriate action key. This functionality is particularly valuable for JPro, as it operates seamlessly within the browser.
 
 #### Bufixes
 * Fixed bug in `jpro-mdfx`, when using MDFXUtil to extract chapters, some header like H3 were removed.
@@ -91,6 +92,8 @@ that prevented the addition of duplicate event handlers to the provided node.
 
 ----------------------
 
+## 0.4.x
+
 ### 0.4.4 (November 8, 2024)
 
 #### Improvements
@@ -169,6 +172,8 @@ Module System.
 * Fixed the stylesheet path in the `jpro-routing-popup` module for the SimplePopup control.
 
 ----------------------
+
+## Old Versions
 
 ### 0.3.2 (June 12, 2024)
 

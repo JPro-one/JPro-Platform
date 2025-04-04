@@ -63,10 +63,12 @@ public class CopyUtil {
 
         private void install(Node node) {
             node.setOnMouseClicked(event -> {
-                Clipboard clipboard = Clipboard.getSystemClipboard();
-                ClipboardContent content = new ClipboardContent();
-                content.putString(this.text);
-                clipboard.setContent(content);
+                if(this.text != null) {
+                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString(this.text);
+                    clipboard.setContent(content);
+                }
             });
         }
     }
@@ -79,8 +81,8 @@ public class CopyUtil {
         private final SimpleStringProperty copyTextProperty = new SimpleStringProperty();
 
         public CopyJPro(String text, Node node) {
-            install(node);
             setText(text);
+            install(node);
         }
 
         @Override
@@ -92,15 +94,20 @@ public class CopyUtil {
             WebAPI.getWebAPI(node, webapi -> {
                 final JSVariable jsElem = webapi.getElement(node);
                 Runnable run = () -> {
-                    String escapedText = copyTextProperty.get()
-                            .replace("'", "\\'")
-                            .replace("\"", "\\\"")
-                            .replace("\n", "\\n");
-                    String script = jsElem.getName() + ".onmousedown = function(event) {"
-                            + "  console.log('copy: " + escapedText + "');"
-                            + "  navigator.clipboard.writeText('" + escapedText + "');"
-                            + "};";
-                    webapi.executeScript(script);
+                    String origText = copyTextProperty.get();
+                    if(origText == null) {
+                        String script = jsElem.getName() + ".onmousedown = undefined;";
+                    } else {
+                        String escapedText = copyTextProperty.get()
+                                .replace("'", "\\'")
+                                .replace("\"", "\\\"")
+                                .replace("\n", "\\n");
+                        String script = jsElem.getName() + ".onmousedown = function(event) {"
+                                + "  console.log('copy: " + escapedText + "');"
+                                + "  navigator.clipboard.writeText('" + escapedText + "');"
+                                + "};";
+                        webapi.executeScript(script);
+                    }
                 };
                 copyTextProperty.addListener((observable, oldValue, newValue) -> {
                     run.run();
