@@ -7,6 +7,7 @@
 * Added for `jpro-mdfx` new StyleClasses `top`, `right`, `bottom`, `left` to the `MarkdownView` class.
 These can be used to style tables in markdown.
 * Moved CopyUtil from jpro-routing-core to jpro-utils. It's now written in Java and doesn't add Scala dependencies.
+* Added the `UserPlatform` class to `jpro-util`. It now detects the user’s platform and determines the appropriate action key. This functionality is particularly valuable for JPro, as it operates seamlessly within the browser.
 
 #### Bufixes
 * Fixed bug in `jpro-mdfx`, when using MDFXUtil to extract chapters, some header like H3 were removed.
