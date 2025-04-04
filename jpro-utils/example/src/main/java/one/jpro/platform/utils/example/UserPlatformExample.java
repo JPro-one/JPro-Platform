@@ -52,7 +52,7 @@ public class UserPlatformExample extends Application {
         // Create a UserPlatform instance using the real WebAPI.
         UserPlatform userPlatformFromAPI = new UserPlatform(webAPI);
         // Also create a UserPlatform instance using desktop system properties.
-        UserPlatform userPlatformDesktop = UserPlatform.simulateDesktop();
+        UserPlatform userPlatformDesktop = UserPlatform.simulateNative();
 
         String currentInfo = webAPIValues + "\n"
                 + getUserPlatformInfo("UserPlatform from WebAPI", userPlatformFromAPI)
@@ -141,9 +141,8 @@ public class UserPlatformExample extends Application {
         sb.append("isWindows: ").append(platform.isWindows()).append("\n");
         sb.append("isMac: ").append(platform.isMac()).append("\n");
         sb.append("isLinux: ").append(platform.isLinux()).append("\n");
-        sb.append("isDesktop: ").append(platform.isDesktop()).append("\n");
-        sb.append("isMobile: ").append(platform.isMobile()).append("\n");
         sb.append("isWeb: ").append(platform.isWeb()).append("\n");
+        sb.append("isMobile: ").append(platform.isMobile()).append("\n");
         sb.append("MetaKey: ").append(getKeyCodeName(platform.getModifierKey())).append("\n");
         return sb.toString();
     }
