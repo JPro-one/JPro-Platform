@@ -29,7 +29,7 @@ public class UserPlatform {
 
     private UserPlatform(String platform, WebAPI webAPI, boolean isNative) {
         this.platform = platform;
-        this.isNative = !WebAPI.isBrowser();
+        this.isNative = isNative;
         this.webAPI = webAPI;
     }
 
@@ -98,7 +98,7 @@ public class UserPlatform {
         if(isNative) {
             return PlatformUtils.isAndroid() || PlatformUtils.isIOS();
         } else {
-            return WebAPI.isBrowser();
+            return webAPI.isMobile();
         }
     }
 
