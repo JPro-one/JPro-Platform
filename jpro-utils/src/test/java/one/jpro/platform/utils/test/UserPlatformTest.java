@@ -2,7 +2,6 @@ package one.jpro.platform.utils.test;
 
 import javafx.scene.input.KeyCode;
 import one.jpro.platform.utils.UserPlatform;
-import org.junit.jupiter.api.
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
