@@ -1,12 +1,19 @@
 package one.jpro.platform.routing.crawl
 
+import javafx.application.Platform
 import javafx.scene.control.Label
 import one.jpro.platform.routing.crawl.TestUtils.{LeakStage, Page1, Page2}
 import one.jpro.platform.routing.{Request, Response, Route, RouteNode}
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.cores.default.inFX
 import simplefx.util.Predef.intercept
 
+object TestMemoryTester {
+  @BeforeAll
+  def init(): Unit = inFX {
+    Platform.setImplicitExit(false)
+  }
+}
 class TestMemoryTester {
 
   @Test

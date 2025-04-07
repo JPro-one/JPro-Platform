@@ -1,5 +1,6 @@
 package one.jpro.platform.routing.crawl
 
+import javafx.application.Platform
 import one.jpro.jmemorybuddy.JMemoryBuddy
 import javafx.stage.Stage
 import one.jpro.platform.routing.crawl.AppCrawler.{CrawlReportApp, routeToRouteNode}
@@ -8,6 +9,7 @@ import one.jpro.platform.routing.{Request, Route, RouteApp, RouteNode, View}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.core._
 import simplefx.all._
+
 import java.util.function.Supplier
 
 object MemoryTester {
@@ -42,16 +44,16 @@ object MemoryTester {
   }
 
   def testForLeaks2_keepStage(pages: List[String], appFactory: Supplier[Route]): Unit = {
-    JMemoryBuddy.memoryTest(checker1 => {
-      val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
-      assert(routeNode != null, "The routeNode must not return null ")
-      JMemoryBuddy.memoryTest(checker2 => {
-        pages.foreach { pageURL =>
+    pages.foreach { pageURL =>
+      JMemoryBuddy.memoryTest(checker1 => {
+        val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
+        assert(routeNode != null, "The routeNode must not return null ")
+        JMemoryBuddy.memoryTest(checker2 => {
           logger.debug(s"Checking for leak for the url: $pageURL")
           val result = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
 
           println("Got result: " + result)
-          if(result.isInstanceOf[View]) {
+          if (result.isInstanceOf[View]) {
             val view = result.asInstanceOf[View]
             // Scene Graph:
             println("Got result: " + view.realContent)
@@ -60,12 +62,12 @@ object MemoryTester {
             inFX(routeNode.scene.root.applyCss())
           }
           Thread.sleep(100)
-        }
-        routeNode.getSessionManager().gotoURL("/").future.await
+          routeNode.getSessionManager().gotoURL("/").future.await
+        })
+        inFX(routeNode.scene.window.asInstanceOf[Stage].close())
+        checker1.assertCollectable(routeNode)
       })
-      inFX(routeNode.scene.window.asInstanceOf[Stage].close())
-      checker1.assertCollectable(routeNode)
-    })
+    }
   }
 
 }

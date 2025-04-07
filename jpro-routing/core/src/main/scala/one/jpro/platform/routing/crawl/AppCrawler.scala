@@ -237,6 +237,7 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
       case null =>
         deadLinks += crawlNext
     }
+    runLater(app.scene.window.asInstanceOf[Stage].close())
   }
   def crawlAll(): CrawlReportApp = {
 
