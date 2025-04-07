@@ -61,7 +61,6 @@ object MemoryTester {
             assert(view == routeNode.getSessionManager().getView(), "The view must be the same as in the session manager")
             inFX(routeNode.scene.root.applyCss())
           }
-          Thread.sleep(100)
           routeNode.getSessionManager().gotoURL("/").future.await
         })
         inFX(routeNode.scene.window.asInstanceOf[Stage].close())
