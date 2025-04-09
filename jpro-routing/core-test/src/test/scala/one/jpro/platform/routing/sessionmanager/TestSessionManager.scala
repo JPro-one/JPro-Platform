@@ -1,6 +1,7 @@
 package one.jpro.platform.routing.sessionmanager
 
 import javafx.scene.control.Label
+import javafx.scene.layout.StackPane
 import one.jpro.platform.routing.{Filters, Response, Route, RouteApp}
 import org.junit.jupiter.api.Test
 import simplefx.core._
@@ -35,6 +36,24 @@ class TestSessionManager {
       val url = app.getSessionManager().getURL()
       assert(url == "/test/test2")
     }
+  }
+
+  @Test
+  def testPageCreatedOnce(): Unit = {
+    var i = 0
+    val route = Route.empty()
+      .and(Route.get("/", r => Response.node(new StackPane {
+        i += 1
+      })))
+
+    val app = new RouteApp {
+      override def createRoute(): Route = route
+    }
+    val stage = inFX(new javafx.stage.Stage())
+    inFX(app.startFuture(stage)).future.await
+    assert(i == 1)
+    inFX(app.getSessionManager().gotoURL("/").future).await
+    assert(i == 2)
   }
 
   @Test

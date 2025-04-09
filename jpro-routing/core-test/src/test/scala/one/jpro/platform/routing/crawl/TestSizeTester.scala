@@ -22,7 +22,9 @@ class TestSizeTester {
   @Test
   def positiveTest1(): Unit = {
     def route = Route.empty()
-      .and(Route.get("/", r => Response.node(new StackPane)))
+      .and(Route.get("/", r => Response.node(new StackPane {{
+        new Exception().printStackTrace()
+      }})))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
     SizeTester.testSize(10,2000,result, () => route)
   }
@@ -53,6 +55,19 @@ class TestSizeTester {
     def route = Route.empty()
       .and(Route.get("/", r => Response.node(new StackPane {{
         setMaxWidth(1999)
+      }})))
+    val result = AppCrawler.crawlRoute("http://localhost", () => route)
+    intercept[Throwable](SizeTester.testSize(10,2000,result, () => route))
+  }
+
+  @Test
+  def negativeCSS(): Unit = {
+    def route = Route.empty()
+      .and(Route.get("/", r => Response.node(new StackPane {{
+        getStylesheets.add("testfiles/size-tester-test-css.css")
+        getChildren().add(new StackPane() {{
+          getStyleClass.add("min-100")
+        }})
       }})))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
     intercept[Throwable](SizeTester.testSize(10,2000,result, () => route))

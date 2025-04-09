@@ -28,7 +28,7 @@ object MemoryTester {
         JMemoryBuddy.memoryTest(checker2 => {
           val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
           assert(routeNode != null, "The routeNode must not return null ")
-          val view = inFX(routeNode.getRoute()(Request.fromString(pageURL))).future.await
+          val view = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
           inFX(routeNode.scene.root.applyCss())
 
           checker2.setAsReferenced(routeNode)
