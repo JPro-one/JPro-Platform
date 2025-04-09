@@ -20,9 +20,9 @@ object AppCrawler {
 
   case class ImageInfo(url: String, description: String)
 
-  case class CrawlReportPage(path: String, links: List[LinkInfo], pictures: List[ImageInfo], title: String, description: String)
+  case class CrawlReportPage(path: String, links: java.util.List[LinkInfo], pictures: java.util.List[ImageInfo], title: String, description: String)
 
-  case class CrawlReportApp(pages: List[String], reports: List[CrawlReportPage], deadLinks: List[String])
+  case class CrawlReportApp(pages: java.util.List[String], reports: java.util.List[CrawlReportPage], deadLinks: java.util.List[String])
 
 
   def crawlPage(page: View): CrawlReportPage = {
@@ -96,7 +96,7 @@ object AppCrawler {
     val node = page.realContent
     crawlNode(page.realContent)
 
-    CrawlReportPage(page.url, foundLinks.reverse, images.reverse, page.title, page.description)
+    CrawlReportPage(page.url, foundLinks.reverse.asJava, images.reverse.asJava, page.title, page.description)
   }
 
   def crawlRoute(prefix: String, createRoute: Supplier[Route]): CrawlReportApp = {
@@ -223,7 +223,7 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
           def simplifyLink(x: String) = {
             if(x.startsWith(prefix)) x.drop(prefix.length) else x
           }
-          newReport.links.filter(x => isOwnLink(x.url)).foreach { link =>
+          newReport.links.asScala.filter(x => isOwnLink(x.url)).foreach { link =>
             val url = simplifyLink(link.url)
             if (!indexed.contains(url) && !toIndex.contains(url)) {
               toIndex += url
@@ -250,7 +250,7 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
       }
     }
 
-    CrawlReportApp((indexed -- redirects -- deadLinks).toList, reports.reverse, deadLinks.toList)
+    CrawlReportApp((indexed -- redirects -- deadLinks).toList.asJava, reports.reverse.asJava, deadLinks.toList.asJava)
   }
 
 }

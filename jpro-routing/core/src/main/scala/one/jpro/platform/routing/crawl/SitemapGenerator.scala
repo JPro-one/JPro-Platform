@@ -19,14 +19,14 @@ object SitemapGenerator {
     urlset.setAttribute("xmlns:image","http://www.google.com/schemas/sitemap-image/1.1")
     doc.appendChild(urlset)
 
-    report.reports.map { page =>
+    report.reports.forEach { page =>
       val child1 = doc.createElement("url")
       val loc = doc.createElement("loc")
       loc.setTextContent(prefix + page.path)
 
       child1.appendChild(loc)
 
-      page.pictures/*.filter(_.url.startsWith("http"))*/.map { img =>
+      page.pictures/*.filter(_.url.startsWith("http"))*/.forEach { img =>
         val image = doc.createElement("image:image")
         val imageloc = doc.createElement("image:loc")
         if(img.url.startsWith("http")) {

@@ -10,6 +10,8 @@ import simplefx.all
 import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.util.Predef.intercept
 
+import scala.collection.JavaConverters.asScalaBufferConverter
+
 object TestAppCrawler {
   @BeforeAll
   def init(): Unit = inFX {
@@ -29,7 +31,7 @@ class TestAppCrawler {
     println("Links: " + result.pictures)
     assert(result.links contains LinkInfo("/page2", "desc1"))
     assert(result.links contains LinkInfo("/page2", ""), result.links)
-    assert(result.pictures.exists(x => x.description == "The Description"))
+    assert(result.pictures.asScala.exists(x => x.description == "The Description"))
   }
 
   @Test
@@ -113,8 +115,8 @@ class TestAppCrawler {
     val r = AppCrawler.crawlRoute("http://localhost", () =>
       Route.empty().and(Route.get("/", r => Response.view(view)))
     )
-    assert(r.pages.length == 1)
-    assert(r.reports.head.pictures.nonEmpty)
+    assert(r.pages.size() == 1)
+    assert(!r.reports.get(0).pictures.isEmpty)
   }
 
   @Test
