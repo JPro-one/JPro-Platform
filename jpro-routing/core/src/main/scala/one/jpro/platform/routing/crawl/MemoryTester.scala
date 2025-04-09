@@ -14,7 +14,6 @@ import java.util.function.Supplier
 
 object MemoryTester {
 
-  // 2 modes. Keep Stage. Keep RouteNode
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def testForLeaks(report: CrawlReportApp, appFactory: Supplier[Route]): Unit = {
@@ -22,29 +21,31 @@ object MemoryTester {
     testForLeaks2_keepStage(report.pages, appFactory)
   }
 
-  def testForLeaks_newStage(pages: List[String], appFactory: Supplier[Route]): Unit = {
-    pages.foreach { pageURL =>
+  def testForLeaks_newStage(pages: java.util.List[String], appFactory: Supplier[Route]): Unit = {
+    pages.forEach { pageURL =>
       logger.debug(s"Checking for leak for the url: $pageURL")
       JMemoryBuddy.memoryTest(checker1 => {
+        val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
         JMemoryBuddy.memoryTest(checker2 => {
-          val factory: RouteNode = inFX(routeToRouteNode(appFactory.get()))
-          assert(factory != null, "The appFactory must not return null ")
-          val view = inFX(factory.getRoute()(Request.fromString(pageURL))).future.await
+          assert(routeNode != null, "The routeNode must not return null ")
+          val view = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
+          inFX(routeNode.scene.root.applyCss())
 
-          checker2.setAsReferenced(factory)
+          checker2.setAsReferenced(routeNode)
           checker2.assertCollectable(view) // Hm?
           if(view.isInstanceOf[View]) {
             checker2.assertCollectable(inFX(view.asInstanceOf[View].realContent))
           }
-          inFX(factory.scene.window.asInstanceOf[Stage].close())
-          checker1.assertCollectable(factory)
+          routeNode.getSessionManager().gotoURL("/").future.await
         })
+        inFX(routeNode.scene.window.asInstanceOf[Stage].close())
+        checker1.assertCollectable(routeNode)
       })
     }
   }
 
-  def testForLeaks2_keepStage(pages: List[String], appFactory: Supplier[Route]): Unit = {
-    pages.foreach { pageURL =>
+  def testForLeaks2_keepStage(pages: java.util.List[String], appFactory: Supplier[Route]): Unit = {
+    pages.forEach { pageURL =>
       JMemoryBuddy.memoryTest(checker1 => {
         val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
         assert(routeNode != null, "The routeNode must not return null ")
