@@ -1,5 +1,5 @@
 # JPro Platform
-![Build](https://github.com/jpro-one/jpro-platform/actions/workflows/linux.yml/badge.svg)
+![Build](https://github.com/jpro-one/jpro-platform/actions/workflows/main.yml/badge.svg)
 [![JPro supported](https://img.shields.io/badge/JPro-supported-brightgreen.svg)](https://www.jpro.one/)
 
 The JPro Platform represents the foundation of cross-platform application development,
@@ -25,13 +25,15 @@ development and deployment.
 significant savings in development time, resources, and costs.
 ____
 
-To use them, you need the following repository:
+All release builds are now available on [Maven Central](https://central.sonatype.com/search?namespace=one.jpro.platform).
+
+To use the snapshot builds, you need the following repository:
 - For Maven:
 
 ```xml
 <repositories>
   <repository>
-    <id>jpro - sandec repository</id>
+    <id>jpro-sandec-repository</id>
     <url>https://sandec.jfrog.io/artifactory/repo/</url>
   </repository>
 </repositories>
@@ -44,18 +46,6 @@ repositories {
         url "https://sandec.jfrog.io/artifactory/repo"
     }
 }
-```
-
-## Lunch the examples
-The [example](https://github.com/JPro-one/jpro-platform/blob/main/example/src/main/java/one/jpro/platform/example/Main.java)
-subproject holds different examples from the other modules. To run it, you can use the following command:
-* As web application via JPro server
-```shell
-./gradlew example:jproRun
-```
-* As desktop application
-```shell
-./gradlew example:run
 ```
 
 ## JPro Auth
@@ -73,7 +63,7 @@ and OAuth2 (and to some extent OpenID Connect) implementation.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-auth-core</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -81,7 +71,28 @@ and OAuth2 (and to some extent OpenID Connect) implementation.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-auth-core:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-auth-core:0.5.6")
+}
+```
+
+## JPro SceneGraph
+Creates human and AI friendly String representations of JavaFX SceneGraphs.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-scenegraph</artifactId>
+    <version>0.5.6</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-scenegraph:0.5.6")
 }
 ```
 
@@ -94,7 +105,7 @@ This library provides a simple way to pick, drop, upload and download files in *
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-file</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -102,7 +113,7 @@ This library provides a simple way to pick, drop, upload and download files in *
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-file:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-file:0.5.6")
 }
 ```
 
@@ -138,7 +149,7 @@ to the desired size.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-image-manager</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -146,11 +157,33 @@ to the desired size.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-image-manager:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-image-manager:0.5.6")
 }
 ```
 
-## [JPro Media](https://github.com/JPro-one/jpro-platform/tree/main/jpro-media)
+## JPro Mail
+This library provides a simple way to send emails in **JPro/JavaFX** applications. It allows you to send emails
+using SMTP and SMTPS protocols. It also provides a simple way to compose and send emails with attachments.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-mail</artifactId>
+    <version>0.5.6</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-mail:0.5.6")
+}
+```
+
+## JPro Media
 This library is designed for audio and video playback and recording within JavaFX applications.
 It seamlessly operates on both desktop and mobile devices, as well as in web browsers via **JPro**, 
 all while utilizing the same codebase.
@@ -161,13 +194,13 @@ all while utilizing the same codebase.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-media</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 
   <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacv-platform</artifactId>
-      <version>1.5.9</version>
+      <version>1.5.10</version>
       <!-- use compile scope when running/deploying with JPro,-->
       <!-- since the platform related libraries are no more needed-->
       <!-- <scope>compile</scope>-->
@@ -178,12 +211,12 @@ all while utilizing the same codebase.
 #### Gradle configuration
 ```groovy
 plugins {
-    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.9"
+    id 'org.bytedeco.gradle-javacpp-platform' version "1.5.10"
 }
 
 dependencies {
-    implementation("one.jpro.platform:jpro-media:0.2.11-SNAPSHOT")
-    implementation "org.bytedeco:javacv-platform:1.5.9" // use compileOnly configuration when running/deploying with JPro
+    implementation("one.jpro.platform:jpro-media:0.5.6")
+    implementation "org.bytedeco:javacv-platform:1.5.10" // use compileOnly configuration when running/deploying with JPro
 }
 ```
 
@@ -200,7 +233,7 @@ Currently, there are three routing modules available:
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-core</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -208,7 +241,7 @@ Currently, there are three routing modules available:
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-core:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-routing-core:0.5.6")
 }
 ```
 
@@ -220,7 +253,7 @@ dependencies {
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-dev</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -228,7 +261,7 @@ dependencies {
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-dev:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-routing-dev:0.5.6")
 }
 ```
 
@@ -240,7 +273,7 @@ dependencies {
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-popup</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -248,12 +281,13 @@ dependencies {
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-popup:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-routing-popup:0.5.6")
 }
 ```
 
-## JPro Markdown (formerly MDFX)
-This library allows you to render Markdown formatted content in your **JPro/JavaFX** applications.
+## JPro Markdown
+Formerly known as MDFX, this library allows you to render Markdown formatted content in your **JPro/JavaFX**
+applications.
 
 #### Maven configuration
 ```xml
@@ -261,7 +295,7 @@ This library allows you to render Markdown formatted content in your **JPro/Java
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-mdfx</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -269,11 +303,11 @@ This library allows you to render Markdown formatted content in your **JPro/Java
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-mdfx:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-mdfx:0.5.6")
 }
 ```
 
-## JPro Sessions
+## JPro Session
 This library provides a simple implementation of a session manager for **JavaFX/JPro** applications.
 It remembers the user, based on a cookie. A simple ObservableMap is used to store the session data.
 This data is only accessible in the JPro Server, not in the browser - which can be important for some security reasons.
@@ -283,8 +317,8 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 <dependencies>
   <dependency>
     <groupId>one.jpro.platform</groupId>
-    <artifactId>jpro-sessions</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <artifactId>jpro-session</artifactId>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -292,7 +326,28 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-sessions:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-session:0.5.6")
+}
+```
+
+## JPro Utils
+This library offers essential tools for various functionalities to enhance the development of **JPro/JavaFX** applications.
+
+#### Maven configuration
+```xml
+<dependency>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-utils</artifactId>
+    <version>0.5.6</version>
+  </dependency>
+</dependency>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation 'one.jpro.platform:jpro-utils:0.5.6'
 }
 ```
 
@@ -313,7 +368,7 @@ capabilities.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-webrtc</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -321,7 +376,7 @@ capabilities.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-webrtc:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-webrtc:0.5.6")
 }
 ```
 
@@ -336,7 +391,7 @@ the embedded controls. The video can be played in full-screen mode.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-youtube</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -344,7 +399,7 @@ the embedded controls. The video can be played in full-screen mode.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-youtube:0.2.11-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-youtube:0.5.6")
 }
 ```
 
@@ -373,7 +428,7 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-html-scrollpane</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
+    <version>0.5.6</version>
   </dependency>
 </dependencies>
 ```
@@ -381,104 +436,59 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-html-scrollpane:0.2.11-SNAPSHOT")
-}
-```
-
-## TreeShowing
-#### Motivation
-In JavaFX, when a node could be collected - it's often prevented by ongoing animation or background tasks.
-For this reason, it's often necessary to stop the animation or background task, 
-when a node is no longer used.
-Internally in JavaFX, the property "treeShowing" is used, to check whether a Node is still used.
-But as an end-user, this property is not accessible in their application.
-With this project, we want to make the property available to the common JavaFX Developer - allowing them to write
-bug-free and leak-free applications.
-
-#### Maven configuration
-```xml
-<dependency>
-  <groupId>one.jpro.platform</groupId>
-  <artifactId>tree-showing</artifactId>
-  <version>0.2.11-SNAPSHOT</version>
-</dependency>
-```
-
-#### Gradle configuration
-```groovy
-dependencies {
-    implementation 'one.jpro.platform:tree-showing:0.2.11-SNAPSHOT'
-}
-```
-
-#### Typical Usage:
-```
-Timeline myTimeline = new Timeline();
-myTimeline.setCycleCount(Timeline.INDEFINITE);
-Node node = <MyNode>
-treeShowing = TreeShowing.treeShowing(node);
-treeShowing.addListener((p,o,showing) -> {
-  if(showing) {
-    myTimeline.start();
-  } else {
-    myTimeline.stop();
-  }
-});
-if(treeShowing.get()) {
-  myTimeline.start();
-}
-```
-
-## Freeze Detector
-This library allows you to track whether the JavaFX Application Thread is frozen for a given time.
-This can be useful for debugging purposes, detecting deadlocks or other optimize performance.
-
-#### Maven configuration
-```xml
-<dependency>
-  <dependency>
-    <groupId>one.jpro.platform</groupId>
-    <artifactId>freeze-detector</artifactId>
-    <version>0.2.11-SNAPSHOT</version>
-  </dependency>
-</dependency>
-```
-
-#### Gradle configuration
-```groovy
-dependencies {
-    implementation 'one.jpro.platform:freeze-detector:0.2.11-SNAPSHOT'
+    implementation("one.jpro.platform:jpro-html-scrollpane:0.5.6")
 }
 ```
 
 ## Launch the examples
+To run the examples, you can use the following commands:
 
 - As desktop application
 ```shell
+./gradlew example:run
+
 ./gradlew jpro-auth:example:run -Psample=basic-login
 ./gradlew jpro-auth:example:run -Psample=google-login
 ./gradlew jpro-auth:example:run -Psample=oauth
+./gradlew jpro-file:example:run -Psample=text-editor
 ./gradlew jpro-file:example:run -Psample=file-uploader
-./gradlew jpro-file:example:run -Psample=file-uploader
+./gradlew jpro-mail:example:run -Psample=compose-mail
 ./gradlew jpro-media:example:run -Psample=media-player
 ./gradlew jpro-media:example:run -Psample=media-recorder
 ./gradlew jpro-media:example:run -Psample=media-recorder-and-player
+./gradlew jpro-mdfx:example:run
 ./gradlew jpro-routing:example:run -Psample=colors
+./gradlew jpro-routing:example:run -Psample=popup
 ./gradlew jpro-routing:example:run -Psample=test
+./gradlew jpro-utils:example:run -Psample=copy
+./gradlew jpro-utils:example:run -Psample=user-platform
 ```
 
 - As JPro application
 ```shell
+./gradlew example:jproRun
+
 ./gradlew jpro-auth:example:jproRun -Psample=basic-login
 ./gradlew jpro-auth:example:jproRun -Psample=google-login
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
+./gradlew jpro-file:example:jproRun -Psample=text-editor
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
-./gradlew jpro-file:example:jproRun -Psample=file-uploader
+./gradlew jpro-mail:example:jproRun -Psample=compose-mail
 ./gradlew jpro-media:example:jproRun -Psample=media-player
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player
+./gradlew jpro-mdfx:example:jproRun
 ./gradlew jpro-routing:example:jproRun -Psample=colors
+./gradlew jpro-routing:example:jproRun -Psample=popup
 ./gradlew jpro-routing:example:jproRun -Psample=test
+./gradlew jpro-routing:example:jproRun -Psample=extensions
 ./gradlew jpro-webrtc:example:jproRun
 ./gradlew jpro-sipjs:example:jproRun
+./gradlew jpro-utils:example:jproRun -Psample=copy
+./gradlew jpro-utils:example:jproRun -Psample=user-platform
+```
+
+- Run the [ensemble](https://www.jfx-ensemble.com/) website
+```shell
+./gradlew ensemble:site:jproRun
 ```

@@ -56,6 +56,7 @@ public class ImageTransformerFitWidth implements ImageTransformer {
         Graphics2D g2d = (Graphics2D) outputImage.getGraphics();
         ImageTransformerHelpers.graphicsDefaultConfiguration(g2d);
         g2d.drawImage(inputImage, 0, 0, targetWidth, targetHeight, null);
+        g2d.dispose();
         return outputImage;
     }
 

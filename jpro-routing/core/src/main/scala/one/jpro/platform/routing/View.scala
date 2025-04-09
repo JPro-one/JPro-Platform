@@ -33,7 +33,7 @@ abstract class View extends ResponseResult { THIS =>
    * @param x path
    * @return whether the view handles the url change
    */
-  def handleURL(x: String): Boolean = false
+  def handleRequest(x: Request): Boolean = false
   def mapContent(f: Node => Node): View = new View {
     override def title: String = THIS.title
 

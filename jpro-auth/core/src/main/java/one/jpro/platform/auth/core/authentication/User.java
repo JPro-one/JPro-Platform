@@ -1,5 +1,6 @@
 package one.jpro.platform.auth.core.authentication;
 
+import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -122,10 +123,22 @@ public class User implements Authentication {
         return Collections.unmodifiableMap(attributes);
     }
 
+    /**
+     * Checks if the user has a specific role.
+     *
+     * @param role the role to check.
+     * @return true if the user has the specified role, false otherwise.
+     */
     public boolean hasRole(String role) {
         return getRoles().contains(role);
     }
 
+    /**
+     * Checks if the user has a specific attribute.
+     *
+     * @param key the key of the attribute to check
+     * @return true if the user has the specified attribute, false otherwise
+     */
     public boolean hasAttribute(String key) {
         return hasKey(toJSON().getJSONObject(KEY_ATTRIBUTES), key);
     }
@@ -142,5 +155,25 @@ public class User implements Authentication {
             }
         }
         return exists;
+    }
+
+    /**
+     * Retrieves the value of a specific attribute.
+     *
+     * @param key the key of the attribute to retrieve
+     * @return the value of the attribute as a String, or null if the attribute does not exist
+     */
+    public Optional<String> getAttribute(String key) {
+        final Object value = AuthUtils.findValueByKey(toJSON().getJSONObject(KEY_ATTRIBUTES), key);
+        return Optional.ofNullable(value).map(Object::toString);
+    }
+
+    /**
+     * Retrieve the user's email from the user's attributes.
+     *
+     * @return the email as a string
+     */
+    public String getEmail() {
+        return getAttribute("email").orElseThrow();
     }
 }

@@ -30,7 +30,8 @@ public interface HttpServer extends AutoCloseable {
      * @throws HttpServerException if an error occurs
      */
     static HttpServer create(@Nullable final Stage stage) throws HttpServerException {
-        if (WebAPI.isBrowser() && stage != null) {
+        if (WebAPI.isBrowser()) {
+            Objects.requireNonNull(stage, "Stage cannot be null");
             WebAPI webAPI = WebAPI.getWebAPI(stage);
             return new JProServerImpl(webAPI);
         }

@@ -52,6 +52,7 @@ public class ImageTransformerFitHeight implements ImageTransformer {
         Graphics2D g2d = resized.createGraphics();
         ImageTransformerHelpers.graphicsDefaultConfiguration(g2d);
         g2d.drawImage(original, 0, 0, newWidth, targetHeight, null);
+        g2d.dispose();
         return resized;
     }
 

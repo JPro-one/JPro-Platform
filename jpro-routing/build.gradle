@@ -25,17 +25,17 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
     dependencies {
-        api "com.sandec.jpro:jpro-webapi:$JPRO_VERSION"
+        api "one.jpro:jpro-webapi:$JPRO_VERSION"
         api "SANDEC:jnodes:$JNODES_VERSION"
-        api "de.sandec:JMemoryBuddy:$JMEMORYBUDDY_VERSION"
+        api "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
         api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     }
 }
 
 configure([project(':jpro-routing:core')]) {
     dependencies {
+        api project(":jpro-utils")
         api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
-        api project(":internal:openlink")
     }
 
     publishing {
@@ -43,8 +43,13 @@ configure([project(':jpro-routing:core')]) {
             mavenJava(MavenPublication) {
                 // Add README.md as an artifact named DOCUMENTATION.md
                 artifact(source: file('build/docs/DOCUMENTATION.md')) {
-                    classifier 'documentation'
+                    classifier 'DOCUMENTATION'
                     extension 'md'
+                }
+
+                pom {
+                    name = 'JPro Routing Core'
+                    description = 'A framework for building JPro/JavaFX applications, both desktop and web, with routing capabilities.'
                 }
             }
         }
@@ -61,18 +66,34 @@ configure([project(':jpro-routing:core')]) {
 
 configure([project(':jpro-routing:dev')]) {
     dependencies {
-        implementation project(':jpro-routing:core')
+        api project(':jpro-routing:core')
         api "org.kordamp.ikonli:ikonli-javafx:$IKONLI_VERSION"
         api "org.kordamp.ikonli:ikonli-evaicons-pack:$IKONLI_VERSION"
         api "org.kordamp.ikonli:ikonli-ionicons4-pack:$IKONLI_VERSION"
-        implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+        implementation "one.jpro.platform.jpms:cssfx:$CSSFX_VERSION"
         implementation "org.scenic-view:scenic-view:$SCENIC_VIEW_VERSION"
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                pom {
+                    name = 'JPro Routing Dev'
+                    description = 'A module that provides extra routing tools useful during development.'
+                }
+            }
+        }
     }
 }
 
 configure([project(':jpro-routing:core-test')]) {
     dependencies {
         implementation project(':jpro-routing:core')
+    }
+
+    test {
+        jvmArgs = [
+                "-Dglass.platform=Monocle", "-Dmonocle.platform=Headless"]
     }
 }
 
@@ -86,12 +107,12 @@ configure(project(':jpro-routing:example')) {
         implementation project(':jpro-routing:popup')
 
         implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
-        implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+        implementation "one.jpro.platform.jpms:cssfx:$CSSFX_VERSION"
         runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
     }
 
     javafx {
-        version = "$JAVAFX_VERSION"
+        version = "$JAVAFX_EXAMPLES_VERSION"
         modules = ['javafx.graphics', 'javafx.controls', 'javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web']
     }
 
@@ -101,7 +122,9 @@ configure(project(':jpro-routing:example')) {
 
     def examples = [
             'colors': 'example.colors.ColorsApp',
-            'test'  : 'example.scala.TestWebApplication'
+            'popup' : 'example.popup.PopupApp',
+            'test'  : 'example.scala.TestWebApplication',
+            'extensions': 'example.scala.TestExtensions'
     ]
     mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["colors"]
 

@@ -1,5 +1,6 @@
 package one.jpro.platform.mdfx.impl;
 
+import com.vladsch.flexmark.util.sequence.Escaping;
 import one.jpro.platform.mdfx.MarkdownView;
 import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.ext.attributes.AttributeNode;
@@ -50,6 +51,8 @@ public class MDFXNodeHelper extends VBox {
     int gridx = 0;
     int gridy = 0;
     TextFlow flow = null;
+
+    List<Node> childrenCurrentRow = new LinkedList<>();
 
     boolean isListOrdered = false;
     int orderedListCounter = 0;
@@ -385,12 +388,12 @@ public class MDFXNodeHelper extends VBox {
         public void visit(com.vladsch.flexmark.ast.Text text) {
             visitor.visitChildren(text);
 
-            String wholeText = text.getChars().normalizeEOL();
+            String wholeText = Escaping.unescapeString(text.getChars().normalizeEOL());
 
             String[] textsSplit;
             if (nodePerWord) {
                 // split with " " but keep the " " in the array
-                textsSplit = text.getChars().normalizeEOL().split("(?<= )");
+                textsSplit = wholeText.split("(?<= )");
                 // Combine split texts, which only contain a space:
                 for (int i = 0; i <= textsSplit.length - 1; i += 1) {
                     if (textsSplit[i].equals(" ")) {
@@ -408,7 +411,7 @@ public class MDFXNodeHelper extends VBox {
                 }
             } else {
                 textsSplit = new String[1];
-                textsSplit[0] = text.getChars().normalizeEOL();
+                textsSplit[0] = wholeText;
             }
             final String[] textsSplitFinal = textsSplit;
 
@@ -428,6 +431,7 @@ public class MDFXNodeHelper extends VBox {
             grid.getStyleClass().add("markdown-table-table");
             gridx = 0;
             gridy = -1;
+            childrenCurrentRow.clear();
             root.getChildren().add(grid);
 
             visitor.visitChildren(customNode);
@@ -447,13 +451,20 @@ public class MDFXNodeHelper extends VBox {
         public void visit(TableBody customNode) {
             if (!shouldShowContent()) return;
             visitor.visitChildren(customNode);
+            childrenCurrentRow.forEach(node -> {
+                node.getStyleClass().add("bottom");
+            });
+            childrenCurrentRow.clear();
         }
 
         public void visit(TableRow customNode) {
             if (customNode.getRowNumber() != 0) {
                 gridx = 0;
                 gridy += 1;
+                childrenCurrentRow.clear();
                 visitor.visitChildren(customNode);
+                childrenCurrentRow.get(0).getStyleClass().add("left");
+                childrenCurrentRow.get(childrenCurrentRow.size() - 1).getStyleClass().add("right");
             }
         }
 
@@ -464,6 +475,7 @@ public class MDFXNodeHelper extends VBox {
             flow.getStyleClass().add("markdown-table-cell");
             if (gridy == 0) {
                 flow.getStyleClass().add("markdown-table-cell-top");
+                flow.getStyleClass().add("top");
             }
             if (gridy % 2 == 0) {
                 flow.getStyleClass().add("markdown-table-odd");
@@ -472,6 +484,7 @@ public class MDFXNodeHelper extends VBox {
             }
             grid.add(flow, gridx, gridy);
             gridx += 1;
+            childrenCurrentRow.add(flow);
             visitor.visitChildren(customNode);
         }
 

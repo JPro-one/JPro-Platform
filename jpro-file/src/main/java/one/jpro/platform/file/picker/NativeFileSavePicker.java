@@ -1,9 +1,5 @@
 package one.jpro.platform.file.picker;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
@@ -23,93 +19,19 @@ import java.util.function.Function;
  */
 public class NativeFileSavePicker extends BaseFileSavePicker {
 
-    private final FileChooser fileChooser;
-
+    /**
+     * Constructs a new {@link NativeFileSavePicker} associated with the given JavaFX node.
+     *
+     * @param node the JavaFX node that will trigger the file save dialog.
+     */
     public NativeFileSavePicker(Node node) {
         super(node);
-        fileChooser = new FileChooser();
-    }
-
-    @Override
-    public final String getTitle() {
-        return fileChooser.getTitle();
-    }
-
-    @Override
-    public final void setTitle(final String value) {
-        fileChooser.setTitle(value);
-    }
-
-    @Override
-    public final StringProperty titleProperty() {
-        return fileChooser.titleProperty();
-    }
-
-    @Override
-    public final StringProperty initialFileNameProperty() {
-        if (initialFileName == null) {
-            initialFileName = new SimpleStringProperty(this, "initialFileName");
-            fileChooser.initialFileNameProperty().bind(initialFileName);
-        }
-        return initialFileName;
-    }
-
-    @Override
-    public final File getInitialDirectory() {
-        return fileChooser.getInitialDirectory();
-    }
-
-    @Override
-    public final void setInitialDirectory(final File value) {
-        fileChooser.setInitialDirectory(value);
-    }
-
-    @Override
-    public final ObjectProperty<File> initialDirectoryProperty() {
-        return fileChooser.initialDirectoryProperty();
-    }
-
-    @Override
-    public final ObjectProperty<ExtensionFilter> selectedExtensionFilterProperty() {
-        if (selectedExtensionFilter == null) {
-            selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter") {
-
-                @Override
-                protected void invalidated() {
-                    final ExtensionFilter selectedExtensionFilter = get();
-                    if (selectedExtensionFilter != null) {
-                        // check if the extension filter is already added to the file chooser
-                        final var optionalExtensionFilter = fileChooser.getExtensionFilters().stream()
-                                .filter(extensionFilter -> extensionFilter.getDescription()
-                                        .equals(selectedExtensionFilter.description()))
-                                .findFirst();
-                        if (optionalExtensionFilter.isPresent()) {
-                            fileChooser.setSelectedExtensionFilter(optionalExtensionFilter.get());
-                        } else {
-                            // add the extension filter which will automatically add the extension
-                            // filter to the file chooser due to the registered listener
-                            getExtensionFilters().add(selectedExtensionFilter);
-
-                            // Retrieve the extension filter from the file chooser and set it as
-                            // the selected extension filter
-                            fileChooser.getExtensionFilters().stream()
-                                    .filter(extensionFilter -> extensionFilter.getDescription()
-                                            .equals(selectedExtensionFilter.description()))
-                                    .findFirst().ifPresent(fileChooser::setSelectedExtensionFilter);
-                        }
-                    } else {
-                        fileChooser.setSelectedExtensionFilter(null);
-                    }
-                }
-            };
-        }
-        return selectedExtensionFilter;
     }
 
     @Override
     final void showDialog() {
         // Basic configuration
-        fileChooser.setTitle("Save file as...");
+        final FileChooser fileChooser = createFileChooser();
 
         // Retrieve scene and window references from the node
         final Scene scene = getNode().getScene();
@@ -129,5 +51,22 @@ public class NativeFileSavePicker extends BaseFileSavePicker {
                 onFileSelected.apply(saveToFile);
             }
         }
+    }
+
+    /**
+     * Creates and configures a {@link FileChooser} for saving files.
+     *
+     * @return a configured {@link FileChooser} instance.
+     */
+    FileChooser createFileChooser() {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.titleProperty().bind(titleProperty());
+        fileChooser.initialDirectoryProperty().bind(initialDirectoryProperty());
+        fileChooser.initialFileNameProperty().bind(initialFileNameProperty());
+        fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
+                .map(ExtensionFilter::toJavaFXExtensionFilter)
+                .toList());
+        setNativeSelectedExtensionFilter(fileChooser, getSelectedExtensionFilter());
+        return fileChooser;
     }
 }

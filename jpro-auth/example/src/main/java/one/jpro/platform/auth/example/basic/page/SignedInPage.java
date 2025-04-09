@@ -17,7 +17,7 @@ public class SignedInPage extends Page {
         final var headerLabel = new Label("Not signed in.");
         headerLabel.getStyleClass().add("header-label");
 
-        final var user = app.getUser();
+        final var user = app.userSession.getUser();
         if (user == null) {
             getChildren().add(headerLabel);
         } else {
@@ -31,7 +31,7 @@ public class SignedInPage extends Page {
 
             final var signOutButton = new Button("Sign out");
             signOutButton.setOnAction(event -> {
-                app.setUser(null);
+                app.userSession.setUser(null);
                 app.getSessionManager().gotoURL("/");
             });
             signOutButton.setDefaultButton(true);

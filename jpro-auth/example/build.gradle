@@ -1,4 +1,5 @@
 plugins {
+    id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
     id 'org.openjfx.javafxplugin'
     id 'jpro-gradle-plugin'
 }
@@ -9,16 +10,16 @@ dependencies {
     implementation project(':jpro-routing:core')
     implementation project(':jpro-routing:dev')
     implementation project(':jpro-mdfx')
-    implementation project(':jpro-sessions')
+    implementation project(':jpro-session')
 
     implementation "org.controlsfx:controlsfx:$CONTROLSFX_VERSION"
-    implementation "fr.brouillard.oss:cssfx:$CSSFX_VERSION"
+    implementation "one.jpro.platform.jpms:cssfx:$CSSFX_VERSION"
     implementation "io.github.mkpaz:atlantafx-base:$ATLANTAFX_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
 javafx {
-    version = "$JAVAFX_VERSION"
+    version = "$JAVAFX_EXAMPLES_VERSION"
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.web']
 }
 

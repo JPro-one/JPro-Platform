@@ -58,8 +58,7 @@ public class WebFileDropper extends BaseFileDropper {
 
         // Wrap the listener into a WeakInvalidationListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
-        final WeakInvalidationListener weakFileDragOverListener = new WeakInvalidationListener(fileDragOverListener);
-        multiFileUploader.fileDragOverProperty().addListener(weakFileDragOverListener);
+        multiFileUploader.fileDragOverProperty().addListener(new WeakInvalidationListener(fileDragOverListener));
     }
 
     @Override

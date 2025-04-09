@@ -7,6 +7,7 @@ import simplefx.all._
 
 
 class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends SessionManager { THIS =>
+  assert(webApp != null, "webApp must not be null!")
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -14,26 +15,32 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
   webApp <++ container
 
   def goBack(): Unit = {
-    webAPI.executeScript("history.go(-1);")
+    webAPI.js().eval("history.go(-1);")
   }
 
   def goForward(): Unit = {
-    webAPI.executeScript("history.go(1);")
+    webAPI.js().eval("history.go(1);")
   }
 
-  webAPI.addInstanceCloseListener(() => {
-    THIS.view.onClose()
-    THIS.view.setSessionManager(null)
-    markViewCollectable(THIS.view)
-  })
+  if(webAPI != null) { // somtetimes webAPI is null, for example when crawling
+    webAPI.addInstanceCloseListener(() => {
+      // if the session only has redirects, the view is null
+      if (THIS.view != null) {
+        THIS.view.onClose()
+        THIS.view.setSessionManager(null)
+        markViewCollectable(THIS.view)
+      }
+    })
+  }
 
-  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean, track: Boolean): Unit = {
+  def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response = {
     assert(x != null, "Response was null for url: " + _url)
     val url = _url
     x match {
       case Redirect(url) =>
         if(isExternal(url)) {
-          this.asInstanceOf[SessionManagerWeb].webAPI.executeScript(s"""window.location.href = "$url";""")
+          this.asInstanceOf[SessionManagerWeb].webAPI.js().eval(s"""window.location.href = "$url";""")
+          Response.fromResult(x)
         } else {
           gotoURL(url)
         }
@@ -54,67 +61,47 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
 
         if(pushState) {
-          //webAPI.executeScript(s"""var doc = document.documentElement;
+          //webAPI.js().eval(s"""var doc = document.documentElement;
           //                        |history.replaceState({
           //                        |marker: "goto",
           //                        |scrollTop: (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0)
           //                        |}, null, null);
           //                        |""".stripMargin)
-          webAPI.executeScript(s"""history.pushState(null, null, "${view.url.replace("\"","\\\"")}");""")
+          webAPI.js().eval(s"""history.pushState(null, null, "${view.url.replace("\"","\\\"")}");""")
         }
         val initialState = if(view.saveScrollPosition) "{saveScroll: true}" else "{saveScroll: false}"
 
-        webAPI.executeScript(
+        webAPI.js().eval(
           """var scrollY = 0;
             |if(history.state != null) {
             |  scrollY = history.state.scrollTop || 0;
             |}
             |scroll(0,scrollY)
           """.stripMargin)
-        webAPI.executeScript(s"""document.getElementsByTagName("jpro-app")[0].sfxelem.setFXHeight(${!view.fullscreen})""")
-        webAPI.executeScript(s"""document.title = "${view.title.replace("\"","\\\"")}";""")
-        webAPI.executeScript(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${view.description.replace("\"","\\\"")}");""")
-        webAPI.executeScript(s"history.replaceState($initialState, null, null)")
-        if(ganalytics && track) {
-          webAPI.executeScript(s"""
-                                  |ga('set', {
-                                  |  page: "${view.url.replace("\"","\\\"")}",
-                                  |  title: "${view.title.replace("\"","\\\"")}"
-                                  |});
-                                  |
-          |// send it for tracking
-                                  |ga('send', 'pageview');
-          """.stripMargin)
-        }
-        if(gtags && track) {
-          assert(trackingID.nonEmpty)
-          webAPI.executeScript(s"""
-                                  |gtag('config', '$trackingID', {
-                                  |  'page_title' : "${view.title.replace("\"","\\\"")}",
-                                  |  'page_location': "${view.title.replace("\"","\\\"")}"
-                                  |});""".stripMargin)
-        }
-
+        webAPI.js().eval(s"""document.getElementsByTagName("jpro-app")[0].sfxelem.setFXHeight(${!view.fullscreen})""")
+        webAPI.js().eval(s"""document.title = "${Option(view.title).getOrElse("").replace("\"","\\\"")}";""")
+        webAPI.js().eval(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${Option(view.description).getOrElse("").replace("\"","\\\"")}");""")
+        webAPI.js().eval(s"history.replaceState($initialState, null, null)")
+        Response.fromResult(x)
     }
   }
 
-  def gotoFullEncodedURL(x: String, pushState: Boolean = true, track: Boolean = true): Unit = {
+  def gotoFullEncodedURL(x: String, pushState: Boolean = true): Response = {
     // We no longer decode - we should only process proper URLs
     // If the URL is not proper, we will get a warning when creating the Request.
-    gotoURL(x, pushState, track)
+    gotoURL(x, pushState)
   }
 
-  def start(): Unit = {
-    gotoFullEncodedURL(webAPI.getBrowserURL, false, false)
+  def start(): Response = {
     logger.debug("registering popstate")
     webAPI.registerJavaFunction("popstatejava", (s: String) => {
-      gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""), false)
+      gotoFullEncodedURL(s.drop(1).dropRight(1).replace("\\\"", "\""))
     })
     webAPI.registerJavaFunction("jproGotoURL", (s: String) => {
       gotoURL(s.drop(1).dropRight(1).replace("\\\"", "\""))
     })
 
-    webAPI.executeScript(
+    webAPI.js().eval(
       s"""var scheduled = false
          |window.addEventListener("scroll", function(e) {
          |  if(!scheduled) {
@@ -138,7 +125,7 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
     // that we have to move back to the saved scrollPosition.
     // we have to check, whether the ws is still alive, shortly after popstate.
     // we have to save the old scrollY immediately, so we remember it faster, than the safari resets it.
-    webAPI.executeScript("""
+    webAPI.js().eval("""
                            |window.addEventListener('popstate', function(e) {
                            |  window.setTimeout(function(){console.log("popstate called!")},3000);
                            |  var scrollY = 0;
@@ -154,11 +141,13 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
                            |  }, 1);
                            |  jpro.popstatejava(location.href);
                            |});""".stripMargin)
-    webAPI.executeScript(
+    webAPI.js().eval(
       // Back off, browser, I got this...
       """if ('scrollRestoration' in history) {
         |  history.scrollRestoration = 'manual';
         |}
       """.stripMargin)
+
+    gotoFullEncodedURL(webAPI.getBrowserURL, false)
   }
 }

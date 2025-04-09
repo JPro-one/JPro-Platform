@@ -76,7 +76,6 @@ public class BasicAuthenticationProviderTests {
                 .hasRootCauseMessage("Invalid username or password");
     }
 
-
     @Test
     public void testAuthenticateCredentialValidationException() {
         UsernamePasswordCredentials invalidFormatCredentials = new UsernamePasswordCredentials("", "");
@@ -92,6 +91,4 @@ public class BasicAuthenticationProviderTests {
                 .hasRootCauseInstanceOf(UserNotFoundException.class)
                 .hasMessageEndingWith("Invalid username");
     }
-
-
 }

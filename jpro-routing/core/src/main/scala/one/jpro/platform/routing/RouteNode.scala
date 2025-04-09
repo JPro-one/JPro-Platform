@@ -15,6 +15,9 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
   }
 
   styleClass ::= "jpro-web-app"
+  private var sessionManager: SessionManager = null
+
+  def getSessionManager(): SessionManager = sessionManager
 
   @Bind private var layoutCounter = 0
   def getLayoutCounter(): Int = layoutCounter
@@ -32,19 +35,12 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
   lazy val webAPI: WebAPI = if(WebAPI.isBrowser) com.jpro.webapi.WebAPI.getWebAPI(stage) else null
 
   var newRoute: Route = route
-  def getRoute: Route = newRoute
+  def getRoute(): Route = newRoute
   def setRoute(x: Route): Unit = newRoute = x
 
-  def route(s: String, oldView: Node) = {
-    val oldViewW = new WeakReference(oldView)
-    newRoute(Request.fromString(s).copy(oldContent = oldViewW, origOldContent = oldViewW))
-  }
-  def route = {
-    (s: String) => newRoute(Request.fromString(s))
-  }
 
-
-  def start(sessionManager: SessionManager) = {
+  def start(sessionManager: SessionManager): Response = {
+    this.sessionManager = sessionManager
     SessionManagerContext.setContext(this, sessionManager)
     sessionManager.start()
   }

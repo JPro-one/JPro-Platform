@@ -6,7 +6,7 @@ module one.jpro.platform.auth.example {
     requires one.jpro.platform.auth.routing;
     requires one.jpro.platform.routing.dev;
     requires one.jpro.platform.mdfx;
-    requires one.jpro.platform.sessions;
+    requires one.jpro.platform.session;
     requires atlantafx.base;
 
     exports one.jpro.platform.auth.example.basic;

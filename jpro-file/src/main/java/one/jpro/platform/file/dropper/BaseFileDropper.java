@@ -44,7 +44,7 @@ abstract class BaseFileDropper implements FileDropper {
 
     @Override
     public final void setExtensionFilter(final ExtensionFilter filter) {
-        extensionFilterProperty().setValue(filter);
+        extensionFilterProperty().set(filter);
     }
 
     @Override
@@ -65,7 +65,7 @@ abstract class BaseFileDropper implements FileDropper {
 
     @Override
     public final void setSelectionMode(final SelectionMode value) {
-        selectionModeProperty().setValue(value);
+        selectionModeProperty().set(value);
     }
 
     @Override
@@ -86,7 +86,7 @@ abstract class BaseFileDropper implements FileDropper {
 
     @Override
     public final void setOnDragEntered(EventHandler<FileDragEvent> value) {
-        onDragEnteredProperty().setValue(value);
+        onDragEnteredProperty().set(value);
     }
 
     @Override
@@ -113,7 +113,7 @@ abstract class BaseFileDropper implements FileDropper {
 
     @Override
     public final void setOnDragExited(EventHandler<FileDragEvent> value) {
-        onDragExitedProperty().setValue(value);
+        onDragExitedProperty().set(value);
     }
 
     @Override
@@ -140,7 +140,7 @@ abstract class BaseFileDropper implements FileDropper {
 
     @Override
     public void setOnFilesSelected(Consumer<List<? extends FileSource>> value) {
-        onFilesSelectedProperty().setValue(value);
+        onFilesSelectedProperty().set(value);
     }
 
     @Override
@@ -161,7 +161,12 @@ abstract class BaseFileDropper implements FileDropper {
     boolean hasSupportedExtension(List<File> files) {
         final ExtensionFilter extensionFilter = getExtensionFilter();
         return extensionFilter == null || files.stream()
-                .anyMatch(file -> extensionFilter.extensions().stream()
-                        .anyMatch(extension -> file.getName().endsWith(extension)));
+                .anyMatch(file -> {
+                    if(extensionFilter.allowDirectory() && file.isDirectory()) {
+                        return true;
+                    }
+                    return extensionFilter.extensions().stream()
+                            .anyMatch(extension -> file.getName().toLowerCase().endsWith(extension));
+                });
     }
 }

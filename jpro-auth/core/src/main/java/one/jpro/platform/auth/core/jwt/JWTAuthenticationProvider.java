@@ -1,16 +1,13 @@
 package one.jpro.platform.auth.core.jwt;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTDecodeException;
+import io.jsonwebtoken.*;
 import one.jpro.platform.auth.core.authentication.*;
-import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -22,9 +19,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCredentials> {
 
-    private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
-
-    private static final Base64.Decoder BASE64_DECODER = AuthUtils.BASE64_DECODER;
+    private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
 
     @NotNull
     private final JWTAuthOptions authOptions;
@@ -52,10 +47,10 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
      * @return a {@link CompletableFuture} holding the token credentials
      */
     public CompletableFuture<TokenCredentials> token(@NotNull String tokenPath, @NotNull final JSONObject authInfo) {
-        log.debug("Requesting token from: {}, and authentication info: {}", authOptions.getSite() + tokenPath, authInfo);
+        logger.debug("Requesting token from: {}, and authentication info: {}", authOptions.getSite() + tokenPath, authInfo);
         return api.token(tokenPath, authInfo)
                 .thenCompose(json -> {
-                    log.info("Received token: {}", json);
+                    logger.info("Received token: {}", json);
                     if (json.has("token")) {
                         return CompletableFuture.completedFuture(new TokenCredentials(json.getString("token")));
                     } else {
@@ -76,17 +71,17 @@ public class JWTAuthenticationProvider implements AuthenticationProvider<TokenCr
         try {
             credentials.validate(null);
         } catch (CredentialValidationException ex) {
-            log.error("JWT token validation failed", ex);
+            logger.error("JWT token validation failed", ex);
             return CompletableFuture.failedFuture(ex);
         }
 
         final JSONObject payload;
         try {
-            final String encodedJwtPayload = JWT.decode(credentials.getToken()).getPayload();
-            final String decodedJwtPayload = new String(BASE64_DECODER.decode(encodedJwtPayload));
-            payload = new JSONObject(decodedJwtPayload);
-        } catch (JWTDecodeException ex) {
-            log.error("JWT token decoding failed", ex);
+            final Jwt<Header, Claims> jwt = Jwts.parser().build()
+                    .parseUnsecuredClaims(credentials.getToken());
+            payload = new JSONObject(jwt.getPayload());
+        } catch (JwtException ex) {
+            logger.error("JWT token decoding failed", ex);
             return CompletableFuture.failedFuture(ex);
         }
 

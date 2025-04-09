@@ -69,6 +69,7 @@ public class ImageSourceFile implements ImageSource {
         JSONObject json = new JSONObject();
         json.put("type", getClass().getSimpleName());
         json.put("path", ImageUtils.escapeJson(file.getAbsolutePath()));
+        json.put("modified", file.lastModified());
         return json;
     }
 }

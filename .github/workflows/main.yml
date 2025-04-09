@@ -1,0 +1,87 @@
+name: CI build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  DISPLAY: ":99"
+  XVFB_PARAMS: "-screen 0 1920x1080x24"
+  RUNNING_ON_CI: true
+
+jobs:
+  builds:
+    name: '${{ matrix.os }} with Java ${{ matrix.jdk }}'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        jdk: [21, 23]
+        os: [ubuntu-22.04, windows-2022]
+      fail-fast: false
+      max-parallel: 4
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java ${{ matrix.jdk }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.jdk }}
+
+      - name: Install GStreamer and Plugins (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgstreamer1.0-0 \
+            gstreamer1.0-libav \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-bad \
+            gstreamer1.0-plugins-ugly
+
+      - name: Set up Virtual Audio Device (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pacmd load-module module-null-sink sink_name=DummyOutput
+
+      - name: Enable Media Features (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Enable-WindowsOptionalFeature -Online -FeatureName MediaPlayback -All
+          Enable-WindowsOptionalFeature -Online -FeatureName ServerMediaFoundation -All
+
+      - name: Set JavaFX Media Backend to WMF (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:JDK_JAVA_OPTIONS = "-Djfxmedia.platforms=Windows"
+
+      - name: Compile
+        run: |
+          ./gradlew jar
+          ./gradlew example:jar
+
+      - name: Set up Virtual Display (for Linux)
+        if: runner.os == 'Linux'
+        run: |
+          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARAMS}} &
+
+      - name: Test
+        run: |
+          ./gradlew test
+        shell: bash
+
+      - name: Javadoc
+        run: |
+          ./gradlew javadoc

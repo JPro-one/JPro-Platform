@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.dev
 
 import com.jpro.webapi.WebAPI
-import de.sandec.jmemorybuddy.JMemoryBuddyLive
+import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import fr.brouillard.oss.cssfx.CSSFX
 import one.jpro.platform.routing.filter.container.ContainerFilter
 import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
@@ -95,8 +95,12 @@ object DevFilter {
           } else None
           text <-- ("LayoutCounter: " + layouts.map(_.toString).getOrElse("-"))
         }
-        this <++ new Label {
+        this <++ new Label { LABEL =>
+          getStyleClass.add("devfilter-focus-label")
           text <-- ("Focused: " + (if(scene == null) "" else scene.focusOwner))
+          tooltip = new Tooltip() {
+            text <-- ("Focused: " + (if(LABEL.scene == null) "" else LABEL.scene.focusOwner))
+          }
         }
         //this <++ new Label() {
         //  text <-- (if(request == null) "-" else "request: " + request)
