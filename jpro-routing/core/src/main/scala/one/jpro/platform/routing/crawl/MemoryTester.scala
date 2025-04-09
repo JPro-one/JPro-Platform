@@ -25,8 +25,8 @@ object MemoryTester {
     pages.forEach { pageURL =>
       logger.debug(s"Checking for leak for the url: $pageURL")
       JMemoryBuddy.memoryTest(checker1 => {
+        val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
         JMemoryBuddy.memoryTest(checker2 => {
-          val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
           assert(routeNode != null, "The routeNode must not return null ")
           val view = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
           inFX(routeNode.scene.root.applyCss())
@@ -36,9 +36,10 @@ object MemoryTester {
           if(view.isInstanceOf[View]) {
             checker2.assertCollectable(inFX(view.asInstanceOf[View].realContent))
           }
-          inFX(routeNode.scene.window.asInstanceOf[Stage].close())
-          checker1.assertCollectable(routeNode)
+          routeNode.getSessionManager().gotoURL("/").future.await
         })
+        inFX(routeNode.scene.window.asInstanceOf[Stage].close())
+        checker1.assertCollectable(routeNode)
       })
     }
   }
