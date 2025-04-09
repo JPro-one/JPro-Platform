@@ -2,6 +2,7 @@ package one.jpro.platform.routing.crawl
 
 import one.jpro.platform.routing.{LinkUtil, View}
 import simplefx.all._
+import simplefx.core._
 
 object TestUtils {
 
@@ -55,6 +56,13 @@ object TestUtils {
       this <++ new Label("222") {
         LinkUtil.setLink(this,"http://external/link", "desc2")
       }
+    }
+  }
+
+  class LeakStage() extends StackPane {
+    onceWhen(scene != null) --> {
+      println("Adding leak to scene.")
+      scene.getProperties().put(this,this)
     }
   }
 }

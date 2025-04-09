@@ -99,15 +99,9 @@ object AppCrawler {
     CrawlReportPage(page.url, foundLinks.reverse, images.reverse, page.title, page.description)
   }
 
-  def crawlRoute(prefix: String, createRoute: () => Route): CrawlReportApp = {
+  def crawlRoute(prefix: String, createRoute: Supplier[Route]): CrawlReportApp = {
     val crawler = new AppCrawler(prefix, () => {
-      val stage = new Stage
-      val routeNode = new RouteNode(stage)
-      stage.setScene(new Scene(routeNode))
-      val sm = new SessionManagerDesktop(routeNode)
-      routeNode.setRoute(createRoute())
-      routeNode.start(sm)
-      routeNode
+      routeToRouteNode(createRoute.get())
     })
     crawler.crawlAll()
   }
@@ -119,6 +113,7 @@ object AppCrawler {
     val sm = new SessionManagerDesktop(routeNode)
     routeNode.setRoute(route)
     routeNode.start(sm)
+    stage.show()
     routeNode
   }
 
@@ -242,6 +237,7 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
       case null =>
         deadLinks += crawlNext
     }
+    runLater(app.scene.window.asInstanceOf[Stage].close())
   }
   def crawlAll(): CrawlReportApp = {
 

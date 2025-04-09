@@ -15,6 +15,9 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
   }
 
   styleClass ::= "jpro-web-app"
+  private var sessionManager: SessionManager = null
+
+  def getSessionManager(): SessionManager = sessionManager
 
   @Bind private var layoutCounter = 0
   def getLayoutCounter(): Int = layoutCounter
@@ -37,6 +40,7 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
 
 
   def start(sessionManager: SessionManager): Response = {
+    this.sessionManager = sessionManager
     SessionManagerContext.setContext(this, sessionManager)
     sessionManager.start()
   }

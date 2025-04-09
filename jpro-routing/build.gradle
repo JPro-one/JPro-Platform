@@ -90,6 +90,11 @@ configure([project(':jpro-routing:core-test')]) {
     dependencies {
         implementation project(':jpro-routing:core')
     }
+
+    test {
+        jvmArgs = [
+                "-Dglass.platform=Monocle", "-Dmonocle.platform=Headless"]
+    }
 }
 
 configure(project(':jpro-routing:example')) {

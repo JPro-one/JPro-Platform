@@ -1,12 +1,19 @@
 package one.jpro.platform.routing.crawl
 
+import javafx.application.Platform
 import javafx.scene.control.Label
-import one.jpro.platform.routing.crawl.TestUtils.{Page1, Page2}
-import one.jpro.platform.routing.{Response, Route, RouteNode}
-import org.junit.jupiter.api.Test
+import one.jpro.platform.routing.crawl.TestUtils.{LeakStage, Page1, Page2}
+import one.jpro.platform.routing.{Request, Response, Route, RouteNode}
+import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.cores.default.inFX
 import simplefx.util.Predef.intercept
 
+object TestMemoryTester {
+  @BeforeAll
+  def init(): Unit = inFX {
+    Platform.setImplicitExit(false)
+  }
+}
 class TestMemoryTester {
 
   @Test
@@ -43,16 +50,16 @@ class TestMemoryTester {
     intercept[Throwable](MemoryTester.testForLeaks(result, () => route))
   }
 
-  /*
+
   @Test
   def simpleFailingTest3(): Unit = {
-    val route = inFX(Route.empty()
-        .and(Route.get("/", r => Response.view(new Page1)))
-        .and(Route.get("/page2", r => Response.view(new Page2)))
-        .and(Route.get("/page4", r => Response.view(new Page2)))
-    )
-    val result = AppCrawler.crawlApp("http://localhost", () => route)
+
+    val route: Route = Route.empty()
+      .and(Route.get("/", r => Response.view(new Page1)))
+      .and(Route.get("/page2", r => Response.node(new LeakStage)))
+      .and(Route.get("/page4", r => Response.view(new Page2)))
+    val result = AppCrawler.crawlRoute("http://localhost", () => route)
     intercept[Throwable](MemoryTester.testForLeaks(result, () => route)) // fails because the webapp is not collectable
   }
-   */
+
 }

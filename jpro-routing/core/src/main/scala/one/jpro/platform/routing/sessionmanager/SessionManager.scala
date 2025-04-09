@@ -32,6 +32,7 @@ trait SessionManager { THIS =>
   @Bind var url: String = null
   @Bind var view: View = null
 
+  def getView(): View = view
   def getURL(): String = url
 
   def goBack(): Unit
