@@ -17,10 +17,6 @@ buildscript {
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:core-test'),
            project(':jpro-routing:example')]) {
     apply plugin: 'de.sandec.simplefx'
-
-    compileScala {
-        targetCompatibility = "1.8"
-    }
 }
 
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
@@ -35,6 +31,7 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 configure([project(':jpro-routing:core')]) {
     dependencies {
         api project(":jpro-utils")
+        api project(":jpro-scenegraph")
         api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
     }
 
