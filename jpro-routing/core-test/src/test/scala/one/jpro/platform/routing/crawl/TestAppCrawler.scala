@@ -3,12 +3,19 @@ package one.jpro.platform.routing.crawl
 import simplefx.all._
 import simplefx.core._
 import TestUtils._
+import javafx.application.Platform
 import one.jpro.platform.routing.crawl.AppCrawler.LinkInfo
 import one.jpro.platform.routing.{LinkUtil, Response, Route, RouteNode, RouteUtils, View}
 import simplefx.all
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.util.Predef.intercept
 
+object TestAppCrawler {
+  @BeforeAll
+  def init(): Unit = inFX {
+    Platform.setImplicitExit(false)
+  }
+}
 class TestAppCrawler {
 
   @Test
