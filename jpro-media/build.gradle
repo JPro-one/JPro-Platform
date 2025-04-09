@@ -10,7 +10,8 @@ dependencies {
 
     testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"
     testImplementation "one.jpro.platform.jpms:testfx-core:$TESTFX_VERSION"
-    testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
+    //testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
+    testImplementation "org.testfx:openjfx-monocle:$MONOCLE_VERSION"
     testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
     testImplementation "org.bytedeco:javacpp-platform:$JAVACPP_VERSION"
     testRuntimeOnly "org.bytedeco:flandmark-platform:1.07-1.5.8"
