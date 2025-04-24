@@ -43,8 +43,12 @@ public class CopyExample extends Application {
         var copyException = new Button("Copy Exception");
         CopyUtil.setCopyOnClick(copyException, getExceptionText());
 
+        var specialCharacters = "\r$\n\t\\\"'<>";
+        var copySpecialCharactersButton = new Button(specialCharacters);
+        CopyUtil.setCopyOnClick(copySpecialCharactersButton, specialCharacters);
+
         // Use a VBox to layout the UI components neatly.
-        VBox root = new VBox(15, instructionLabel, textField, copyButton, nullButton, copyException);
+        VBox root = new VBox(15, instructionLabel, textField, copyButton, nullButton, copyException, copySpecialCharactersButton);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-padding: 20; -fx-background-color: #f4f4f4;");
 

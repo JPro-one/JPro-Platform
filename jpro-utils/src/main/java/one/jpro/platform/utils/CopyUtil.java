@@ -101,9 +101,10 @@ public class CopyUtil {
                         String escapedText = copyTextProperty.get()
                                 .replace("'", "\\'")
                                 .replace("\"", "\\\"")
+                                .replace("\r\n", "\\n")
+                                .replace("\r", "\\n")
                                 .replace("\n", "\\n");
                         String script = jsElem.getName() + ".onmousedown = function(event) {"
-                                + "  console.log('copy: " + escapedText + "');"
                                 + "  navigator.clipboard.writeText('" + escapedText + "');"
                                 + "};";
                         webapi.executeScript(script);
