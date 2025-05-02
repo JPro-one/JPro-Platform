@@ -15,7 +15,7 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
   }
 
   styleClass ::= "jpro-web-app"
-  private var sessionManager: SessionManager = null
+  private[routing] var sessionManager: SessionManager = null
 
   def getSessionManager(): SessionManager = sessionManager
 
@@ -40,8 +40,6 @@ class RouteNode(stage: Stage, route: Route) extends StackPane { THIS =>
 
 
   def start(sessionManager: SessionManager): Response = {
-    this.sessionManager = sessionManager
-    SessionManagerContext.setContext(this, sessionManager)
     sessionManager.start()
   }
 

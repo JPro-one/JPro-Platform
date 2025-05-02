@@ -4,7 +4,7 @@ import com.jpro.webapi.WebAPI
 import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
-import one.jpro.platform.routing.{HistoryEntry, Request, Response, ResponseResult, RouteNode, View}
+import one.jpro.platform.routing.{HistoryEntry, Request, Response, ResponseResult, RouteNode, SessionManagerContext, View}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
@@ -18,6 +18,9 @@ import java.util.function.Consumer
 trait SessionManager { THIS =>
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+
+  SessionManagerContext.setContext(webApp, this)
+  webApp.sessionManager = this
 
   def webApp: RouteNode
 
