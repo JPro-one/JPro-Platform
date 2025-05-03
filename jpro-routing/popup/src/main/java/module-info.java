@@ -8,6 +8,7 @@ module one.jpro.platform.routing.popup {
     requires simplefx.extended;
     requires scala.library;
     requires org.kordamp.ikonli.javafx;
+    requires one.jpro.platform.routing.core;
 
     exports one.jpro.platform.routing.popup.simplepopup;
     exports one.jpro.platform.routing.popup;
