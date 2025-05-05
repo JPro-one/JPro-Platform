@@ -10,7 +10,7 @@ object ContainerFilter {
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  private val factoryKey = new Object() // It's correct, that his is outside the method.
+  private val factoryKey = new Object() // It's correct, that this is outside the method.
   def create(supplier: Supplier[Container], clazz: Class[_]): Filter = {
     create(new ContainerFactory {
       override def isContainer(x:  Node): Boolean = {
