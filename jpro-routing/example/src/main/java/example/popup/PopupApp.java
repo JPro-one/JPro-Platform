@@ -31,7 +31,9 @@ public class PopupApp extends RouteApp {
                 .and(redirect("/", "/popup"))
                 .and(get("/popup", (r) -> Response.node(popupSampleButtons())))
                 .filter(Filters.FullscreenFilter(true))
-                .filter(DevFilter.create());
+                .filter(DevFilter.create())
+                .filter(PopupAPI.createPopupContainerFilter())
+                ;
     }
 
     /**
@@ -46,11 +48,11 @@ public class PopupApp extends RouteApp {
 
         Button showPopupButton = new Button("Show Popup");
         showPopupButton.setOnAction(event ->
-                PopupAPI.openPopup(getRouteNode(), SimplePopups.infoPopup("Title", "This is a simple popup")));
+                PopupAPI.openPopup(showPopupButton, SimplePopups.infoPopup("Title", "This is a simple popup")));
 
         Button showLoadingScreen = new Button("Show Loading Screen");
         showLoadingScreen.setOnAction(event ->
-                PopupAPI.showLoadingScreen(getRouteNode(), createWaitFuture(3000)));
+                PopupAPI.showLoadingScreen(showPopupButton, createWaitFuture(3000)));
 
         result.getChildren().addAll(showPopupButton, showLoadingScreen);
 

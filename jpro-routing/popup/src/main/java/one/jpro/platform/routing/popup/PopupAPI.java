@@ -1,91 +1,168 @@
 package one.jpro.platform.routing.popup;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import one.jpro.platform.routing.Filters;
+import one.jpro.platform.routing.Request;
+import one.jpro.platform.routing.filter.container.Container;
+import one.jpro.platform.routing.filter.container.ContainerFilter;
 import simplefx.experimental.parts.FXFuture;
+import one.jpro.platform.routing.Filter;
 
 import java.util.Objects;
 
 /**
  * Provides utility methods for managing popups in a JPro application.
- * This includes opening and closing popups, as well as showing a loading screen.
- *
- * @author Florian Kirmaier
+ * Popups are always placed into whatever Pane you’ve registered via
+ * registerPopupContainer — and you never pass the container in manually.
  */
 public class PopupAPI {
 
-    public static final Object POPUP_CONTEXT = new Object();
+    /**
+     * Map any “context holder” Node → the Pane that should host popups under it.
+     * Call registerPopupContainer(...) once at startup.
+     */
+    public static final ContextManager<Pane> POPUP_CONTAINER_CONTEXT = new ContextManager<>();
 
     /**
-     * Opens a popup within the specified context.
-     *
-     * @param popupContext the pane that will serve as the context for the popup
-     * @param popup        the node representing the popup to be displayed
-     * @throws RuntimeException if {@code popupContext} is null
+     * Map every popup root Node → itself, so we can discover the popup from any child.
      */
-    public static void openPopup(Pane popupContext, Node popup) {
-        Objects.requireNonNull(popupContext, "popupContext must not be null");
-        popup.getProperties().put(POPUP_CONTEXT, popupContext);
-        popupContext.getChildren().add(popup);
+    public static final ContextManager<Node> POPUP_CONTEXT = new ContextManager<>();
+
+    /**
+     * Register a node under which all popups should live.
+     *
+     * @param container the Pane into which popups will be added
+     */
+    public static void registerPopupContainer(Pane container) {
+        Objects.requireNonNull(container,     "container must not be null");
+        POPUP_CONTAINER_CONTEXT.setContext(container, container);
     }
 
     /**
-     * Closes the specified popup node.
+     * Opens a popup by looking up its container from the nearest registered holder.
      *
-     * @param popupNode the popup node to be closed
+     * @param contextHolder any Node that was previously registered
+     * @param popup the Node to show as a popup
      */
-    public static void closePopup(Node popupNode) {
-        Node popup = getPopup(popupNode);
-        Pane popupContext = getPopupContext(popup);
-        popupContext.getChildren().remove(popup);
+    public static void openPopup(Node contextHolder, Node popup) {
+        Objects.requireNonNull(popup, "popup must not be null");
+        // find the Pane we registered under this holder (or its parents)
+        Pane container = POPUP_CONTAINER_CONTEXT.getContext(contextHolder);
+
+        // mark “this node is a popup root”
+        POPUP_CONTEXT.setContext(popup, popup);
+        // also carry forward the container lookup for children
+        POPUP_CONTAINER_CONTEXT.setContext(popup, container);
+
+        container.getChildren().add(popup);
     }
 
     /**
-     * Shows a loading screen on the specified popup context and binds it to the completion of a future.
+     * Closes whichever popup contains the given node.
      *
-     * @param <T>          the type of the result produced by the future
-     * @param popupContext the pane that will serve as the context for the loading screen
-     * @param fxFuture     the future whose completion will trigger the removal of the loading screen
-     * @return the {@link FXFuture} passed as an argument
-     * @throws RuntimeException if {@code popupContext} is null
+     * @param anyNodeInPopup any Node inside (or equal to) the popup
      */
-    public static <T> FXFuture<T> showLoadingScreen(Pane popupContext, FXFuture<T> fxFuture) {
-        Objects.requireNonNull(popupContext, "popupContext must not be null");
+    public static void closePopup(Node anyNodeInPopup) {
+        // find the popup root
+        Node popup = POPUP_CONTEXT.getContext(anyNodeInPopup);
+        // find its container
+        Pane container = POPUP_CONTAINER_CONTEXT.getContext(popup);
+        container.getChildren().remove(popup);
+    }
+
+    /**
+     * Shows a translucent loading‐indicator popup bound to an FXFuture.
+     *
+     * @param contextHolder any Node that was registered as a container holder
+     * @param fxFuture when this completes, the loading popup will auto-close
+     * @param <T> the future’s result type
+     */
+    public static <T> FXFuture<T> showLoadingScreen(Node contextHolder, FXFuture<T> fxFuture) {
+        Objects.requireNonNull(contextHolder, "contextHolder must not be null");
 
         ProgressIndicator indicator = new ProgressIndicator();
         indicator.setMaxWidth(100);
         indicator.setMaxHeight(100);
+
         StackPane popup = new StackPane(indicator);
+        // semi-transparent black backdrop
         popup.setStyle("-fx-background-color: #00000066;");
-        openPopup(popupContext, popup);
-        fxFuture.onComplete((v) -> {
+
+        openPopup(contextHolder, popup);
+
+        fxFuture.onComplete(v -> {
             indicator.setProgress(1.0);
             closePopup(popup);
         });
+
         return fxFuture;
     }
 
     /**
-     * Retrieves the popup context for a given popup node.
-     *
-     * @param popup the node for which to find the popup context
-     * @return the pane that serves as the context for the popup
+     * Returns a filter which adds a Stackpane, which is used as a popup container.
+     * @return a filter which adds a Stackpane, which is used as a popup container
      */
-    public static Pane getPopupContext(Node popup) {
-        Pane context = (Pane) popup.getProperties().get(POPUP_CONTEXT);
-        return (context == null) ? getPopupContext(popup.getParent()) : context;
+    public static Filter createPopupContainerFilter() {
+        return ContainerFilter.create(
+                () -> new PopupContainer(), PopupContainer.class);
     }
 
-    /**
-     * Retrieves the popup node from a given node, if it exists.
-     *
-     * @param popupNode the node from which to retrieve the popup
-     * @return the node representing the popup, or the input node if no popup context is found
-     */
-    public static Node getPopup(Node popupNode) {
-        Node context = (Node) popupNode.getProperties().get(POPUP_CONTEXT);
-        return (context == null) ? getPopup(popupNode.getParent()) : popupNode;
+    private static class PopupContainer extends StackPane implements Container {
+
+        // the actual properties
+        private final ObjectProperty<Node>    contentProperty = new SimpleObjectProperty<>(this, "content");
+        private final ObjectProperty<Request> requestProperty = new SimpleObjectProperty<>(this, "request");
+
+        public PopupContainer() {
+            // register this StackPane as the host for all popups below it
+            registerPopupContainer(this);
+            contentProperty.addListener((observable, oldValue, newValue) -> {
+                if(oldValue != null) {
+                    getChildren().remove(oldValue);
+                }
+                if(newValue != null) {
+                    getChildren().add(newValue);
+                }
+            });
+        }
+
+        // Methods not really relevant here, but requried for the API.
+
+        // contentProperty / getContent / setContent
+        @Override
+        public ObjectProperty<Node> contentProperty() {
+            return contentProperty;
+        }
+
+        @Override
+        public Node getContent() {
+            return contentProperty.get();
+        }
+
+        @Override
+        public void setContent(Node content) {
+            this.contentProperty.set(content);
+        }
+
+        // requestProperty / getRequest / setRequest
+        @Override
+        public ObjectProperty<Request> requestProperty() {
+            return requestProperty;
+        }
+
+        @Override
+        public Request getRequest() {
+            return requestProperty.get();
+        }
+
+        @Override
+        public void setRequest(Request request) {
+            this.requestProperty.set(request);
+        }
     }
 }

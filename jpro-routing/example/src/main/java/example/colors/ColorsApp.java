@@ -53,13 +53,13 @@ public class ColorsApp extends RouteApp {
                 .filter(RouteUtils.sideTransitionFilter(1))
                 .filter(DevFilter.create())
                 .filter(StatisticsFilter.create())
-                .filter(ContainerFilter.create(() -> new SimpleContainer()))
+                .filter(ContainerFilter.create(() -> new SimpleContainer(), SimpleContainer.class))
                 .filter(ContainerFilter.create(() -> new SimpleHamburgerMenu(List.of(
                         new SimpleHamburgerMenu.Link("Green", "/green"),
                         new SimpleHamburgerMenu.Link("Red", "/red"),
                         new SimpleHamburgerMenu.Link("Blue", "/blue"),
                         new SimpleHamburgerMenu.Link("Yellow", "/yellow")
-                ))));
+                )), SimpleHamburgerMenu.class));
     }
 
     /**

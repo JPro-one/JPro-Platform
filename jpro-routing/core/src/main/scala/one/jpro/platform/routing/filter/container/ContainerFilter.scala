@@ -10,15 +10,16 @@ object ContainerFilter {
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  private val factoryKey = new Object()
-  def create(supplier: Supplier[Container]): Filter = {
+  private val factoryKey = new Object() // It's correct, that this is outside the method.
+  def create(supplier: Supplier[Container], clazz: Class[_]): Filter = {
     create(new ContainerFactory {
       override def isContainer(x:  Node): Boolean = {
-        x.getProperties.get(factoryKey) == this.getClass
+        x.getProperties.get(factoryKey) == clazz
       }
       override def createContainer(): _root_.javafx.scene.Node = {
         val res = supplier.get().asInstanceOf[Node]
-        res.getProperties.put(factoryKey, this.getClass)
+        assert(res.getClass == clazz, s"The class of the container must be $clazz but was ${res.getClass}")
+        res.getProperties.put(factoryKey, clazz)
         res
       }
       override def setContent(c:  _root_.javafx.scene.Node, x:  _root_.javafx.scene.Node): Unit = {
