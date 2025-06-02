@@ -23,8 +23,16 @@ public abstract class NativeFilePickerTest {
     @BeforeAll
     public static void startJavaFX() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.startup(latch::countDown);
-        latch.await();
+
+        try {
+            Platform.startup(latch::countDown);
+        } catch (IllegalStateException ex) {
+            // Platform already initialized, which is fine
+            // Check if we can actually use the FX thread
+            Platform.runLater(latch::countDown);
+        } finally {
+            latch.await();
+        }
     }
 
     /**
