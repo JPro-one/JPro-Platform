@@ -10,13 +10,12 @@ import javafx.scene.input.KeyCombination;
  * <p>
  * This class supports both JPro (Web) and Desktop environments.
  * It determines OS types using provided WebAPI values or system properties.
- * </p>
  */
 public class UserPlatform {
 
-    private boolean isNative;
-    private WebAPI webAPI;
     private final String platform;
+    private final WebAPI webAPI;
+    private final boolean isNative;
 
     /**
      * Creates a UserPlatform instance from a WebAPI.
@@ -55,12 +54,13 @@ public class UserPlatform {
     }
 
     private static String platformFrom(WebAPI webAPI) {
-        if(WebAPI.isBrowser()) {
+        if (WebAPI.isBrowser()) {
             return platformFrom(webAPI.getPlatform(), webAPI.getPlatformOld());
         } else {
             return System.getProperty("os.name");
         }
     }
+
     private static String platformFrom(String primary, String fallback) {
         if (primary != null && !primary.isEmpty()) {
             return primary;
@@ -92,10 +92,11 @@ public class UserPlatform {
 
     /**
      * Determines if the platform is a mobile environment.
+     *
      * @return {@code true} if mobile, {@code false} otherwise
      */
     public boolean isMobile() {
-        if(isNative) {
+        if (isNative) {
             return PlatformUtils.isAndroid() || PlatformUtils.isIOS();
         } else {
             return webAPI.isMobile();
@@ -104,7 +105,7 @@ public class UserPlatform {
 
     /**
      * Returns the modifier key for the current platform.
-     * For Mac OS it returns {@code KeyCode.META}, otherwise {@code KeyCode.CONTROL}.
+     * For macOS, it returns {@code KeyCode.META}, otherwise {@code KeyCode.CONTROL}.
      *
      * @return the meta key code
      */
@@ -114,7 +115,7 @@ public class UserPlatform {
 
     /**
      * Returns the modifier key combination for the current platform.
-     * For Mac OS it returns {@code KeyCombination.META_DOWN}, otherwise {@code KeyCombination.CONTROL_DOWN}.
+     * For macOS, it returns {@code KeyCombination.META_DOWN}, otherwise {@code KeyCombination.CONTROL_DOWN}.
      *
      * @return the meta key code
      */
@@ -136,7 +137,7 @@ public class UserPlatform {
      * Returns the modifier key combination for the platform determined by the given WebAPI.
      *
      * @param webAPI the WebAPI to determine the platform
-     *  @return the meta key code
+     * @return the meta key code
      */
     public static KeyCombination.Modifier getModifierKeyCombination(WebAPI webAPI) {
         return new UserPlatform(webAPI).getModifierKeyCombination();
@@ -176,7 +177,6 @@ public class UserPlatform {
      * Determines if the current environment is web-based (JPro).
      * <p>
      * This method checks the system property "javafx.platform" for the value "jpro".
-     * </p>
      *
      * @return {@code true} if web-based, {@code false} otherwise
      */
