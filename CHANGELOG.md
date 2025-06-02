@@ -3,6 +3,7 @@
 ## 0.5.x
 
 ### 0.5.7-SNAPSHOT (TBD)
+
 #### Features
 * Added for `jpro-mdfx` new StyleClasses `top`, `right`, `bottom`, `left` to the `MarkdownView` class.
 These can be used to style tables in markdown.
@@ -10,6 +11,9 @@ These can be used to style tables in markdown.
 * Added the `UserPlatform` class to `jpro-util`. It now detects the user’s platform and determines the appropriate action key. This functionality is particularly valuable for JPro, as it operates seamlessly within the browser.
 * Added SizeTester to `jpro-routing`, which allows to ensure that the whole app is responsive.
 * Reworked `jpro-routing-popup` API.
+
+#### Improvements
+* Removed Logback runtime dependency from `jpro-file` module.
 
 #### Bufixes
 * Fixed bug in `jpro-mdfx`, when using MDFXUtil to extract chapters, some header like H3 were removed.

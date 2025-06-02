@@ -2,7 +2,6 @@ dependencies {
     implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
-    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 }
 
 compileJava {
