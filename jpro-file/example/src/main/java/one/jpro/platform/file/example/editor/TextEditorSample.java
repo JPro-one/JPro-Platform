@@ -117,21 +117,20 @@ public class TextEditorSample extends Application {
         });
 
         Button openDirectory = new Button("Open Directory", new FontIcon(Material2AL.FOLDER_OPEN));
-        if(!WebAPI.isBrowser()) {
+        if (!WebAPI.isBrowser()) {
             FileOpenPicker directoryOpenPicker = FileOpenPicker.create(openDirectory);
             directoryOpenPicker.getExtensionFilters().add(ExtensionFilter.DIRECTORY);
-            directoryOpenPicker.setOnFilesSelected(fileSources -> {
-                fileSources.stream().findFirst().ifPresent(fileSource -> {
-                    // Note: We only test whether choosing a directory works
-                    LOGGER.info("Chosen directory: " + fileSource.uploadFileAsync().join().getAbsolutePath());
-                });
-            });
+            directoryOpenPicker.setOnFilesSelected(fileSources ->
+                    fileSources.stream().findFirst().ifPresent(fileSource -> {
+                        // Note: We only test whether choosing a directory works
+                        LOGGER.info("Chosen directory: " + fileSource.uploadFileAsync().join().getAbsolutePath());
+                    }));
         }
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox controlsBox = new HBox(newButton, openButton);
-        if(!WebAPI.isBrowser()) {
+        if (!WebAPI.isBrowser()) {
             controlsBox.getChildren().add(openDirectory);
         }
         controlsBox.getChildren().add(spacer);
@@ -175,7 +174,7 @@ public class TextEditorSample extends Application {
                 fileSource.uploadFileAsync()
                         .thenCompose(file -> {
                             try {
-                                if(file.isDirectory()) {
+                                if (file.isDirectory()) {
                                     LOGGER.info("Chosen directory: " + file.getAbsolutePath());
                                     return CompletableFuture.completedFuture(file);
                                 } else {
