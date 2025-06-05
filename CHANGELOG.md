@@ -2,7 +2,7 @@
 
 ## 0.5.x
 
-### 0.5.7-SNAPSHOT (TBD)
+### 0.5.7 (June 5, 2025)
 
 #### Features
 * Added for `jpro-mdfx` new StyleClasses `top`, `right`, `bottom`, `left` to the `MarkdownView` class.
