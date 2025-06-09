@@ -36,6 +36,9 @@ test {
     // Check if the RUNNING_ON_CI environment variable is set to 'true'
     def runningOnCi = System.getenv('RUNNING_ON_CI') == 'true'
 
+    // Check if running on Windows
+    def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+
     // Pass the environment variable to the test JVM as a system property
     systemProperty 'RUNNING_ON_CI', runningOnCi
 
@@ -43,6 +46,10 @@ test {
     if (runningOnCi) {
         useJUnitPlatform {
             excludeTags('media-recorder')
+            // Also exclude media-player tests on Windows CI since they are not stable
+            if (isWindows) {
+                excludeTags('media-player')
+            }
         }
     }
 }

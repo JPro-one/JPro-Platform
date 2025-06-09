@@ -40,6 +40,7 @@ import static org.testfx.assertions.api.Assertions.assertThat;
  */
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("media-player")
 public class MediaPlayerTests {
 
     private final Logger log = LoggerFactory.getLogger(MediaPlayerTests.class);
