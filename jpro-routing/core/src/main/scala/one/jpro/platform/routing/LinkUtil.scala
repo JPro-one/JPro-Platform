@@ -175,7 +175,7 @@ object LinkUtil {
         linkAndPush --> { case(link, pushState) =>
           def script = if (pushState) {
             s"""${aElem.getName}.onclick =  function(event) {
-               |  if(!event.shiftKey && !event.metaKey) {
+               |  if(!event.shiftKey && !event.ctrlKey && !event.metaKey) {
                |    jpro.jproGotoURL(\"${link.replace("\"", "\\\"")}\"); event.preventDefault();
                |  }
                |};""".stripMargin
