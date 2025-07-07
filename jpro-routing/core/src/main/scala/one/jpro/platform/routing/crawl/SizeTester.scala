@@ -38,8 +38,8 @@ object SizeTester {
       val nodeMinWidth = node.minWidth(-1)
       val nodeMaxWidth = node.maxWidth(-1)
       logger.debug("Page: " + pageURL + " minWidth: " + nodeMinWidth + " maxWidth: " + nodeMaxWidth)
-      assert(nodeMinWidth <= minWidth, s"Node minWidth: ${nodeMinWidth} should be less than or equal to $minWidth")
-      assert(nodeMaxWidth >= maxWidth, s"Node maxWidth: ${nodeMaxWidth} should be greater than or equal to $maxWidth")
+      assert(nodeMinWidth <= minWidth, s"Url: $pageURL Node minWidth: ${nodeMinWidth} should be less than or equal to $minWidth")
+      assert(nodeMaxWidth >= maxWidth, s"Url: $pageURL Node maxWidth: ${nodeMaxWidth} should be greater than or equal to $maxWidth")
       inFX(routeNode.scene.window.asInstanceOf[Stage].close())
     })
   }
