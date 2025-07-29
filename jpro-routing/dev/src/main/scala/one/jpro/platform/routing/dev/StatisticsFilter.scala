@@ -2,7 +2,6 @@ package one.jpro.platform.routing.dev
 
 import com.jpro.webapi.WebAPI
 import one.jpro.jmemorybuddy.JMemoryBuddyLive
-import fr.brouillard.oss.cssfx.CSSFX
 import one.jpro.platform.routing.filter.container.ContainerFilter
 import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
 import org.kordamp.ikonli.javafx.FontIcon
@@ -12,6 +11,7 @@ import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
 import one.jpro.platform.routing.dev.NodesHelper._
+import one.jpro.platform.utils.TreeShowing
 
 object StatisticsFilter {
 
@@ -182,6 +182,19 @@ object StatisticsFilter {
             labels <++ new Label("visible Nodes: ")
             values <++ new Label() {
               text <-- ("" + formatInt(CONTAINER.visibleTreeSize))
+            }
+          }
+          this <++ new StatBox() {
+            @Bind var minWidthV = 0.0
+            @Bind var treeVisisble = TreeShowing.treeShowing(this).toBindable
+            when(treeVisisble) ==> {
+              every(1 s) --> {
+                minWidthV := this.scene.root.minWidth(-1)
+              }
+            }
+            labels <++ new Label("minWidth: ")
+            values <++ new Label() {
+              text <-- ("" + minWidthV)
             }
           }
         }
