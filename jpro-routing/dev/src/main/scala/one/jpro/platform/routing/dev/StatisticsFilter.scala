@@ -31,7 +31,7 @@ object StatisticsFilter {
 
       override def toString(): String = s"DevFilter(content=$content)"
 
-      this <++ new HBox {
+      this <++ new TextFlow { // Should use flexbox later
 
         styleClass <++ "statisticsfilter-hbox"
 

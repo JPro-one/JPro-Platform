@@ -34,7 +34,7 @@ object DevFilter {
         report = JMemoryBuddyLive.getReport
       }
 
-      this <++ new HBox {
+      this <++ new TextFlow { // Should use flexbox later
         styleClass <++ "devfilter-hbox"
         this <++ new Button() {
           styleClass ::= "devfilter-icon-button"
