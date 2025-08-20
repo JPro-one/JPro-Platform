@@ -5,7 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
-import one.jpro.platform.auth.routing.AuthOAuth2Filter;
+import one.jpro.platform.auth.routing.AuthBasicOAuth2Filter;
 import simplefx.experimental.parts.FXFuture;
 
 import java.util.Optional;
@@ -74,7 +74,7 @@ public class AuthProviderPage extends Page {
 
         final var signInBox = loginApp.createButtonWithDescription(
                 "Sign in with the selected authentication provider.", "Sign In",
-                event -> AuthOAuth2Filter.authorize(this, authProvider, authCredentials));
+                event -> AuthBasicOAuth2Filter.authorize(this, authProvider, authCredentials));
 
         final var discoveryBox = loginApp.createButtonWithDescription(
                 "The OpenID Connect Discovery provides a client with configuration details.",

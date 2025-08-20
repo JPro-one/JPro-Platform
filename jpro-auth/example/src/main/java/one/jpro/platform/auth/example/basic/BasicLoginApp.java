@@ -13,6 +13,8 @@ import one.jpro.platform.auth.example.basic.page.LoginPage;
 import one.jpro.platform.auth.example.basic.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
 import one.jpro.platform.auth.routing.AuthBasicFilter;
+import one.jpro.platform.auth.routing.AuthUIProvider;
+import one.jpro.platform.auth.routing.AuthUIProviders;
 import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
@@ -58,6 +60,7 @@ public class BasicLoginApp extends RouteApp {
             .userManager(userManager)
             .roles("USER", "ADMIN")
             .create();
+    private AuthUIProvider authUIProvider;
     private final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials();
 
     private static final SessionManager sessionManager = new SessionManager("basic-login-app");
@@ -74,6 +77,7 @@ public class BasicLoginApp extends RouteApp {
         session = (WebAPI.isBrowser()) ? sessionManager.getSession(getWebAPI()) :
                 sessionManager.getSession("user-session");
         userSession = new UserSession(session);
+        authUIProvider = AuthUIProviders.createBasicProvider(basicAuthProvider, userSession);
 
         Optional.ofNullable(CupertinoLight.class.getResource(new CupertinoLight().getUserAgentStylesheet()))
                 .map(URL::toExternalForm)
@@ -82,7 +86,13 @@ public class BasicLoginApp extends RouteApp {
                 .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
         return Route.empty()
-                .and(Route.get("/", request -> Response.node(new LoginPage(basicAuthProvider, credentials))))
+                .and(Route.get("/", request -> {
+                    if(userSession.isLoggedIn()) {
+                        return Response.redirect("/user/signed-in");
+                    } else {
+                        return Response.node(new LoginPage(basicAuthProvider, authUIProvider, credentials));
+                    }
+                }))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
                 .filter(AuthBasicFilter.create(basicAuthProvider, credentials, user -> {

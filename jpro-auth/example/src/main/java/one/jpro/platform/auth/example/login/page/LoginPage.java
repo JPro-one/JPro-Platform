@@ -4,7 +4,8 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
-import one.jpro.platform.auth.routing.AuthOAuth2Filter;
+import one.jpro.platform.auth.routing.AuthBasicOAuth2Filter;
+import one.jpro.platform.auth.routing.AuthUIProvider;
 
 import java.util.Optional;
 
@@ -15,12 +16,10 @@ import java.util.Optional;
  */
 public class LoginPage extends Page {
 
-    public LoginPage(GoogleAuthenticationProvider authProvider) {
+    public LoginPage(GoogleAuthenticationProvider authProvider, AuthUIProvider uiProvider) {
         getStyleClass().add("simple-page");
 
-        final var googleProviderButton = createAuthProviderButton("Google");
-        googleProviderButton.setDefaultButton(true);
-        googleProviderButton.setOnAction(event -> AuthOAuth2Filter.authorize(googleProviderButton, authProvider));
+        final var googleProviderButton = uiProvider.createAuthenticationNode();
 
         getChildren().add(googleProviderButton);
     }
