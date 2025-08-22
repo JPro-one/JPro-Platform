@@ -599,7 +599,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                             ? e.getClaims().getExpiration().toInstant()
                             : Instant.now());
         } catch (JwtException | IOException | InterruptedException e) {
-            throw new IllegalStateException(e.getMessage());
+            throw new IllegalStateException(e);
         }
 
         // Basic checks against JWTOptions
