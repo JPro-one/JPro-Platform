@@ -18,6 +18,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -137,7 +138,7 @@ public class OAuth2API {
         if (confidentialClient) {
             String basic = options.getClientId() + ":" + options.getClientSecret();
             headers.put("Authorization", "Basic " +
-                    Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
+                    Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
         }
 
         // Send authorization params in the body
@@ -213,7 +214,7 @@ public class OAuth2API {
         if (confidentialClient) {
             String basic = options.getClientId() + ":" + options.getClientSecret();
             headers.put("Authorization", "Basic " +
-                    Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
+                    Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
         }
 
         final JSONObject form = new JSONObject()
@@ -271,7 +272,7 @@ public class OAuth2API {
         if (confidentialClient) {
             String basic = options.getClientId() + ":" + options.getClientSecret();
             headers.put("Authorization", "Basic " +
-                    Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
+                    Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
         }
 
         final JSONObject form = new JSONObject()

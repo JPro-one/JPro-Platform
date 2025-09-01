@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 import static one.jpro.platform.auth.core.utils.AuthUtils.BCRYPT_PASSWORD_ENCODER;
@@ -108,7 +109,7 @@ public class UsernamePasswordCredentialsTests {
         UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials("username", "password");
         String expectedAuthHeader = "Basic " +
-                Encoders.BASE64URL.encode((credentials.getUsername() + ":" + credentials.getPassword())
+                Base64.getEncoder().encodeToString((credentials.getUsername() + ":" + credentials.getPassword())
                         .getBytes(StandardCharsets.UTF_8));
         assertThat(credentials.toHttpAuthorization()).isEqualTo(expectedAuthHeader);
     }
@@ -124,7 +125,7 @@ public class UsernamePasswordCredentialsTests {
         UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials(username, password);
         String expectedAuthHeader = "Basic " +
-                Encoders.BASE64URL.encode((username + ":" + password)
+                Base64.getEncoder().encodeToString((username + ":" + password)
                         .getBytes(StandardCharsets.UTF_8));
         assertThat(credentials.toHttpAuthorization()).isEqualTo(expectedAuthHeader);
     }

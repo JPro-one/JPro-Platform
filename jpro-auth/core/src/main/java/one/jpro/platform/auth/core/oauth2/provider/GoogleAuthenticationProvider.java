@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -97,7 +98,7 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
             if (confidentialClient) {
                 String basic = options.getClientId() + ":" + options.getClientSecret();
                 headers.put("Authorization", "Basic " +
-                        Encoders.BASE64URL.encode(basic.getBytes(StandardCharsets.UTF_8)));
+                        Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
             }
 
             final String path = options.getIntrospectionPath() + "?" + tokenType + "=" + token;

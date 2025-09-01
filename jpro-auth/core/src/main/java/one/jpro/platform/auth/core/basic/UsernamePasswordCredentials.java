@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -124,7 +125,7 @@ public class UsernamePasswordCredentials implements Credentials {
             result.append(password);
         }
 
-        return "Basic " + Encoders.BASE64URL.encode(result.toString().getBytes(StandardCharsets.UTF_8));
+        return "Basic " + Base64.getEncoder().encodeToString(result.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
