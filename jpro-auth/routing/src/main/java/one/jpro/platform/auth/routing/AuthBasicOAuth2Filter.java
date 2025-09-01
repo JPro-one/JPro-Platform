@@ -78,7 +78,7 @@ public interface AuthBasicOAuth2Filter {
         Objects.requireNonNull(errorFunction, "Error function cannot be null");
 
         return (route) -> (request) -> {
-            if (request.getPath().equals(credentials.getRedirectUri())) {
+            if (Request.matchesSoft(request, credentials.getRedirectUri())) {
                 return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
                         .flatMap(r -> {
                             if(userSession != null) {

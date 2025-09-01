@@ -96,4 +96,38 @@ object Request {
         throw new RuntimeException("Could not parse Request from string: " + s, e)
     }
   }
+
+  /**
+   * Check whether it matches.
+   * url can be like "/test" but also a full url like "http://domain:port/test"
+   * The check ignores query parameters.
+   */
+  def matchesSoft(request: Request, url: String): Boolean = {
+    try {
+      val uri = new URI(url)
+      val urlPath = uri.getPath
+
+      // quick path check
+      if (urlPath != request.getPath()) return false
+
+      val hasHost = uri.getHost != null
+      if (!hasHost) {
+        // path-only comparison, queries ignored
+        true
+      } else {
+        // full URL provided: compare scheme, host, and optionally port
+        val schemeMatches = Option(uri.getScheme).exists(_.equalsIgnoreCase(request.getProtocol()))
+        val hostMatches = uri.getHost.equalsIgnoreCase(request.getDomain())
+
+        val portFromUrl = uri.getPort // -1 means not specified
+        val portMatches =
+          if (portFromUrl == -1) true
+          else portFromUrl == request.getPort()
+
+        schemeMatches && hostMatches && portMatches
+      }
+    } catch {
+      case _: Exception => false
+    }
+  }
 }
