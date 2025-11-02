@@ -5,6 +5,7 @@ import javafx.scene.layout.StackPane
 import one.jpro.platform.routing.{Filters, Response, Route, RouteApp}
 import org.junit.jupiter.api.Test
 import simplefx.core._
+import simplefx.util.Predef.intercept
 
 class TestSessionManager {
   @Test
@@ -103,5 +104,19 @@ class TestSessionManager {
       assert(view.realContent.asInstanceOf[Label].getText.contains("Not Found"), view.realContent.asInstanceOf[Label].getText)
       println("Label Text: " + view.realContent.asInstanceOf[Label].getText)
     }
+  }
+
+  @Test
+  def testLoop(): Unit = {
+    val route = Route.empty()
+      .and(Route.get("/", r => Response.redirect("/")))
+
+    val app = new RouteApp {
+      override def createRoute(): Route = route
+    }
+
+    val stage = inFX(new javafx.stage.Stage())
+    val error: Exception = intercept[Exception](inFX(app.startFuture(stage)).future.await)
+    assert(error.getMessage.contains("Too many redirects"))
   }
 }
