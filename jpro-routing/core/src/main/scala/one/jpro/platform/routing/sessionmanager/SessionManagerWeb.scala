@@ -42,9 +42,10 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
           this.asInstanceOf[SessionManagerWeb].webAPI.js().eval(s"""window.location.href = "$url";""")
           Response.fromResult(x)
         } else {
-          gotoURL(url)
+          redirect(url, _url)
         }
       case view: View =>
+        redirectCounter = 0
         this.url = url
         view.setSessionManager(this)
         view.url = url

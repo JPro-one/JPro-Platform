@@ -30,8 +30,9 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
     x match {
       case Redirect(url) =>
         logger.debug(s"redirect: ${_url} -> $url")
-        gotoURL(url)
+        redirect(url, _url)
       case view: View =>
+        redirectCounter = 0
         val oldView = this.view
         this.view = view
         view.setSessionManager(this)

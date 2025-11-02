@@ -24,6 +24,7 @@ trait SessionManager { THIS =>
 
   def webApp: RouteNode
 
+  val MAX_REDIRECTS = 10
   val getHistoryBackward: ObservableList[HistoryEntry] = FXCollections.observableArrayList()
   val currentHistoryProperty: ObjectProperty[HistoryEntry] = new SimpleObjectProperty(null)
   val getHistoryForwards: ObservableList[HistoryEntry] = FXCollections.observableArrayList()
@@ -41,6 +42,17 @@ trait SessionManager { THIS =>
   def goBack(): Unit
   def goForward(): Unit
   def isExternal(x: String): Boolean = x.startsWith("http")
+
+  var redirectCounter = 0
+  def redirect(to: String, from: String): Response = {
+    redirectCounter += 1
+    if(redirectCounter > MAX_REDIRECTS) {
+      logger.error(s"Too many redirects (more than 10). Last redirect was from $from to $to")
+      return Response.error(new Exception(s"Too many redirects (more than 10). Last redirect was from $from to $to"))
+    }
+    gotoURL(to)
+  }
+
   def gotoURL(url: String): Response = {
     if(isExternal(url)) {
       if(WebAPI.isBrowser) {
