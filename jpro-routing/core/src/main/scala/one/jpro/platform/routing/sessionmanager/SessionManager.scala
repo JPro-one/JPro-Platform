@@ -50,6 +50,11 @@ trait SessionManager { THIS =>
       logger.error(s"Too many redirects (more than 10). Last redirect was from $from to $to")
       return Response.error(new Exception(s"Too many redirects (more than 10). Last redirect was from $from to $to"))
     }
+    if(redirectCounter > 1) {
+      logger.info(s"Redirecting from $from to $to (redirect #$redirectCounter)")
+    } else {
+      logger.info(s"Redirecting from $from to $to")
+    }
     gotoURL(to)
   }
 
