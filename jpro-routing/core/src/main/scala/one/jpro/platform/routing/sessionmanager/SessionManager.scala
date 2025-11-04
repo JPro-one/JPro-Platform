@@ -60,6 +60,7 @@ trait SessionManager { THIS =>
 
   def gotoURL(url: String): Response = {
     if(isExternal(url)) {
+      logger.info(s"Opening external link: $url")
       if(WebAPI.isBrowser) {
         this.asInstanceOf[SessionManagerWeb].webAPI.executeScript(s"""window.location.href = "$url";""")
       } else {
