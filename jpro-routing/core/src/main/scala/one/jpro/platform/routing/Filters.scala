@@ -91,7 +91,7 @@ object Filters {
   }
 
   def notFoundPage(): Filter = {
-    notFoundPage((request) => Response.node(new Label("Not Found: " + request.getPath())))
+    notFoundPage(_ => Response.node(new NotFoundPage()))
   }
   def notFoundPage(function: Route): Filter = { route =>
     route.and(function)
