@@ -9,11 +9,12 @@ dependencies {
     implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+    implementation "org.scenic-view:scenic-view:$SCENIC_VIEW_VERSION"
 }
 
 javafx {
     version = "$JAVAFX_EXAMPLES_VERSION"
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.web']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
 }
 
 mainClassName = 'one.jpro.platform.mdfx.example.MarkdownViewSample'

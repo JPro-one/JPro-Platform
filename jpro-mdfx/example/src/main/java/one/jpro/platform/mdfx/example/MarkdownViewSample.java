@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import one.jpro.platform.mdfx.MarkdownView;
 import one.jpro.platform.mdfx.extensions.YoutubeExtension;
 import org.apache.commons.io.IOUtils;
+import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,9 @@ public class MarkdownViewSample extends Application {
         Scene scene = new Scene(createRoot(stage), 1000,600);
         stage.setScene(scene);
         stage.show();
+
+        // Start ScenicView
+        // ScenicView.show(scene);
     }
 
     public Parent createRoot(Stage stage) {

@@ -12,6 +12,9 @@ authentication methods configurable in an application.
 #### Miscellaneous
 * Removed AuthJwtFilter, because it was not used anywhere and seemed to be a leftover from the past.
 
+#### Bugfixes
+* `jpro-mdfx`, works now properly with JavaFX25. Previously the layouting of Listings was broken.
+
 ### 0.5.7 (June 5, 2025)
 
 #### Features

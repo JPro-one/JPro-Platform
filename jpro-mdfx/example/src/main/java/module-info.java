@@ -10,6 +10,7 @@ module one.jpro.platform.mdfx.example {
 
     requires jpro.webapi;
     requires one.jpro.platform.mdfx;
+    requires org.scenicview.scenicview;
 
     exports one.jpro.platform.mdfx.example;
 }

@@ -68,7 +68,6 @@
 
 .markdown-listitem-dot {
     -fx-font-size: 16;
-    -fx-min-width: 20;
     -fx-text-fill: -mdfx-font-color;
 }
 
