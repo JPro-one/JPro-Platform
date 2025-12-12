@@ -80,8 +80,9 @@ public class CommandRunnerTests {
             commandRunner.addArgs("ls", "build.gradle");
             assertThatThrownBy(() -> commandRunner.runAsync("async-ls", mockFile))
                     .hasMessageContaining("Cannot run program \"ls\"")
-                    .hasMessageContaining("error=2, No such file or directory")
-                    .hasRootCauseMessage("error=2, No such file or directory")
+                    .hasMessageContaining("error=2")
+                    .hasMessageContaining("No such file or directory")
+                    //.hasRootCauseMessage("error=2, No such file or directory") // Dependent on OS and or JavaVersion
                     .hasCauseInstanceOf(IOException.class);
         }
     }
