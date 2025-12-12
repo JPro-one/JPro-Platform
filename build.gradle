@@ -100,8 +100,11 @@ configure(subprojects.findAll { it.name != 'example' }) {
     }
 
     dependencies {
-        testImplementation "org.junit.jupiter:junit-jupiter:$JUNIT_VERSION"
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+        testImplementation(platform("org.junit:junit-bom:$JUNIT_VERSION"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testImplementation("org.junit.jupiter:junit-jupiter-api")
+        testImplementation("org.junit.jupiter:junit-jupiter-engine")
+        testImplementation("org.junit.platform:junit-platform-launcher")
 
         testImplementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
         testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"

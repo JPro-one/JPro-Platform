@@ -24,10 +24,9 @@ def examples = [
         'file-uploader' : 'one.jpro.platform.file.example.upload.FileUploaderSample'
 ]
 
-mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["text-editor"]
 
 application {
-    mainClass = "$mainClassName"
+    mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["text-editor"]
     mainModule = "one.jpro.platform.file.example"
     applicationDefaultJvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"

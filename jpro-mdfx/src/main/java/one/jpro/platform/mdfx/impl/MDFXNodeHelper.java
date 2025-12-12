@@ -244,13 +244,13 @@ public class MDFXNodeHelper extends VBox {
             Label dot = new Label(text);
             dot.getStyleClass().add("markdown-listitem-dot");
             dot.getStyleClass().add("markdown-text");
+            dot.setMinWidth(Region.USE_PREF_SIZE);
 
             HBox hbox = new HBox();
             hbox.getStyleClass().add("markdown-hbox1");
             hbox.getChildren().add(dot);
             hbox.setAlignment(Pos.TOP_LEFT);
             HBox.setHgrow(newRoot, Priority.ALWAYS);
-            newRoot.setPrefWidth(1.0); // This way, it doesn't take space from the "dot" label
             hbox.getChildren().add(newRoot);
 
             oldRoot.getChildren().add(hbox);

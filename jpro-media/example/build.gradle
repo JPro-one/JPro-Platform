@@ -32,10 +32,8 @@ def examples = [
         'media-recorder-and-player': 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
 ]
 
-mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["media-recorder-and-player"]
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["media-recorder-and-player"]
     mainModule = 'one.jpro.platform.media.example'
     applicationDefaultJvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"

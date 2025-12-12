@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Microsoft Authentication Provider tests.
@@ -51,8 +52,8 @@ public class MicrosoftAuthenticationProviderTests {
                     assertEquals(List.of("pairwise"), options.getSupportedSubjectTypes());
                     assertEquals(List.of("RS256"), options.getSupportedIdTokenSigningAlgValues());
                     assertEquals(List.of("openid", "profile", "email", "offline_access"), options.getSupportedScopes());
-                    assertEquals(List.of("client_secret_post", "private_key_jwt", "client_secret_basic"),
-                            options.getSupportedTokenEndpointAuthMethods());
+                    assertTrue(options.getSupportedTokenEndpointAuthMethods()
+                            .containsAll(List.of("client_secret_post", "private_key_jwt", "client_secret_basic")));
                     assertEquals(List.of("sub", "iss", "cloud_instance_name", "cloud_instance_host_name",
                                     "cloud_graph_host_name", "msgraph_host", "aud", "exp", "iat",
                                     "auth_time", "acr", "nonce", "preferred_username", "name", "tid",

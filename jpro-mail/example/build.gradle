@@ -21,9 +21,7 @@ def examples = [
         'compose-mail' : 'one.jpro.platform.mail.example.compose.ComposeMailSample'
 ]
 
-mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["compose-mail"]
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["compose-mail"]
     mainModule = "one.jpro.platform.mail.example"
 }
