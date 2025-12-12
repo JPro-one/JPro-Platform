@@ -29,9 +29,7 @@ def examples = [
         'oauth'       : 'one.jpro.platform.auth.example.oauth.OAuthApp'
 ]
 
-mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["google-login"]
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["google-login"]
     mainModule = "one.jpro.platform.auth.example"
 }

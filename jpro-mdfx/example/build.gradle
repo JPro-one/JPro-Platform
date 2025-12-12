@@ -17,9 +17,7 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
 }
 
-mainClassName = 'one.jpro.platform.mdfx.example.MarkdownViewSample'
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = 'one.jpro.platform.mdfx.example.MarkdownViewSample'
     mainModule = "one.jpro.platform.mdfx.example"
 }

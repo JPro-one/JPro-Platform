@@ -15,9 +15,7 @@ javafx {
     modules = ['javafx.controls']
 }
 
-mainClassName = 'one.jpro.platform.htmlscrollpane.example.HTMLScrollPaneSample'
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = 'one.jpro.platform.htmlscrollpane.example.HTMLScrollPaneSample'
     mainModule = "one.jpro.platform.htmlscrollpane.example"
 }

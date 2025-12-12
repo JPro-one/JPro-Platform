@@ -14,14 +14,12 @@ def examples = [
         'user-platform' : 'one.jpro.platform.utils.example.UserPlatformExample'
 ]
 
-mainClassName = examples.getOrDefault(project.getProperties().get("sample"), "UnknownApp")
-
 javafx {
     version = "$JAVAFX_EXAMPLES_VERSION"
     modules = ['javafx.graphics', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.swing', 'javafx.web']
 }
 
 application {
-    mainClass = "$mainClassName"
+    mainClass = examples.getOrDefault(project.getProperties().get("sample"), "UnknownApp")
     mainModule = 'one.jpro.platform.utils.example'
 }

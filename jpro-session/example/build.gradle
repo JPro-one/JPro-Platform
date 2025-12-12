@@ -16,9 +16,7 @@ javafx {
     modules = ['javafx.graphics', 'javafx.controls']
 }
 
-mainClassName = 'one.jpro.platform.session.example.SessionManagerSample'
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = 'one.jpro.platform.session.example.SessionManagerSample'
     mainModule = "one.jpro.platform.sessions.example"
 }

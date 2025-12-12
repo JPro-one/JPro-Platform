@@ -123,9 +123,8 @@ configure(project(':jpro-routing:example')) {
             'test'  : 'example.scala.TestWebApplication',
             'extensions': 'example.scala.TestExtensions'
     ]
-    mainClassName = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["colors"]
 
     application {
-        mainClass = "$mainClassName"
+        mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["colors"]
     }
 }

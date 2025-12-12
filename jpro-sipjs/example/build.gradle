@@ -14,9 +14,7 @@ javafx {
     modules = ['javafx.graphics', 'javafx.controls', 'javafx.swing', 'javafx.fxml', 'javafx.media', 'javafx.web']
 }
 
-mainClassName = "one.jpro.platform.sipjs.example.SIPJSApp"
-
 application {
-    mainClass = "$mainClassName"
+    mainClass = "one.jpro.platform.sipjs.example.SIPJSApp"
     mainModule = 'one.jpro.platform.sipjs.example'
 }
