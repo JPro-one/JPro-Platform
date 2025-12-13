@@ -174,72 +174,103 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
   import AppCrawler.logger
 
   assert(!isApplicationThread, "This method must not be called on the application thread")
+
   var toIndex = Set[String]("/")
   var indexed = Set[String]()
   var redirects = Set[String]()
   var deadLinks = Set[String]()
   var reports: List[CrawlReportPage] = List()
 
-  def isOwnLink(x: String): Boolean = x.startsWith(prefix) || x.startsWith("/")
+  private val linkSources =
+    scala.collection.mutable.HashMap.empty[String, scala.collection.mutable.LinkedHashSet[String]]
+
+  def isOwnLink(x: String): Boolean =
+    x.startsWith(prefix) || x.startsWith("/")
+
+  private def enqueue(url: String, from: String): Unit = {
+    val sources =
+      linkSources.getOrElseUpdate(url, scala.collection.mutable.LinkedHashSet.empty[String])
+    sources += from
+    if (!indexed.contains(url) && !toIndex.contains(url) && isOwnLink(url)) {
+      toIndex += url
+    }
+  }
+
+  private def sourcesOf(url: String): String =
+    linkSources.get(url).map(_.mkString(", ")).getOrElse("<unknown>")
 
   def doStep(): Unit = {
     val crawlNext = toIndex.head
     toIndex -= crawlNext
     indexed += crawlNext
 
+    logger.info(s"Crawling: $crawlNext (found from: ${sourcesOf(crawlNext)})")
+
     val app: RouteNode = inFX(createApp.get())
     val result = inFX {
       LinkUtil.getSessionManager(app)
       val request = Request.fromString(crawlNext)
-      app.getRoute()(Request.fromString(crawlNext))
+      app.getRoute()(request)
     }.future.await
+
     result match {
       case Redirect(url) =>
         redirects += crawlNext
-        if (!indexed.contains(url) && !toIndex.contains(url)) {
-          if (isOwnLink(url)) {
-            toIndex += url
-          }
-        }
+        logger.info(s"Redirect: $crawlNext -> $url (found from: ${sourcesOf(crawlNext)})")
+
+        val fromSources = linkSources.get(crawlNext).map(_.toList).getOrElse(Nil)
+        enqueue(url, crawlNext)
+        fromSources.foreach(src => enqueue(url, src))
+
       case view: View =>
         println(s"View: ${view.url} crawlNext: $crawlNext")
         try {
-          val newReport = inFX{
-            runScheduler{
-            LinkUtil.getSessionManager(app).gotoURL(crawlNext, view, pushState = false)
-            view.url = crawlNext
-            assert(app.scene != null, s"Scene is null for $crawlNext")
-            assert(app.scene.root != null, s"Root is null for $crawlNext")
+          val newReport = inFX {
+            runScheduler {
+              LinkUtil.getSessionManager(app).gotoURL(crawlNext, view, pushState = false)
+              view.url = crawlNext
+              assert(app.scene != null, s"Scene is null for $crawlNext")
+              assert(app.scene.root != null, s"Root is null for $crawlNext")
             }
             app.scene.root.applyCss()
-            //app.scene.root.layout()
-            //println(SceneGraphSerializer.serialize(app.scene.root))
             assert(view.realContent.parent != null, s"Parent is null for $crawlNext")
             assert(view.realContent.scene != null, s"Scene is null for $crawlNext")
-            println("SCENE WH: " + view.realContent.scene.getWidth + " " + view.realContent.scene.getHeight)
+            println(
+              "SCENE WH: " +
+                view.realContent.scene.getWidth + " " +
+                view.realContent.scene.getHeight
+            )
             AppCrawler.crawlPage(view)
           }
+
           reports = newReport :: reports
-          def simplifyLink(x: String) = {
-            if(x.startsWith(prefix)) x.drop(prefix.length) else x
-          }
-          newReport.links.asScala.filter(x => isOwnLink(x.url)).foreach { link =>
-            val url = simplifyLink(link.url)
-            if (!indexed.contains(url) && !toIndex.contains(url)) {
-              toIndex += url
+
+          def simplifyLink(x: String): String =
+            if (x.startsWith(prefix)) x.drop(prefix.length) else x
+
+          newReport.links.asScala
+            .filter(li => isOwnLink(li.url))
+            .foreach { link =>
+              val url = simplifyLink(link.url)
+              enqueue(url, crawlNext)
             }
-          }
+
         } catch {
           case ex: Throwable =>
-            logger.error(s"Error crawling page: $crawlNext", ex)
+            logger.error(
+              s"Error crawling page: $crawlNext (found from: ${sourcesOf(crawlNext)})",
+              ex
+            )
             deadLinks += crawlNext
         }
       case null =>
+        logger.warn(s"Dead link: $crawlNext (found from: ${sourcesOf(crawlNext)})")
         deadLinks += crawlNext
     }
     runLater(app.scene.window.asInstanceOf[Stage].close())
   }
   def crawlAll(): CrawlReportApp = {
+    enqueue("/", "<seed>")
 
     while (toIndex.nonEmpty) {
       try {
@@ -250,7 +281,10 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
       }
     }
 
-    CrawlReportApp((indexed -- redirects -- deadLinks).toList.asJava, reports.reverse.asJava, deadLinks.toList.asJava)
+    CrawlReportApp(
+      (indexed -- redirects -- deadLinks).toList.asJava,
+      reports.reverse.asJava,
+      deadLinks.toList.asJava
+    )
   }
-
 }
