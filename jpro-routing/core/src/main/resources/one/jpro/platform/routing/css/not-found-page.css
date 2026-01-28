@@ -1,11 +1,11 @@
 @font-face {
     font-family: "DM Sans Regular";
-    src: url("../font/DMSans-Regular.ttf");
+    src: url("../resources/font/DMSans-Regular.ttf");
 }
 
 @font-face {
     font-family: "DM Sans Bold";
-    src: url("../font/DMSans-Bold.ttf");
+    src: url("../resources/font/DMSans-Bold.ttf");
 }
 
 .not-found-page {
