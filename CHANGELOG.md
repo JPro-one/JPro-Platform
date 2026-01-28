@@ -8,6 +8,7 @@
 without the need to change anything in the RouteApp.
 * Added the class AuthUIProvider - which simplifies making the different 
 authentication methods configurable in an application.
+* Added new class `SEOUtil` to `jpro-routing-core` module. This can be used to mark certain nodes as H1, H2, etc. for SEO purposes.
 
 #### Miscellaneous
 * Removed AuthJwtFilter, because it was not used anywhere and seemed to be a leftover from the past.
