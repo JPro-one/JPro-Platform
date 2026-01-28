@@ -4,7 +4,7 @@ import com.jpro.webapi.WebAPI
 import javafx.scene.Node
 import javafx.scene.control.Tooltip
 
-class SEOUtil {
+object SEOUtil {
 
   def h1(x: Node): Unit = {
     wrapNode("h1", x)
