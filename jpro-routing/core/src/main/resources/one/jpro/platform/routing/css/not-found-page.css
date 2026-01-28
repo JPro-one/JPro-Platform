@@ -1,0 +1,40 @@
+@font-face {
+    font-family: "DM Sans Regular";
+    src: url("../font/DMSans-Regular.ttf");
+}
+
+@font-face {
+    font-family: "DM Sans Bold";
+    src: url("../font/DMSans-Bold.ttf");
+}
+
+.not-found-page {
+    -fx-background-color: white;
+    -fx-background-image: url("../images/background.png");
+    -fx-background-repeat: repeat;
+    -fx-alignment: center;
+    -fx-padding: 64 0 64 0;
+}
+
+.not-found-page-container {
+    -fx-max-width: 600;
+    -fx-max-height: 368;
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #3E3BC51F;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-padding: 32 24 32 24;
+    -fx-spacing: 32;
+    -fx-alignment: center;
+}
+
+.not-found-page-title {
+    -fx-font-family: "DM Sans Bold";
+    -fx-font-size: 32;
+}
+
+.not-found-page-text {
+    -fx-font-family: "DM Sans Regular";
+    -fx-font-size: 16;
+}
