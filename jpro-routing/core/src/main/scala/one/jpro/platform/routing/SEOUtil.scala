@@ -32,8 +32,10 @@ object SEOUtil {
 
   private def wrapNode(tag: String, node: Node): Unit = {
     WebAPI.getWebAPI(node, webapi => {
-        webapi.wrapNode(tag, node);
-        webapi.getElement(node)
+        val elem = webapi.wrapNode(tag, node)
+        // Reset all default browser styles for heading elements to prevent them from affecting rendering.
+        // The heading tags are only used for SEO semantics, not visual styling.
+        webapi.js().eval(s"${elem.getName}.style.all = 'unset';")
     })
   }
 
