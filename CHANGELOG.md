@@ -1,8 +1,9 @@
 # Changelog
 
 ## 0.5.x
+### 0.5.9 (TBD)
 
-### 0.5.8-SNAPSHOT (TBD)
+### 0.5.8 (February 20, 2026)
 #### Features
 * Added AuthUIProvider to the `jpro-auth-routing` module. This filters can be used, to limit access to the whole app,
 without the need to change anything in the RouteApp.
