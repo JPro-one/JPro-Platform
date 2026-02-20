@@ -6,15 +6,26 @@
 #### Features
 * Added AuthUIProvider to the `jpro-auth-routing` module. This filters can be used, to limit access to the whole app,
 without the need to change anything in the RouteApp.
-* Added the class AuthUIProvider - which simplifies making the different 
+* Added the class AuthUIProvider - which simplifies making the different
 authentication methods configurable in an application.
 * Added new class `SEOUtil` to `jpro-routing-core` module. This can be used to mark certain nodes as H1, H2, etc. for SEO purposes.
+* Added default 404 page to `jpro-routing`.
+* Enhanced AppCrawler to track link sources and improve logging for redirects and dead links.
+
+#### Improvements
+* Improved redirect loop handling in `jpro-routing`.
+* Updated various dependencies to their latest versions.
+* Upgraded Gradle wrapper to version `8.14.2`.
 
 #### Miscellaneous
 * Removed AuthJwtFilter, because it was not used anywhere and seemed to be a leftover from the past.
 
 #### Bugfixes
 * `jpro-mdfx`, works now properly with JavaFX25. Previously the layouting of Listings was broken.
+* Fixed Auth to use Base64 encoder instead of Base64URL encoder for the Authorization header.
+* Fixed OAuthFilter to check the redirect URI correctly when it contains the full domain.
+* Fixed Statistics Filter min-width issue that could break the layout of the application.
+* Fixed ctrl+click default behavior for links in `jpro-routing`.
 
 ### 0.5.7 (June 5, 2025)
 
