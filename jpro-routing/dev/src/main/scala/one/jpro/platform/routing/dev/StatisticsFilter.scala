@@ -7,6 +7,7 @@ import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.scenicview.ScenicView
 import org.slf4j.{Logger, LoggerFactory}
+import scala.language.postfixOps
 import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._

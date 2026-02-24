@@ -32,7 +32,8 @@ configure([project(':jpro-routing:core')]) {
     dependencies {
         api project(":jpro-utils")
         api project(":jpro-scenegraph")
-        api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
+        api "SANDEC:simplefx_2.13:$SIMPLEFX_VERSION"
+        api "org.scala-lang:scala-library:2.13.18"
     }
 
     publishing {
