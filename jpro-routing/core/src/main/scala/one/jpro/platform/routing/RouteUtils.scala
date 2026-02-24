@@ -1,6 +1,7 @@
 package one.jpro.platform.routing
 
 import one.jpro.platform.routing.filter.container.ContainerFactory
+import scala.language.postfixOps
 import simplefx.all
 import simplefx.all._
 import simplefx.core._

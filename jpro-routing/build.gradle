@@ -22,7 +22,6 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
     dependencies {
         api "one.jpro:jpro-webapi:$JPRO_VERSION"
-        api "SANDEC:jnodes:$JNODES_VERSION"
         api "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
         api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     }
@@ -32,7 +31,8 @@ configure([project(':jpro-routing:core')]) {
     dependencies {
         api project(":jpro-utils")
         api project(":jpro-scenegraph")
-        api "SANDEC:simplefx_2.12:$SIMPLEFX_VERSION"
+        api "SANDEC:simplefx_2.13:$SIMPLEFX_VERSION"
+        api "org.scala-lang:scala-library:2.13.18"
     }
 
     publishing {
