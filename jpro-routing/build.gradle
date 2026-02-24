@@ -22,7 +22,6 @@ configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(
 configure([project(':jpro-routing:core'), project(':jpro-routing:dev'), project(':jpro-routing:popup')]) {
     dependencies {
         api "one.jpro:jpro-webapi:$JPRO_VERSION"
-        api "SANDEC:jnodes:$JNODES_VERSION"
         api "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
         api "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     }

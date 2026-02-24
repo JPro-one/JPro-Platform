@@ -2,9 +2,17 @@ package one.jpro.platform.routing
 
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.core._
 
+import scala.concurrent.Await
+
+object TestRouteApp {
+    @BeforeAll
+    def setup(): Unit = {
+        Await.result(simplefx.cores.initializeCore(), (second))
+    }
+}
 class TestRouteApp {
 
     @Test
