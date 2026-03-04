@@ -71,6 +71,11 @@ buildscript {
         classpath "tech.yanand.gradle:maven-central-publish:$MAVEN_CENTRAL_PUBLISH_PLUGIN_VERSION"
     }
 }
+apply plugin: 'java'
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 subprojects {
     apply plugin: 'java'
@@ -149,6 +154,7 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
            project("jpro-html-scrollpane"), project("jpro-routing:core"), project("jpro-routing:dev"),
            project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
            rootProject]) {
+    apply plugin: 'java'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
     apply plugin: 'tech.yanand.maven-central-publish'
@@ -181,6 +187,12 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                 } else {
                     // Ensure only one component is included in the publication
                     from components.java
+                }
+
+                if (project != rootProject) {
+                    dependencies {
+                        implementation(rootProject)
+                    }
                 }
 
                 pom {
