@@ -2,12 +2,32 @@ plugins {
     id 'org.javamodularity.moduleplugin' version "$MODULE_PLUGIN_VERSION"
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+javafx {
+    version = "$JAVAFX_25_VERSION"
+}
+
 dependencies {
     implementation project(':jpro-youtube')
     implementation "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$FLEXMARK_VERSION"
     implementation "com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$FLEXMARK_VERSION"
     implementation "com.vladsch.flexmark:flexmark-ext-tables:$FLEXMARK_VERSION"
     implementation "com.vladsch.flexmark:flexmark-ext-attributes:$FLEXMARK_VERSION"
+    implementation "io.github.mkpaz:tm4javafx:0.1.0"
+    implementation("org.openjfx:jfx-incubator-richtext:$JAVAFX_25_VERSION") {
+        artifact {
+            classifier = 'mac-aarch64'
+        }
+    }
+    implementation("org.openjfx:jfx-incubator-input:$JAVAFX_25_VERSION") {
+        artifact {
+            classifier = 'mac-aarch64'
+        }
+    }
 }
 
 javadoc {
