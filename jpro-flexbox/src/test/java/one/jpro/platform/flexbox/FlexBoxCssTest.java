@@ -33,7 +33,8 @@ class FlexBoxCssTest extends FlexBoxTestBase {
         assertTrue(names.contains("justify-content"), "Should contain justify-content");
         assertTrue(names.contains("align-items"), "Should contain align-items");
         assertTrue(names.contains("align-content"), "Should contain align-content");
-        assertTrue(names.contains("gap"), "Should contain gap");
+        assertTrue(names.contains("row-gap"), "Should contain row-gap");
+        assertTrue(names.contains("column-gap"), "Should contain column-gap");
     }
 
     @Test
@@ -63,7 +64,8 @@ class FlexBoxCssTest extends FlexBoxTestBase {
                     css.getProperty().equals("justify-content") ||
                     css.getProperty().equals("align-items") ||
                     css.getProperty().equals("align-content") ||
-                    css.getProperty().equals("gap")) {
+                    css.getProperty().equals("row-gap") ||
+                    css.getProperty().equals("column-gap")) {
                 @SuppressWarnings("unchecked")
                 CssMetaData<FlexBox, ?> flexMeta = (CssMetaData<FlexBox, ?>) css;
                 assertTrue(flexMeta.isSettable(box),

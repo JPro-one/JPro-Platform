@@ -3,6 +3,7 @@ package one.jpro.platform.flexbox;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.css.*;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
@@ -36,6 +37,7 @@ public class FlexBox extends Pane {
     private static final String BASIS_CONSTRAINT = "flexbox-basis";
     private static final String ALIGN_SELF_CONSTRAINT = "flexbox-align-self";
     private static final String ORDER_CONSTRAINT = "flexbox-order";
+    private static final String MARGIN_CONSTRAINT = "flexbox-margin";
 
     // ── CSS metadata ──────────────────────────────────────────────────
 
@@ -69,10 +71,16 @@ public class FlexBox extends Pane {
                 @Override public StyleableProperty<FlexAlignContent> getStyleableProperty(FlexBox node) { return node.alignContent; }
             };
 
-    private static final CssMetaData<FlexBox, Number> GAP_META =
-            new CssMetaData<>("gap", StyleConverter.getSizeConverter(), 0) {
-                @Override public boolean isSettable(FlexBox node) { return !node.gap.isBound(); }
-                @Override public StyleableProperty<Number> getStyleableProperty(FlexBox node) { return (StyleableProperty<Number>) (StyleableProperty<?>) node.gap; }
+    private static final CssMetaData<FlexBox, Number> ROW_GAP_META =
+            new CssMetaData<>("row-gap", StyleConverter.getSizeConverter(), 0) {
+                @Override public boolean isSettable(FlexBox node) { return !node.rowGap.isBound(); }
+                @Override public StyleableProperty<Number> getStyleableProperty(FlexBox node) { return (StyleableProperty<Number>) (StyleableProperty<?>) node.rowGap; }
+            };
+
+    private static final CssMetaData<FlexBox, Number> COLUMN_GAP_META =
+            new CssMetaData<>("column-gap", StyleConverter.getSizeConverter(), 0) {
+                @Override public boolean isSettable(FlexBox node) { return !node.columnGap.isBound(); }
+                @Override public StyleableProperty<Number> getStyleableProperty(FlexBox node) { return (StyleableProperty<Number>) (StyleableProperty<?>) node.columnGap; }
             };
 
     private static final List<CssMetaData<? extends Styleable, ?>> CLASS_CSS_META_DATA;
@@ -83,7 +91,8 @@ public class FlexBox extends Pane {
         list.add(JUSTIFY_CONTENT_META);
         list.add(ALIGN_ITEMS_META);
         list.add(ALIGN_CONTENT_META);
-        list.add(GAP_META);
+        list.add(ROW_GAP_META);
+        list.add(COLUMN_GAP_META);
         CLASS_CSS_META_DATA = Collections.unmodifiableList(list);
     }
 
@@ -143,19 +152,46 @@ public class FlexBox extends Pane {
     public final void setAlignContent(FlexAlignContent value) { alignContent.set(value); }
     public final ObjectProperty<FlexAlignContent> alignContentProperty() { return alignContent; }
 
-    private final StyleableDoubleProperty gap =
+    private final StyleableDoubleProperty rowGap =
             new StyleableDoubleProperty(0) {
                 @Override protected void invalidated() { requestLayout(); }
                 @Override public Object getBean() { return FlexBox.this; }
-                @Override public String getName() { return "gap"; }
+                @Override public String getName() { return "rowGap"; }
                 @Override public CssMetaData<FlexBox, Number> getCssMetaData() {
-                    return GAP_META;
+                    return ROW_GAP_META;
                 }
             };
 
-    public final double getGap() { return gap.get(); }
-    public final void setGap(double value) { gap.set(value); }
-    public final DoubleProperty gapProperty() { return gap; }
+    public final double getRowGap() { return rowGap.get(); }
+    public final void setRowGap(double value) { rowGap.set(value); }
+    public final DoubleProperty rowGapProperty() { return rowGap; }
+
+    private final StyleableDoubleProperty columnGap =
+            new StyleableDoubleProperty(0) {
+                @Override protected void invalidated() { requestLayout(); }
+                @Override public Object getBean() { return FlexBox.this; }
+                @Override public String getName() { return "columnGap"; }
+                @Override public CssMetaData<FlexBox, Number> getCssMetaData() {
+                    return COLUMN_GAP_META;
+                }
+            };
+
+    public final double getColumnGap() { return columnGap.get(); }
+    public final void setColumnGap(double value) { columnGap.set(value); }
+    public final DoubleProperty columnGapProperty() { return columnGap; }
+
+    /**
+     * Convenience method: sets both row-gap and column-gap to the same value.
+     */
+    public final void setGap(double value) {
+        setRowGap(value);
+        setColumnGap(value);
+    }
+
+    /**
+     * Returns the row-gap value (for backward compatibility with single-gap usage).
+     */
+    public final double getGap() { return getRowGap(); }
 
     // ── Static child constraint methods ───────────────────────────────
 
@@ -209,6 +245,20 @@ public class FlexBox extends Pane {
         return val instanceof Number ? ((Number) val).intValue() : 0;
     }
 
+    public static void setMargin(Node child, Insets value) {
+        if (value == null) {
+            child.getProperties().remove(MARGIN_CONSTRAINT);
+        } else {
+            child.getProperties().put(MARGIN_CONSTRAINT, value);
+        }
+        requestParentLayout(child);
+    }
+
+    public static Insets getMargin(Node child) {
+        Object val = child.getProperties().get(MARGIN_CONSTRAINT);
+        return val instanceof Insets ? (Insets) val : Insets.EMPTY;
+    }
+
     private static void requestParentLayout(Node child) {
         if (child.getParent() instanceof FlexBox) {
             child.getParent().requestLayout();
@@ -220,21 +270,33 @@ public class FlexBox extends Pane {
     private static class FlexItem {
         final Node node;
         final int originalIndex;
+        final Insets margin;
+        // Margin components in main/cross directions (set during layout)
+        double marginMainBefore, marginMainAfter;
+        double marginCrossBefore, marginCrossAfter;
         double basis;
-        double mainSize;
-        double crossSize;
-        double mainPos;
-        double crossPos;
+        double mainSize;    // content size on main axis (excluding margins)
+        double crossSize;   // content size on cross axis (excluding margins)
+        double mainPos;     // position including margin offset
+        double crossPos;    // position including margin offset
 
         FlexItem(Node node, int originalIndex) {
             this.node = node;
             this.originalIndex = originalIndex;
+            this.margin = getMargin(node);
         }
+
+        /** Total main-axis margin (before + after). */
+        double mainMargin() { return marginMainBefore + marginMainAfter; }
+
+        /** Total cross-axis margin (before + after). */
+        double crossMargin() { return marginCrossBefore + marginCrossAfter; }
     }
 
     private static class FlexLine {
         final List<FlexItem> items = new ArrayList<>();
         double totalBasis;
+        double totalMarginMain;
         double crossSize;
         double crossPos;
         double crossSizeActual;
@@ -262,7 +324,10 @@ public class FlexBox extends Pane {
         boolean doWrap = wrapMode != FlexWrap.NOWRAP;
         double mainSize = isRow ? contentWidth : contentHeight;
         double crossSize = isRow ? contentHeight : contentWidth;
-        double gapVal = getGap();
+        // In row layout: main axis is horizontal (column-gap), cross axis is vertical (row-gap)
+        // In column layout: main axis is vertical (row-gap), cross axis is horizontal (column-gap)
+        double mainGap = isRow ? getColumnGap() : getRowGap();
+        double crossGap = isRow ? getRowGap() : getColumnGap();
 
         // 1. Build sorted item list (stable sort by order)
         List<FlexItem> items = new ArrayList<>(managed.size());
@@ -270,6 +335,21 @@ public class FlexBox extends Pane {
             items.add(new FlexItem(managed.get(i), i));
         }
         items.sort(Comparator.comparingInt(a -> getOrder(a.node)));
+
+        // 1b. Decompose margins into main/cross components
+        for (FlexItem item : items) {
+            if (isRow) {
+                item.marginMainBefore = item.margin.getLeft();
+                item.marginMainAfter = item.margin.getRight();
+                item.marginCrossBefore = item.margin.getTop();
+                item.marginCrossAfter = item.margin.getBottom();
+            } else {
+                item.marginMainBefore = item.margin.getTop();
+                item.marginMainAfter = item.margin.getBottom();
+                item.marginCrossBefore = item.margin.getLeft();
+                item.marginCrossAfter = item.margin.getRight();
+            }
+        }
 
         // 2. Compute basis for each item
         for (FlexItem item : items) {
@@ -281,31 +361,33 @@ public class FlexBox extends Pane {
         }
 
         // 3. Break into lines
-        List<FlexLine> lines = buildLines(items, mainSize, gapVal, doWrap);
+        List<FlexLine> lines = buildLines(items, mainSize, mainGap, doWrap);
 
         // 4. Resolve main-axis sizes per line (grow/shrink)
         for (FlexLine line : lines) {
-            resolveMainSizes(line, mainSize, gapVal, isRow);
+            resolveMainSizes(line, mainSize, mainGap, isRow);
         }
 
-        // 5. Compute cross sizes per line
+        // 5. Compute cross sizes per line (using resolved main size as constraint)
         for (FlexLine line : lines) {
             double maxCross = 0;
             for (FlexItem item : line.items) {
-                double pref = isRow ? item.node.prefHeight(-1) : item.node.prefWidth(-1);
-                maxCross = Math.max(maxCross, pref);
+                double pref = isRow
+                        ? item.node.prefHeight(item.mainSize)
+                        : item.node.prefWidth(item.mainSize);
+                maxCross = Math.max(maxCross, pref + item.crossMargin());
             }
             line.crossSize = maxCross;
         }
 
         // 6. Distribute lines along cross axis (align-content)
-        distributeCrossLines(lines, crossSize, gapVal, wrapMode);
+        distributeCrossLines(lines, crossSize, crossGap, wrapMode);
 
         // 7. Position items on main axis (justify-content) and cross axis (align-items/align-self)
         FlexAlignItems defaultAlign = getAlignItems();
 
         for (FlexLine line : lines) {
-            positionMainAxis(line, mainSize, gapVal, isReverse);
+            positionMainAxis(line, mainSize, mainGap, isReverse);
             positionCrossAxis(line, defaultAlign, isRow);
         }
 
@@ -339,8 +421,9 @@ public class FlexBox extends Pane {
         for (int i = 0; i < items.size(); i++) {
             FlexItem item = items.get(i);
             double neededGap = currentLine.items.isEmpty() ? 0 : gapVal;
+            double itemOuterMain = item.basis + item.mainMargin();
 
-            if (doWrap && !currentLine.items.isEmpty() && usedMain + neededGap + item.basis > mainSize) {
+            if (doWrap && !currentLine.items.isEmpty() && usedMain + neededGap + itemOuterMain > mainSize) {
                 currentLine = new FlexLine();
                 lines.add(currentLine);
                 usedMain = 0;
@@ -349,7 +432,8 @@ public class FlexBox extends Pane {
 
             currentLine.items.add(item);
             currentLine.totalBasis += item.basis;
-            usedMain += neededGap + item.basis;
+            currentLine.totalMarginMain += item.mainMargin();
+            usedMain += neededGap + itemOuterMain;
         }
 
         return lines;
@@ -358,19 +442,60 @@ public class FlexBox extends Pane {
     private void resolveMainSizes(FlexLine line, double mainSize, double gapVal, boolean isRow) {
         List<FlexItem> items = line.items;
         double totalGap = items.size() > 1 ? gapVal * (items.size() - 1) : 0;
-        double freeSpace = mainSize - line.totalBasis - totalGap;
+        double freeSpace = mainSize - line.totalBasis - totalGap - line.totalMarginMain;
 
         if (freeSpace >= 0) {
-            double totalGrow = 0;
-            for (FlexItem item : items) totalGrow += getGrow(item.node);
-
-            for (FlexItem item : items) {
-                double grow = getGrow(item.node);
-                double extra = (totalGrow > 0) ? freeSpace * (grow / totalGrow) : 0;
-                item.mainSize = Math.max(0, item.basis + extra);
-            }
+            resolveGrow(items, freeSpace, isRow);
         } else {
             resolveShrink(items, freeSpace, isRow);
+        }
+    }
+
+    private void resolveGrow(List<FlexItem> items, double freeSpace, boolean isRow) {
+        boolean[] frozen = new boolean[items.size()];
+        double[] sizes = new double[items.size()];
+
+        for (int i = 0; i < items.size(); i++) {
+            sizes[i] = items.get(i).basis;
+        }
+
+        double remaining = freeSpace;
+
+        for (int iteration = 0; iteration < items.size(); iteration++) {
+            double totalGrow = 0;
+            for (int i = 0; i < items.size(); i++) {
+                if (!frozen[i]) {
+                    totalGrow += getGrow(items.get(i).node);
+                }
+            }
+
+            if (totalGrow == 0) break;
+
+            boolean anyFrozen = false;
+            for (int i = 0; i < items.size(); i++) {
+                if (frozen[i]) continue;
+
+                FlexItem item = items.get(i);
+                double grow = getGrow(item.node);
+                double extra = remaining * (grow / totalGrow);
+                double tentative = item.basis + extra;
+
+                double maxMain = isRow ? item.node.maxWidth(-1) : item.node.maxHeight(-1);
+                if (tentative > maxMain) {
+                    sizes[i] = maxMain;
+                    remaining -= (maxMain - item.basis);
+                    frozen[i] = true;
+                    anyFrozen = true;
+                } else {
+                    sizes[i] = tentative;
+                }
+            }
+
+            if (!anyFrozen) break;
+        }
+
+        for (int i = 0; i < items.size(); i++) {
+            items.get(i).mainSize = Math.max(0, sizes[i]);
         }
     }
 
@@ -491,7 +616,7 @@ public class FlexBox extends Pane {
         double totalGap = count > 1 ? gapVal * (count - 1) : 0;
 
         double usedMain = 0;
-        for (FlexItem item : items) usedMain += item.mainSize;
+        for (FlexItem item : items) usedMain += item.mainSize + item.mainMargin();
         double remainingSpace = mainSize - usedMain - totalGap;
 
         double mainStart = computeMainStart(remainingSpace, count);
@@ -500,31 +625,53 @@ public class FlexBox extends Pane {
         double pos = mainStart;
         for (int i = 0; i < count; i++) {
             int idx = isReverse ? count - 1 - i : i;
-            items.get(idx).mainPos = pos;
-            pos += items.get(idx).mainSize + mainGap;
+            FlexItem item = items.get(idx);
+            pos += item.marginMainBefore;
+            item.mainPos = pos;
+            pos += item.mainSize + item.marginMainAfter + mainGap;
         }
     }
 
     private void positionCrossAxis(FlexLine line, FlexAlignItems defaultAlign, boolean isRow) {
         double lineCross = line.crossSizeActual;
 
+        // First pass: compute the shared baseline for this line (max baseline offset among baseline-aligned items)
+        double lineBaseline = 0;
+        for (FlexItem item : line.items) {
+            FlexAlignItems align = getAlignSelf(item.node);
+            if (align == null) align = defaultAlign;
+            if (align == FlexAlignItems.BASELINE && isRow) {
+                lineBaseline = Math.max(lineBaseline, item.marginCrossBefore + item.node.getBaselineOffset());
+            }
+        }
+
+        // Second pass: compute sizes and positions
         for (FlexItem item : line.items) {
             FlexAlignItems align = getAlignSelf(item.node);
             if (align == null) align = defaultAlign;
 
-            item.crossSize = computeChildCrossSize(item.node, align, lineCross, isRow);
-            item.crossPos = computeCrossPosition(item.node, align, lineCross, item.crossSize, isRow);
+            double availCross = lineCross - item.crossMargin();
+            item.crossSize = computeChildCrossSize(item.node, align, availCross, item.mainSize, isRow);
+            item.crossPos = computeCrossPosition(item.node, align, availCross, item.crossSize,
+                    item.marginCrossBefore, lineBaseline, isRow);
         }
     }
 
     private double computeMainStart(double remainingSpace, int count) {
-        if (remainingSpace <= 0) return 0;
         switch (getJustifyContent()) {
             case FLEX_END:      return remainingSpace;
             case CENTER:        return remainingSpace / 2;
-            case SPACE_BETWEEN: return 0;
-            case SPACE_AROUND:  return count > 0 ? remainingSpace / (count * 2) : 0;
-            case SPACE_EVENLY:  return count > 0 ? remainingSpace / (count + 1) : 0;
+            case SPACE_BETWEEN:
+                // Falls back to flex-start when overflowing
+                return 0;
+            case SPACE_AROUND:
+                // Falls back to center when overflowing
+                if (remainingSpace < 0) return remainingSpace / 2;
+                return count > 0 ? remainingSpace / (count * 2) : 0;
+            case SPACE_EVENLY:
+                // Falls back to center when overflowing
+                if (remainingSpace < 0) return remainingSpace / 2;
+                return count > 0 ? remainingSpace / (count + 1) : 0;
             default:            return 0;
         }
     }
@@ -540,24 +687,27 @@ public class FlexBox extends Pane {
         }
     }
 
-    private double computeChildCrossSize(Node child, FlexAlignItems align, double crossSize, boolean isRow) {
+    private double computeChildCrossSize(Node child, FlexAlignItems align, double crossSize, double resolvedMainSize, boolean isRow) {
         if (align == FlexAlignItems.STRETCH) {
-            double max = isRow ? child.maxHeight(-1) : child.maxWidth(-1);
+            double max = isRow ? child.maxHeight(resolvedMainSize) : child.maxWidth(resolvedMainSize);
             return Math.min(crossSize, max);
         }
-        return isRow ? child.prefHeight(-1) : child.prefWidth(-1);
+        return isRow ? child.prefHeight(resolvedMainSize) : child.prefWidth(resolvedMainSize);
     }
 
-    private double computeCrossPosition(Node child, FlexAlignItems align, double crossSize, double childCrossSize, boolean isRow) {
+    private double computeCrossPosition(Node child, FlexAlignItems align, double availCross, double childCrossSize,
+                                          double marginCrossBefore, double lineBaseline, boolean isRow) {
         switch (align) {
-            case FLEX_END:  return crossSize - childCrossSize;
-            case CENTER:    return (crossSize - childCrossSize) / 2;
+            case FLEX_END:  return marginCrossBefore + availCross - childCrossSize;
+            case CENTER:    return marginCrossBefore + (availCross - childCrossSize) / 2;
             case BASELINE:
                 if (isRow) {
-                    return child.getBaselineOffset();
+                    // Align this item's baseline to the line's shared baseline
+                    return lineBaseline - child.getBaselineOffset();
                 }
-                return 0;
-            default:        return 0;
+                return marginCrossBefore;
+            case STRETCH:
+            default:        return marginCrossBefore;
         }
     }
 
@@ -572,22 +722,24 @@ public class FlexBox extends Pane {
             if (getWrap() != FlexWrap.NOWRAP) {
                 double max = 0;
                 for (Node child : children) {
-                    max = Math.max(max, child.minWidth(-1));
+                    Insets m = getMargin(child);
+                    max = Math.max(max, child.minWidth(-1) + m.getLeft() + m.getRight());
                 }
                 return snappedLeftInset() + max + snappedRightInset();
             } else {
                 double total = 0;
-                double gapVal = getGap();
                 for (Node child : children) {
-                    total += child.minWidth(-1);
+                    Insets m = getMargin(child);
+                    total += child.minWidth(-1) + m.getLeft() + m.getRight();
                 }
-                total += children.size() > 1 ? gapVal * (children.size() - 1) : 0;
+                total += children.size() > 1 ? getColumnGap() * (children.size() - 1) : 0;
                 return snappedLeftInset() + total + snappedRightInset();
             }
         } else {
             double max = 0;
             for (Node child : children) {
-                max = Math.max(max, child.minWidth(-1));
+                Insets m = getMargin(child);
+                max = Math.max(max, child.minWidth(-1) + m.getLeft() + m.getRight());
             }
             return snappedLeftInset() + max + snappedRightInset();
         }
@@ -602,22 +754,24 @@ public class FlexBox extends Pane {
             if (getWrap() != FlexWrap.NOWRAP) {
                 double max = 0;
                 for (Node child : children) {
-                    max = Math.max(max, child.minHeight(-1));
+                    Insets m = getMargin(child);
+                    max = Math.max(max, child.minHeight(-1) + m.getTop() + m.getBottom());
                 }
                 return snappedTopInset() + max + snappedBottomInset();
             } else {
                 double total = 0;
-                double gapVal = getGap();
                 for (Node child : children) {
-                    total += child.minHeight(-1);
+                    Insets m = getMargin(child);
+                    total += child.minHeight(-1) + m.getTop() + m.getBottom();
                 }
-                total += children.size() > 1 ? gapVal * (children.size() - 1) : 0;
+                total += children.size() > 1 ? getRowGap() * (children.size() - 1) : 0;
                 return snappedTopInset() + total + snappedBottomInset();
             }
         } else {
             double max = 0;
             for (Node child : children) {
-                max = Math.max(max, child.minHeight(-1));
+                Insets m = getMargin(child);
+                max = Math.max(max, child.minHeight(-1) + m.getTop() + m.getBottom());
             }
             return snappedTopInset() + max + snappedBottomInset();
         }
@@ -627,20 +781,21 @@ public class FlexBox extends Pane {
     protected double computePrefWidth(double height) {
         List<Node> children = getManagedChildren();
         boolean isRow = getDirection().isRow();
-        double gapVal = getGap();
 
         if (isRow) {
             double total = 0;
             for (Node child : children) {
+                Insets m = getMargin(child);
                 double basis = getBasis(child);
-                total += basis >= 0 ? basis : child.prefWidth(-1);
+                total += (basis >= 0 ? basis : child.prefWidth(-1)) + m.getLeft() + m.getRight();
             }
-            total += children.size() > 1 ? gapVal * (children.size() - 1) : 0;
+            total += children.size() > 1 ? getColumnGap() * (children.size() - 1) : 0;
             return snappedLeftInset() + total + snappedRightInset();
         } else {
             double max = 0;
             for (Node child : children) {
-                max = Math.max(max, child.prefWidth(-1));
+                Insets m = getMargin(child);
+                max = Math.max(max, child.prefWidth(-1) + m.getLeft() + m.getRight());
             }
             return snappedLeftInset() + max + snappedRightInset();
         }
@@ -650,20 +805,21 @@ public class FlexBox extends Pane {
     protected double computePrefHeight(double width) {
         List<Node> children = getManagedChildren();
         boolean isRow = getDirection().isRow();
-        double gapVal = getGap();
 
         if (!isRow) {
             double total = 0;
             for (Node child : children) {
+                Insets m = getMargin(child);
                 double basis = getBasis(child);
-                total += basis >= 0 ? basis : child.prefHeight(-1);
+                total += (basis >= 0 ? basis : child.prefHeight(-1)) + m.getTop() + m.getBottom();
             }
-            total += children.size() > 1 ? gapVal * (children.size() - 1) : 0;
+            total += children.size() > 1 ? getRowGap() * (children.size() - 1) : 0;
             return snappedTopInset() + total + snappedBottomInset();
         } else {
             double max = 0;
             for (Node child : children) {
-                max = Math.max(max, child.prefHeight(-1));
+                Insets m = getMargin(child);
+                max = Math.max(max, child.prefHeight(-1) + m.getTop() + m.getBottom());
             }
             return snappedTopInset() + max + snappedBottomInset();
         }

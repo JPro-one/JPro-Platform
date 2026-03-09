@@ -54,38 +54,15 @@ public class FlexBoxTestApp extends Application {
             "    /*   flex-start | flex-end | center | stretch */\n" +
             "    /*   space-between | space-around | space-evenly */\n" +
             "\n" +
-            "    /* gap: 12; */\n" +
+            "    /* row-gap: 12; */\n" +
+            "    /* column-gap: 12; */\n" +
             "}\n" +
             "\n" +
             ".flex-item {\n" +
             "    -fx-background-radius: 6;\n" +
             "    -fx-border-radius: 6;\n" +
             "    /* -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 2, 2); */\n" +
-            "}\n" +
-            "\n" +
-            "/* ── Try these presets ─────────────────────────── */\n" +
-            "\n" +
-            "/* Centered card grid:\n" +
-            ".flex-box {\n" +
-            "    flex-wrap: wrap;\n" +
-            "    justify-content: center;\n" +
-            "    align-content: flex-start;\n" +
-            "    gap: 16;\n" +
-            "} */\n" +
-            "\n" +
-            "/* Vertical stack:\n" +
-            ".flex-box {\n" +
-            "    flex-direction: column;\n" +
-            "    align-items: stretch;\n" +
-            "    gap: 8;\n" +
-            "} */\n" +
-            "\n" +
-            "/* Nav bar:\n" +
-            ".flex-box {\n" +
-            "    flex-direction: row;\n" +
-            "    justify-content: space-between;\n" +
-            "    align-items: center;\n" +
-            "} */\n";
+            "}\n";
 
     private final AtomicInteger itemCounter = new AtomicInteger(0);
     private final FlexBox flexBox = new FlexBox();
@@ -98,8 +75,10 @@ public class FlexBoxTestApp extends Application {
     private ComboBox<FlexJustifyContent> justifyBox;
     private ComboBox<FlexAlignItems> alignBox;
     private ComboBox<FlexAlignContent> alignContentBox;
-    private Slider gapSlider;
-    private Label gapLabel;
+    private Slider rowGapSlider;
+    private Slider columnGapSlider;
+    private Label rowGapLabel;
+    private Label columnGapLabel;
 
     @Override
     public void start(Stage stage) {
@@ -129,7 +108,7 @@ public class FlexBoxTestApp extends Application {
         root.setLeft(controlScroll);
         root.setCenter(centerSplit);
 
-        HBox presets = createPresets();
+        FlexBox presets = createPresets();
         presets.setStyle("-fx-background-color: #2c3e50; -fx-padding: 8;");
         root.setTop(presets);
 
@@ -151,7 +130,6 @@ public class FlexBoxTestApp extends Application {
         cssArea.setWrapText(true);
         VBox.setVgrow(cssArea, Priority.ALWAYS);
 
-        // Apply CSS on every text change
         cssArea.textProperty().addListener((obs, oldVal, newVal) -> {
             if (appScene != null) {
                 DynamicCSSUtil.setCssString(appScene, newVal);
@@ -197,13 +175,22 @@ public class FlexBoxTestApp extends Application {
         alignContentBox.setValue(flexBox.getAlignContent());
         alignContentBox.setOnAction(e -> flexBox.setAlignContent(alignContentBox.getValue()));
 
-        gapSlider = new Slider(0, 50, 0);
-        gapSlider.setShowTickLabels(true);
-        gapSlider.setShowTickMarks(true);
-        gapLabel = new Label("Gap: 0");
-        gapSlider.valueProperty().addListener((obs, o, n) -> {
-            flexBox.setGap(n.doubleValue());
-            gapLabel.setText(String.format("Gap: %.0f", n.doubleValue()));
+        rowGapSlider = new Slider(0, 50, 0);
+        rowGapSlider.setShowTickLabels(true);
+        rowGapSlider.setShowTickMarks(true);
+        rowGapLabel = new Label("Row Gap: 0");
+        rowGapSlider.valueProperty().addListener((obs, o, n) -> {
+            flexBox.setRowGap(n.doubleValue());
+            rowGapLabel.setText(String.format("Row Gap: %.0f", n.doubleValue()));
+        });
+
+        columnGapSlider = new Slider(0, 50, 0);
+        columnGapSlider.setShowTickLabels(true);
+        columnGapSlider.setShowTickMarks(true);
+        columnGapLabel = new Label("Column Gap: 0");
+        columnGapSlider.valueProperty().addListener((obs, o, n) -> {
+            flexBox.setColumnGap(n.doubleValue());
+            columnGapLabel.setText(String.format("Column Gap: %.0f", n.doubleValue()));
         });
 
         Button addBtn = new Button("+ Add Item");
@@ -221,7 +208,8 @@ public class FlexBoxTestApp extends Application {
                 new Label("Justify Content:"), justifyBox,
                 new Label("Align Items:"), alignBox,
                 new Label("Align Content:"), alignContentBox,
-                gapLabel, gapSlider,
+                rowGapLabel, rowGapSlider,
+                columnGapLabel, columnGapSlider,
                 new Separator(),
                 addRemove,
                 new Separator(),
@@ -237,113 +225,217 @@ public class FlexBoxTestApp extends Application {
         if (justifyBox != null) justifyBox.setValue(flexBox.getJustifyContent());
         if (alignBox != null) alignBox.setValue(flexBox.getAlignItems());
         if (alignContentBox != null) alignContentBox.setValue(flexBox.getAlignContent());
-        if (gapSlider != null) {
-            gapSlider.setValue(flexBox.getGap());
-            gapLabel.setText(String.format("Gap: %.0f", flexBox.getGap()));
+        if (rowGapSlider != null) {
+            rowGapSlider.setValue(flexBox.getRowGap());
+            rowGapLabel.setText(String.format("Row Gap: %.0f", flexBox.getRowGap()));
+        }
+        if (columnGapSlider != null) {
+            columnGapSlider.setValue(flexBox.getColumnGap());
+            columnGapLabel.setText(String.format("Column Gap: %.0f", flexBox.getColumnGap()));
         }
     }
 
-    private HBox createPresets() {
-        Button navBar = new Button("Nav Bar");
-        navBar.setOnAction(e -> {
-            resetAll();
-            for (int i = 0; i < 5; i++) addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setJustifyContent(FlexJustifyContent.SPACE_BETWEEN);
-            flexBox.setAlignItems(FlexAlignItems.CENTER);
-            syncControls();
-            refreshItemControls();
-        });
-
-        Button centered = new Button("Centered");
-        centered.setOnAction(e -> {
-            resetAll();
-            addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setJustifyContent(FlexJustifyContent.CENTER);
-            flexBox.setAlignItems(FlexAlignItems.CENTER);
-            syncControls();
-            refreshItemControls();
-        });
-
-        Button equalCols = new Button("Equal Columns");
-        equalCols.setOnAction(e -> {
-            resetAll();
-            for (int i = 0; i < 3; i++) addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setAlignItems(FlexAlignItems.STRETCH);
-            flexBox.setGap(12);
-            flexBox.getChildren().forEach(c -> FlexBox.setGrow(c, 1));
-            syncControls();
-            refreshItemControls();
-        });
-
-        Button wrappingCards = new Button("Wrapping Cards");
-        wrappingCards.setOnAction(e -> {
-            resetAll();
-            for (int i = 0; i < 9; i++) addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setWrap(FlexWrap.WRAP);
-            flexBox.setAlignContent(FlexAlignContent.FLEX_START);
-            flexBox.setAlignItems(FlexAlignItems.FLEX_START);
-            flexBox.setGap(12);
-            flexBox.getChildren().forEach(c -> FlexBox.setBasis(c, 150));
-            syncControls();
-            refreshItemControls();
-        });
-
-        Button holyGrail = new Button("Holy Grail");
-        holyGrail.setOnAction(e -> {
-            resetAll();
-            for (int i = 0; i < 3; i++) addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setAlignItems(FlexAlignItems.STRETCH);
-            flexBox.setGap(8);
-            FlexBox.setBasis(flexBox.getChildren().get(0), 100);
-            FlexBox.setGrow(flexBox.getChildren().get(1), 1);
-            FlexBox.setBasis(flexBox.getChildren().get(2), 100);
-            syncControls();
-            refreshItemControls();
-        });
-
-        Button shrinkDemo = new Button("Shrink Demo");
-        shrinkDemo.setOnAction(e -> {
-            resetAll();
-            for (int i = 0; i < 4; i++) addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setAlignItems(FlexAlignItems.STRETCH);
-            for (javafx.scene.Node c : flexBox.getChildren()) {
-                FlexBox.setBasis(c, 200);
-            }
-            FlexBox.setShrink(flexBox.getChildren().get(0), 0);
-            syncControls();
-            refreshItemControls();
-        });
-
-        Button orderDemo = new Button("Order Demo");
-        orderDemo.setOnAction(e -> {
-            resetAll();
-            for (int i = 0; i < 5; i++) addItem();
-            flexBox.setDirection(FlexDirection.ROW);
-            flexBox.setGap(8);
-            for (int i = 0; i < flexBox.getChildren().size(); i++) {
-                FlexBox.setOrder(flexBox.getChildren().get(i), flexBox.getChildren().size() - i);
-            }
-            syncControls();
-            refreshItemControls();
-        });
-
-        for (Button b : new Button[]{navBar, centered, equalCols, wrappingCards, holyGrail, shrinkDemo, orderDemo}) {
-            b.setStyle("-fx-text-fill: white; -fx-background-color: #7f8c8d; -fx-cursor: hand;");
-        }
+    private FlexBox createPresets() {
+        Button headerBar = preset("Header Bar", this::presetHeaderBar);
+        Button sidebar = preset("Sidebar Layout", this::presetSidebarLayout);
+        Button dashboard = preset("Dashboard", this::presetDashboard);
+        Button tagCloud = preset("Tag Cloud", this::presetTagCloud);
+        Button form = preset("Form Layout", this::presetFormLayout);
+        Button gallery = preset("Photo Gallery", this::presetPhotoGallery);
+        Button footer = preset("Footer", this::presetFooter);
+        Button appStack = preset("App Stack", this::presetAppStack);
 
         Label title = new Label("Presets:");
         title.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 0 0 0;");
+        title.setMinWidth(Region.USE_PREF_SIZE);
 
-        HBox presets = new HBox(8, title, navBar, centered, equalCols, wrappingCards, holyGrail, shrinkDemo, orderDemo);
-        presets.setAlignment(Pos.CENTER_LEFT);
+        FlexBox presets = new FlexBox();
+        presets.setWrap(FlexWrap.WRAP);
+        presets.setAlignItems(FlexAlignItems.CENTER);
+        presets.setGap(8);
+        presets.getChildren().addAll(title, headerBar, sidebar, dashboard, tagCloud, form, gallery, footer, appStack);
         return presets;
     }
+
+    private Button preset(String label, Runnable action) {
+        Button b = new Button(label);
+        b.setStyle("-fx-text-fill: white; -fx-background-color: #7f8c8d; -fx-cursor: hand;");
+        b.setMinWidth(Region.USE_PREF_SIZE);
+        b.setOnAction(e -> {
+            action.run();
+            syncControls();
+            refreshItemControls();
+        });
+        return b;
+    }
+
+    // ── Presets ──────────────────────────────────────────────────────────
+
+    private void presetHeaderBar() {
+        resetAll();
+        addItem("Logo", 120, 45);
+        StackPane spacer = addItem("", 0, 45);
+        spacer.setOpacity(0);
+        FlexBox.setGrow(spacer, 1);
+        addItem("Home", 60, 45);
+        addItem("About", 70, 45);
+        addItem("Contact", 85, 45);
+
+        flexBox.setAlignItems(FlexAlignItems.CENTER);
+        flexBox.setColumnGap(8);
+        FlexBox.setShrink(flexBox.getChildren().get(0), 0);
+    }
+
+    private void presetSidebarLayout() {
+        resetAll();
+        addItem("Sidebar", 180, 300);
+        addItem("Content", 400, 300);
+        addItem("Aside", 140, 300);
+
+        flexBox.setAlignItems(FlexAlignItems.STRETCH);
+        flexBox.setColumnGap(8);
+        FlexBox.setBasis(flexBox.getChildren().get(0), 180);
+        FlexBox.setShrink(flexBox.getChildren().get(0), 0);
+        FlexBox.setBasis(flexBox.getChildren().get(1), 300);
+        FlexBox.setGrow(flexBox.getChildren().get(1), 1);
+        FlexBox.setBasis(flexBox.getChildren().get(2), 140);
+        FlexBox.setShrink(flexBox.getChildren().get(2), 0);
+    }
+
+    private void presetDashboard() {
+        resetAll();
+        addItem("Revenue", 250, 120);
+        addItem("Users", 150, 120);
+        addItem("Orders", 150, 120);
+        addItem("Chart", 400, 180);
+        addItem("Activity", 200, 180);
+        addItem("Alerts", 150, 100);
+
+        flexBox.setWrap(FlexWrap.WRAP);
+        flexBox.setAlignItems(FlexAlignItems.STRETCH);
+        flexBox.setAlignContent(FlexAlignContent.FLEX_START);
+        flexBox.setRowGap(12);
+        flexBox.setColumnGap(12);
+
+        for (javafx.scene.Node c : flexBox.getChildren()) {
+            FlexBox.setGrow(c, 1);
+        }
+        double[] bases = {250, 150, 150, 400, 200, 150};
+        for (int i = 0; i < bases.length; i++) {
+            FlexBox.setBasis(flexBox.getChildren().get(i), bases[i]);
+        }
+        FlexBox.setGrow(flexBox.getChildren().get(3), 2); // Chart grows faster
+    }
+
+    private void presetTagCloud() {
+        resetAll();
+        String[] tags = {"JavaFX", "CSS", "FlexBox", "Layout", "Responsive",
+                "Design", "UI", "Components", "Platform", "Web", "Styling", "Pane"};
+        int[] widths = {70, 45, 75, 65, 100, 65, 35, 105, 80, 45, 70, 55};
+        for (int i = 0; i < tags.length; i++) {
+            addItem(tags[i], widths[i], 32);
+        }
+
+        flexBox.setWrap(FlexWrap.WRAP);
+        flexBox.setAlignItems(FlexAlignItems.CENTER);
+        flexBox.setAlignContent(FlexAlignContent.FLEX_START);
+        flexBox.setRowGap(8);
+        flexBox.setColumnGap(8);
+    }
+
+    private void presetFormLayout() {
+        resetAll();
+        addItem("Name", 500, 40);
+        addItem("Email", 500, 40);
+        addItem("Street", 350, 40);
+        addItem("City", 200, 40);
+        addItem("ZIP", 100, 40);
+        addItem("Message", 500, 100);
+        addItem("Submit", 120, 45);
+
+        flexBox.setWrap(FlexWrap.WRAP);
+        flexBox.setAlignItems(FlexAlignItems.FLEX_START);
+        flexBox.setAlignContent(FlexAlignContent.FLEX_START);
+        flexBox.setRowGap(8);
+        flexBox.setColumnGap(8);
+
+        for (int i = 0; i < 6; i++) {
+            FlexBox.setGrow(flexBox.getChildren().get(i), 1);
+        }
+        FlexBox.setBasis(flexBox.getChildren().get(2), 350);
+        FlexBox.setBasis(flexBox.getChildren().get(3), 200);
+        FlexBox.setBasis(flexBox.getChildren().get(4), 100);
+        FlexBox.setGrow(flexBox.getChildren().get(4), 0); // ZIP stays fixed
+        FlexBox.setAlignSelf(flexBox.getChildren().get(6), FlexAlignItems.FLEX_END);
+    }
+
+    private void presetPhotoGallery() {
+        resetAll();
+        addItem("Landscape", 200, 130);
+        addItem("Portrait", 130, 200);
+        addItem("Square", 150, 150);
+        addItem("Panorama", 300, 100);
+        addItem("Landscape 2", 180, 120);
+        addItem("Tall", 120, 220);
+        addItem("Wide", 250, 110);
+        addItem("Small", 100, 100);
+
+        flexBox.setWrap(FlexWrap.WRAP);
+        flexBox.setAlignItems(FlexAlignItems.STRETCH);
+        flexBox.setAlignContent(FlexAlignContent.FLEX_START);
+        flexBox.setRowGap(6);
+        flexBox.setColumnGap(6);
+
+        for (javafx.scene.Node c : flexBox.getChildren()) {
+            FlexBox.setGrow(c, 1);
+        }
+        double[] bases = {200, 130, 150, 300, 180, 120, 250, 100};
+        for (int i = 0; i < bases.length; i++) {
+            FlexBox.setBasis(flexBox.getChildren().get(i), bases[i]);
+        }
+    }
+
+    private void presetFooter() {
+        resetAll();
+        addItem("About Us", 250, 150);
+        addItem("Links", 150, 150);
+        addItem("Support", 150, 150);
+        addItem("Newsletter", 200, 150);
+
+        flexBox.setWrap(FlexWrap.WRAP);
+        flexBox.setJustifyContent(FlexJustifyContent.SPACE_BETWEEN);
+        flexBox.setAlignItems(FlexAlignItems.FLEX_START);
+        flexBox.setAlignContent(FlexAlignContent.FLEX_START);
+        flexBox.setRowGap(16);
+        flexBox.setColumnGap(16);
+
+        FlexBox.setBasis(flexBox.getChildren().get(0), 250);
+        FlexBox.setGrow(flexBox.getChildren().get(0), 2);
+        FlexBox.setBasis(flexBox.getChildren().get(1), 150);
+        FlexBox.setGrow(flexBox.getChildren().get(1), 1);
+        FlexBox.setBasis(flexBox.getChildren().get(2), 150);
+        FlexBox.setGrow(flexBox.getChildren().get(2), 1);
+        FlexBox.setBasis(flexBox.getChildren().get(3), 200);
+        FlexBox.setGrow(flexBox.getChildren().get(3), 1);
+    }
+
+    private void presetAppStack() {
+        resetAll();
+        addItem("App Header", 500, 50);
+        addItem("Toolbar", 500, 35);
+        addItem("Content Area", 500, 300);
+        addItem("Status Bar", 500, 30);
+
+        flexBox.setDirection(FlexDirection.COLUMN);
+        flexBox.setAlignItems(FlexAlignItems.STRETCH);
+
+        FlexBox.setShrink(flexBox.getChildren().get(0), 0);
+        FlexBox.setShrink(flexBox.getChildren().get(1), 0);
+        FlexBox.setGrow(flexBox.getChildren().get(2), 1);
+        FlexBox.setShrink(flexBox.getChildren().get(3), 0);
+    }
+
+    // ── Item management ─────────────────────────────────────────────────
 
     private void resetAll() {
         flexBox.getChildren().clear();
@@ -356,34 +448,43 @@ public class FlexBoxTestApp extends Application {
         flexBox.setGap(0);
     }
 
-    private void addItem() {
+    /** Add a default-sized item. */
+    private StackPane addItem() {
+        return addItem("Item " + itemCounter.get(), 80, 60);
+    }
+
+    /** Add an item with a custom label and size. */
+    private StackPane addItem(String labelText, double prefWidth, double prefHeight) {
         int idx = itemCounter.getAndIncrement();
         Color color = COLORS[idx % COLORS.length];
 
-        Region item = new Region();
-        item.setPrefSize(80, 60);
-        item.setMinSize(20, 20);
-        item.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        Region bg = new Region();
+        bg.setMinSize(20, 20);
+        bg.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         String hex = String.format("#%02x%02x%02x",
                 (int) (color.getRed() * 255),
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
-        item.setStyle("-fx-background-color: " + hex + ";"
+        bg.setStyle("-fx-background-color: " + hex + ";"
                 + " -fx-background-radius: 6;"
                 + " -fx-border-color: derive(" + hex + ", -20%);"
                 + " -fx-border-radius: 6;");
 
-        Label label = new Label("Item " + idx);
-        label.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13;");
-        StackPane wrapper = new StackPane(item, label);
+        Label label = new Label(labelText);
+        double fontSize = prefHeight < 40 ? 11 : 13;
+        label.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: " + fontSize + ";");
+        label.setMouseTransparent(true);
+
+        StackPane wrapper = new StackPane(bg, label);
         wrapper.getStyleClass().addAll("flex-item", "flex-item-" + idx);
         wrapper.setMinSize(20, 20);
         wrapper.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        wrapper.setPrefSize(80, 60);
+        wrapper.setPrefSize(prefWidth, prefHeight);
 
         flexBox.getChildren().add(wrapper);
         refreshItemControls();
+        return wrapper;
     }
 
     private void removeItem() {
@@ -397,7 +498,16 @@ public class FlexBoxTestApp extends Application {
         itemControls.getChildren().clear();
         for (int i = 0; i < flexBox.getChildren().size(); i++) {
             javafx.scene.Node child = flexBox.getChildren().get(i);
-            int idx = i;
+            String name = "";
+            if (child instanceof StackPane) {
+                for (javafx.scene.Node n : ((StackPane) child).getChildren()) {
+                    if (n instanceof Label) {
+                        name = ((Label) n).getText();
+                        break;
+                    }
+                }
+            }
+            if (name.isEmpty()) name = "#" + i;
 
             Spinner<Double> growSpinner = new Spinner<>(0.0, 10.0, FlexBox.getGrow(child), 0.5);
             growSpinner.setEditable(true);
@@ -436,7 +546,7 @@ public class FlexBoxTestApp extends Application {
             });
 
             VBox itemBox = new VBox(2,
-                    new Label("#" + idx + " ──────────"),
+                    new Label(name + " ──────────"),
                     new HBox(4, new Label("grow:"), growSpinner, new Label("shrink:"), shrinkSpinner),
                     new HBox(4, new Label("basis:"), basisSpinner, new Label("order:"), orderSpinner),
                     new HBox(4, new Label("align-self:"), alignSelfBox)
