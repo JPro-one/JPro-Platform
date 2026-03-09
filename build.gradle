@@ -148,12 +148,13 @@ configure(subprojects.findAll { it.name != 'example' }) {
     }
 }
 
-configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpro-file"),
-           project("jpro-image-manager"), project("jpro-mail"), project("jpro-mdfx"), project("jpro-media"),
-           project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"), project("jpro-utils"),
-           project("jpro-html-scrollpane"), project("jpro-routing:core"), project("jpro-routing:dev"),
-           project("jpro-routing:popup"), project("jpro-webrtc"), project("jpro-youtube"),
-           rootProject]) {
+configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpro-dynamic-css"),
+           project("jpro-file"), project("jpro-flexbox"), project("jpro-image-manager"), project("jpro-mail"),
+           project("jpro-mdfx"),
+           project("jpro-media"), project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"),
+           project("jpro-utils"), project("jpro-html-scrollpane"), project("jpro-routing:core"),
+           project("jpro-routing:dev"), project("jpro-routing:popup"), project("jpro-webrtc"),
+           project("jpro-youtube"), rootProject]) {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'

@@ -1,0 +1,10 @@
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro FlexBox'
+                description = 'A CSS FlexBox layout implementation for JavaFX.'
+            }
+        }
+    }
+}

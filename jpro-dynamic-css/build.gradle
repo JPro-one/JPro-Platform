@@ -1,0 +1,31 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url "https://sandec.jfrog.io/artifactory/repo"
+        }
+    }
+
+    dependencies {
+        classpath "SANDEC:simplefx-plugin-gradle:$SIMPLEFX_VERSION"
+    }
+}
+
+apply plugin: 'de.sandec.simplefx'
+
+dependencies {
+    api "SANDEC:simplefx_2.13:$SIMPLEFX_VERSION"
+    api "org.scala-lang:scala-library:2.13.18"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'JPro Dynamic CSS'
+                description = 'Reactive dynamic CSS for JavaFX scenes and parents.'
+            }
+        }
+    }
+}
