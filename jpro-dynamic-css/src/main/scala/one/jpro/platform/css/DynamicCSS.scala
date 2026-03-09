@@ -1,5 +1,6 @@
 package one.jpro.platform.css
 
+import javafx.beans.property.{SimpleStringProperty, StringProperty}
 import simplefx.core._
 import simplefx.all._
 import simplefx.util.Predef._
@@ -11,7 +12,9 @@ object DynamicCSS {
   @extension class AddCSSStringParent(parent: Parent) {
     def isShowing = parent.scene != null && parent.scene.window != null && parent.scene.window.showing
     @Bind private var showingCSS = <--((this.isShowing, cssString))
-    @Bind var cssString: String = "" <> {
+
+    lazy val _cssStringProperty = new SimpleStringProperty("")
+    @Bind var cssString: String = _cssStringProperty.toBindable <> {
       var previousURL: URL = null
       var previousKey: String = null
       updated(showingCSS --> { x =>
@@ -33,12 +36,16 @@ object DynamicCSS {
         }
       })
     }
+
+    def cssStringProperty: StringProperty = _cssStringProperty
   }
 
   @extension class AddCSSStringScene(scene: Scene) {
     def isShowing = scene.window != null && scene.window.showing
     @Bind private var showingCSS = <--((this.isShowing, cssString))
-    @Bind var cssString: String = "" <> {
+
+    lazy val _cssStringProperty = new SimpleStringProperty("")
+    @Bind var cssString: String = _cssStringProperty.toBindable <> {
       var previousURL: URL = null
       var previousKey: String = null
       updated(showingCSS --> { x =>
@@ -60,6 +67,8 @@ object DynamicCSS {
         }
       })
     }
+
+    def cssStringProperty: StringProperty = _cssStringProperty
   }
 }
 

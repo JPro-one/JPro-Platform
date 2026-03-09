@@ -1,6 +1,11 @@
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'DOCUMENTATION'
+                extension 'md'
+            }
+
             pom {
                 name = 'JPro FlexBox'
                 description = 'A CSS FlexBox layout implementation for JavaFX.'
@@ -8,3 +13,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
