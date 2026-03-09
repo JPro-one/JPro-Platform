@@ -1,6 +1,7 @@
 package one.jpro.platform.mdfx.impl;
 
 import com.vladsch.flexmark.util.sequence.Escaping;
+import one.jpro.platform.mdfx.MarkdownCodeBlock;
 import one.jpro.platform.mdfx.MarkdownView;
 import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.ext.attributes.AttributeNode;
@@ -191,12 +192,11 @@ public class MDFXNodeHelper extends VBox {
 
             if (!shouldShowContent()) return;
 
-            Label label = new Label(fencedCodeBlock.getContentChars().toString());
-            label.getStyleClass().add("markdown-codeblock");
-            VBox vbox = new VBox(label);
-            vbox.getStyleClass().add("markdown-codeblock-box");
+            String code = fencedCodeBlock.getContentChars().toString();
+            String language = fencedCodeBlock.getInfo().toString().trim();
 
-            root.getChildren().add(vbox);
+            MarkdownCodeBlock codeBlock = new MarkdownCodeBlock(code, language);
+            root.getChildren().add(codeBlock);
         }
 
         public void visit(SoftLineBreak softLineBreak) {

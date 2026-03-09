@@ -4,16 +4,32 @@ plugins {
     id 'jpro-gradle-plugin'
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
 dependencies {
     implementation(project(":jpro-mdfx"))
+    implementation(project(":jpro-dynamic-css"))
     implementation "commons-io:commons-io:$COMMONS_IO_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
     implementation "org.scenic-view:scenic-view:$SCENIC_VIEW_VERSION"
+    runtimeOnly("org.openjfx:jfx-incubator-richtext:$JAVAFX_25_VERSION") {
+        artifact {
+            classifier = 'mac-aarch64'
+        }
+    }
+    runtimeOnly("org.openjfx:jfx-incubator-input:$JAVAFX_25_VERSION") {
+        artifact {
+            classifier = 'mac-aarch64'
+        }
+    }
 }
 
 javafx {
-    version = "$JAVAFX_EXAMPLES_VERSION"
+    version = "$JAVAFX_25_VERSION"
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
 }
 

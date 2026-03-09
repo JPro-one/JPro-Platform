@@ -14,8 +14,13 @@ module one.jpro.platform.mdfx {
     requires flexmark.util.data;
     requires flexmark.util.collection;
     requires one.jpro.platform.youtube;
+    requires tm4javafx;
+    requires tm4java;
+    requires jfx.incubator.richtext;
 
     opens one.jpro.platform.mdfx;
+    opens one.jpro.platform.mdfx.grammars;
+    opens one.jpro.platform.mdfx.themes;
     exports one.jpro.platform.mdfx;
     exports one.jpro.platform.mdfx.extensions;
     opens one.jpro.platform.mdfx.extensions;

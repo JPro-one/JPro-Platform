@@ -1,6 +1,32 @@
+* {
+    -mdfx-font-color: black;
+    -mdfx-link-color: blue;
+    -mdfx-border-color-1: #888;
+
+    -mdfx-bg-color-1: #ccc;
+    -mdfx-bg-color-2: #ddd;
+    -mdfx-bg-color-3: #eee;
+
+    -mdfx-bq-color-border: #4488cc;
+    -mdfx-bq-color-background: #0000ff0c;
+}
+
 .markdown-text {
+    -fx-font-family: ARIAL;
     -fx-font-size: 16;
     -fx-fill: -mdfx-font-color;
+}
+
+.markdown-italic {
+    -fx-font-style: italic;
+}
+
+.markdown-bold {
+    -fx-font-weight: bold;
+}
+
+.markdown-strikethrough {
+    -fx-strikethrough: true;
 }
 
 .markdown-normal-flow {

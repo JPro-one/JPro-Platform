@@ -2,6 +2,7 @@ def subprojectsWithDocs = [
         "jpro-auth",
         "jpro-dynamic-css",
         "jpro-file",
+        "jpro-mdfx",
         "jpro-flexbox",
         "jpro-media",
         "jpro-routing"
