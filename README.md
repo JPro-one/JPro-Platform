@@ -419,6 +419,50 @@ Notes:
  * The SessionManager needs a name, which is used to identify the application.
  Different applications should use different names.
 
+## JPro Dynamic CSS
+Reactive dynamic CSS for JavaFX scenes and parents. Apply CSS strings at runtime without external stylesheet files.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-dynamic-css</artifactId>
+    <version>0.5.8</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-dynamic-css:0.5.8")
+}
+```
+
+## JPro FlexBox
+A CSS FlexBox layout implementation for JavaFX. Brings the familiar CSS Flexbox model to JavaFX with support for
+flex-direction, flex-wrap, justify-content, align-items, align-content, gap, and per-child grow/shrink/basis/order
+properties — all styleable via CSS.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-flexbox</artifactId>
+    <version>0.5.8</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-flexbox:0.5.8")
+}
+```
+
 ## JPro HTML Scrollpane
 Provides a skin implementation of a scrollpane for **JPro** applications only.
 
@@ -460,6 +504,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:run -Psample=colors
 ./gradlew jpro-routing:example:run -Psample=popup
 ./gradlew jpro-routing:example:run -Psample=test
+./gradlew jpro-flexbox:example:run
 ./gradlew jpro-utils:example:run -Psample=copy
 ./gradlew jpro-utils:example:run -Psample=user-platform
 ```

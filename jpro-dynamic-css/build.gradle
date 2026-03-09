@@ -22,6 +22,11 @@ dependencies {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'DOCUMENTATION'
+                extension 'md'
+            }
+
             pom {
                 name = 'JPro Dynamic CSS'
                 description = 'Reactive dynamic CSS for JavaFX scenes and parents.'
@@ -29,3 +34,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
