@@ -1,0 +1,23 @@
+.markdown-code-block {
+    -fx-padding: 8;
+}
+
+.markdown-code-block .code-text-flow {
+    -fx-padding: 12;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-color: -mdfx-border-color-1;
+    -fx-border-width: 0.5;
+    -fx-background-color: #00000009;
+    -fx-line-spacing: 2;
+}
+
+.markdown-code-block .code-text-flow .text {
+    -fx-font-family: "monospace";
+    -fx-font-size: 14;
+}
+
+.markdown-code-block .code-plain-text {
+    -fx-font-family: "monospace";
+    -fx-font-size: 14;
+}

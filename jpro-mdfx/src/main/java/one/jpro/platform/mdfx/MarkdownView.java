@@ -12,9 +12,11 @@ import one.jpro.platform.mdfx.impl.MDFXNodeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class MarkdownView extends VBox {
+
+    private static final String USER_AGENT_STYLESHEET =
+            MarkdownView.class.getResource("mdfx.css").toExternalForm();
 
     private List<ImageExtension> extensions = new ArrayList<>();
 
@@ -33,9 +35,6 @@ public class MarkdownView extends VBox {
         this.extensions = extensions;
         this.mdString.set(mdString);
         this.mdString.addListener((p,o,n) -> updateContent());
-        Optional.ofNullable(MarkdownView.class.getResource("/one/jpro/platform/mdfx/mdfx.css"))
-                .ifPresent(cssResource -> getStylesheets().add(cssResource.toExternalForm()));
-        getDefaultStylesheets().forEach(getStylesheets()::add);
         updateContent();
     }
 
@@ -43,11 +42,9 @@ public class MarkdownView extends VBox {
         this("");
     }
 
-    protected List<String> getDefaultStylesheets() {
-        final var defaultStylesheets = new ArrayList<String>();
-        Optional.ofNullable(MarkdownView.class.getResource("/one/jpro/platform/mdfx/mdfx-default.css"))
-                .ifPresent(cssResource -> defaultStylesheets.add(cssResource.toExternalForm()));
-        return defaultStylesheets;
+    @Override
+    public String getUserAgentStylesheet() {
+        return USER_AGENT_STYLESHEET;
     }
 
     private void updateContent() {

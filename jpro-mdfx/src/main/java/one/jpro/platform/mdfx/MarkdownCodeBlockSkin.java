@@ -73,6 +73,7 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
 
         control.codeProperty().addListener((_, _, _) -> updateContent());
         control.languageProperty().addListener((_, _, _) -> updateContent());
+        control.codeThemeProperty().addListener((_, _, _) -> updateContent());
 
         updateContent();
     }
@@ -84,7 +85,6 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
 
         if (code == null || code.isEmpty()) {
             textFlow.getChildren().clear();
-            textFlow.setStyle("");
             return;
         }
 
@@ -99,12 +99,14 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
 
     private void highlightWithTextMate(String code, String grammarResource) {
         try {
+            String themeResource = getSkinnable().getCodeTheme();
+
             styleProvider = new StyleProvider();
             styleProvider.setGrammar(
                     IGrammarSource.fromResource(MarkdownCodeBlock.class, grammarResource)
             );
             styleProvider.setTheme(
-                    IThemeSource.fromResource(MarkdownCodeBlock.class, "themes/github-light-default.json")
+                    IThemeSource.fromResource(MarkdownCodeBlock.class, themeResource)
             );
 
             textFlowModel = new TextFlowModel();
@@ -121,7 +123,6 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
 
     private void showPlainText(String code) {
         textFlow.getChildren().clear();
-        textFlow.setStyle("");
         Text text = new Text(code);
         text.getStyleClass().add("code-plain-text");
         textFlow.getChildren().add(text);
