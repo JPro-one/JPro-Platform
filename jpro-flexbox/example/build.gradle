@@ -1,0 +1,18 @@
+plugins {
+    id 'org.openjfx.javafxplugin'
+    id 'application'
+}
+
+javafx {
+    version = "$JAVAFX_EXAMPLES_VERSION"
+    modules = ['javafx.graphics', 'javafx.controls']
+}
+
+dependencies {
+    implementation project(":jpro-flexbox")
+    implementation project(":jpro-dynamic-css")
+}
+
+application {
+    mainClass = 'one.jpro.platform.flexbox.example.FlexBoxTestApp'
+}
