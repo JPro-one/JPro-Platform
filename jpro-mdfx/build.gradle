@@ -42,6 +42,11 @@ javadoc {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'DOCUMENTATION'
+                extension 'md'
+            }
+
             pom {
                 name = 'JPro Markdown'
                 description = 'A module that allows you to render Markdown formatted content in your JPro/JavaFX applications.'
@@ -49,3 +54,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
