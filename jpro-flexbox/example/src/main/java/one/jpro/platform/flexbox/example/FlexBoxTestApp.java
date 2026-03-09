@@ -62,6 +62,16 @@ public class FlexBoxTestApp extends Application {
             "    -fx-background-radius: 6;\n" +
             "    -fx-border-radius: 6;\n" +
             "    /* -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 2, 2); */\n" +
+            "\n" +
+            "    /* ── Per-item FlexBox properties (FlexItem) ── */\n" +
+            "\n" +
+            "    /* flex-grow: 0; */\n" +
+            "    /* flex-shrink: 1; */\n" +
+            "    /* flex-basis: -1; */\n" +
+            "    /*   -1 = auto (use pref size) */\n" +
+            "    /* order: 0; */\n" +
+            "    /* align-self: center; */\n" +
+            "    /*   flex-start | flex-end | center | stretch | baseline */\n" +
             "}\n";
 
     private final AtomicInteger itemCounter = new AtomicInteger(0);
@@ -273,58 +283,51 @@ public class FlexBoxTestApp extends Application {
 
     private void presetHeaderBar() {
         resetAll();
-        addItem("Logo", 120, 45);
-        StackPane spacer = addItem("", 0, 45);
+        addItem("Logo", 120, 45).setFlexShrink(0);
+        FlexItem spacer = addItem("", 0, 45);
         spacer.setOpacity(0);
-        FlexBox.setGrow(spacer, 1);
+        spacer.setFlexGrow(1);
         addItem("Home", 60, 45);
         addItem("About", 70, 45);
         addItem("Contact", 85, 45);
 
         flexBox.setAlignItems(FlexAlignItems.CENTER);
         flexBox.setColumnGap(8);
-        FlexBox.setShrink(flexBox.getChildren().get(0), 0);
     }
 
     private void presetSidebarLayout() {
         resetAll();
-        addItem("Sidebar", 180, 300);
-        addItem("Content", 400, 300);
-        addItem("Aside", 140, 300);
+        FlexItem sidebar = addItem("Sidebar", 180, 300);
+        sidebar.setFlexBasis(180);
+        sidebar.setFlexShrink(0);
+        FlexItem content = addItem("Content", 400, 300);
+        content.setFlexBasis(300);
+        content.setFlexGrow(1);
+        FlexItem aside = addItem("Aside", 140, 300);
+        aside.setFlexBasis(140);
+        aside.setFlexShrink(0);
 
         flexBox.setAlignItems(FlexAlignItems.STRETCH);
         flexBox.setColumnGap(8);
-        FlexBox.setBasis(flexBox.getChildren().get(0), 180);
-        FlexBox.setShrink(flexBox.getChildren().get(0), 0);
-        FlexBox.setBasis(flexBox.getChildren().get(1), 300);
-        FlexBox.setGrow(flexBox.getChildren().get(1), 1);
-        FlexBox.setBasis(flexBox.getChildren().get(2), 140);
-        FlexBox.setShrink(flexBox.getChildren().get(2), 0);
     }
 
     private void presetDashboard() {
         resetAll();
-        addItem("Revenue", 250, 120);
-        addItem("Users", 150, 120);
-        addItem("Orders", 150, 120);
-        addItem("Chart", 400, 180);
-        addItem("Activity", 200, 180);
-        addItem("Alerts", 150, 100);
+        double[][] cards = {{250, 120}, {150, 120}, {150, 120}, {400, 180}, {200, 180}, {150, 100}};
+        String[] names = {"Revenue", "Users", "Orders", "Chart", "Activity", "Alerts"};
+        double[] bases = {250, 150, 150, 400, 200, 150};
+        for (int i = 0; i < names.length; i++) {
+            FlexItem item = addItem(names[i], cards[i][0], cards[i][1]);
+            item.setFlexGrow(1);
+            item.setFlexBasis(bases[i]);
+        }
+        ((FlexItem) flexBox.getChildren().get(3)).setFlexGrow(2); // Chart grows faster
 
         flexBox.setWrap(FlexWrap.WRAP);
         flexBox.setAlignItems(FlexAlignItems.STRETCH);
         flexBox.setAlignContent(FlexAlignContent.FLEX_START);
         flexBox.setRowGap(12);
         flexBox.setColumnGap(12);
-
-        for (javafx.scene.Node c : flexBox.getChildren()) {
-            FlexBox.setGrow(c, 1);
-        }
-        double[] bases = {250, 150, 150, 400, 200, 150};
-        for (int i = 0; i < bases.length; i++) {
-            FlexBox.setBasis(flexBox.getChildren().get(i), bases[i]);
-        }
-        FlexBox.setGrow(flexBox.getChildren().get(3), 2); // Chart grows faster
     }
 
     private void presetTagCloud() {
@@ -345,62 +348,54 @@ public class FlexBoxTestApp extends Application {
 
     private void presetFormLayout() {
         resetAll();
-        addItem("Name", 500, 40);
-        addItem("Email", 500, 40);
-        addItem("Street", 350, 40);
-        addItem("City", 200, 40);
-        addItem("ZIP", 100, 40);
-        addItem("Message", 500, 100);
-        addItem("Submit", 120, 45);
+        addItem("Name", 500, 40).setFlexGrow(1);
+        addItem("Email", 500, 40).setFlexGrow(1);
+        FlexItem street = addItem("Street", 350, 40);
+        street.setFlexGrow(1);
+        street.setFlexBasis(350);
+        FlexItem city = addItem("City", 200, 40);
+        city.setFlexGrow(1);
+        city.setFlexBasis(200);
+        FlexItem zip = addItem("ZIP", 100, 40);
+        zip.setFlexBasis(100);
+        addItem("Message", 500, 100).setFlexGrow(1);
+        FlexItem submit = addItem("Submit", 120, 45);
+        submit.setAlignSelf(FlexAlignItems.FLEX_END);
 
         flexBox.setWrap(FlexWrap.WRAP);
         flexBox.setAlignItems(FlexAlignItems.FLEX_START);
         flexBox.setAlignContent(FlexAlignContent.FLEX_START);
         flexBox.setRowGap(8);
         flexBox.setColumnGap(8);
-
-        for (int i = 0; i < 6; i++) {
-            FlexBox.setGrow(flexBox.getChildren().get(i), 1);
-        }
-        FlexBox.setBasis(flexBox.getChildren().get(2), 350);
-        FlexBox.setBasis(flexBox.getChildren().get(3), 200);
-        FlexBox.setBasis(flexBox.getChildren().get(4), 100);
-        FlexBox.setGrow(flexBox.getChildren().get(4), 0); // ZIP stays fixed
-        FlexBox.setAlignSelf(flexBox.getChildren().get(6), FlexAlignItems.FLEX_END);
     }
 
     private void presetPhotoGallery() {
         resetAll();
-        addItem("Landscape", 200, 130);
-        addItem("Portrait", 130, 200);
-        addItem("Square", 150, 150);
-        addItem("Panorama", 300, 100);
-        addItem("Landscape 2", 180, 120);
-        addItem("Tall", 120, 220);
-        addItem("Wide", 250, 110);
-        addItem("Small", 100, 100);
+        String[] names = {"Landscape", "Portrait", "Square", "Panorama", "Landscape 2", "Tall", "Wide", "Small"};
+        double[][] sizes = {{200, 130}, {130, 200}, {150, 150}, {300, 100}, {180, 120}, {120, 220}, {250, 110}, {100, 100}};
+        for (int i = 0; i < names.length; i++) {
+            FlexItem item = addItem(names[i], sizes[i][0], sizes[i][1]);
+            item.setFlexGrow(1);
+            item.setFlexBasis(sizes[i][0]);
+        }
 
         flexBox.setWrap(FlexWrap.WRAP);
         flexBox.setAlignItems(FlexAlignItems.STRETCH);
         flexBox.setAlignContent(FlexAlignContent.FLEX_START);
         flexBox.setRowGap(6);
         flexBox.setColumnGap(6);
-
-        for (javafx.scene.Node c : flexBox.getChildren()) {
-            FlexBox.setGrow(c, 1);
-        }
-        double[] bases = {200, 130, 150, 300, 180, 120, 250, 100};
-        for (int i = 0; i < bases.length; i++) {
-            FlexBox.setBasis(flexBox.getChildren().get(i), bases[i]);
-        }
     }
 
     private void presetFooter() {
         resetAll();
-        addItem("About Us", 250, 150);
-        addItem("Links", 150, 150);
-        addItem("Support", 150, 150);
-        addItem("Newsletter", 200, 150);
+        String[] names = {"About Us", "Links", "Support", "Newsletter"};
+        double[] widths = {250, 150, 150, 200};
+        double[] grows = {2, 1, 1, 1};
+        for (int i = 0; i < names.length; i++) {
+            FlexItem item = addItem(names[i], widths[i], 150);
+            item.setFlexBasis(widths[i]);
+            item.setFlexGrow(grows[i]);
+        }
 
         flexBox.setWrap(FlexWrap.WRAP);
         flexBox.setJustifyContent(FlexJustifyContent.SPACE_BETWEEN);
@@ -408,31 +403,17 @@ public class FlexBoxTestApp extends Application {
         flexBox.setAlignContent(FlexAlignContent.FLEX_START);
         flexBox.setRowGap(16);
         flexBox.setColumnGap(16);
-
-        FlexBox.setBasis(flexBox.getChildren().get(0), 250);
-        FlexBox.setGrow(flexBox.getChildren().get(0), 2);
-        FlexBox.setBasis(flexBox.getChildren().get(1), 150);
-        FlexBox.setGrow(flexBox.getChildren().get(1), 1);
-        FlexBox.setBasis(flexBox.getChildren().get(2), 150);
-        FlexBox.setGrow(flexBox.getChildren().get(2), 1);
-        FlexBox.setBasis(flexBox.getChildren().get(3), 200);
-        FlexBox.setGrow(flexBox.getChildren().get(3), 1);
     }
 
     private void presetAppStack() {
         resetAll();
-        addItem("App Header", 500, 50);
-        addItem("Toolbar", 500, 35);
-        addItem("Content Area", 500, 300);
-        addItem("Status Bar", 500, 30);
+        addItem("App Header", 500, 50).setFlexShrink(0);
+        addItem("Toolbar", 500, 35).setFlexShrink(0);
+        addItem("Content Area", 500, 300).setFlexGrow(1);
+        addItem("Status Bar", 500, 30).setFlexShrink(0);
 
         flexBox.setDirection(FlexDirection.COLUMN);
         flexBox.setAlignItems(FlexAlignItems.STRETCH);
-
-        FlexBox.setShrink(flexBox.getChildren().get(0), 0);
-        FlexBox.setShrink(flexBox.getChildren().get(1), 0);
-        FlexBox.setGrow(flexBox.getChildren().get(2), 1);
-        FlexBox.setShrink(flexBox.getChildren().get(3), 0);
     }
 
     // ── Item management ─────────────────────────────────────────────────
@@ -449,12 +430,12 @@ public class FlexBoxTestApp extends Application {
     }
 
     /** Add a default-sized item. */
-    private StackPane addItem() {
+    private FlexItem addItem() {
         return addItem("Item " + itemCounter.get(), 80, 60);
     }
 
     /** Add an item with a custom label and size. */
-    private StackPane addItem(String labelText, double prefWidth, double prefHeight) {
+    private FlexItem addItem(String labelText, double prefWidth, double prefHeight) {
         int idx = itemCounter.getAndIncrement();
         Color color = COLORS[idx % COLORS.length];
 
@@ -476,7 +457,7 @@ public class FlexBoxTestApp extends Application {
         label.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: " + fontSize + ";");
         label.setMouseTransparent(true);
 
-        StackPane wrapper = new StackPane(bg, label);
+        FlexItem wrapper = new FlexItem(bg, label);
         wrapper.getStyleClass().addAll("flex-item", "flex-item-" + idx);
         wrapper.setMinSize(20, 20);
         wrapper.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -498,6 +479,8 @@ public class FlexBoxTestApp extends Application {
         itemControls.getChildren().clear();
         for (int i = 0; i < flexBox.getChildren().size(); i++) {
             javafx.scene.Node child = flexBox.getChildren().get(i);
+            FlexItem fi = child instanceof FlexItem ? (FlexItem) child : null;
+
             String name = "";
             if (child instanceof StackPane) {
                 for (javafx.scene.Node n : ((StackPane) child).getChildren()) {
@@ -512,22 +495,30 @@ public class FlexBoxTestApp extends Application {
             Spinner<Double> growSpinner = new Spinner<>(0.0, 10.0, FlexBox.getGrow(child), 0.5);
             growSpinner.setEditable(true);
             growSpinner.setPrefWidth(70);
-            growSpinner.valueProperty().addListener((obs, o, n) -> FlexBox.setGrow(child, n));
+            growSpinner.valueProperty().addListener((obs, o, n) -> {
+                if (fi != null) fi.setFlexGrow(n); else FlexBox.setGrow(child, n);
+            });
 
             Spinner<Double> shrinkSpinner = new Spinner<>(0.0, 10.0, FlexBox.getShrink(child), 0.5);
             shrinkSpinner.setEditable(true);
             shrinkSpinner.setPrefWidth(70);
-            shrinkSpinner.valueProperty().addListener((obs, o, n) -> FlexBox.setShrink(child, n));
+            shrinkSpinner.valueProperty().addListener((obs, o, n) -> {
+                if (fi != null) fi.setFlexShrink(n); else FlexBox.setShrink(child, n);
+            });
 
             Spinner<Double> basisSpinner = new Spinner<>(-1.0, 500.0, FlexBox.getBasis(child), 10);
             basisSpinner.setEditable(true);
             basisSpinner.setPrefWidth(70);
-            basisSpinner.valueProperty().addListener((obs, o, n) -> FlexBox.setBasis(child, n));
+            basisSpinner.valueProperty().addListener((obs, o, n) -> {
+                if (fi != null) fi.setFlexBasis(n); else FlexBox.setBasis(child, n);
+            });
 
             Spinner<Integer> orderSpinner = new Spinner<>(-10, 10, FlexBox.getOrder(child));
             orderSpinner.setEditable(true);
             orderSpinner.setPrefWidth(60);
-            orderSpinner.valueProperty().addListener((obs, o, n) -> FlexBox.setOrder(child, n));
+            orderSpinner.valueProperty().addListener((obs, o, n) -> {
+                if (fi != null) fi.setFlexOrder(n); else FlexBox.setOrder(child, n);
+            });
 
             ComboBox<String> alignSelfBox = new ComboBox<>();
             alignSelfBox.getItems().add("auto");
@@ -538,10 +529,11 @@ public class FlexBoxTestApp extends Application {
             alignSelfBox.setOnAction(e -> {
                 String val = alignSelfBox.getValue();
                 if ("auto".equals(val)) {
-                    child.getProperties().remove("flexbox-align-self");
-                    flexBox.requestLayout();
+                    if (fi != null) fi.setAlignSelf(null);
+                    else { child.getProperties().remove("flexbox-align-self"); flexBox.requestLayout(); }
                 } else {
-                    FlexBox.setAlignSelf(child, FlexAlignItems.valueOf(val));
+                    if (fi != null) fi.setAlignSelf(FlexAlignItems.valueOf(val));
+                    else FlexBox.setAlignSelf(child, FlexAlignItems.valueOf(val));
                 }
             });
 
