@@ -16,8 +16,6 @@ import java.util.List;
 public class MarkdownCodeBlock extends Control {
 
     private static final String DEFAULT_STYLE_CLASS = "markdown-code-block";
-    private static final String USER_AGENT_STYLESHEET =
-            MarkdownCodeBlock.class.getResource("markdown-code-block.css").toExternalForm();
 
     private final StringProperty code = new SimpleStringProperty(this, "code", "");
     private final StringProperty language = new SimpleStringProperty(this, "language", "");
@@ -102,11 +100,6 @@ public class MarkdownCodeBlock extends Control {
     @Override
     protected Skin<?> createDefaultSkin() {
         return new MarkdownCodeBlockSkin(this);
-    }
-
-    @Override
-    public String getUserAgentStylesheet() {
-        return USER_AGENT_STYLESHEET;
     }
 
     @Override
