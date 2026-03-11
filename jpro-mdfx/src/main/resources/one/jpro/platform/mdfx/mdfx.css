@@ -181,7 +181,6 @@
 /* ---------- CODE BLOCK ---------- */
 
 .markdown-code-block {
-    -fx-padding: 10px 0px;
 }
 
 .markdown-code-block .code-text-flow {
