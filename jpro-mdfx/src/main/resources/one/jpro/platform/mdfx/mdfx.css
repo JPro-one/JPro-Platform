@@ -17,7 +17,7 @@
 
 .markdown-text {
     -fx-font-family: ARIAL;
-    -fx-font-size: 16;
+    -fx-font-size: 1em;
     -fx-fill: -mdfx-font-color;
 }
 
@@ -63,24 +63,24 @@
 }
 
 .markdown-heading-1 .markdown-text {
-    -fx-font-size: 50px;
+    -fx-font-size: 2em;
 }
 
 .markdown-heading-2 .markdown-text {
-    -fx-font-size: 38px;
+    -fx-font-size: 1.75em;
 }
 
 
 .markdown-heading-3 .markdown-text {
-    -fx-font-size: 28px;
+    -fx-font-size: 1.5em;
 }
 
 .markdown-heading-4 .markdown-text {
-    -fx-font-size: 24px;
+    -fx-font-size: 1.25em;
 }
 
 .markdown-heading-5 .markdown-text {
-    -fx-font-size: 20px;
+    -fx-font-size: 1em;
 }
 
 .markdown-link {
@@ -97,7 +97,6 @@
 }
 
 .markdown-listitem-dot {
-    -fx-font-size: 16px;
     -fx-text-fill: -mdfx-font-color;
 }
 
@@ -113,7 +112,6 @@
 .markdown-code,
 .markdown-codeblock {
     -fx-wrap-text: true;
-    -fx-font-size: 16;
 }
 
 .markdown-codeblock-box,
