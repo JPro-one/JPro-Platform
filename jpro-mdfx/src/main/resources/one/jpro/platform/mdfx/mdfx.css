@@ -16,8 +16,6 @@
 }
 
 .markdown-text {
-    -fx-font-family: ARIAL;
-    -fx-font-size: 1em;
     -fx-fill: -mdfx-font-color;
 }
 
