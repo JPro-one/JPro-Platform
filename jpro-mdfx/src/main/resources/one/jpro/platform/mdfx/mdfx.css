@@ -1,4 +1,4 @@
-.markdown-view {
+* {
     -mdfx-font-color: -fx-text-base-color;
     -mdfx-link-color: -fx-accent;
     -mdfx-border-color-1: -fx-box-border;
@@ -161,7 +161,7 @@
 
 .markdown-hbox1 {
     -fx-spacing: 0px;
-    -fx-padding: 8px;
+    -fx-padding: 2px;
 }
 
 /* ---------- BLOCK QUOTE ---------- */
