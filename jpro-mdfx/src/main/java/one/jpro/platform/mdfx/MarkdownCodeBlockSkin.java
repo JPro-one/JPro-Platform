@@ -114,6 +114,9 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
             textFlowModel.setStyleProvider(styleProvider);
             textFlowModel.setText(code);
 
+            // Workaround, until https://github.com/mkpaz/tm4javafx/pull/4 is merged.
+            trimTrailingNewline(textFlow);
+
             ThemeSettings settings = styleProvider.getThemeSettings();
             StyleHelper.applyThemeSettings(textFlow, settings);
         } catch (Exception e) {
@@ -126,6 +129,21 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
         Text text = new Text(code);
         text.getStyleClass().add("code-plain-text");
         textFlow.getChildren().add(text);
+    }
+
+    /**
+     * Removes a trailing newline from the last Text node in the TextFlow.
+     * TextFlowModel appends a trailing '\n' which creates a visible blank line.
+     */
+    private void trimTrailingNewline(TextFlow textFlow) {
+        if (textFlow.getChildren().isEmpty()) return;
+        var last = textFlow.getChildren().get(textFlow.getChildren().size() - 1);
+        if (last instanceof Text textNode) {
+            String t = textNode.getText();
+            if (t.endsWith("\n")) {
+                textNode.setText(t.substring(0, t.length() - 1));
+            }
+        }
     }
 
     @Override
