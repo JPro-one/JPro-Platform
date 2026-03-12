@@ -162,7 +162,6 @@ public class MarkdownViewSample extends Application {
             }
         };
         markdownView.setPadding(new Insets(0, 10, 0, 10));
-        markdownView.getStyleClass().add("markdown-view");
         markdownView.mdStringProperty().bind(mdTextArea.textProperty());
 
         final var scrollPane = new ScrollPane(markdownView);
