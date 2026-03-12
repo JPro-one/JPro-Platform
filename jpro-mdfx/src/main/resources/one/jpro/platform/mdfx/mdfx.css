@@ -191,12 +191,5 @@
     -fx-border-width: 1px;
     -fx-background-color: -mdfx-code-block-background;
     -fx-line-spacing: 2px;
-}
-
-.markdown-code-block .code-text-flow .text {
-    -fx-font-family: "monospace";
-}
-
-.markdown-code-block .code-plain-text {
     -fx-font-family: "monospace";
 }

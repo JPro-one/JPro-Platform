@@ -13,6 +13,7 @@ import one.jpro.platform.mdfx.impl.MDFXNodeHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class MarkdownView extends VBox {
 
@@ -65,6 +66,14 @@ public class MarkdownView extends VBox {
 
     public String getMdString() {
         return mdString.get();
+    }
+
+    /**
+     * Returns the default language to use for code blocks that don't specify one.
+     * Override this method to provide a default language. Returns empty by default.
+     */
+    public Optional<String> getDefaultLanguage() {
+        return Optional.empty();
     }
 
     public boolean showChapter(int[] currentChapter) {

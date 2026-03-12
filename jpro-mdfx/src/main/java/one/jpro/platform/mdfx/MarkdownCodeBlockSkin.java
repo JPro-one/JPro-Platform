@@ -126,6 +126,9 @@ public class MarkdownCodeBlockSkin extends SkinBase<MarkdownCodeBlock> {
 
     private void showPlainText(String code) {
         textFlow.getChildren().clear();
+        if (code.endsWith("\n")) {
+            code = code.substring(0, code.length() - 1);
+        }
         Text text = new Text(code);
         text.getStyleClass().add("code-plain-text");
         textFlow.getChildren().add(text);
