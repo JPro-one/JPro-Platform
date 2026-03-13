@@ -89,19 +89,24 @@ public class MarkdownCodeBlock extends StackPane {
 
     private final StyleableStringProperty codeTheme = new SimpleStyleableStringProperty(CODE_THEME, this, "codeTheme", DEFAULT_CODE_THEME);
     private final TextFlow textFlow;
+    private final String code;
+    private final String language;
     private TextFlowModel textFlowModel;
 
     public MarkdownCodeBlock(String code, String language) {
+        this.code = code;
+        this.language = language;
+
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
         textFlow = new TextFlow();
         textFlow.getStyleClass().add("code-text-flow");
         getChildren().add(textFlow);
 
-        updateContent(code, language);
+        codeTheme.subscribe(v -> updateContent());
     }
 
-    private void updateContent(String code, String language) {
+    private void updateContent() {
         if (code == null || code.isEmpty()) {
             textFlow.getChildren().clear();
             return;
