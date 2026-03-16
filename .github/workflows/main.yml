@@ -65,7 +65,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $env:JDK_JAVA_OPTIONS = "-Djfxmedia.platforms=Windows"
+          echo "JDK_JAVA_OPTIONS=-Djfxmedia.platforms=Windows" >> $env:GITHUB_ENV
 
       - name: Compile
         run: |
