@@ -1,19 +1,21 @@
-* {
-    -mdfx-font-color: black;
-    -mdfx-link-color: blue;
-    -mdfx-border-color-1: #888;
+.markdown-view {
+    -mdfx-font-color: -fx-text-base-color;
+    -mdfx-link-color: -fx-accent;
+    -mdfx-border-color-1: -fx-box-border;
 
-    -mdfx-bg-color-1: #ccc;
-    -mdfx-bg-color-2: #ddd;
-    -mdfx-bg-color-3: #eee;
+    -mdfx-bg-color-1: -fx-control-inner-background;
+    -mdfx-bg-color-2: -fx-control-inner-background-alt;
+    -mdfx-bg-color-3: -fx-color;
 
-    -mdfx-bq-color-border: #4488cc;
-    -mdfx-bq-color-background: #0000ff0c;
+    -mdfx-bq-color-border: derive(-fx-accent, -50%);
+    -mdfx-bq-color-background: -fx-accent;
+    -mdfx-bq-text-fill: -fx-selection-bar-text;
+
+    -mdfx-code-block-border: -fx-box-border;
+    -mdfx-code-block-background: -fx-control-inner-background;
 }
 
 .markdown-text {
-    -fx-font-family: ARIAL;
-    -fx-font-size: 16;
     -fx-fill: -mdfx-font-color;
 }
 
@@ -39,44 +41,43 @@
 }
 
 .markdown-heading-1 {
-    -fx-padding: 14;
+    -fx-padding: 14px 0px;
 }
 
 .markdown-heading-2 {
-    -fx-padding: 10;
+    -fx-padding: 10px 0px;
 }
 
 .markdown-heading-3 {
-    -fx-padding: 8;
+    -fx-padding: 8px 0px;
 }
 
 .markdown-heading-4 {
-    -fx-padding: 6;
+    -fx-padding: 6px 0px;
 }
 
 .markdown-heading-5 {
-    -fx-padding: 4;
+    -fx-padding: 4px 0px;
 }
 
 .markdown-heading-1 .markdown-text {
-    -fx-font-size: 50;
+    -fx-font-size: 2em;
 }
 
 .markdown-heading-2 .markdown-text {
-    -fx-font-size: 38;
+    -fx-font-size: 1.75em;
 }
 
-
 .markdown-heading-3 .markdown-text {
-    -fx-font-size: 28;
+    -fx-font-size: 1.5em;
 }
 
 .markdown-heading-4 .markdown-text {
-    -fx-font-size: 24;
+    -fx-font-size: 1.25em;
 }
 
 .markdown-heading-5 .markdown-text {
-    -fx-font-size: 20;
+    -fx-font-size: 1em;
 }
 
 .markdown-link {
@@ -89,17 +90,16 @@
 }
 
 .markdown-paragraph-list {
-    -fx-spacing: 15;
+    -fx-spacing: 15px;
 }
 
 .markdown-listitem-dot {
-    -fx-font-size: 16;
     -fx-text-fill: -mdfx-font-color;
 }
 
 .markdown-codeblock-box,
 .markdown-code {
-    -fx-padding: 0 8 0 8;
+    -fx-padding: 0px 8px;
 }
 
 .markdown-code {
@@ -109,39 +109,37 @@
 .markdown-code,
 .markdown-codeblock {
     -fx-wrap-text: true;
-    -fx-font-size: 16;
 }
 
 .markdown-codeblock-box,
 .markdown-code-background {
-    -fx-padding: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: -mdfx-border-color-1;
-    -fx-border-width: 0.5;
-    -fx-background-radius: 8;
-    -fx-background-color: #00000009; /*  -mdfx-bg-color-3*/
+    -fx-padding: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: -mdfx-code-block-border;
+    -fx-border-width: 0.5px;
+    -fx-background-radius: 8px;
+    -fx-background-color: -mdfx-code-block-background;
 }
 
 .markdown-code-background {
-    -fx-border-width: 0;
-    -fx-background-color: #0000AA10; /*  -mdfx-bg-color-3*/
+    -fx-border-width: 0px;
 }
 
 .markdown-code-anti-padding {
     /*-fx-padding: -8;*/
     -fx-border-color: red;
-    -fx-border-width: 1;
+    -fx-border-width: 1px;
 }
 
 .markdown-table-table {
-    -fx-vgap: -1;
-    -fx-hgap: -1;
+    -fx-vgap: -1px;
+    -fx-hgap: -1px;
 }
 
 .markdown-table-cell {
-    -fx-padding: 8;
+    -fx-padding: 8px;
     -fx-border-color: -mdfx-border-color-1;
-    -fx-border-width: 0;
+    -fx-border-width: 0px;
 }
 
 .markdown-table-even {
@@ -162,15 +160,36 @@
 }
 
 .markdown-hbox1 {
-    -fx-spacing: 0;
-    -fx-padding: 8;
+    -fx-spacing: 0px;
+    -fx-padding: 2px;
 }
 
+/* ---------- BLOCK QUOTE ---------- */
+
 .markdown-normal-block-quote {
-    -fx-background-color: -mdfx-bq-color-background;
-    -fx-background-insets: 10;
+    -fx-background: -mdfx-bq-color-background;
+    -fx-background-color: -fx-background;
     -fx-border-color: -mdfx-bq-color-border;
-    -fx-border-width: 0 0 0 3;
-    -fx-border-insets: 10 10 10 10;
-    -fx-padding: 10 10 10 10;
+    -fx-border-width: 0px 0px 0px 3px;
+    -fx-padding: 10px;
+}
+
+.markdown-normal-block-quote .markdown-normal-flow .markdown-text {
+    -fx-fill: -mdfx-bq-text-fill;
+}
+
+/* ---------- CODE BLOCK ---------- */
+
+.markdown-code-block {
+}
+
+.markdown-code-block .code-text-flow {
+    -fx-padding: 12px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-border-color: -mdfx-code-block-border;
+    -fx-border-width: 1px;
+    -fx-background-color: -mdfx-code-block-background;
+    -fx-line-spacing: 2px;
+    -fx-font-family: "monospace";
 }

@@ -1,8 +1,19 @@
 # Changelog
 
-## 0.5.x
-### 0.5.9 (TBD)
+## 0.6.x
+### 0.6.0 (TBD)
 
+#### Features
+* Added FlexBox layout implementation.
+* Added Dynamic CSS module, which allows defining a stylesheet via a string property — useful for live-editing CSS in examples.
+* Added syntax-highlighted code blocks to `jpro-mdfx` using TextMate grammars via tm4javafx.
+
+#### Improvements
+* Improved documentation for FlexBox and dynamic CSS.
+* Updated internal Scala and SimpleFX versions.
+* Improved documentation structure, now better suited for the experimental [ai-docs](https://github.com/JPro-one/ai-docs) plugin.
+
+## 0.5.x
 ### 0.5.8 (February 20, 2026)
 #### Features
 * Added AuthUIProvider to the `jpro-auth-routing` module. This filters can be used, to limit access to the whole app,

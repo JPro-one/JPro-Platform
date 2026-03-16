@@ -195,6 +195,11 @@ public class MDFXNodeHelper extends VBox {
             String code = fencedCodeBlock.getContentChars().toString();
             String language = fencedCodeBlock.getInfo().toString().trim();
 
+            // Fall back to the default language if none is specified in the code fence
+            if (language.isEmpty()) {
+                language = parent.getDefaultLanguage().orElse("");
+            }
+
             MarkdownCodeBlock codeBlock = new MarkdownCodeBlock(code, language);
             root.getChildren().add(codeBlock);
         }

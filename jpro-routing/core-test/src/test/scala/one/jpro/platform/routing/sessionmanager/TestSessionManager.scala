@@ -3,10 +3,17 @@ package one.jpro.platform.routing.sessionmanager
 import javafx.scene.control.Label
 import javafx.scene.layout.StackPane
 import one.jpro.platform.routing.{Filters, Response, Route, RouteApp}
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.core._
 import simplefx.util.Predef.intercept
+import scala.concurrent.Await
 
+object TestSessionManager {
+  @BeforeAll
+  def setup(): Unit = {
+    Await.result(simplefx.cores.initializeCore(), (second))
+  }
+}
 class TestSessionManager {
   @Test
   def someTests(): Unit = {

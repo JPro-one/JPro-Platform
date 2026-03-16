@@ -2,6 +2,7 @@ package one.jpro.platform.mdfx.example;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -15,6 +16,7 @@ import one.jpro.platform.css.DynamicCSSUtil;
 import one.jpro.platform.mdfx.MarkdownView;
 import one.jpro.platform.mdfx.extensions.YoutubeExtension;
 import org.apache.commons.io.IOUtils;
+import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,7 +161,7 @@ public class MarkdownViewSample extends Application {
                 }
             }
         };
-        markdownView.getStyleClass().add("markdown-view");
+        markdownView.setPadding(new Insets(0, 10, 0, 10));
         markdownView.mdStringProperty().bind(mdTextArea.textProperty());
 
         final var scrollPane = new ScrollPane(markdownView);

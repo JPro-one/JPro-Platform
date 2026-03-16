@@ -193,12 +193,6 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                     from components.java
                 }
 
-                if (project != rootProject) {
-                    dependencies {
-                        implementation(rootProject)
-                    }
-                }
-
                 pom {
                     name = 'JPro Platform'
                     description = 'JPro Platform is a collection of modules that allows you to create ' +
@@ -231,6 +225,15 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                     issueManagement {
                         system = 'GitHub'
                         url = 'https://github.com/JPro-one/JPro-Platform/issues'
+                    }
+
+                    if (project != rootProject) {
+                        withXml {
+                            def parentNode = asNode().appendNode('parent')
+                            parentNode.appendNode('groupId', 'one.jpro.platform')
+                            parentNode.appendNode('artifactId', rootProject.name)
+                            parentNode.appendNode('version', JPRO_PLATFORM_VERSION)
+                        }
                     }
                 }
             }

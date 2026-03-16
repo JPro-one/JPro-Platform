@@ -12,13 +12,14 @@ import one.jpro.platform.mdfx.impl.MDFXNodeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class MarkdownView extends VBox {
 
-    private static final String USER_AGENT_STYLESHEET =
-            MarkdownView.class.getResource("mdfx.css").toExternalForm();
+    private static final String USER_AGENT_STYLESHEET = Objects.requireNonNull(MarkdownView.class.getResource("mdfx.css")).toExternalForm();
 
-    private List<ImageExtension> extensions = new ArrayList<>();
+    private final List<ImageExtension> extensions;
 
     private final SimpleStringProperty mdString = new SimpleStringProperty("");
 
@@ -31,6 +32,8 @@ public class MarkdownView extends VBox {
         if(extensions.stream().filter(e -> e.getScheme() == null).count() > 1) {
             throw new IllegalArgumentException("Only one extension can have a scheme of null");
         }
+
+        getStyleClass().add("markdown-view");
 
         this.extensions = extensions;
         this.mdString.set(mdString);
@@ -63,6 +66,14 @@ public class MarkdownView extends VBox {
 
     public String getMdString() {
         return mdString.get();
+    }
+
+    /**
+     * Returns the default language to use for code blocks that don't specify one.
+     * Override this method to provide a default language. Returns empty by default.
+     */
+    public Optional<String> getDefaultLanguage() {
+        return Optional.empty();
     }
 
     public boolean showChapter(int[] currentChapter) {
