@@ -59,7 +59,7 @@ email attributes such as sender, recipients, subject, and date, as well as metho
 - Gradle
     ```groovy
     dependencies {
-        implementation("one.jpro.platform:jpro-mail:0.5.8")
+        implementation("one.jpro.platform:jpro-mail:")
     }
     ```
 - Maven
@@ -68,7 +68,7 @@ email attributes such as sender, recipients, subject, and date, as well as metho
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-mail</artifactId>
-        <version>0.5.8</version>
+        <version></version>
       </dependency>
     </dependencies>
     ```

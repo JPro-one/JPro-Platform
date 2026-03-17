@@ -275,6 +275,6 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
     mavenCentral {
         repoDir = layout.buildDirectory.dir('publish-bundle')
         authToken = System.getenv("MAVEN_CENTRAL_AUTH_TOKEN")
-        publishingType = System.getenv("MAVEN_CENTRAL_PUBLISHING_TYPE") ?: 'USER_MANAGED'
+        publishingType = System.getenv("MAVEN_CENTRAL_PUBLISHING_TYPE") ?: 'AUTOMATIC'
     }
 }

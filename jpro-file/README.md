@@ -88,7 +88,7 @@ Add the following configuration to your project based on the build tool you are 
 - Gradle
     ```groovy
     dependencies {
-        implementation("one.jpro.platform:jpro-file:0.5.8")
+        implementation("one.jpro.platform:jpro-file:")
     }
     ```
 - Maven
@@ -97,7 +97,7 @@ Add the following configuration to your project based on the build tool you are 
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-file</artifactId>
-        <version>0.5.8</version>
+        <version></version>
       </dependency>
     </dependencies>
     ```

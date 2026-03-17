@@ -1,7 +1,13 @@
 # Changelog
 
 ## 0.6.x
-### 0.6.0 (TBD)
+### 0.6.1 (March 17, 2026)
+
+#### Bugfixes
+* Fixed `SEOUtils` to work correctly when JPro isn't used.
+* Fixed regression for MDFX — code theme via CSS was not applied.
+
+### 0.6.0 (March 2026)
 
 #### Features
 * Added FlexBox layout implementation.
