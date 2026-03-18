@@ -109,8 +109,26 @@ public class FlexBoxTestApp extends Application {
         // CSS editor at the bottom
         VBox cssEditor = createCssEditor();
 
-        // Center: FlexBox above, CSS editor below
-        SplitPane centerSplit = new SplitPane(flexBox, cssEditor);
+        // Bottom boundary element — verifies FlexBox doesn't overflow downward
+        Label bottomBoundary = new Label("Bottom Boundary");
+        bottomBoundary.setMaxWidth(Double.MAX_VALUE);
+        bottomBoundary.setAlignment(Pos.CENTER);
+        bottomBoundary.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6;");
+
+        // Right boundary element — verifies FlexBox doesn't overflow to the right
+        Label rightBoundary = new Label("R\ni\ng\nh\nt");
+        rightBoundary.setAlignment(Pos.CENTER);
+        rightBoundary.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6;");
+
+        // Wrap FlexBox: FlexBox + bottom boundary in a VBox, then right element beside it
+        VBox flexWithBottom = new VBox(flexBox, bottomBoundary);
+        HBox flexWithBoundaries = new HBox(flexWithBottom, rightBoundary);
+        HBox.setHgrow(flexWithBottom, Priority.ALWAYS);
+
+        // Center: FlexBox with boundaries above, CSS editor below
+        ScrollPane boundaryScroll = new ScrollPane(flexWithBoundaries);
+        boundaryScroll.setFitToWidth(true);
+        SplitPane centerSplit = new SplitPane(boundaryScroll, cssEditor);
         centerSplit.setOrientation(javafx.geometry.Orientation.VERTICAL);
         centerSplit.setDividerPositions(0.7);
 

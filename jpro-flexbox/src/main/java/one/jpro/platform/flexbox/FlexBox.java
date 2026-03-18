@@ -714,6 +714,16 @@ public class FlexBox extends Pane {
     // ── Size computation ──────────────────────────────────────────────
 
     @Override
+    public javafx.geometry.Orientation getContentBias() {
+        boolean isRow = getDirection().isRow();
+        if (getWrap() != FlexWrap.NOWRAP) {
+            // Row+wrap: height depends on width; Column+wrap: width depends on height
+            return isRow ? javafx.geometry.Orientation.HORIZONTAL : javafx.geometry.Orientation.VERTICAL;
+        }
+        return null;
+    }
+
+    @Override
     protected double computeMinWidth(double height) {
         List<Node> children = getManagedChildren();
         boolean isRow = getDirection().isRow();
@@ -736,6 +746,16 @@ public class FlexBox extends Pane {
                 return snappedLeftInset() + total + snappedRightInset();
             }
         } else {
+            // Column direction: if wrapping and height is known, simulate column breaks
+            boolean doWrap = getWrap() != FlexWrap.NOWRAP;
+            if (doWrap && height >= 0) {
+                double availableHeight = height - snappedTopInset() - snappedBottomInset();
+                double rowGap = getRowGap();
+                double colGap = getColumnGap();
+                return snappedLeftInset()
+                        + computeWrappedCrossSize(children, availableHeight, rowGap, colGap, false)
+                        + snappedRightInset();
+            }
             double max = 0;
             for (Node child : children) {
                 Insets m = getMargin(child);
@@ -768,6 +788,16 @@ public class FlexBox extends Pane {
                 return snappedTopInset() + total + snappedBottomInset();
             }
         } else {
+            // Row direction: if wrapping and width is known, simulate row breaks
+            boolean doWrap = getWrap() != FlexWrap.NOWRAP;
+            if (doWrap && width >= 0) {
+                double availableWidth = width - snappedLeftInset() - snappedRightInset();
+                double colGap = getColumnGap();
+                double rowGap = getRowGap();
+                return snappedTopInset()
+                        + computeWrappedCrossSize(children, availableWidth, colGap, rowGap, true)
+                        + snappedBottomInset();
+            }
             double max = 0;
             for (Node child : children) {
                 Insets m = getMargin(child);
@@ -792,6 +822,16 @@ public class FlexBox extends Pane {
             total += children.size() > 1 ? getColumnGap() * (children.size() - 1) : 0;
             return snappedLeftInset() + total + snappedRightInset();
         } else {
+            // Column direction: if wrapping and height is known, simulate column breaks
+            boolean doWrap = getWrap() != FlexWrap.NOWRAP;
+            if (doWrap && height >= 0) {
+                double availableHeight = height - snappedTopInset() - snappedBottomInset();
+                double rowGap = getRowGap();   // main-axis gap in column direction
+                double colGap = getColumnGap(); // cross-axis gap in column direction
+                return snappedLeftInset()
+                        + computeWrappedCrossSize(children, availableHeight, rowGap, colGap, false)
+                        + snappedRightInset();
+            }
             double max = 0;
             for (Node child : children) {
                 Insets m = getMargin(child);
@@ -816,6 +856,16 @@ public class FlexBox extends Pane {
             total += children.size() > 1 ? getRowGap() * (children.size() - 1) : 0;
             return snappedTopInset() + total + snappedBottomInset();
         } else {
+            // Row direction: if wrapping and width is known, simulate row breaks
+            boolean doWrap = getWrap() != FlexWrap.NOWRAP;
+            if (doWrap && width >= 0) {
+                double availableWidth = width - snappedLeftInset() - snappedRightInset();
+                double colGap = getColumnGap(); // main-axis gap in row direction
+                double rowGap = getRowGap();    // cross-axis gap in row direction
+                return snappedTopInset()
+                        + computeWrappedCrossSize(children, availableWidth, colGap, rowGap, true)
+                        + snappedBottomInset();
+            }
             double max = 0;
             for (Node child : children) {
                 Insets m = getMargin(child);
@@ -823,5 +873,57 @@ public class FlexBox extends Pane {
             }
             return snappedTopInset() + max + snappedBottomInset();
         }
+    }
+
+    /**
+     * Simulates wrap line-breaking and returns the total cross-axis size
+     * (sum of line cross sizes + cross gaps between lines).
+     *
+     * @param children      managed children
+     * @param mainSize      available main-axis size (content area)
+     * @param mainGap       gap between items on the main axis
+     * @param crossGap      gap between lines on the cross axis
+     * @param isRow         true for row direction, false for column direction
+     */
+    private double computeWrappedCrossSize(List<Node> children, double mainSize,
+                                           double mainGap, double crossGap, boolean isRow) {
+        double totalCross = 0;
+        int lineCount = 0;
+        double usedMain = 0;
+        double lineCrossMax = 0;
+
+        for (int i = 0; i < children.size(); i++) {
+            Node child = children.get(i);
+            Insets m = getMargin(child);
+            double basis = getBasis(child);
+            double itemMain = (basis >= 0 ? basis
+                    : (isRow ? child.prefWidth(-1) : child.prefHeight(-1)))
+                    + (isRow ? m.getLeft() + m.getRight() : m.getTop() + m.getBottom());
+            double itemCross = (isRow ? child.prefHeight(-1) : child.prefWidth(-1))
+                    + (isRow ? m.getTop() + m.getBottom() : m.getLeft() + m.getRight());
+
+            double neededGap = (usedMain > 0) ? mainGap : 0;
+
+            if (usedMain > 0 && usedMain + neededGap + itemMain > mainSize) {
+                // Wrap: finish current line, start new one
+                totalCross += lineCrossMax;
+                lineCount++;
+                usedMain = itemMain;
+                lineCrossMax = itemCross;
+            } else {
+                usedMain += neededGap + itemMain;
+                lineCrossMax = Math.max(lineCrossMax, itemCross);
+            }
+        }
+        // Add the last line
+        if (children.size() > 0) {
+            totalCross += lineCrossMax;
+            lineCount++;
+        }
+        // Add cross gaps between lines
+        if (lineCount > 1) {
+            totalCross += crossGap * (lineCount - 1);
+        }
+        return totalCross;
     }
 }
