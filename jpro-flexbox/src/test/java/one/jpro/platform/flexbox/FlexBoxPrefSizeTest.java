@@ -3,6 +3,8 @@ package one.jpro.platform.flexbox;
 import javafx.scene.layout.Region;
 import org.junit.jupiter.api.Test;
 
+import javafx.geometry.Orientation;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -276,5 +278,99 @@ class FlexBoxPrefSizeTest extends FlexBoxTestBase {
         double pw = box.prefWidth(-1);
         assertEquals(60, pw, 0.5,
                 "Column direction: prefWidth should be max width, not sum");
+    }
+
+    // ── Content bias ──
+
+    @Test
+    void contentBias_rowWrap_isHorizontal() {
+        FlexBox box = new FlexBox();
+        box.setWrap(FlexWrap.WRAP);
+        assertEquals(Orientation.HORIZONTAL, box.getContentBias(),
+                "Row + wrap: content bias should be HORIZONTAL (height depends on width)");
+    }
+
+    @Test
+    void contentBias_columnWrap_isVertical() {
+        FlexBox box = new FlexBox();
+        box.setDirection(FlexDirection.COLUMN);
+        box.setWrap(FlexWrap.WRAP);
+        assertEquals(Orientation.VERTICAL, box.getContentBias(),
+                "Column + wrap: content bias should be VERTICAL (width depends on height)");
+    }
+
+    @Test
+    void contentBias_noWrap_isNull() {
+        FlexBox box = new FlexBox();
+        assertNull(box.getContentBias(),
+                "No wrap: content bias should be null");
+    }
+
+    // ── minHeight with wrapping ──
+
+    @Test
+    void minHeight_twoRows_whenWrapping() {
+        FlexBox box = new FlexBox();
+        box.setWrap(FlexWrap.WRAP);
+        Region a = createBox(100, 40);
+        Region b = createBox(100, 50);
+        Region c = createBox(100, 30);
+        box.getChildren().addAll(a, b, c);
+
+        // Width 250: row 1 (a, b) max height 50, row 2 (c) height 30
+        double mh = box.minHeight(250);
+        assertEquals(80, mh, 0.5,
+                "Two rows: minHeight should be sum of row heights (50 + 30)");
+    }
+
+    @Test
+    void minHeight_withRowGap_whenWrapping() {
+        FlexBox box = new FlexBox();
+        box.setWrap(FlexWrap.WRAP);
+        box.setRowGap(10);
+        Region a = createBox(100, 40);
+        Region b = createBox(100, 50);
+        Region c = createBox(100, 30);
+        box.getChildren().addAll(a, b, c);
+
+        // Width 250: row 1 (a, b) height 50, gap 10, row 2 (c) height 30
+        double mh = box.minHeight(250);
+        assertEquals(90, mh, 0.5,
+                "Two rows with gap: minHeight should include row gap");
+    }
+
+    // ── minWidth with wrapping in column direction ──
+
+    @Test
+    void minWidth_twoColumns_whenWrappingInColumnDirection() {
+        FlexBox box = new FlexBox();
+        box.setDirection(FlexDirection.COLUMN);
+        box.setWrap(FlexWrap.WRAP);
+        Region a = createBox(40, 100);
+        Region b = createBox(50, 100);
+        Region c = createBox(30, 100);
+        box.getChildren().addAll(a, b, c);
+
+        // Height 250: column 1 (a, b) max width 50, column 2 (c) width 30
+        double mw = box.minWidth(250);
+        assertEquals(80, mw, 0.5,
+                "Two columns: minWidth should be sum of column widths (50 + 30)");
+    }
+
+    @Test
+    void minWidth_withColumnGap_whenWrappingInColumnDirection() {
+        FlexBox box = new FlexBox();
+        box.setDirection(FlexDirection.COLUMN);
+        box.setWrap(FlexWrap.WRAP);
+        box.setColumnGap(10);
+        Region a = createBox(40, 100);
+        Region b = createBox(50, 100);
+        Region c = createBox(30, 100);
+        box.getChildren().addAll(a, b, c);
+
+        // Height 250: column 1 (a, b) max width 50, gap 10, column 2 (c) width 30
+        double mw = box.minWidth(250);
+        assertEquals(90, mw, 0.5,
+                "Two columns with gap: minWidth should include column gap");
     }
 }
