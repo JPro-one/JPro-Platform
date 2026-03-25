@@ -13,7 +13,7 @@ module one.jpro.platform.mdfx {
     requires flexmark.util.sequence;
     requires flexmark.util.data;
     requires flexmark.util.collection;
-    requires one.jpro.platform.youtube;
+    requires static one.jpro.platform.youtube;
     requires tm4javafx;
     requires tm4java;
     requires jfx.incubator.richtext;
