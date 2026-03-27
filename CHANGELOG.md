@@ -1,6 +1,11 @@
 # Changelog
 
 ## 0.6.x
+### 0.6.2 (TBD)
+
+#### Bugfixes
+* Fixed links created via `LinkUtil.setLink` not behaving as proper browser links (no pointer cursor, no right-click "Open in new tab") due to inherited `pointer-events: none` from JPro's div wrapper. Required for JPro >= 2026.1.2.
+
 ### 0.6.1 (March 17, 2026)
 
 #### Bugfixes
