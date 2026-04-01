@@ -63,7 +63,7 @@ and OAuth2 (and to some extent OpenID Connect) implementation.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-auth-core</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -71,7 +71,7 @@ and OAuth2 (and to some extent OpenID Connect) implementation.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-auth-core:")
+    implementation("one.jpro.platform:jpro-auth-core:0.6.2")
 }
 ```
 
@@ -84,7 +84,7 @@ Creates human and AI friendly String representations of JavaFX SceneGraphs.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-scenegraph</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -92,7 +92,7 @@ Creates human and AI friendly String representations of JavaFX SceneGraphs.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-scenegraph:")
+    implementation("one.jpro.platform:jpro-scenegraph:0.6.2")
 }
 ```
 
@@ -105,7 +105,7 @@ This library provides a simple way to pick, drop, upload and download files in *
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-file</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -113,7 +113,7 @@ This library provides a simple way to pick, drop, upload and download files in *
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-file:")
+    implementation("one.jpro.platform:jpro-file:0.6.2")
 }
 ```
 
@@ -149,7 +149,7 @@ to the desired size.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-image-manager</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -157,7 +157,7 @@ to the desired size.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-image-manager:")
+    implementation("one.jpro.platform:jpro-image-manager:0.6.2")
 }
 ```
 
@@ -171,7 +171,7 @@ using SMTP and SMTPS protocols. It also provides a simple way to compose and sen
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-mail</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -179,7 +179,7 @@ using SMTP and SMTPS protocols. It also provides a simple way to compose and sen
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-mail:")
+    implementation("one.jpro.platform:jpro-mail:0.6.2")
 }
 ```
 
@@ -194,7 +194,7 @@ all while utilizing the same codebase.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-media</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 
   <dependency>
@@ -215,7 +215,7 @@ plugins {
 }
 
 dependencies {
-    implementation("one.jpro.platform:jpro-media:")
+    implementation("one.jpro.platform:jpro-media:0.6.2")
     implementation "org.bytedeco:javacv-platform:1.5.10" // use compileOnly configuration when running/deploying with JPro
 }
 ```
@@ -233,7 +233,7 @@ Currently, there are three routing modules available:
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-core</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -241,7 +241,7 @@ Currently, there are three routing modules available:
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-core:")
+    implementation("one.jpro.platform:jpro-routing-core:0.6.2")
 }
 ```
 
@@ -253,7 +253,7 @@ dependencies {
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-dev</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -261,7 +261,7 @@ dependencies {
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-dev:")
+    implementation("one.jpro.platform:jpro-routing-dev:0.6.2")
 }
 ```
 
@@ -273,7 +273,7 @@ dependencies {
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-routing-popup</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -281,7 +281,7 @@ dependencies {
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-popup:")
+    implementation("one.jpro.platform:jpro-routing-popup:0.6.2")
 }
 ```
 
@@ -295,7 +295,7 @@ applications.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-mdfx</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -303,7 +303,7 @@ applications.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-mdfx:")
+    implementation("one.jpro.platform:jpro-mdfx:0.6.2")
 }
 ```
 
@@ -318,7 +318,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-session</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -326,7 +326,7 @@ This data is only accessible in the JPro Server, not in the browser - which can 
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-session:")
+    implementation("one.jpro.platform:jpro-session:0.6.2")
 }
 ```
 
@@ -339,7 +339,7 @@ This library offers essential tools for various functionalities to enhance the d
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-utils</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependency>
 ```
@@ -347,7 +347,7 @@ This library offers essential tools for various functionalities to enhance the d
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation 'one.jpro.platform:jpro-utils:'
+    implementation 'one.jpro.platform:jpro-utils:0.6.2'
 }
 ```
 
@@ -368,7 +368,7 @@ capabilities.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-webrtc</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -376,7 +376,7 @@ capabilities.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-webrtc:")
+    implementation("one.jpro.platform:jpro-webrtc:0.6.2")
 }
 ```
 
@@ -391,7 +391,7 @@ the embedded controls. The video can be played in full-screen mode.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-youtube</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -399,7 +399,7 @@ the embedded controls. The video can be played in full-screen mode.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-youtube:")
+    implementation("one.jpro.platform:jpro-youtube:0.6.2")
 }
 ```
 
@@ -428,7 +428,7 @@ Reactive dynamic CSS for JavaFX scenes and parents. Apply CSS strings at runtime
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-dynamic-css</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -436,7 +436,7 @@ Reactive dynamic CSS for JavaFX scenes and parents. Apply CSS strings at runtime
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-dynamic-css:")
+    implementation("one.jpro.platform:jpro-dynamic-css:0.6.2")
 }
 ```
 
@@ -451,7 +451,7 @@ properties — all styleable via CSS.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-flexbox</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -459,7 +459,7 @@ properties — all styleable via CSS.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-flexbox:")
+    implementation("one.jpro.platform:jpro-flexbox:0.6.2")
 }
 ```
 
@@ -472,7 +472,7 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
   <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-html-scrollpane</artifactId>
-    <version></version>
+    <version>0.6.2</version>
   </dependency>
 </dependencies>
 ```
@@ -480,7 +480,7 @@ Provides a skin implementation of a scrollpane for **JPro** applications only.
 #### Gradle configuration
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-html-scrollpane:")
+    implementation("one.jpro.platform:jpro-html-scrollpane:0.6.2")
 }
 ```
 
