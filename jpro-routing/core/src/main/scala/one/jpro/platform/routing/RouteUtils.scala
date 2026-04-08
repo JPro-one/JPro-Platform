@@ -1,6 +1,5 @@
 package one.jpro.platform.routing
 
-import one.jpro.platform.routing.filter.container.ContainerFactory
 import scala.language.postfixOps
 import simplefx.all
 import simplefx.all._
@@ -64,24 +63,5 @@ object RouteUtils {
     override def title: String = null
     override def description: String = ""
     override def content: all.Node = x
-  }
-
-
-
-
-  abstract class SFXContainerFactory extends ContainerFactory {
-    def isContainer(x: Node): Boolean
-    override def setContent(c: Node, x: Node): Unit = c.asInstanceOf[MyContainer].content = x
-    override def getContent(c: Node): Node = {
-      c.asInstanceOf[MyContainer].content
-    }
-    override def setRequest(c: Node, r: Request): Unit = c.asInstanceOf[MyContainer].request = r
-
-    type MyContainer <: Container with Node
-    trait Container { x: Node =>
-      @Bind var request: Request = null
-      @Bind var content: Node = null
-    }
-
   }
 }

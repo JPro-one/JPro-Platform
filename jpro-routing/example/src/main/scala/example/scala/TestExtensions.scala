@@ -12,7 +12,6 @@ import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter.Link
 import fr.brouillard.oss.cssfx.CSSFX
 import one.jpro.platform.routing.{Filters, LinkUtil, Redirect, Request, Response, Route, RouteNode, RouteUtils}
 import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter
-import one.jpro.platform.routing.filter.container.ContainerFactory
 import one.jpro.platform.routing.sessionmanager.SessionManager
 
 class TestExtensionsApp(stage: Stage) extends RouteNode(stage) {

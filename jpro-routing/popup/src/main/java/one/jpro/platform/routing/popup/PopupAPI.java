@@ -108,8 +108,7 @@ public class PopupAPI {
      * @return a filter which adds a Stackpane, which is used as a popup container
      */
     public static Filter createPopupContainerFilter() {
-        return ContainerFilter.create(
-                () -> new PopupContainer(), PopupContainer.class);
+        return ContainerFilter.fromContainer(PopupContainer::new);
     }
 
     private static class PopupContainer extends StackPane implements Container {

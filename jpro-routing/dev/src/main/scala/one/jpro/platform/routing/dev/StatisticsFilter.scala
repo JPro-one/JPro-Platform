@@ -1,11 +1,8 @@
 package one.jpro.platform.routing.dev
 
 import com.jpro.webapi.WebAPI
-import one.jpro.jmemorybuddy.JMemoryBuddyLive
-import one.jpro.platform.routing.filter.container.ContainerFilter
-import one.jpro.platform.routing.{Filter, LinkUtil, RouteUtils}
-import org.kordamp.ikonli.javafx.FontIcon
-import org.scenicview.ScenicView
+import one.jpro.platform.routing.filter.container.{ContainerFilter, ReactiveContainer}
+import one.jpro.platform.routing.Filter
 import org.slf4j.{Logger, LoggerFactory}
 import scala.language.postfixOps
 import simplefx.all._
@@ -18,216 +15,204 @@ object StatisticsFilter {
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  object StatisticsFilterContainerFactory extends RouteUtils.SFXContainerFactory {
+  def create(): Filter = ContainerFilter.fromReactiveContainer(() => new StatisticsContainer)
 
-    override def isContainer(x: Node): Boolean = x.isInstanceOf[MyContainer]
+  private class StatisticsContainer extends VBox with ReactiveContainer { CONTAINER =>
+    stylesheets <++ DevFilter.getClass.getResource("/one/jpro/platform/routing/dev/statisticsfilter.css").toExternalForm
 
-    override def createContainer() = new MyContainer
+    styleClass <++ "statisticsfilter-vbox"
 
-    class MyContainer extends VBox with Container {
-      CONTAINER =>
-      stylesheets <++ DevFilter.getClass.getResource("/one/jpro/platform/routing/dev/statisticsfilter.css").toExternalForm
+    override def toString(): String = s"DevFilter(content=$content)"
 
-      styleClass <++ "statisticsfilter-vbox"
+    this <++ new TextFlow { // Should use flexbox later
 
-      override def toString(): String = s"DevFilter(content=$content)"
+      styleClass <++ "statisticsfilter-hbox"
 
-      this <++ new TextFlow { // Should use flexbox later
+      var webAPIData: WebAPIData = null
 
-        styleClass <++ "statisticsfilter-hbox"
+      if (WebAPI.isBrowser) {
+        WebAPI.getWebAPI(this, (webAPI: WebAPI) => {
+          webAPIData = new WebAPIData(webAPI)
+          setupContent()
+        })
+      } else {
+        setupContent()
+      }
 
-        var webAPIData: WebAPIData = null
+      @Bind var loadTimeFX = (0 s)
+      @Bind var loadTimeJS = (0 s)
+
+      class WebAPIData(val webAPI: WebAPI) {
+        val instanceInfo = webAPI.getInstanceInfo
+
+        @Bind val afk = instanceInfo.afkProperty.toBindable
+        @Bind val latency = instanceInfo.latencyProperty.toBindable
+        @Bind val background = instanceInfo.backgroundProperty.toBindable
+        @Bind val lastUserActionTime = instanceInfo.lastActionTimeProperty.toBindable
+        @Bind val dataSent = instanceInfo.dataSentWSProperty.toBindable
+        @Bind val dataReceived = instanceInfo.dataReceivedWSProperty.toBindable
+        @Bind val nodesCreated = instanceInfo.nodesCreatedProperty.toBindable
+        @Bind val nodesSynchronized = instanceInfo.nodesSynchronizedProperty.toBindable
+        @Bind val nodesCollected = instanceInfo.nodesCollectedProperty.toBindable
+
+        @Bind var createdBeforeRequest = 0
+        @Bind val createdSinceRequest = <--(nodesCreated - createdBeforeRequest)
+      }
+
+
+      def setupContent(): Unit = {
+        request --> {
+          if (WebAPI.isBrowser) {
+            webAPIData.createdBeforeRequest := webAPIData.nodesCreated
+          }
+
+          val t1 = systemTime
+          nextFrame --> {
+            val t2 = systemTime
+            val t = t2 - t1
+            loadTimeFX := t
+            if (WebAPI.isBrowser) {
+              webAPIData.webAPI.executeScriptWithListener("1", r => {
+                val t3 = systemTime
+                val t = t3 - t2
+                loadTimeJS := t
+              })
+            }
+          }
+        }
+
+        def toFileSizeString(x: Int): (String, String) = {
+          val kb = x / 1024
+          val mb = kb / 1024
+          if (mb > 5) (formatInt(mb), "MB")
+          else if (kb > 50) (formatInt(kb), "KB")
+          else (formatInt(x), "B")
+        }
+
+        def toTimeString(x: Time): (String, String) = {
+          val ms = x div millisecond
+          (ms.toString, "ms")
+        }
+        def formatInt(x: Int): String = {
+          val s = x.toString
+          val l = s.length
+          if (l > 3) {
+            s.substring(0, l - 3) + "." + s.substring(l - 3, l)
+          } else {
+            s
+          }
+        }
 
         if (WebAPI.isBrowser) {
-          WebAPI.getWebAPI(this, (webAPI: WebAPI) => {
-            webAPIData = new WebAPIData(webAPI)
-            setupContent()
-          })
-        } else {
-          setupContent()
-        }
-
-        @Bind var loadTimeFX = (0 s)
-        @Bind var loadTimeJS = (0 s)
-
-        class WebAPIData(val webAPI: WebAPI) {
-          val instanceInfo = webAPI.getInstanceInfo
-
-          @Bind val afk = instanceInfo.afkProperty.toBindable
-          @Bind val latency = instanceInfo.latencyProperty.toBindable
-          @Bind val background = instanceInfo.backgroundProperty.toBindable
-          @Bind val lastUserActionTime = instanceInfo.lastActionTimeProperty.toBindable
-          @Bind val dataSent = instanceInfo.dataSentWSProperty.toBindable
-          @Bind val dataReceived = instanceInfo.dataReceivedWSProperty.toBindable
-          @Bind val nodesCreated = instanceInfo.nodesCreatedProperty.toBindable
-          @Bind val nodesSynchronized = instanceInfo.nodesSynchronizedProperty.toBindable
-          @Bind val nodesCollected = instanceInfo.nodesCollectedProperty.toBindable
-
-          @Bind var createdBeforeRequest = 0
-          @Bind val createdSinceRequest = <--(nodesCreated - createdBeforeRequest)
-        }
-
-
-        def setupContent(): Unit = {
-          request --> {
-            if (WebAPI.isBrowser) {
-              webAPIData.createdBeforeRequest := webAPIData.nodesCreated
+          this <++ new StatBox(true) {
+            labels <++ new Label("sent: ")
+            values <++ new Label() {
+              text <-- toFileSizeString(webAPIData.dataSent.toInt)._1
+            }
+            units <++ new Label() {
+              text <-- toFileSizeString(webAPIData.dataSent.toInt)._2
             }
 
-            val t1 = systemTime
-            nextFrame --> {
-              val t2 = systemTime
-              val t = t2 - t1
-              loadTimeFX := t
-              if (WebAPI.isBrowser) {
-                webAPIData.webAPI.executeScriptWithListener("1", r => {
-                  val t3 = systemTime
-                  val t = t3 - t2
-                  loadTimeJS := t
-                })
-              }
+            labels <++ new Label("received: ")
+            values <++ new Label() {
+              text <-- toFileSizeString(webAPIData.dataReceived.toInt)._1
             }
-          }
-
-          def toFileSizeString(x: Int): (String, String) = {
-            val kb = x / 1024
-            val mb = kb / 1024
-            if (mb > 5) (formatInt(mb), "MB")
-            else if (kb > 50) (formatInt(kb), "KB")
-            else (formatInt(x), "B")
-          }
-
-          def toTimeString(x: Time): (String, String) = {
-            val ms = x div millisecond
-            (ms.toString, "ms")
-          }
-          def formatInt(x: Int): String = {
-            val s = x.toString
-            val l = s.length
-            if(l > 3) {
-              s.substring(0,l-3) + "." + s.substring(l-3,l)
-            } else {
-              s
-            }
-          }
-
-          if(WebAPI.isBrowser) {
-            this <++ new StatBox(true) {
-              labels <++ new Label("sent: ")
-              values <++ new Label() {
-                text <-- toFileSizeString(webAPIData.dataSent.toInt)._1
-              }
-              units <++ new Label() {
-                text <-- toFileSizeString(webAPIData.dataSent.toInt)._2
-              }
-
-              labels <++ new Label("received: ")
-              values <++ new Label() {
-                text <-- toFileSizeString(webAPIData.dataReceived.toInt)._1
-              }
-              units <++ new Label() {
-                text <-- toFileSizeString(webAPIData.dataReceived.toInt)._2
-              }
-            }
-            //this <++ new Label() {
-            //  text <-- ("Latency: " + webAPIData.latency + " ms")
-            //}
-
-            this <++ new StatBox(true) {
-              labels <++ new Label("Latency: ")
-              values <++ new Label() {
-                text <-- ("" + toTimeString(webAPIData.latency * (millisecond))._1)
-              }
-              units <++ new Label() {
-                text <-- ("" + toTimeString(webAPIData.latency * (millisecond))._2)
-              }
+            units <++ new Label() {
+              text <-- toFileSizeString(webAPIData.dataReceived.toInt)._2
             }
           }
 
           this <++ new StatBox(true) {
-            labels <++ new Label("loadTimeFX: ")
+            labels <++ new Label("Latency: ")
             values <++ new Label() {
-              text <-- ("" + toTimeString(loadTimeFX)._1)
+              text <-- ("" + toTimeString(webAPIData.latency * (millisecond))._1)
             }
             units <++ new Label() {
-              text <-- ("" + toTimeString(loadTimeFX)._2)
-            }
-            if(WebAPI.isBrowser) {
-              labels <++ new Label("loadTimeJS: ")
-              values <++ new Label() {
-                text <-- ("" + toTimeString(loadTimeJS)._1)
-              }
-              units <++ new Label() {
-                text <-- ("" + toTimeString(loadTimeJS)._2)
-              }
+              text <-- ("" + toTimeString(webAPIData.latency * (millisecond))._2)
             }
           }
+        }
 
-          if(WebAPI.isBrowser) {
-            this <++ new StatBox {
-              labels <++ new Label("nodesSynchronized: ")
-              values <++ new Label() {
-                text <-- ("" + webAPIData.nodesSynchronized)
-              }
-              labels <++ new Label("createdSinceRequest: ")
-              values <++ new Label() {
-                text <-- ("" + webAPIData.createdSinceRequest)
-              }
+        this <++ new StatBox(true) {
+          labels <++ new Label("loadTimeFX: ")
+          values <++ new Label() {
+            text <-- ("" + toTimeString(loadTimeFX)._1)
+          }
+          units <++ new Label() {
+            text <-- ("" + toTimeString(loadTimeFX)._2)
+          }
+          if (WebAPI.isBrowser) {
+            labels <++ new Label("loadTimeJS: ")
+            values <++ new Label() {
+              text <-- ("" + toTimeString(loadTimeJS)._1)
+            }
+            units <++ new Label() {
+              text <-- ("" + toTimeString(loadTimeJS)._2)
             }
           }
-          this <++ new StatBox() {
-            labels <++ new Label("Nodes: ")
+        }
+
+        if (WebAPI.isBrowser) {
+          this <++ new StatBox {
+            labels <++ new Label("nodesSynchronized: ")
             values <++ new Label() {
-              text <-- ("" + formatInt(CONTAINER.treeSize))
+              text <-- ("" + webAPIData.nodesSynchronized)
             }
-            labels <++ new Label("visible Nodes: ")
+            labels <++ new Label("createdSinceRequest: ")
             values <++ new Label() {
-              text <-- ("" + formatInt(CONTAINER.visibleTreeSize))
+              text <-- ("" + webAPIData.createdSinceRequest)
             }
           }
-          this <++ new StatBox() {
-            @Bind var minWidthV = 0.0
-            @Bind var treeVisisble = TreeShowing.treeShowing(this).toBindable
-            when(treeVisisble) ==> {
-              every(1 s) --> {
-                minWidthV := this.scene.root.minWidth(-1)
-              }
+        }
+        this <++ new StatBox() {
+          labels <++ new Label("Nodes: ")
+          values <++ new Label() {
+            text <-- ("" + formatInt(CONTAINER.treeSize))
+          }
+          labels <++ new Label("visible Nodes: ")
+          values <++ new Label() {
+            text <-- ("" + formatInt(CONTAINER.visibleTreeSize))
+          }
+        }
+        this <++ new StatBox() {
+          @Bind var minWidthV = 0.0
+          @Bind var treeVisisble = TreeShowing.treeShowing(this).toBindable
+          when(treeVisisble) ==> {
+            every(1 s) --> {
+              minWidthV := this.scene.root.minWidth(-1)
             }
-            labels <++ new Label("minWidth: ")
-            values <++ new Label() {
-              text <-- ("" + minWidthV)
-            }
+          }
+          labels <++ new Label("minWidth: ")
+          values <++ new Label() {
+            text <-- ("" + minWidthV)
           }
         }
       }
-      class StatBox(addUnits: Boolean = false) extends HBox {
-        styleClass <++ "statisticsfilter-statbox"
+    }
+    class StatBox(addUnits: Boolean = false) extends HBox {
+      styleClass <++ "statisticsfilter-statbox"
 
-        val labels = new VBox {
-          styleClass <++ "statisticsfilter-statbox-labels"
-        }
-        val values = new VBox {
-          styleClass <++ "statisticsfilter-statbox-values"
-        }
-        val units = new VBox {
-          styleClass <++ "statisticsfilter-statbox-units"
-        }
+      val labels = new VBox {
+        styleClass <++ "statisticsfilter-statbox-labels"
+      }
+      val values = new VBox {
+        styleClass <++ "statisticsfilter-statbox-values"
+      }
+      val units = new VBox {
+        styleClass <++ "statisticsfilter-statbox-units"
+      }
 
-        this <++ labels
-        this <++ values
-        if(addUnits) {
-          this <++ units
-        }
+      this <++ labels
+      this <++ values
+      if (addUnits) {
+        this <++ units
       }
-      this <++ new StackPane {
-        pickOnBounds = false
-        javafx.scene.layout.VBox.setVgrow(this, Priority.ALWAYS)
-        children <-- (if (content != null) List(content) else Nil)
-      }
+    }
+    this <++ new StackPane {
+      pickOnBounds = false
+      javafx.scene.layout.VBox.setVgrow(this, Priority.ALWAYS)
+      children <-- (if (content != null) List(content) else Nil)
     }
   }
 
-  def create(): Filter = {
-    ContainerFilter.create(StatisticsFilterContainerFactory)
-  }
 }

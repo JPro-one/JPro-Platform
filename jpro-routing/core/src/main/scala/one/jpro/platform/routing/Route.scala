@@ -47,14 +47,18 @@ trait Route {
   def filter(filter: Filter): Route = filter(this)
   def filterWhen(cond: Predicate[Request], filter: (Request) => Filter): Route = { r =>
     if(cond.test(r)) {
-      filter.apply(r)(this).apply(r)
+      // Wrap the user-supplied lambda so any StatefulFilter constructed
+      // inside it is detected and reported as a fail-fast violation.
+      val resolved = StatefulFilterContext.runInRequestLambda(filter.apply(r))
+      resolved(this).apply(r)
     } else {
       this.apply(r)
     }
   }
   def filterWhenFuture(cond: Predicate[Request], filter: (Request) => FXFuture[Filter]): Route = { r =>
     if(cond.test(r)) {
-      Response(filter(r).flatMap(filter => filter(this).apply(r).future))
+      val future = StatefulFilterContext.runInRequestLambda(filter(r))
+      Response(future.flatMap(filter => filter(this).apply(r).future))
     } else {
       this.apply(r)
     }
