@@ -1,6 +1,20 @@
 # Changelog
 
-## 0.6.x
+## Unreleased
+
+#### Features
+* Added `StatefulFilter` base class for filters that hold per-session state. Constructing one inside a per-request route lambda (`filterWhen` / `filterWhenFuture`) now fails fast with a clear error message — fixing a class of subtle bugs where filters were re-created on every navigation.
+* Added `Filters.css(...)` (and `CssFilter`) for scoping stylesheets to a route subtree. CSS attached to the wrapper container Parent, not the Scene, so per-route stylesheets cannot bleed into sibling subtrees. Reactive: pass an `ObservableList[String]` to swap stylesheets at runtime (e.g. for responsive desktop/mobile or theme switching).
+* Added `ContainerFilter.fromContainer(...)` and `ContainerFilter.fromReactiveContainer(...)` static factories so wrappers that implement the `Container` trait or mix in `ReactiveContainer` no longer need a hand-written four-method bridge subclass.
+
+#### Improvements
+* `ContainerFilter` is now an abstract class with three implementation hooks (`createNode` / `setContent` / `getContent`) and a default no-op `setRequest`. Identity is per-instance (the filter object itself), removing the previous class-based identity key and the `ContainerFactory` indirection.
+* `ContainerFilter` holds its container via `WeakReference`, so the wrapper Node can be garbage-collected once nothing in the live scene graph references it. `CssFilter` uses `WeakListChangeListener` for the same reason. Both restore the memory profile of the previous design without the property-key identity check.
+
+#### Breaking changes
+* `ContainerFactory` trait and `ContainerFilter.create(supplier, clazz)` factory removed — subclass `ContainerFilter` directly, or use one of the `fromContainer` / `fromReactiveContainer` factories.
+* `RouteUtils.SFXContainerFactory` removed — replaced by mixing the new `ReactiveContainer` trait into your wrapper Node.
+
 ### 0.6.2 (April 1, 2026)
 
 #### Improvements

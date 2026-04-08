@@ -1,11 +1,34 @@
 package one.jpro.platform.routing
 
+import javafx.collections.{FXCollections, ObservableList}
 import javafx.scene.control.Label
+import one.jpro.platform.routing.filter.container.CssFilter
 import simplefx.all
 import java.util.function.Function
 import java.util.function.BiFunction
 
 object Filters {
+
+  /**
+   * Wraps the matched view in a `StackPane` whose stylesheets reflect the
+   * given list. Mutating the list at runtime updates the wrapper's
+   * stylesheets immediately, so this can be driven by an `isMobile`
+   * subscription, a theme switcher, etc.
+   *
+   * Note: this returns a [[StatefulFilter]] (specifically a [[CssFilter]]).
+   * Each call creates a new instance with its own identity. As with any
+   * stateful filter, do NOT call this from inside a per-request lambda
+   * (`filterWhen`, `filterWhenFuture`) — hoist it to a field on your
+   * RouteApp or a Site object instead.
+   */
+  def css(sheets: ObservableList[String]): Filter = new CssFilter(sheets)
+
+  /** Convenience overload for a fixed (non-reactive) list of stylesheets. */
+  def css(sheets: String*): Filter = new CssFilter(FXCollections.observableArrayList(sheets: _*))
+
+  /** Java-friendly varargs overload. */
+  def css(sheets: Array[String]): Filter = new CssFilter(FXCollections.observableArrayList(sheets: _*))
+
   def FullscreenFilter(fullscreenValue: Boolean): Filter = { route => { request =>
       val r = route.apply(request)
 
