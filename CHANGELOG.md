@@ -3,7 +3,7 @@
 ## Unreleased
 
 #### Features
-* Added `Filters.css(...)` (and `CssFilter`) for scoping stylesheets to a route subtree — attached to the wrapper container `Parent`, not the `Scene`, so per-route CSS cannot bleed into siblings. Reactive via `ObservableList[String]` for runtime swaps (responsive, theme switching).
+* Added `Filters.stylesheets(...)` and `Filters.styleClasses(...)` for scoping stylesheets and style classes to a route subtree. Both attach to the wrapper container `Parent` (not the `Scene`), so per-route values cannot bleed into siblings. Reactive via `ObservableList[String]`, plus a Scala-only by-name overload (`=> List[String]`) that uses simplefx binding to track `@Bind` dependencies automatically.
 
 #### Improvements
 * Reworked `ContainerFilter` — now an abstract class subclassed directly (or built via `fromContainer` / `fromReactiveContainer` factories), with per-instance identity and a `WeakReference`-held wrapper so it can be garbage-collected once no live scene graph references it. The new `StatefulFilter` base it extends fails fast when any container/stateful filter is constructed inside a per-request lambda (`filterWhen` / `filterWhenFuture`). **Breaking**: removes `ContainerFactory`, `RouteUtils.SFXContainerFactory`, and the old `ContainerFilter.create(supplier, clazz)` factory.
