@@ -157,6 +157,7 @@ object LinkUtil {
         val divBox = webapi.executeScriptWithVariable("document.createElement('div')");
         webapi.executeScript(
           s"""
+             |${aElem.getName}.style.pointerEvents = 'auto';
              |${aElem.getName}.appendChild(${divBox.getName});
              |${divBox.getName}.style.display = 'block';
              |${divBox.getName}.style.position = 'absolute';

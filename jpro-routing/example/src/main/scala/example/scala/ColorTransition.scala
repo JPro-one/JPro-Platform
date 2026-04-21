@@ -2,27 +2,11 @@ package example.scala
 
 import one.jpro.platform.routing.Route.{get, redirect}
 import com.jpro.webapi.WebAPI
-import one.jpro.platform.routing.{Filters, LinkUtil, Request, Response, Route, RouteNode, RouteUtils}
+import one.jpro.platform.routing.{Filters, LinkUtil, Response, Route, RouteNode, RouteUtils}
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import simplefx.all._
 import simplefx.core._
 import one.jpro.platform.routing.dev.DevFilter
-
-object HeaderFactory extends RouteUtils.SFXContainerFactory {
-
-  override def isContainer(x: Node): Boolean = x.isInstanceOf[MyContainer]
-  override def createContainer() = new MyContainer
-  class MyContainer extends VBox with Container {
-
-    this <++ new Label {
-      text <-- (if(request != null) request.getOriginalPath() else "---")
-    }
-    this <++ new StackPane {
-      javafx.scene.layout.VBox.setVgrow(this, Priority.ALWAYS)
-      children <-- (if(content != null) List(content) else Nil)
-    }
-  }
-}
 
 class ColorTransition(stage: Stage) extends RouteNode(stage) {
   private def format(v: Double) = {
@@ -56,8 +40,6 @@ class ColorTransition(stage: Stage) extends RouteNode(stage) {
       .filter(Filters.FullscreenFilter(true))
       .filter(RouteUtils.sideTransitionFilter(1))
       .filter(DevFilter.create())
-      //.filter(RouteUtils.containerFilter(HeaderFactory) compose RouteUtils.containerFilter(HeaderFactory))
-      //.filter(RouteUtils.containerFilter(HeaderFactory))
   )
 }
 
