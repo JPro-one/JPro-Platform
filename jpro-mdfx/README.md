@@ -80,7 +80,7 @@ markdownView.getStylesheets().add(getClass().getResource("/my-style.css").toExte
 
 Fenced code blocks are rendered with TextMate-based syntax highlighting using [tm4javafx](https://github.com/mkpaz/tm4javafx) (VSCode-compatible TextMate grammars).
 
-**Supported languages:** java, javascript/js, python/py, css, html, xml, json, yaml, typescript/ts, c, cpp, go, rust, ruby, swift, sql, bash/sh, groovy, dart, dockerfile, markdown, php, kotlin
+**Supported languages:** java, javascript/js, python/py, css, html, xml, json, yaml, typescript/ts, c, cpp, go, rust, ruby, swift, sql, bash/sh, groovy, dart, dockerfile, markdown, php, kotlin, http/rest
 
 ### Code Highlighting Theme via CSS
 
