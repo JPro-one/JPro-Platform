@@ -181,7 +181,6 @@
 /* ---------- CODE BLOCK ---------- */
 
 .markdown-code-block {
-    -mdfx-scrollable: true;
 }
 
 .markdown-code-block .code-text-flow {
