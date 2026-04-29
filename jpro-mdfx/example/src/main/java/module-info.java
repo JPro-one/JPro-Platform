@@ -12,6 +12,6 @@ module one.jpro.platform.mdfx.example {
     requires one.jpro.platform.mdfx;
     requires one.jpro.platform.dynamic.css;
     requires org.scenicview.scenicview;
-
     exports one.jpro.platform.mdfx.example;
+    opens one.jpro.platform.mdfx.example;
 }

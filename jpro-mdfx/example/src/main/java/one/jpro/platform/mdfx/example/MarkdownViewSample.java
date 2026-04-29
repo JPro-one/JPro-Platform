@@ -38,6 +38,7 @@ public class MarkdownViewSample extends Application {
 
     private static final String STYLE_NONE = "None";
     private static final String STYLE_DARK = "Dark";
+    private static final String STYLE_NORD = "Nord";
     private static final String STYLE_SEPIA = "Sepia";
     private static final String STYLE_BLUE = "Blue";
 
@@ -122,6 +123,27 @@ public class MarkdownViewSample extends Application {
             }
             """;
 
+    private static final String NORD_CSS = """
+            * {
+                -mdfx-font-color: #d8dee9;
+                -mdfx-link-color: #88c0d0;
+                -mdfx-border-color-1: #4c566a;
+                -mdfx-bg-color-1: #2e3440;
+                -mdfx-bg-color-2: #3b4252;
+                -mdfx-bg-color-3: #434c5e;
+                -mdfx-bq-color-border: #88c0d0;
+                -mdfx-bq-color-background: #88c0d024;
+                -mdfx-code-block-border: #4c566a;
+                -mdfx-code-block-background: #2e3440;
+            }
+            .markdown-view {
+                -fx-background-color: #2e3440;
+            }
+            .markdown-code-block {
+                -mdfx-code-theme: "/one/jpro/platform/mdfx/example/nord-color-theme.json";
+            }
+            """;
+
     @Override
     public void start(Stage stage) {
         stage.setTitle("JPro Markdown View");
@@ -185,6 +207,7 @@ public class MarkdownViewSample extends Application {
                 return codeBlock;
             }
         };
+        markdownView.setThemeResourceClass(MarkdownViewSample.class);
         markdownView.setPadding(new Insets(0, 10, 0, 10));
         markdownView.mdStringProperty().bind(mdTextArea.textProperty());
 
@@ -194,7 +217,7 @@ public class MarkdownViewSample extends Application {
 
         // CSS style selector
         ComboBox<String> styleSelector = new ComboBox<>(
-                FXCollections.observableArrayList(STYLE_NONE, STYLE_DARK, STYLE_SEPIA, STYLE_BLUE));
+                FXCollections.observableArrayList(STYLE_NONE, STYLE_DARK, STYLE_NORD, STYLE_SEPIA, STYLE_BLUE));
         styleSelector.setValue(STYLE_NONE);
 
         // Custom CSS editor
@@ -206,6 +229,7 @@ public class MarkdownViewSample extends Application {
         styleSelector.valueProperty().addListener((obs, oldVal, newVal) -> {
             String css = switch (newVal) {
                 case STYLE_DARK -> DARK_CSS;
+                case STYLE_NORD -> NORD_CSS;
                 case STYLE_SEPIA -> SEPIA_CSS;
                 case STYLE_BLUE -> BLUE_CSS;
                 default -> "";

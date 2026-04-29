@@ -84,7 +84,7 @@ public class MarkdownView extends VBox {
     }
 
     public void setThemeResourceClass(Class<?> themeResourceClass) {
-        this.themeResourceClass = Objects.requireNonNull(themeResourceClass, "resourceLoader");
+        this.themeResourceClass = Objects.requireNonNull(themeResourceClass, "themeResourceClass");
         updateContent();
     }
 
