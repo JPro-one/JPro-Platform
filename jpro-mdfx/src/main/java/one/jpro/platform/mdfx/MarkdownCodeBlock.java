@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Displays syntax-highlighted code using TextMate grammars.
@@ -91,11 +92,17 @@ public class MarkdownCodeBlock extends StackPane {
     private final TextFlow textFlow;
     private final String code;
     private final String language;
+    private final Class<?> resourceBaseClass;
     private TextFlowModel textFlowModel;
 
     public MarkdownCodeBlock(String code, String language) {
+        this(code, language, MarkdownCodeBlock.class);
+    }
+
+    public MarkdownCodeBlock(String code, String language, Class<?> themeResourceClass) {
         this.code = code;
         this.language = language;
+        this.resourceBaseClass = Objects.requireNonNull(themeResourceClass, "themeResourceClass");
 
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
@@ -129,7 +136,7 @@ public class MarkdownCodeBlock extends StackPane {
                     IGrammarSource.fromResource(MarkdownCodeBlock.class, grammarResource)
             );
             styleProvider.setTheme(
-                    IThemeSource.fromResource(MarkdownCodeBlock.class, codeTheme.get())
+                    createCodeThemeSource(codeTheme.get())
             );
 
             textFlowModel = new TextFlowModel();
@@ -145,6 +152,13 @@ public class MarkdownCodeBlock extends StackPane {
         } catch (Exception e) {
             showPlainText(code);
         }
+    }
+
+    protected IThemeSource createCodeThemeSource(String codeTheme) {
+        if (resourceBaseClass.getResource(codeTheme) != null) {
+            return IThemeSource.fromResource(resourceBaseClass, codeTheme);
+        }
+        return IThemeSource.fromResource(MarkdownCodeBlock.class, codeTheme);
     }
 
     private void showPlainText(String code) {

@@ -22,12 +22,15 @@ public class MarkdownView extends VBox {
     private final List<ImageExtension> extensions;
 
     private final SimpleStringProperty mdString = new SimpleStringProperty("");
+    private Class<?> themeResourceClass;
 
     public MarkdownView(String mdString) {
         this(mdString, defaultExtensions());
     }
 
     public MarkdownView(String mdString, List<ImageExtension> extensions) {
+        this.themeResourceClass = getClass();
+
         // Check whether only one extension has the scheme null
         if(extensions.stream().filter(e -> e.getScheme() == null).count() > 1) {
             throw new IllegalArgumentException("Only one extension can have a scheme of null");
@@ -76,6 +79,15 @@ public class MarkdownView extends VBox {
         return Optional.empty();
     }
 
+    public Class<?> getThemeResourceClass() {
+        return themeResourceClass;
+    }
+
+    public void setThemeResourceClass(Class<?> themeResourceClass) {
+        this.themeResourceClass = Objects.requireNonNull(themeResourceClass, "resourceLoader");
+        updateContent();
+    }
+
     public boolean showChapter(int[] currentChapter) {
             return true;
     }
@@ -103,7 +115,7 @@ public class MarkdownView extends VBox {
     }
 
     public Node generateFencedCodeBlock(String code, String language) {
-        return new MarkdownCodeBlock(code, language);
+        return new MarkdownCodeBlock(code, language, themeResourceClass);
     }
 
     public static List<ImageExtension> defaultExtensions() {
