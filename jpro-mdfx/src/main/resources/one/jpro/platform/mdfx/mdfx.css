@@ -193,3 +193,24 @@
     -fx-line-spacing: 2px;
     -fx-font-family: "monospace";
 }
+
+.markdown-code-block.scrollable .code-scroll-pane {
+    -fx-padding: 0px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-border-color: -mdfx-code-block-border;
+    -fx-border-width: 1px;
+    -fx-background-color: -mdfx-code-block-background;
+}
+
+.markdown-code-block.scrollable .code-scroll-pane .viewport,
+.markdown-code-block.scrollable .code-scroll-pane .corner {
+    -fx-background-color: transparent;
+}
+
+.markdown-code-block.scrollable .code-text-flow {
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
