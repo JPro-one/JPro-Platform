@@ -181,6 +181,7 @@
 /* ---------- CODE BLOCK ---------- */
 
 .markdown-code-block {
+    -mdfx-scrollable: true;
 }
 
 .markdown-code-block .code-text-flow {
@@ -195,7 +196,7 @@
 }
 
 .markdown-code-block.scrollable .code-scroll-pane {
-    -fx-padding: 0px;
+    -fx-padding: 2px;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-border-color: -mdfx-code-block-border;
