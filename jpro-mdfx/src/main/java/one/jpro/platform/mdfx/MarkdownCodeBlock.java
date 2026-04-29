@@ -1,6 +1,9 @@
 package one.jpro.platform.mdfx;
 
 import javafx.css.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -23,6 +26,7 @@ import java.util.Map;
 public class MarkdownCodeBlock extends StackPane {
 
     private static final String DEFAULT_STYLE_CLASS = "markdown-code-block";
+    private static final String SCROLLABLE_STYLE_CLASS = "scrollable";
     private static final String DEFAULT_CODE_THEME = "/one/jpro/platform/mdfx/themes/github-light-default.json";
 
     private static final Map<String, String> LANGUAGE_TO_GRAMMAR = new HashMap<>();
@@ -80,15 +84,32 @@ public class MarkdownCodeBlock extends StackPane {
                 }
             };
 
+    private static final CssMetaData<MarkdownCodeBlock, Boolean> SCROLLABLE =
+            new CssMetaData<>("-mdfx-scrollable", StyleConverter.getBooleanConverter(), false) {
+                @Override
+                public boolean isSettable(MarkdownCodeBlock node) {
+                    return !node.scrollable.isBound();
+                }
+
+                @Override
+                public StyleableProperty<Boolean> getStyleableProperty(MarkdownCodeBlock node) {
+                    return node.scrollable;
+                }
+            };
+
     private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
     static {
         List<CssMetaData<? extends Styleable, ?>> list = new ArrayList<>(StackPane.getClassCssMetaData());
         list.add(CODE_THEME);
+        list.add(SCROLLABLE);
         STYLEABLES = Collections.unmodifiableList(list);
     }
 
     private final StyleableStringProperty codeTheme = new SimpleStyleableStringProperty(CODE_THEME, this, "codeTheme", DEFAULT_CODE_THEME);
+    private final StyleableBooleanProperty scrollable = new SimpleStyleableBooleanProperty(SCROLLABLE, this, "scrollable", false);
+
     private final TextFlow textFlow;
+    private final ScrollPane scrollPane;
     private final String code;
     private final String language;
     private TextFlowModel textFlowModel;
@@ -101,9 +122,58 @@ public class MarkdownCodeBlock extends StackPane {
 
         textFlow = new TextFlow();
         textFlow.getStyleClass().add("code-text-flow");
-        getChildren().add(textFlow);
 
+        scrollPane = new ScrollPane();
+        scrollPane.getStyleClass().add("code-scroll-pane");
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(false);
+        scrollPane.setFocusTraversable(false);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.viewportBoundsProperty().subscribe(bounds -> updateTextFlowMinWidth());
+
+        updateScrollableState();
+
+        scrollable.subscribe(v -> updateScrollableState());
         codeTheme.subscribe(v -> updateContent());
+    }
+
+    public final boolean isScrollable() {
+        return scrollable.get();
+    }
+
+    public final void setScrollable(boolean scrollable) {
+        this.scrollable.set(scrollable);
+    }
+
+    public final BooleanProperty scrollableProperty() {
+        return scrollable;
+    }
+
+    private void updateScrollableState() {
+        getStyleClass().remove(SCROLLABLE_STYLE_CLASS);
+        getChildren().clear();
+
+        if (isScrollable()) {
+            getStyleClass().add(SCROLLABLE_STYLE_CLASS);
+            scrollPane.setContent(textFlow);
+            getChildren().add(scrollPane);
+        } else {
+            scrollPane.setContent(null);
+            getChildren().add(textFlow);
+        }
+
+        updateTextFlowMinWidth();
+    }
+
+    private void updateTextFlowMinWidth() {
+        if (isScrollable()) {
+            textFlow.setMinWidth(scrollPane.getViewportBounds().getWidth());
+            textFlow.setMinHeight(scrollPane.getViewportBounds().getHeight());
+        } else {
+            textFlow.setMinWidth(Region.USE_COMPUTED_SIZE);
+            textFlow.setMinHeight(Region.USE_COMPUTED_SIZE);
+        }
     }
 
     private void updateContent() {
@@ -142,6 +212,10 @@ public class MarkdownCodeBlock extends StackPane {
 
             ThemeSettings settings = styleProvider.getThemeSettings();
             StyleHelper.applyThemeSettings(textFlow, settings);
+            if (settings != null) {
+                StyleHelper.addOrReplaceStyle(scrollPane, "-fx-background", settings.getBackgroundColor());
+                StyleHelper.addOrReplaceStyle(scrollPane, "-fx-background-color", settings.getBackgroundColor());
+            }
         } catch (Exception e) {
             showPlainText(code);
         }
