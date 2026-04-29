@@ -200,7 +200,7 @@ public class MDFXNodeHelper extends VBox {
                 language = parent.getDefaultLanguage().orElse("");
             }
 
-            MarkdownCodeBlock codeBlock = new MarkdownCodeBlock(code, language);
+            var codeBlock = parent.generateFencedCodeBlock(code, language);
             root.getChildren().add(codeBlock);
         }
 
