@@ -102,6 +102,9 @@ public class MarkdownView extends VBox {
         return res.get().getFunction().apply(url, this);
     }
 
+    public Node generateFencedCodeBlock(String code, String language) {
+        return new MarkdownCodeBlock(code, language);
+    }
 
     public static List<ImageExtension> defaultExtensions() {
         return new ArrayList<>(List.of(DEFAULT_IMAGE_EXTENSION));

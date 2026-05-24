@@ -8,11 +8,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import one.jpro.platform.css.DynamicCSSUtil;
+import one.jpro.platform.mdfx.MarkdownCodeBlock;
 import one.jpro.platform.mdfx.MarkdownView;
 import one.jpro.platform.mdfx.extensions.YoutubeExtension;
 import org.apache.commons.io.IOUtils;
@@ -159,6 +161,28 @@ public class MarkdownViewSample extends Application {
                 } else {
                     return super.generateImage(url);
                 }
+            }
+
+            @Override
+            public Node generateFencedCodeBlock(String code, String language) {
+                Node codeBlock = super.generateFencedCodeBlock(code, language);
+
+                MenuItem copyItem = new MenuItem("Copy to Clipboard");
+                copyItem.setOnAction(event -> {
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString(code);
+                    Clipboard.getSystemClipboard().setContent(content);
+                });
+
+                var contextMenu = new ContextMenu(copyItem);
+
+                codeBlock.setOnMouseClicked(event -> {
+                   if (event.getButton() == MouseButton.SECONDARY) {
+                       contextMenu.show(codeBlock, event.getScreenX(), event.getScreenY());
+                   }
+                });
+
+                return codeBlock;
             }
         };
         markdownView.setPadding(new Insets(0, 10, 0, 10));
