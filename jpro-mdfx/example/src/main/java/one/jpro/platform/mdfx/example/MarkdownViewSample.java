@@ -65,6 +65,8 @@ public class MarkdownViewSample extends Application {
 
             .markdown-code-block {
                 -mdfx-code-theme: "/one/jpro/platform/mdfx/themes/github-light-default.json";
+                -mdfx-scrollable: true;
+                -mdfx-add-copy-button: true;
             }
             */
             """;
@@ -85,6 +87,7 @@ public class MarkdownViewSample extends Application {
             }
             .markdown-code-block {
                 -mdfx-code-theme: "/one/jpro/platform/mdfx/themes/github-dark-default.json";
+                -mdfx-add-copy-button: true;
             }
             """;
 
@@ -150,6 +153,7 @@ public class MarkdownViewSample extends Application {
         Scene scene = new Scene(createRoot(stage), 1200, 700);
         stage.setScene(scene);
         stage.show();
+        //ScenicView.show(scene);
     }
 
     public Parent createRoot(Stage stage) {

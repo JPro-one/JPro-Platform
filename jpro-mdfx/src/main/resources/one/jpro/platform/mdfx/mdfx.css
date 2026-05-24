@@ -215,3 +215,15 @@
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
 }
+
+.markdown-code-block .code-copy-button {
+    -fx-padding: 2px 8px;
+    -fx-font-size: 0.85em;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-opacity: 0.65;
+}
+
+.markdown-code-block:hover .code-copy-button {
+    -fx-opacity: 1.0;
+}
