@@ -100,6 +100,18 @@ The `-mdfx-code-theme` CSS property controls which TextMate theme is used for sy
 
 Users can point to their own TextMate theme JSON resource.
 
+### Scrollable Code Blocks
+
+Code blocks wrap their content by default. For source code where wrapping makes line structure harder to read, enable horizontal scrolling with `-mdfx-scrollable`:
+
+```css
+.markdown-code-block {
+    -mdfx-scrollable: true;
+}
+```
+
+When enabled, fenced code blocks keep their original horizontal layout and show a horizontal scrollbar when the code is wider than the available Markdown view width.
+
 ## Supported Markdown Features
 
 Headings (H1–H5), bold, italic, strikethrough, links, images, ordered/unordered lists, task lists, fenced code blocks with syntax highlighting, inline code, GFM tables, blockquotes, attributes.
