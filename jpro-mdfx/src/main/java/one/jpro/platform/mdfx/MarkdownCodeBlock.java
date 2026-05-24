@@ -2,11 +2,15 @@ package one.jpro.platform.mdfx;
 
 import javafx.css.*;
 import javafx.beans.property.BooleanProperty;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import one.jpro.platform.utils.CopyUtil;
 import tm4javafx.richtext.StyleHelper;
 import tm4javafx.richtext.StyleProvider;
 import tm4javafx.richtext.TextFlowModel;
@@ -28,6 +32,7 @@ public class MarkdownCodeBlock extends StackPane {
 
     private static final String DEFAULT_STYLE_CLASS = "markdown-code-block";
     private static final String SCROLLABLE_STYLE_CLASS = "scrollable";
+    private static final String COPY_BUTTON_STYLE_CLASS = "code-copy-button";
     private static final String DEFAULT_CODE_THEME = "/one/jpro/platform/mdfx/themes/github-light-default.json";
 
     private static final Map<String, String> LANGUAGE_TO_GRAMMAR = new HashMap<>();
@@ -100,19 +105,35 @@ public class MarkdownCodeBlock extends StackPane {
                 }
             };
 
+    private static final CssMetaData<MarkdownCodeBlock, Boolean> ADD_COPY_BUTTON =
+            new CssMetaData<>("-mdfx-add-copy-button", StyleConverter.getBooleanConverter(), false) {
+                @Override
+                public boolean isSettable(MarkdownCodeBlock node) {
+                    return !node.addCopyButton.isBound();
+                }
+
+                @Override
+                public StyleableProperty<Boolean> getStyleableProperty(MarkdownCodeBlock node) {
+                    return node.addCopyButton;
+                }
+            };
+
     private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
     static {
         List<CssMetaData<? extends Styleable, ?>> list = new ArrayList<>(StackPane.getClassCssMetaData());
         list.add(CODE_THEME);
         list.add(SCROLLABLE);
+        list.add(ADD_COPY_BUTTON);
         STYLEABLES = Collections.unmodifiableList(list);
     }
 
     private final StyleableStringProperty codeTheme = new SimpleStyleableStringProperty(CODE_THEME, this, "codeTheme", DEFAULT_CODE_THEME);
     private final StyleableBooleanProperty scrollable = new SimpleStyleableBooleanProperty(SCROLLABLE, this, "scrollable", false);
+    private final StyleableBooleanProperty addCopyButton = new SimpleStyleableBooleanProperty(ADD_COPY_BUTTON, this, "addCopyButton", false);
 
     private final TextFlow textFlow;
     private final ScrollPane scrollPane;
+    private Button copyButton;
     private final String code;
     private final String language;
     private final Class<?> resourceBaseClass;
@@ -144,6 +165,7 @@ public class MarkdownCodeBlock extends StackPane {
         updateScrollableState();
 
         scrollable.subscribe(v -> updateScrollableState());
+        addCopyButton.subscribe(v -> updateScrollableState());
         codeTheme.subscribe(v -> updateContent());
     }
 
@@ -159,6 +181,18 @@ public class MarkdownCodeBlock extends StackPane {
         return scrollable;
     }
 
+    public final boolean isAddCopyButton() {
+        return addCopyButton.get();
+    }
+
+    public final void setAddCopyButton(boolean addCopyButton) {
+        this.addCopyButton.set(addCopyButton);
+    }
+
+    public final BooleanProperty addCopyButtonProperty() {
+        return addCopyButton;
+    }
+
     private void updateScrollableState() {
         getStyleClass().remove(SCROLLABLE_STYLE_CLASS);
         getChildren().clear();
@@ -172,7 +206,23 @@ public class MarkdownCodeBlock extends StackPane {
             getChildren().add(textFlow);
         }
 
+        if (isAddCopyButton()) {
+            getChildren().add(getOrCreateCopyButton());
+        }
+
         updateTextFlowMinWidth();
+    }
+
+    private Button getOrCreateCopyButton() {
+        if (copyButton == null) {
+            copyButton = new Button("Copy");
+            copyButton.getStyleClass().add(COPY_BUTTON_STYLE_CLASS);
+            copyButton.setFocusTraversable(false);
+            CopyUtil.setCopyOnClick(copyButton, code == null ? "" : code);
+            StackPane.setAlignment(copyButton, Pos.TOP_RIGHT);
+            StackPane.setMargin(copyButton, new Insets(8));
+        }
+        return copyButton;
     }
 
     private void updateTextFlowMinWidth() {
