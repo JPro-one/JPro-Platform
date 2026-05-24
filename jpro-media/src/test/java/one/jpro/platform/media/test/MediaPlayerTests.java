@@ -45,7 +45,7 @@ public class MediaPlayerTests {
 
     private final Logger log = LoggerFactory.getLogger(MediaPlayerTests.class);
 
-    private static final String MEDIA_SOURCE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    private static final String MEDIA_SOURCE = System.getProperty("MEDIA_MP4_TEST_URL");
     private MediaPlayer mediaPlayer;
     private MediaView mediaView;
     private Button playButton;

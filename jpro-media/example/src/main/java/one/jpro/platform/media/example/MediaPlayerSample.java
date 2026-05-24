@@ -31,8 +31,7 @@ import java.util.Optional;
  */
 public class MediaPlayerSample extends Application {
 
-    public static final String MEDIA_SOURCE =
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    public static final String MEDIA_SOURCE = System.getProperty("MEDIA_MP4_TEST_URL");
 
     private static final ExtensionFilter videoExtensionFilter =
             ExtensionFilter.of("Video files", ".mp4");

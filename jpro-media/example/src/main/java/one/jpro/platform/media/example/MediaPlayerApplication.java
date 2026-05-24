@@ -25,7 +25,7 @@ public class MediaPlayerApplication extends Application {
         stage.setTitle("JPro Media Player");
 
         // Provide a media source
-        String source = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+        String source = System.getProperty("MEDIA_MP4_TEST_URL");
         MediaSource mediaSource = new MediaSource(source);
 
         // Create the media player and the media view.

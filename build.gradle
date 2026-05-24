@@ -129,6 +129,10 @@ configure(subprojects.findAll { it.name != 'example' }) {
     test {
         useJUnitPlatform()
 
+        if (project.hasProperty("MEDIA_MP4_TEST_URL")) {
+            systemProperty "MEDIA_MP4_TEST_URL", project.property("MEDIA_MP4_TEST_URL")
+        }
+
         testLogging {
             events "passed", "skipped", "failed"
             showStandardStreams = true
