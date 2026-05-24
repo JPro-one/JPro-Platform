@@ -82,6 +82,20 @@ jobs:
           ./gradlew test
         shell: bash
 
+      - name: Store Gradle Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'gradle-reports-${{ matrix.os }}-jdk${{ matrix.jdk }}-${{ github.run_id }}'
+          path: |
+            **/build/reports/
+            **/build/test-results/
+            **/hs_err_pid*.log
+            **/replay_pid*.log
+            hs_err_pid*.log
+            replay_pid*.log
+          retention-days: 14
+
       - name: Javadoc
         run: |
           ./gradlew javadoc
