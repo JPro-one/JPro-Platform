@@ -64,6 +64,8 @@ public class MarkdownCodeBlock extends StackPane {
         LANGUAGE_TO_GRAMMAR.put("php", "grammars/php.tmLanguage.json");
         LANGUAGE_TO_GRAMMAR.put("kotlin", "grammars/java.tmLanguage.json");
         LANGUAGE_TO_GRAMMAR.put("kt", "grammars/java.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("http", "grammars/http.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("rest", "grammars/http.tmLanguage.json");
     }
 
     // CSS-styleable property
