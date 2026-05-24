@@ -1,6 +1,5 @@
 module one.jpro.platform.mdfx {
     requires javafx.controls;
-    requires javafx.fxml;
     requires flexmark;
     requires flexmark.ext.attributes;
     requires flexmark.ext.tables;

@@ -80,7 +80,7 @@ markdownView.getStylesheets().add(getClass().getResource("/my-style.css").toExte
 
 Fenced code blocks are rendered with TextMate-based syntax highlighting using [tm4javafx](https://github.com/mkpaz/tm4javafx) (VSCode-compatible TextMate grammars).
 
-**Supported languages:** java, javascript/js, python/py, css, html, xml, json, yaml, typescript/ts, c, cpp, go, rust, ruby, swift, sql, bash/sh, groovy, dart, dockerfile, markdown, php, kotlin
+**Supported languages:** java, javascript/js, python/py, css, html, xml, json, yaml, typescript/ts, c, cpp, go, rust, ruby, swift, sql, bash/sh, groovy, dart, dockerfile, markdown, php, kotlin, http/rest
 
 ### Code Highlighting Theme via CSS
 
@@ -99,6 +99,18 @@ The `-mdfx-code-theme` CSS property controls which TextMate theme is used for sy
 ```
 
 Users can point to their own TextMate theme JSON resource.
+
+### Scrollable Code Blocks
+
+Code blocks wrap their content by default. For source code where wrapping makes line structure harder to read, enable horizontal scrolling with `-mdfx-scrollable`:
+
+```css
+.markdown-code-block {
+    -mdfx-scrollable: true;
+}
+```
+
+When enabled, fenced code blocks keep their original horizontal layout and show a horizontal scrollbar when the code is wider than the available Markdown view width.
 
 ## Supported Markdown Features
 
