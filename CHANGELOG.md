@@ -3,10 +3,16 @@
 ## Unreleased
 
 #### Features
-* Added `Filters.stylesheets(...)` and `Filters.styleClasses(...)` for scoping stylesheets and style classes to a route subtree. Both attach to the wrapper container `Parent` (not the `Scene`), so per-route values cannot bleed into siblings. Reactive via `ObservableList[String]`, plus a Scala-only by-name overload (`=> List[String]`) that uses simplefx binding to track `@Bind` dependencies automatically.
+* `jpro-mdfx`: Optional copy-to-clipboard button on code blocks via `-mdfx-add-copy-button: true;` (#104).
+* `jpro-mdfx`: Code themes and grammars now accept absolute classpath paths or URIs (`file:`, `https:`, `jar:`). Custom grammars register via `MarkdownCodeBlock.languageToGrammar().put(...)` — closes #97. Builds on #103 by @Dansoftowner.
+* `jpro-mdfx`: `MarkdownView.generateFencedCodeBlock(code, language)` override hook for custom code-block rendering (#102 by @Dansoftowner).
+* `jpro-mdfx`: Horizontal scrolling for code blocks via `-mdfx-scrollable: true;` (#101 by @Dansoftowner).
+* `jpro-mdfx`: `http`/`rest` syntax highlighting (#99 by @Dansoftowner).
+* `jpro-routing`: `Filters.stylesheets(...)` / `Filters.styleClasses(...)` let stylesheets and style classes be declared as part of a Route, scoped to that route's subtree (#95, #96).
 
 #### Improvements
-* Reworked `ContainerFilter` — now an abstract class subclassed directly (or built via `fromContainer` / `fromReactiveContainer` factories), with per-instance identity and a `WeakReference`-held wrapper so it can be garbage-collected once no live scene graph references it. The new `StatefulFilter` base it extends fails fast when any container/stateful filter is constructed inside a per-request lambda (`filterWhen` / `filterWhenFuture`). **Breaking**: removes `ContainerFactory`, `RouteUtils.SFXContainerFactory`, and the old `ContainerFilter.create(supplier, clazz)` factory.
+* `jpro-mdfx`: Removed `javafx.fxml` from module dependencies (#98 by @Dansoftowner).
+* `jpro-routing`: Redesigned `ContainerFilter` with a new `StatefulFilter` base. **Breaking**: removes `ContainerFactory` and `ContainerFilter.create(...)` (#95).
 
 ### 0.6.2 (April 1, 2026)
 
