@@ -84,21 +84,27 @@ Fenced code blocks are rendered with TextMate-based syntax highlighting using [t
 
 ### Code Highlighting Theme via CSS
 
-The `-mdfx-code-theme` CSS property controls which TextMate theme is used for syntax highlighting. It takes a resource path to a theme JSON file:
+The `-mdfx-code-theme` CSS property picks the TextMate theme. The value is either an absolute classpath path or an absolute URI:
 
 ```css
-/* Light (default) */
 .markdown-code-block {
-    -mdfx-code-theme: "/one/jpro/platform/mdfx/themes/github-light-default.json";
+    -mdfx-code-theme: "/one/jpro/platform/mdfx/themes/github-dark-default.json";  /* bundled */
 }
-
-/* Dark */
 .markdown-code-block {
-    -mdfx-code-theme: "/one/jpro/platform/mdfx/themes/github-dark-default.json";
+    -mdfx-code-theme: "/com/example/themes/my-theme.json";  /* app-bundled — package must be `opens` */
+}
+.markdown-code-block {
+    -mdfx-code-theme: "file:///Users/me/.themes/cool.json"; /* on disk */
 }
 ```
 
-Users can point to their own TextMate theme JSON resource.
+### Custom Grammars
+
+Register additional TextMate grammars at runtime by mutating the `language → resource` map. Same path/URI rules as themes:
+
+```java
+MarkdownCodeBlock.languageToGrammar().put("nim", "/com/example/grammars/nim.tmLanguage.json");
+```
 
 ### Scrollable Code Blocks
 

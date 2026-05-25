@@ -16,14 +16,18 @@ import tm4javafx.richtext.StyleProvider;
 import tm4javafx.richtext.TextFlowModel;
 import tm4javafx.richtext.ThemeSettings;
 import tm4java.grammar.IGrammarSource;
+import tm4java.parser.ContentType;
 import tm4java.theme.IThemeSource;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Displays syntax-highlighted code using TextMate grammars.
@@ -35,47 +39,57 @@ public class MarkdownCodeBlock extends StackPane {
     private static final String COPY_BUTTON_STYLE_CLASS = "code-copy-button";
     private static final String DEFAULT_CODE_THEME = "/one/jpro/platform/mdfx/themes/github-light-default.json";
 
+    /**
+     * Mutable map from fenced-block language (lowercased) to the TextMate grammar resource path or URI.
+     * Mutate to add or override languages, e.g.:
+     * {@code languageToGrammar().put("nim", "/com/example/grammars/nim.tmLanguage.json")}.
+     */
+    public static Map<String, String> languageToGrammar() {
+        return LANGUAGE_TO_GRAMMAR;
+    }
+
     private static final Map<String, String> LANGUAGE_TO_GRAMMAR = new HashMap<>();
 
+    private static final String BUNDLED_GRAMMARS = "/one/jpro/platform/mdfx/grammars/";
     static {
-        LANGUAGE_TO_GRAMMAR.put("java", "grammars/java.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("javascript", "grammars/javascript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("js", "grammars/javascript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("python", "grammars/python.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("py", "grammars/python.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("css", "grammars/css.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("html", "grammars/html.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("xml", "grammars/xml.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("json", "grammars/json.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("yaml", "grammars/yaml.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("yml", "grammars/yaml.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("typescript", "grammars/typescript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("ts", "grammars/typescript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("c", "grammars/c.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("cpp", "grammars/cpp.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("c++", "grammars/cpp.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("go", "grammars/go.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("golang", "grammars/go.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("rust", "grammars/rust.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("rs", "grammars/rust.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("ruby", "grammars/ruby.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("rb", "grammars/ruby.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("swift", "grammars/swift.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("sql", "grammars/sql.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("bash", "grammars/shellscript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("sh", "grammars/shellscript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("shell", "grammars/shellscript.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("groovy", "grammars/groovy.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("dart", "grammars/dart.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("dockerfile", "grammars/dockerfile.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("docker", "grammars/dockerfile.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("markdown", "grammars/markdown.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("md", "grammars/markdown.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("php", "grammars/php.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("kotlin", "grammars/java.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("kt", "grammars/java.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("http", "grammars/http.tmLanguage.json");
-        LANGUAGE_TO_GRAMMAR.put("rest", "grammars/http.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("java",       BUNDLED_GRAMMARS + "java.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("javascript", BUNDLED_GRAMMARS + "javascript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("js",         BUNDLED_GRAMMARS + "javascript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("python",     BUNDLED_GRAMMARS + "python.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("py",         BUNDLED_GRAMMARS + "python.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("css",        BUNDLED_GRAMMARS + "css.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("html",       BUNDLED_GRAMMARS + "html.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("xml",        BUNDLED_GRAMMARS + "xml.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("json",       BUNDLED_GRAMMARS + "json.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("yaml",       BUNDLED_GRAMMARS + "yaml.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("yml",        BUNDLED_GRAMMARS + "yaml.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("typescript", BUNDLED_GRAMMARS + "typescript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("ts",         BUNDLED_GRAMMARS + "typescript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("c",          BUNDLED_GRAMMARS + "c.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("cpp",        BUNDLED_GRAMMARS + "cpp.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("c++",        BUNDLED_GRAMMARS + "cpp.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("go",         BUNDLED_GRAMMARS + "go.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("golang",     BUNDLED_GRAMMARS + "go.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("rust",       BUNDLED_GRAMMARS + "rust.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("rs",         BUNDLED_GRAMMARS + "rust.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("ruby",       BUNDLED_GRAMMARS + "ruby.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("rb",         BUNDLED_GRAMMARS + "ruby.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("swift",      BUNDLED_GRAMMARS + "swift.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("sql",        BUNDLED_GRAMMARS + "sql.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("bash",       BUNDLED_GRAMMARS + "shellscript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("sh",         BUNDLED_GRAMMARS + "shellscript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("shell",      BUNDLED_GRAMMARS + "shellscript.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("groovy",     BUNDLED_GRAMMARS + "groovy.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("dart",       BUNDLED_GRAMMARS + "dart.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("dockerfile", BUNDLED_GRAMMARS + "dockerfile.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("docker",     BUNDLED_GRAMMARS + "dockerfile.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("markdown",   BUNDLED_GRAMMARS + "markdown.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("md",         BUNDLED_GRAMMARS + "markdown.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("php",        BUNDLED_GRAMMARS + "php.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("kotlin",     BUNDLED_GRAMMARS + "java.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("kt",         BUNDLED_GRAMMARS + "java.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("http",       BUNDLED_GRAMMARS + "http.tmLanguage.json");
+        LANGUAGE_TO_GRAMMAR.put("rest",       BUNDLED_GRAMMARS + "http.tmLanguage.json");
     }
 
     // CSS-styleable property
@@ -136,17 +150,11 @@ public class MarkdownCodeBlock extends StackPane {
     private Button copyButton;
     private final String code;
     private final String language;
-    private final Class<?> resourceBaseClass;
     private TextFlowModel textFlowModel;
 
     public MarkdownCodeBlock(String code, String language) {
-        this(code, language, MarkdownCodeBlock.class);
-    }
-
-    public MarkdownCodeBlock(String code, String language, Class<?> themeResourceClass) {
         this.code = code;
         this.language = language;
-        this.resourceBaseClass = Objects.requireNonNull(themeResourceClass, "themeResourceClass");
 
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
@@ -254,12 +262,8 @@ public class MarkdownCodeBlock extends StackPane {
     private void highlightWithTextMate(String code, String grammarResource) {
         try {
             StyleProvider styleProvider = new StyleProvider();
-            styleProvider.setGrammar(
-                    IGrammarSource.fromResource(MarkdownCodeBlock.class, grammarResource)
-            );
-            styleProvider.setTheme(
-                    createCodeThemeSource(codeTheme.get())
-            );
+            styleProvider.setGrammar(loadGrammar(grammarResource));
+            styleProvider.setTheme(loadTheme(codeTheme.get()));
 
             textFlowModel = new TextFlowModel();
             textFlowModel.setTextFlow(textFlow);
@@ -280,11 +284,32 @@ public class MarkdownCodeBlock extends StackPane {
         }
     }
 
-    protected IThemeSource createCodeThemeSource(String codeTheme) {
-        if (resourceBaseClass.getResource(codeTheme) != null) {
-            return IThemeSource.fromResource(resourceBaseClass, codeTheme);
+    private static IGrammarSource loadGrammar(String path) throws IOException {
+        URL url = findResource(path);
+        if (url == null) throw new IOException("Grammar resource not found on classpath: " + path);
+        return IGrammarSource.fromString(ContentType.getByExtension(path), readAll(url));
+    }
+
+    private static IThemeSource loadTheme(String path) throws IOException {
+        URL url = findResource(path);
+        if (url == null) throw new IOException("Theme resource not found on classpath: " + path);
+        return IThemeSource.fromString(ContentType.getByExtension(path), readAll(url));
+    }
+
+    /** Accepts an absolute classpath path ({@code "/foo/bar.json"}) or an absolute URI ({@code "file:…"}, {@code "https:…"}). */
+    private static URL findResource(String pathOrUri) throws IOException {
+        URI uri = null;
+        try { uri = URI.create(pathOrUri); } catch (IllegalArgumentException ignore) {}
+        if (uri != null && uri.isAbsolute()) return uri.toURL();
+        URL u = MarkdownCodeBlock.class.getResource(pathOrUri);
+        if (u != null) return u;
+        return Thread.currentThread().getContextClassLoader().getResource(pathOrUri.substring(1));
+    }
+
+    private static String readAll(URL url) throws IOException {
+        try (var in = url.openStream()) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
-        return IThemeSource.fromResource(MarkdownCodeBlock.class, codeTheme);
     }
 
     private void showPlainText(String code) {

@@ -211,7 +211,6 @@ public class MarkdownViewSample extends Application {
                 return codeBlock;
             }
         };
-        markdownView.setThemeResourceClass(MarkdownViewSample.class);
         markdownView.setPadding(new Insets(0, 10, 0, 10));
         markdownView.mdStringProperty().bind(mdTextArea.textProperty());
 
