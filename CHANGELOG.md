@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+### 0.6.3 (May 25, 2026)
 
 #### Features
 * `jpro-mdfx`: Optional copy-to-clipboard button on code blocks via `-mdfx-add-copy-button: true;` (#104).
