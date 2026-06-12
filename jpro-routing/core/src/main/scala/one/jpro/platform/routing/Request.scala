@@ -8,6 +8,12 @@ import java.lang.ref.WeakReference
 import java.net.URI
 import java.util.{Map => JMap}
 
+/**
+ * An incoming request, carrying the parsed URL (protocol, domain, port, path,
+ * query parameters) that a Route maps to a Response. When a route is mounted via
+ * {@code Route.path}, the request's path is relative to the mount point — the
+ * original path stays available via {@code getOriginalPath()}.
+ */
 case class Request (
   private val url: String,
   private val protocol: String,
@@ -23,14 +29,23 @@ case class Request (
 
   assert(resolve(path) == origPath, s"resolve path: ${resolve(path)} != origPath: ${origPath}")
 
+  /** Returns the full URL this request was created from. */
   def getUrl(): String = url
+  /** Returns the protocol, e.g. "http" — may be null for plain paths. */
   def getProtocol(): String = protocol
+  /** Returns the domain, e.g. "example.com" — may be null for plain paths. */
   def getDomain(): String = domain
+  /** Returns the port, or -1 when not specified. */
   def getPort(): Int = port
+  /** Returns the path as requested, unaffected by {@code Route.path} mounting. */
   def getOriginalPath(): String = origPath
+  /** Returns the path relative to the current mount point (see {@code Route.path}). */
   def getPath(): String = path
+  /** Returns the directory this request is mounted at, "/" by default. */
   def getDirectory(): String = directory
+  /** Returns the query parameter, or an empty Option when absent. */
   def getQueryParameter(key: String): Option[String] = queryParameters.get(key)
+  /** Returns the query parameter, or the default when absent. */
   def getQueryParameterOrElse(key: String, default: String): String = queryParameters.getOrElse(key, default)
 
   private lazy val immutableJavaMap: JMap[String, String] = {

@@ -77,18 +77,22 @@ public class HelloRoute extends RouteApp {
 Route static methods:
 ```
 Route.empty()
-Route.redirect(String from, String to)
-Route.get(String path, Route route)
+Route.redirect(String path, String to)
+Route.get(String path, Request -> Response handler)
 ```
 
 Methods of Route:
 ```
 route1.and(route2)
-route1.when(Request->Boolean condition, Request->Route)
-route1.whenFuture(Request->FXFuture<Boolean> condition, Request->Route)
+route1.path(String prefix, Route route)              // match a path prefix; the prefix is stripped for the nested route
+route1.domain(String domain, Route route)
+route1.when(Request -> Boolean condition, Route then)
+route1.when(Request -> Boolean condition, Route then, Route else)
+route1.whenFuture(Request -> FXFuture<Boolean> condition, Route then)
+route1.whenFuture(Request -> FXFuture<Boolean> condition, Route then, Route else)
 route1.filter(Filter filter)
-route1.filterWhen(Request->Boolean condition, Filter filter)
-route1.filterWhenFuture(Request->FXFuture<Boolean> condition, Filter filter)
+route1.filterWhen(Request -> Boolean condition, Request -> Filter filter)
+route1.filterWhenFuture(Request -> Boolean condition, Request -> FXFuture<Filter> filter)
 ```
 
 #### Response
@@ -98,34 +102,41 @@ Response static methods:
 Response.empty()
 Response.node(Node node)
 Response.view(View view)
-Response.redirect(String path)
+Response.redirect(String to)
+Response.error(Exception ex)
+Response.fromFuture(FXFuture<Response> future)
+Response.fromResult(ResponseResult result)
 ```
 
 #### Request
 
 Methods of Request:
 ```
-String request.getPath()
-String request.getDomain()
-int request.getPort()
-String request.getQueryParameter(String name)
+String           request.getPath()
+String           request.getDomain()
+String           request.getProtocol()
+int              request.getPort()
+Optional<String> request.getQueryParameter(String name)     // Scala Option
+String           request.getQueryParameterOrElse(String name, String default)
 Map<String,String> request.getQueryParameters()
 ```
 
 ### Setting Links
 
 You usually want to use a link to switch from one page to another.
-You can set a link on a Node with the methods in LInkUtil.
+You can set a link on a Node with the methods in LinkUtil.
 
 ```
-LinkUtil.setLink(Node node, String path)
+LinkUtil.setLink(Node node, String url)
+LinkUtil.setLink(Node node, String url, String description)
+LinkUtil.setExternalLink(Node node, String url)              // opens in a new tab / external browser
 ```
 
 It's also possible to change the current link with code.
 
 When you have a Node, you can use the following method to change the current link:
 ```
-gotoPage(Node node, String path)
+LinkUtil.gotoPage(Node node, String url)
 ```
 
 You can also access the SessionManager and change the current link.

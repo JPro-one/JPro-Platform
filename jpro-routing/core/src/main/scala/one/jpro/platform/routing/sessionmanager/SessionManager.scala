@@ -15,6 +15,13 @@ import java.net.URI
 import java.util.function.Consumer
 
 
+/**
+ * Manages the navigation of a routing application: the current URL and view,
+ * the history, and programmatic navigation via {@code gotoURL}. There is one
+ * SessionManager per application; obtain it via {@code RouteApp.getSessionManager()}
+ * or {@code LinkUtil.getSessionManager(node)}. In the browser it is backed by the
+ * browser history, on desktop by an in-memory history.
+ */
 trait SessionManager { THIS =>
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
@@ -36,10 +43,14 @@ trait SessionManager { THIS =>
   @Bind var url: String = null
   @Bind var view: View = null
 
+  /** Returns the currently shown view. */
   def getView(): View = view
+  /** Returns the URL currently shown. */
   def getURL(): String = url
 
+  /** Navigates back in the history. */
   def goBack(): Unit
+  /** Navigates forward in the history. */
   def goForward(): Unit
   def isExternal(x: String): Boolean = x.startsWith("http")
 
@@ -58,6 +69,11 @@ trait SessionManager { THIS =>
     gotoURL(to)
   }
 
+  /**
+   * Navigates to the given URL. External URLs (starting with "http") leave the
+   * application; other URLs are resolved against the current one and routed,
+   * pushing a new history entry.
+   */
   def gotoURL(url: String): Response = {
     if(isExternal(url)) {
       logger.info(s"Opening external link: $url")
@@ -118,6 +134,7 @@ trait SessionManager { THIS =>
 }
 
 object SessionManager {
+  /** Returns the SessionManager for the environment: browser-backed under JPro, in-memory on desktop. */
   def getDefault(app: RouteNode, stage: Stage): SessionManager = {
     if(WebAPI.isBrowser) new SessionManagerWeb(app, WebAPI.getWebAPI(stage))
     else new SessionManagerDesktop(app)
