@@ -1,15 +1,5 @@
-def subprojectsWithDocs = [
-        "jpro-auth",
-        "jpro-dynamic-css",
-        "jpro-file",
-        "jpro-mdfx",
-        "jpro-flexbox",
-        "jpro-media",
-        "jpro-routing"
-]
-
 tasks.register('combineDocumentation') {
-    description = "Combines multiple subproject README.md files into a single DOCUMENTATION.md"
+    description = "Generates the platform-level DOCUMENTATION.md from the root README.md"
     group = "Documentation"
 
     // We'll store the final file in build/docs/DOCUMENTATION.md
@@ -17,9 +7,46 @@ tasks.register('combineDocumentation') {
     outputs.file(outputFile)
 
     doLast {
+        // The root README already contains a summary section for every module.
+        // The full module READMEs are published as each module's own DOCUMENTATION
+        // artifact — embedding them here would duplicate every module's documentation.
+        // Single-page consumers (e.g. the website) use DOCUMENTATION-FULL instead.
         def combined = new StringBuilder()
-        def readmeFile = file("$rootDir/README.md")
-        combined.append(readmeFile.text).append("\n\n")
+        combined.append(file("$rootDir/README.md").text).append("\n\n")
+        combined.append("# Module Documentation\n\n")
+        combined.append("Each module publishes its full documentation as its own `DOCUMENTATION` artifact ")
+        combined.append("(classifier `DOCUMENTATION`, extension `md`) alongside its jar — ")
+        combined.append("see the module summaries above and the [repository](https://github.com/JPro-one/jpro-platform) for details.\n")
+
+        // Ensure the docs folder exists
+        outputFile.get().asFile.parentFile.mkdirs()
+
+        // Write the final file
+        outputFile.get().asFile.text = combined.toString()
+    }
+}
+
+def subprojectsWithDocs = [
+        "jpro-auth",
+        "jpro-dynamic-css",
+        "jpro-file",
+        "jpro-mail",
+        "jpro-mdfx",
+        "jpro-flexbox",
+        "jpro-media",
+        "jpro-routing"
+]
+
+tasks.register('combineDocumentationFull') {
+    description = "Combines the root README.md and all subproject README.md files into a single DOCUMENTATION-FULL.md for single-page consumers (e.g. the website)"
+    group = "Documentation"
+
+    def outputFile = layout.buildDirectory.file("docs/DOCUMENTATION-FULL.md")
+    outputs.file(outputFile)
+
+    doLast {
+        def combined = new StringBuilder()
+        combined.append(file("$rootDir/README.md").text).append("\n\n")
         subprojectsWithDocs.each { subprojectName ->
             def subProjectReadmeFile = file("$rootDir/$subprojectName/README.md")
             if (subProjectReadmeFile.exists()) {
@@ -27,10 +54,7 @@ tasks.register('combineDocumentation') {
             }
         }
 
-        // Ensure the docs folder exists
         outputFile.get().asFile.parentFile.mkdirs()
-
-        // Write the final file
         outputFile.get().asFile.text = combined.toString()
     }
 }
@@ -183,6 +207,13 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                         // So Gradle knows it must run combineDocumentation first
                         builtBy tasks.named("combineDocumentation")
                         classifier = 'DOCUMENTATION'
+                        extension = 'md'
+                    }
+
+                    // Attach the merged single-page DOCUMENTATION-FULL.md (website consumer)
+                    artifact(tasks.named("combineDocumentationFull")) {
+                        builtBy tasks.named("combineDocumentationFull")
+                        classifier = 'DOCUMENTATION-FULL'
                         extension = 'md'
                     }
 
