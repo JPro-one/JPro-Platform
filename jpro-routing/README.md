@@ -165,7 +165,7 @@ On the browser, scrollable uses the native scrolling of the browser.
 
 This can be configured with the following methods
 1. Override the method `Page.fullscreen()` in your Page
-2. Use the filter `Filters.FullscreenFilter(boolean)` to set it for a Route
+2. Use the filter `Filters.fullscreen(boolean)` to set it for a Route
 
 
 ### History API and defaultpage
@@ -205,7 +205,7 @@ A `Filter` wraps a `Route` and can decorate every page. The library ships severa
 
 ```java
 route
-    .filter(Filters.FullscreenFilter(true))                  // force fullscreen
+    .filter(Filters.fullscreen(true))                  // force fullscreen
     .filter(Filters.titleAndDescription("My App", "..."))    // default title/description
     .filter(Filters.stylesheets(new String[]{"/css/main.css"})) // wrap pages with stylesheets
     .filter(Filters.styleClasses(new String[]{"dark-theme"}))   // wrap pages with style classes

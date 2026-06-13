@@ -37,7 +37,7 @@ class ColorTransition(stage: Stage) extends RouteNode(stage) {
       )
       // Alternative names: with, apply, map, use, modify, wrap, transform
       // enhancer, operations
-      .filter(Filters.FullscreenFilter(true))
+      .filter(Filters.fullscreen(true))
       .filter(RouteUtils.sideTransitionFilter(1))
       .filter(DevFilter.create())
   )

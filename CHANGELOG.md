@@ -2,11 +2,17 @@
 
 ### 0.6.4 (unreleased)
 
+#### Features
+* `jpro-routing`: `Filters.mapPage(Page -> Page)` applies a transform to the route's pages, leaving redirects and empty responses untouched.
+* `jpro-routing`: `Page.withTitle`, `Page.withDescription`, `Page.withFullscreen` return a copy of a page with one property changed.
+
 #### Improvements
 * `jpro-routing`: Documented Pages, filters, containers, popups and dev tools in the README.
+* `jpro-routing`: Page-decorating filters now preserve all page properties (`onClose`, `saveScrollPosition`, `handleRequest`, `subPage`), not only title/description/content/fullscreen.
 
 #### Breaking
 * `jpro-routing`: Renamed `View` to `Page`. Affects `Response.page(...)` (was `Response.view`), `SessionManager.getPage()` (was `getView`), `Page.fromNode(...)`, `subPage()`, and `NodePage`.
+* `jpro-routing`: Renamed `Filters.FullscreenFilter(...)` to `Filters.fullscreen(...)`, for consistency with `Filters.title`/`description`.
 
 ### 0.6.3 (May 25, 2026)
 
