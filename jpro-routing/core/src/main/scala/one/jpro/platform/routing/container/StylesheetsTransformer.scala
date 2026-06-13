@@ -1,4 +1,4 @@
-package one.jpro.platform.routing.filter.container
+package one.jpro.platform.routing.container
 
 import javafx.collections.{FXCollections, ListChangeListener, ObservableList, WeakListChangeListener}
 import javafx.scene.Node

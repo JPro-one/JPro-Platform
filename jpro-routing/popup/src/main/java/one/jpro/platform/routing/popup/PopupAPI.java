@@ -8,8 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import one.jpro.platform.routing.Transformers;
 import one.jpro.platform.routing.Request;
-import one.jpro.platform.routing.filter.container.Container;
-import one.jpro.platform.routing.filter.container.ContainerTransformer;
+import one.jpro.platform.routing.container.Container;
+import one.jpro.platform.routing.container.ContainerTransformer;
 import simplefx.experimental.parts.FXFuture;
 import one.jpro.platform.routing.Transformer;
 

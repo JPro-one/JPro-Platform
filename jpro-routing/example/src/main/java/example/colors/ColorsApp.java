@@ -9,7 +9,7 @@ import javafx.scene.paint.Color;
 import one.jpro.platform.routing.*;
 import one.jpro.platform.routing.dev.DevTransformer;
 import one.jpro.platform.routing.dev.StatisticsTransformer;
-import one.jpro.platform.routing.filter.container.ContainerTransformer;
+import one.jpro.platform.routing.container.ContainerTransformer;
 
 import java.util.List;
 import java.util.regex.Pattern;

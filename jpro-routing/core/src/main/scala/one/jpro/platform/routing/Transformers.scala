@@ -2,7 +2,7 @@ package one.jpro.platform.routing
 
 import javafx.collections.{FXCollections, ObservableList}
 import javafx.scene.control.Label
-import one.jpro.platform.routing.filter.container.{StyleClassTransformer, StylesheetsTransformer}
+import one.jpro.platform.routing.container.{StyleClassTransformer, StylesheetsTransformer}
 import simplefx.all
 import simplefx.all._
 import simplefx.core._

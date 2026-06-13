@@ -12,7 +12,7 @@
 
 #### Breaking
 * `jpro-routing`: Renamed `View` to `Page`. Affects `Response.page(...)` (was `Response.view`), `SessionManager.getPage()` (was `getView`), `Page.fromNode(...)`, `subPage()`, and `NodePage`.
-* `jpro-routing`: Renamed the `Filter` type (`Route => Route`) to `Transformer`. `Route.filter`/`filterWhen`/`filterWhenFuture` are now `transform`/`transformWhen`/`transformWhenFuture`; the `Filters` object is `Transformers` (with `Transformers.fullscreen` replacing `FullscreenFilter`); the built-in implementations are renamed (`ContainerTransformer`, `DevTransformer`, `StatisticsTransformer`, `StyleClassTransformer`, `StylesheetsTransformer`, `LinkHeaderTransformer`, `StatefulTransformer`, `RouteUtils.transition`/`sideTransition`). Authentication classes keep the `Filter` name (`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`).
+* `jpro-routing`: Renamed the `Filter` type (`Route => Route`) to `Transformer`. `Route.filter`/`filterWhen`/`filterWhenFuture` are now `transform`/`transformWhen`/`transformWhenFuture`; the `Filters` object is `Transformers` (with `Transformers.fullscreen` replacing `FullscreenFilter`); the built-in implementations are renamed (`ContainerTransformer`, `DevTransformer`, `StatisticsTransformer`, `StyleClassTransformer`, `StylesheetsTransformer`, `LinkHeaderTransformer`, `StatefulTransformer`, `RouteUtils.transition`/`sideTransition`). Authentication classes keep the `Filter` name (`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`). The package `one.jpro.platform.routing.filter.container` is now `one.jpro.platform.routing.container`.
 
 ### 0.6.3 (May 25, 2026)
 

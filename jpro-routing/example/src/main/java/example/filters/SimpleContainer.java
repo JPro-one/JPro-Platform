@@ -1,6 +1,6 @@
 package example.filters;
 
-import one.jpro.platform.routing.filter.container.Container;
+import one.jpro.platform.routing.container.Container;
 import one.jpro.platform.routing.Request;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

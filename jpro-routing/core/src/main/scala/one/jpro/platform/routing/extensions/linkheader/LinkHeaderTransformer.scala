@@ -1,6 +1,6 @@
 package one.jpro.platform.routing.extensions.linkheader
 
-import one.jpro.platform.routing.filter.container.{ContainerTransformer, ReactiveContainer}
+import one.jpro.platform.routing.container.{ContainerTransformer, ReactiveContainer}
 import one.jpro.platform.routing.{Transformer, LinkUtil}
 
 import collection.JavaConverters._
