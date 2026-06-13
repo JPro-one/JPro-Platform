@@ -15,7 +15,7 @@ module one.jpro.platform.routing.core {
     exports one.jpro.platform.routing.context;
     exports one.jpro.platform.routing.crawl;
     exports one.jpro.platform.routing.performance;
-    exports one.jpro.platform.routing.filter.container;
+    exports one.jpro.platform.routing.container;
     exports one.jpro.platform.routing.sessionmanager;
     exports one.jpro.platform.routing.extensions.linkheader;
     exports one.jpro.platform.routing.server;

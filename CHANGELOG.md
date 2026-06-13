@@ -3,16 +3,16 @@
 ### 0.6.4 (unreleased)
 
 #### Features
-* `jpro-routing`: `Filters.mapPage(Page -> Page)` applies a transform to the route's pages, leaving redirects and empty responses untouched.
+* `jpro-routing`: `Transformers.mapPage(Page -> Page)` applies a transform to the route's pages, leaving redirects and empty responses untouched.
 * `jpro-routing`: `Page.withTitle`, `Page.withDescription`, `Page.withFullscreen` return a copy of a page with one property changed.
 
 #### Improvements
-* `jpro-routing`: Documented Pages, filters, containers, popups and dev tools in the README.
-* `jpro-routing`: Page-decorating filters now preserve all page properties (`onClose`, `saveScrollPosition`, `handleRequest`, `subPage`), not only title/description/content/fullscreen.
+* `jpro-routing`: Documented Pages, transformers, containers, popups and dev tools in the README.
+* `jpro-routing`: Page-decorating transformers now preserve all page properties (`onClose`, `saveScrollPosition`, `handleRequest`, `subPage`), not only title/description/content/fullscreen.
 
 #### Breaking
 * `jpro-routing`: Renamed `View` to `Page`. Affects `Response.page(...)` (was `Response.view`), `SessionManager.getPage()` (was `getView`), `Page.fromNode(...)`, `subPage()`, and `NodePage`.
-* `jpro-routing`: Renamed `Filters.FullscreenFilter(...)` to `Filters.fullscreen(...)`, for consistency with `Filters.title`/`description`.
+* `jpro-routing`: Renamed the `Filter` type (`Route => Route`) to `Transformer`. `Route.filter`/`filterWhen`/`filterWhenFuture` are now `transform`/`transformWhen`/`transformWhenFuture`; the `Filters` object is `Transformers` (with `Transformers.fullscreen` replacing `FullscreenFilter`); the built-in implementations are renamed (`ContainerTransformer`, `DevTransformer`, `StatisticsTransformer`, `StyleClassTransformer`, `StylesheetsTransformer`, `LinkHeaderTransformer`, `StatefulTransformer`, `RouteUtils.transition`/`sideTransition`). Authentication classes keep the `Filter` name (`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`). The package `one.jpro.platform.routing.filter.container` is now `one.jpro.platform.routing.container`.
 
 ### 0.6.3 (May 25, 2026)
 

@@ -1,4 +1,4 @@
-package one.jpro.platform.routing.filter.container
+package one.jpro.platform.routing.container
 
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.scene.Node

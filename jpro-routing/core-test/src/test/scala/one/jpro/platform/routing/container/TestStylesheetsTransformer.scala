@@ -1,4 +1,4 @@
-package one.jpro.platform.routing.filter.container
+package one.jpro.platform.routing.container
 
 import javafx.collections.FXCollections
 import javafx.scene.Node
@@ -14,14 +14,14 @@ import simplefx.experimental._
 import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
-object TestStylesheetsFilter {
+object TestStylesheetsTransformer {
   @BeforeAll
   def setup(): Unit = {
     Await.result(simplefx.cores.initializeCore(), (second))
   }
 }
 
-class TestStylesheetsFilter {
+class TestStylesheetsTransformer {
 
   /** Run a route on the FX thread, await its future, return the wrapper Node. */
   private def runRequest(route: Route, req: Request): Node = {
@@ -33,16 +33,16 @@ class TestStylesheetsFilter {
 
   @Test
   def containerIsReusedAcrossRequests(): Unit = {
-    val filter = new StylesheetsFilter("/test.css")
+    val filter = new StylesheetsTransformer("/test.css")
     val route =
       Route.empty()
         .and(Route.get("/a", _ => Response.node(new Label("A"))))
         .and(Route.get("/b", _ => Response.node(new Label("B"))))
-        .filter(filter)
+        .transform(filter)
 
     val c1 = runRequest(route, Request.fromString("http://localhost/a"))
     assert(c1 != null, "first request should produce a wrapper Node")
-    assert(c1.isInstanceOf[StackPane], "StylesheetsFilter wraps in a StackPane")
+    assert(c1.isInstanceOf[StackPane], "StylesheetsTransformer wraps in a StackPane")
 
     val c2 = runRequest(route, Request.fromString("http://localhost/b", c1))
     assert(c1 eq c2, "the wrapper Node should be reused across requests")
@@ -51,12 +51,12 @@ class TestStylesheetsFilter {
   // ----- Identity isolation between two filter instances -----
 
   @Test
-  def twoStylesheetsFiltersHaveDistinctContainers(): Unit = {
-    val a = new StylesheetsFilter("/a.css")
-    val b = new StylesheetsFilter("/b.css")
+  def twoStylesheetsTransformersHaveDistinctContainers(): Unit = {
+    val a = new StylesheetsTransformer("/a.css")
+    val b = new StylesheetsTransformer("/b.css")
 
-    val routeA = Route.get("/", _ => Response.node(new Label("a"))).filter(a)
-    val routeB = Route.get("/", _ => Response.node(new Label("b"))).filter(b)
+    val routeA = Route.get("/", _ => Response.node(new Label("a"))).transform(a)
+    val routeB = Route.get("/", _ => Response.node(new Label("b"))).transform(b)
 
     val cA = runRequest(routeA, Request.fromString("http://localhost/"))
     assert(cA != null)
@@ -67,13 +67,13 @@ class TestStylesheetsFilter {
     assert(cA ne cB, "filter B must not reuse filter A's container")
   }
 
-  // ----- Construction-context detection (filterWhen) -----
+  // ----- Construction-context detection (transformWhen) -----
 
   @Test
-  def constructingStatefulFilterInsideFilterWhenFails(): Unit = {
+  def constructingStatefulTransformerInsideFilterWhenFails(): Unit = {
     val route =
       Route.get("/", _ => Response.node(new Label()))
-        .filterWhen(_ => true, _ => new StylesheetsFilter("/x.css"))
+        .transformWhen(_ => true, _ => new StylesheetsTransformer("/x.css"))
 
     var threw = false
     try {
@@ -81,24 +81,24 @@ class TestStylesheetsFilter {
     } catch {
       case _: IllegalStateException => threw = true
     }
-    assert(threw, "constructing StylesheetsFilter inside filterWhen should fail fast")
+    assert(threw, "constructing StylesheetsTransformer inside transformWhen should fail fast")
   }
 
   @Test
-  def hoistedStatefulFilterInsideFilterWhenIsFine(): Unit = {
-    val css = new StylesheetsFilter("/x.css")
+  def hoistedStatefulTransformerInsideFilterWhenIsFine(): Unit = {
+    val css = new StylesheetsTransformer("/x.css")
     val route =
       Route.get("/", _ => Response.node(new Label()))
-        .filterWhen(_ => true, _ => css)
+        .transformWhen(_ => true, _ => css)
 
     val c = runRequest(route, Request.fromString("http://localhost/"))
     assert(c != null)
   }
 
   @Test
-  def topLevelStatefulFilterConstructionIsFine(): Unit = {
-    val css = new StylesheetsFilter("/x.css")
-    val route = Route.get("/", _ => Response.node(new Label())).filter(css)
+  def topLevelStatefulTransformerConstructionIsFine(): Unit = {
+    val css = new StylesheetsTransformer("/x.css")
+    val route = Route.get("/", _ => Response.node(new Label())).transform(css)
     val c = runRequest(route, Request.fromString("http://localhost/"))
     assert(c != null)
   }
@@ -108,8 +108,8 @@ class TestStylesheetsFilter {
   @Test
   def stylesheetsReflectTheSourceObservableList(): Unit = {
     val sheets = FXCollections.observableArrayList("/initial.css")
-    val css = new StylesheetsFilter(sheets)
-    val route = Route.get("/", _ => Response.node(new Label())).filter(css)
+    val css = new StylesheetsTransformer(sheets)
+    val route = Route.get("/", _ => Response.node(new Label())).transform(css)
 
     val container = runRequest(route, Request.fromString("http://localhost/")).asInstanceOf[StackPane]
     assert(container != null)
@@ -133,10 +133,10 @@ class TestStylesheetsFilter {
   def byNameOverloadTracksReactiveDependency(): Unit = {
     val toggle = inFX { new MobileToggle }
     val filter = inFX {
-      Filters.stylesheets(
+      Transformers.stylesheets(
         if (toggle.isMobile) List("/mobile.css") else List("/desktop.css"))
     }
-    val route = Route.get("/", _ => Response.node(new Label())).filter(filter)
+    val route = Route.get("/", _ => Response.node(new Label())).transform(filter)
 
     val container = runRequest(route, Request.fromString("http://localhost/")).asInstanceOf[StackPane]
     assert(container != null)
@@ -151,9 +151,9 @@ class TestStylesheetsFilter {
 
   // ----- Memory: container is GC-collectible when no live scene holds it -----
 
-  /** A trivial ContainerFilter with no bindings — isolates the WeakReference
-   *  fix in `ContainerFilter` from any filter-specific reference leaks. */
-  private class TrivialContainerFilter extends ContainerFilter {
+  /** A trivial ContainerTransformer with no bindings — isolates the WeakReference
+   *  fix in `ContainerTransformer` from any filter-specific reference leaks. */
+  private class TrivialContainerTransformer extends ContainerTransformer {
     override def createNode(): Node = new StackPane()
     override def setContent(c: Node, x: Node): Unit =
       c.asInstanceOf[StackPane].getChildren.setAll(x)
@@ -165,8 +165,8 @@ class TestStylesheetsFilter {
 
   @Test
   def trivialContainerIsCollectibleAfterStrongRefDropped(): Unit = {
-    val filter = new TrivialContainerFilter
-    val route = Route.get("/", _ => Response.node(new Label("page"))).filter(filter)
+    val filter = new TrivialContainerTransformer
+    val route = Route.get("/", _ => Response.node(new Label("page"))).transform(filter)
 
     JMemoryBuddy.memoryTest { checker =>
       val container = runRequest(route, Request.fromString("http://localhost/"))
@@ -179,8 +179,8 @@ class TestStylesheetsFilter {
   @Test
   def stylesheetsFilterContainerIsCollectibleAfterStrongRefDropped(): Unit = {
     val sheets = FXCollections.observableArrayList("/test.css")
-    val filter = new StylesheetsFilter(sheets)
-    val route = Route.get("/", _ => Response.node(new Label("page"))).filter(filter)
+    val filter = new StylesheetsTransformer(sheets)
+    val route = Route.get("/", _ => Response.node(new Label("page"))).transform(filter)
 
     JMemoryBuddy.memoryTest { checker =>
       val container = runRequest(route, Request.fromString("http://localhost/"))

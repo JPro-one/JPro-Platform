@@ -3,11 +3,11 @@ package example.popup;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
-import one.jpro.platform.routing.Filters;
+import one.jpro.platform.routing.Transformers;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
-import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.dev.DevTransformer;
 import one.jpro.platform.routing.popup.PopupAPI;
 import one.jpro.platform.routing.popup.simplepopup.SimplePopups;
 import org.slf4j.Logger;
@@ -30,9 +30,9 @@ public class PopupApp extends RouteApp {
         return Route.empty()
                 .and(redirect("/", "/popup"))
                 .and(get("/popup", (r) -> Response.node(popupSampleButtons())))
-                .filter(Filters.fullscreen(true))
-                .filter(DevFilter.create())
-                .filter(PopupAPI.createPopupContainerFilter())
+                .transform(Transformers.fullscreen(true))
+                .transform(DevTransformer.create())
+                .transform(PopupAPI.createPopupContainerTransformer())
                 ;
     }
 

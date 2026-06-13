@@ -7,9 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import one.jpro.platform.routing.*;
-import one.jpro.platform.routing.dev.DevFilter;
-import one.jpro.platform.routing.dev.StatisticsFilter;
-import one.jpro.platform.routing.filter.container.ContainerFilter;
+import one.jpro.platform.routing.dev.DevTransformer;
+import one.jpro.platform.routing.dev.StatisticsTransformer;
+import one.jpro.platform.routing.container.ContainerTransformer;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -49,12 +49,12 @@ public class ColorsApp extends RouteApp {
                         Route.empty()
                                 .and(Route.get("/green", (r) -> gen("Green", r.resolve("/red"), Color.GREEN)))
                                 .and(Route.get("/red", (r) -> gen("Red", r.resolve("/green"), Color.RED))))
-                .filter(Filters.fullscreen(true))
-                .filter(RouteUtils.sideTransitionFilter(1))
-                .filter(DevFilter.create())
-                .filter(StatisticsFilter.create())
-                .filter(ContainerFilter.fromContainer(SimpleContainer::new))
-                .filter(ContainerFilter.fromContainer(() -> new SimpleHamburgerMenu(List.of(
+                .transform(Transformers.fullscreen(true))
+                .transform(RouteUtils.sideTransition(1))
+                .transform(DevTransformer.create())
+                .transform(StatisticsTransformer.create())
+                .transform(ContainerTransformer.fromContainer(SimpleContainer::new))
+                .transform(ContainerTransformer.fromContainer(() -> new SimpleHamburgerMenu(List.of(
                         new SimpleHamburgerMenu.Link("Green", "/green"),
                         new SimpleHamburgerMenu.Link("Red", "/red"),
                         new SimpleHamburgerMenu.Link("Blue", "/blue"),

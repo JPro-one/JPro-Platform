@@ -26,7 +26,7 @@ object SitemapGenerator {
 
       child1.appendChild(loc)
 
-      page.pictures/*.filter(_.url.startsWith("http"))*/.forEach { img =>
+      page.pictures/*.transform(_.url.startsWith("http"))*/.forEach { img =>
         val image = doc.createElement("image:image")
         val imageloc = doc.createElement("image:loc")
         if(img.url.startsWith("http")) {

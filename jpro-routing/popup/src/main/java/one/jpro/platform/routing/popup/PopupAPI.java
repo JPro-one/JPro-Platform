@@ -6,12 +6,12 @@ import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import one.jpro.platform.routing.Filters;
+import one.jpro.platform.routing.Transformers;
 import one.jpro.platform.routing.Request;
-import one.jpro.platform.routing.filter.container.Container;
-import one.jpro.platform.routing.filter.container.ContainerFilter;
+import one.jpro.platform.routing.container.Container;
+import one.jpro.platform.routing.container.ContainerTransformer;
 import simplefx.experimental.parts.FXFuture;
-import one.jpro.platform.routing.Filter;
+import one.jpro.platform.routing.Transformer;
 
 import java.util.Objects;
 
@@ -107,8 +107,8 @@ public class PopupAPI {
      * Returns a filter which adds a Stackpane, which is used as a popup container.
      * @return a filter which adds a Stackpane, which is used as a popup container
      */
-    public static Filter createPopupContainerFilter() {
-        return ContainerFilter.fromContainer(PopupContainer::new);
+    public static Transformer createPopupContainerTransformer() {
+        return ContainerTransformer.fromContainer(PopupContainer::new);
     }
 
     private static class PopupContainer extends StackPane implements Container {

@@ -1,21 +1,21 @@
 package one.jpro.platform.routing.extensions.linkheader
 
-import one.jpro.platform.routing.filter.container.{ContainerFilter, ReactiveContainer}
-import one.jpro.platform.routing.{Filter, LinkUtil}
+import one.jpro.platform.routing.container.{ContainerTransformer, ReactiveContainer}
+import one.jpro.platform.routing.{Transformer, LinkUtil}
 
 import collection.JavaConverters._
 import simplefx.core._
 import simplefx.all._
 import simplefx.experimental._
 
-object LinkHeaderFilter {
+object LinkHeaderTransformer {
   case class Link(name: String, prefix: String)
 
   def genLink(name: String, prefix: String) = new Link(name, prefix)
 
-  def create(x: Link*): Filter = create(x.toList)
-  def create(x: java.util.List[Link]): Filter = create(x.asScala.toList)
-  def create(x: List[Link]): Filter = ContainerFilter.fromReactiveContainer(() => new LinkHeaderContainer(x))
+  def create(x: Link*): Transformer = create(x.toList)
+  def create(x: java.util.List[Link]): Transformer = create(x.asScala.toList)
+  def create(x: List[Link]): Transformer = ContainerTransformer.fromReactiveContainer(() => new LinkHeaderContainer(x))
 
   private class LinkHeaderContainer(links: List[Link]) extends VBox with ReactiveContainer {
     this <++ new HBox {

@@ -23,11 +23,11 @@ Request: Request(path, query parameters, domain)
 Response: Page | Redirect | Empty
 ```
 
-An additional type is Filter.
-A Filter is a function from a Route to a new Route.
+An additional type is Transformer.
+A Transformer is a function from a Route to a new Route.
 This allows interesting features like authentication or analytics.
 ```
-Filter: Route => Route
+Transformer: Route => Route
 ```
 
 ### Advantages
@@ -41,14 +41,14 @@ If the first Route doesn't match, the second Route is tried.
 This way we can reuse existing JavaFx Applications/Routes and combine them to a new Application.
 
 ** Authentication **
-It's simple to add authentication as a filter to your application.
+It's simple to add authentication as a transformer to your application.
 This way it's possible to hide certain pages if the user is not logged in - or doesn't have the right permissions.
 Checkout jpro-auth-routing for a OAuth2 implementation.
 
 ** Utility Overlays **
 It's possible to add utility overlays to your application.
-Check out the DevFilter in the module jpro-routing-dev.
-For example, the DevFilter and StatisticsFilter are very useful for development.
+Check out the DevTransformer in the module jpro-routing-dev.
+For example, the DevTransformer and StatisticsTransformer are very useful for development.
 
 ### Hello World
 
@@ -90,9 +90,9 @@ route1.when(Request -> Boolean condition, Route then)
 route1.when(Request -> Boolean condition, Route then, Route else)
 route1.whenFuture(Request -> FXFuture<Boolean> condition, Route then)
 route1.whenFuture(Request -> FXFuture<Boolean> condition, Route then, Route else)
-route1.filter(Filter filter)
-route1.filterWhen(Request -> Boolean condition, Request -> Filter filter)
-route1.filterWhenFuture(Request -> Boolean condition, Request -> FXFuture<Filter> filter)
+route1.transform(Transformer transformer)
+route1.transformWhen(Request -> Boolean condition, Request -> Transformer transformer)
+route1.transformWhenFuture(Request -> Boolean condition, Request -> FXFuture<Transformer> transformer)
 ```
 
 #### Response
@@ -165,7 +165,7 @@ On the browser, scrollable uses the native scrolling of the browser.
 
 This can be configured with the following methods
 1. Override the method `Page.fullscreen()` in your Page
-2. Use the filter `Filters.fullscreen(boolean)` to set it for a Route
+2. Use the transformer `Transformers.fullscreen(boolean)` to set it for a Route
 
 
 ### History API and defaultpage
@@ -199,25 +199,25 @@ Route.get("/", r -> Response.page(new HomePage()))
 - `handleRequest(Request)` — return true to handle URL changes inside the page yourself
   (e.g. for tab navigation within one page, without recreating it)
 
-### Built-in Filters
+### Built-in Transformers
 
-A `Filter` wraps a `Route` and can decorate every page. The library ships several:
+A `Transformer` wraps a `Route` and can decorate every page. The library ships several:
 
 ```java
 route
-    .filter(Filters.fullscreen(true))                  // force fullscreen
-    .filter(Filters.titleAndDescription("My App", "..."))    // default title/description
-    .filter(Filters.stylesheets(new String[]{"/css/main.css"})) // wrap pages with stylesheets
-    .filter(Filters.styleClasses(new String[]{"dark-theme"}))   // wrap pages with style classes
-    .filter(Filters.errorPage())                             // show exceptions instead of failing
-    .filter(Filters.notFoundPage())                          // fallback page for unmatched paths
-    .filter(RouteUtils.transitionFilter(0.5))                // fade between pages
-    .filter(RouteUtils.sideTransitionFilter(0.5))            // slide between pages
+    .transform(Transformers.fullscreen(true))                  // force fullscreen
+    .transform(Transformers.titleAndDescription("My App", "..."))    // default title/description
+    .transform(Transformers.stylesheets(new String[]{"/css/main.css"})) // wrap pages with stylesheets
+    .transform(Transformers.styleClasses(new String[]{"dark-theme"}))   // wrap pages with style classes
+    .transform(Transformers.errorPage())                             // show exceptions instead of failing
+    .transform(Transformers.notFoundPage())                          // fallback page for unmatched paths
+    .transform(RouteUtils.transition(0.5))                // fade between pages
+    .transform(RouteUtils.sideTransition(0.5))            // slide between pages
 ```
 
-- `Filters.errorPage((request, exception) -> Response...)` customizes error rendering.
-- `Filters.notFoundPage(route)` takes any `Route` as the fallback.
-- `Filters.stylesheets`/`styleClasses` also accept an `ObservableList` — mutate it at
+- `Transformers.errorPage((request, exception) -> Response...)` customizes error rendering.
+- `Transformers.notFoundPage(route)` takes any `Route` as the fallback.
+- `Transformers.stylesheets`/`styleClasses` also accept an `ObservableList` — mutate it at
   runtime (e.g. switching a theme, or mobile vs desktop) and the pages update immediately.
 
 #### Custom Containers
@@ -226,7 +226,7 @@ To wrap every page in your own layout (navigation menu, header, footer), impleme
 `Container` interface (a Node with a `contentProperty` and a `requestProperty`) and apply it with:
 
 ```java
-route.filter(ContainerFilter.fromContainer(() -> new MyMenuContainer()));
+route.transform(ContainerTransformer.fromContainer(() -> new MyMenuContainer()));
 ```
 
 See `SimpleHamburgerMenu` in the example project for a responsive menu implemented this way.
@@ -238,7 +238,7 @@ applications, on desktop and in the browser:
 
 ```java
 // once, at the end of the route definition:
-route.filter(PopupAPI.createPopupContainerFilter())
+route.transform(PopupAPI.createPopupContainerTransformer())
 
 // anywhere in the application (node = any node in the scene graph):
 PopupAPI.openPopup(node, SimplePopups.infoPopup("Info", "Saved successfully."));
@@ -257,16 +257,16 @@ The module `one.jpro.platform:jpro-routing-dev` provides overlays for developmen
 
 ```java
 route
-    .filter(DevFilter.create())          // dev toolbar
-    .filter(StatisticsFilter.create())   // performance statistics (browser)
+    .transform(DevTransformer.create())          // dev toolbar
+    .transform(StatisticsTransformer.create())   // performance statistics (browser)
 ```
 
-- **DevFilter** — a toolbar with back/forward/refresh, an editable URL bar, a ScenicView
+- **DevTransformer** — a toolbar with back/forward/refresh, an editable URL bar, a ScenicView
   launcher, a "pages uncollected" memory counter, and a force-GC button.
-- **StatisticsFilter** — live statistics when running in the browser: latency, bytes
+- **StatisticsTransformer** — live statistics when running in the browser: latency, bytes
   sent/received, synchronized/created/collected nodes, and load times.
 
-Remove these filters for production builds (or apply them conditionally).
+Remove these transformers for production builds (or apply them conditionally).
 
 ### Additional Features
 

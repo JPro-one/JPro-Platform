@@ -189,7 +189,7 @@ public class BasicAuthExample extends RouteApp {
                 .and(Route.get("/", request -> Response.node(new LoginPage(this, basicAuthProvider, credentials))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .filter(AuthFilter.create(basicAuthProvider, credentials, user -> {
+                .transform(AuthFilter.create(basicAuthProvider, credentials, user -> {
                     setUser(user);
                     return Response.redirect("/user/signed-in");
                 }, error -> Response.node(new ErrorPage(error))));
@@ -215,7 +215,7 @@ public class OAuth2Example extends RouteApp {
                 .and(Route.get("/", request -> Response.node(new LoginPage(googleAuthProvider))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
-                .filter(OAuth2Filter.create(googleAuthProvider, user -> {
+                .transform(OAuth2Filter.create(googleAuthProvider, user -> {
                     setUser(user);
                     return Response.redirect("/user/signed-in");
                 }, error -> Response.node(new ErrorPage(error))));
