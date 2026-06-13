@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.7.0 (unreleased)
+### 0.7.0 (June 13, 2026)
 
 #### Features
 * `jpro-routing`: `Transformers.mapPage(Page -> Page)` applies a transform to the route's pages, leaving redirects and empty responses untouched.
