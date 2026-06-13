@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static javafx.scene.media.MediaPlayer.Status;
+import static org.assertj.core.api.Assertions.within;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 /**
@@ -44,6 +45,9 @@ import static org.testfx.assertions.api.Assertions.assertThat;
 public class MediaPlayerTests {
 
     private final Logger log = LoggerFactory.getLogger(MediaPlayerTests.class);
+
+    // Seeking snaps to the nearest decodable frame, so current time lands within ~1 frame (~33 ms at 30 fps) of the request.
+    private static final double SEEK_TOLERANCE_MS = 50.0;
 
     private static final String MEDIA_SOURCE = System.getProperty("MEDIA_MP4_TEST_URL");
     private MediaPlayer mediaPlayer;
@@ -239,7 +243,7 @@ public class MediaPlayerTests {
         mediaPlayer.seek(seekTime);
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is {} seconds", seekTime.toSeconds());
-        assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime);
+        assertCurrentTimeCloseTo(seekTime);
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -302,7 +306,7 @@ public class MediaPlayerTests {
         mediaPlayer.seek(seekTime);
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is 483 seconds");
-        assertThat(mediaPlayer.getCurrentTime()).isEqualTo(Duration.seconds(483));
+        assertCurrentTimeCloseTo(seekTime);
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isFalse();
         assertThat(pauseButton.isDisable()).isTrue();
@@ -332,7 +336,7 @@ public class MediaPlayerTests {
         mediaPlayer.seek(seekTime);
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is {} seconds", seekTime.toSeconds());
-        assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime);
+        assertCurrentTimeCloseTo(seekTime);
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -352,7 +356,7 @@ public class MediaPlayerTests {
         mediaPlayer.seek(seekTime2);
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is {} seconds", seekTime2.toSeconds());
-        assertThat(mediaPlayer.getCurrentTime()).isEqualByComparingTo(seekTime2);
+        assertCurrentTimeCloseTo(seekTime2);
 
         // wait for 1 second:
         TimeUnit.SECONDS.sleep(1);
@@ -584,6 +588,11 @@ public class MediaPlayerTests {
         assertThat(pauseButton.isDisable()).isTrue();
         assertThat(stopButton.isDisable()).isTrue();
         log.debug("Checks passed");
+    }
+
+    private void assertCurrentTimeCloseTo(Duration expectedTime) {
+        assertThat(mediaPlayer.getCurrentTime().toMillis())
+                .isCloseTo(expectedTime.toMillis(), within(SEEK_TOLERANCE_MS));
     }
 
     private void waitForStatus(Status status) throws TimeoutException {
