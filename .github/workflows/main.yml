@@ -28,6 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # full history + tags, required for the git-derived version
+          fetch-depth: 0
 
       - name: Setup Java ${{ matrix.jdk }}
         uses: actions/setup-java@v4
@@ -99,3 +102,13 @@ jobs:
       - name: Javadoc
         run: |
           ./gradlew javadoc
+
+      - name: Publish SNAPSHOT to Sandec Artifactory
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && runner.os == 'Linux'
+        run: ./publishSandecArtifactory.sh --snapshot-only
+        env:
+          SANDEC_ARTIFACTORY_USERNAME: ${{ secrets.SANDEC_ARTIFACTORY_USERNAME }}
+          SANDEC_ARTIFACTORY_PASSWORD: ${{ secrets.SANDEC_ARTIFACTORY_PASSWORD }}
+          SANDEC_SIGNING_KEY_ID: ${{ secrets.SANDEC_SIGNING_KEY_ID }}
+          SANDEC_SIGNING_SECRET_KEY: ${{ secrets.SANDEC_SIGNING_SECRET_KEY }}
+          SANDEC_SIGNING_PASSWORD: ${{ secrets.SANDEC_SIGNING_PASSWORD }}
