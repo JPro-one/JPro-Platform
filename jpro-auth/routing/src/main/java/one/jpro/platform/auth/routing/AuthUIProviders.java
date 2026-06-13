@@ -11,7 +11,7 @@ import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.routing.buttons.GoogleLoginButton;
-import one.jpro.platform.routing.Filter;
+import one.jpro.platform.routing.Transformer;
 import one.jpro.platform.routing.LinkUtil;
 import one.jpro.platform.routing.Response;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +54,7 @@ public class AuthUIProviders {
             }
 
             @Override
-            public Filter createFilter() {
+            public Transformer createFilter() {
                 return AuthBasicOAuth2Filter.create(openidAuthProvider, userSession,
                         user -> Response.redirect("/"), // That's ok, let the app handle it.
                         err -> {throw new RuntimeException(err);});
@@ -111,8 +111,8 @@ public class AuthUIProviders {
             }
 
             @Override
-            public Filter createFilter() {
-                return Filter.empty();
+            public Transformer createFilter() {
+                return Transformer.empty();
             }
         };
     }
@@ -139,10 +139,10 @@ public class AuthUIProviders {
             }
 
             @Override
-            public Filter createFilter() {
+            public Transformer createFilter() {
                 return Arrays.stream(providers)
                         .map(AuthUIProvider::createFilter)
-                        .reduce(Filter::compose).orElse(Filter.empty());
+                        .reduce(Transformer::compose).orElse(Transformer.empty());
             }
         };
     }

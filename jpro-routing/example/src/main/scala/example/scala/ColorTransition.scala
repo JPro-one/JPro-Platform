@@ -2,11 +2,11 @@ package example.scala
 
 import one.jpro.platform.routing.Route.{get, redirect}
 import com.jpro.webapi.WebAPI
-import one.jpro.platform.routing.{Filters, LinkUtil, Response, Route, RouteNode, RouteUtils}
+import one.jpro.platform.routing.{Transformers, LinkUtil, Response, Route, RouteNode, RouteUtils}
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import simplefx.all._
 import simplefx.core._
-import one.jpro.platform.routing.dev.DevFilter
+import one.jpro.platform.routing.dev.DevTransformer
 
 class ColorTransition(stage: Stage) extends RouteNode(stage) {
   private def format(v: Double) = {
@@ -37,9 +37,9 @@ class ColorTransition(stage: Stage) extends RouteNode(stage) {
       )
       // Alternative names: with, apply, map, use, modify, wrap, transform
       // enhancer, operations
-      .filter(Filters.fullscreen(true))
-      .filter(RouteUtils.sideTransitionFilter(1))
-      .filter(DevFilter.create())
+      .transform(Transformers.fullscreen(true))
+      .transform(RouteUtils.sideTransition(1))
+      .transform(DevTransformer.create())
   )
 }
 

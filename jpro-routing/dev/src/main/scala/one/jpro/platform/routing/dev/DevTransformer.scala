@@ -3,8 +3,8 @@ package one.jpro.platform.routing.dev
 import com.jpro.webapi.WebAPI
 import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import fr.brouillard.oss.cssfx.CSSFX
-import one.jpro.platform.routing.filter.container.{ContainerFilter, ReactiveContainer}
-import one.jpro.platform.routing.{Filter, LinkUtil}
+import one.jpro.platform.routing.filter.container.{ContainerTransformer, ReactiveContainer}
+import one.jpro.platform.routing.{Transformer, LinkUtil}
 import org.kordamp.ikonli.javafx.FontIcon
 import org.scenicview.ScenicView
 import org.slf4j.{Logger, LoggerFactory}
@@ -13,25 +13,25 @@ import simplefx.all._
 import simplefx.core._
 import simplefx.experimental._
 
-object DevFilter {
+object DevTransformer {
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  def create(): Filter = {
+  def create(): Transformer = {
     CSSFX.start()
-    ContainerFilter.fromReactiveContainer(() => new DevContainer)
+    ContainerTransformer.fromReactiveContainer(() => new DevContainer)
   }
 
   private class DevContainer extends VBox with ReactiveContainer { CONTAINER =>
-    stylesheets <++ DevFilter.getClass.getResource("/one/jpro/platform/routing/dev/devfilter.css").toExternalForm
+    stylesheets <++ DevTransformer.getClass.getResource("/one/jpro/platform/routing/dev/devfilter.css").toExternalForm
 
     styleClass <++ "devfilter-vbox"
-    override def toString(): String = s"DevFilter(content=$content)"
+    override def toString(): String = s"DevTransformer(content=$content)"
 
     @Bind var report: JMemoryBuddyLive.Report = JMemoryBuddyLive.getReport
     request --> updateReport
     def updateReport(): Unit = {
-      logger.debug("Calling GC (DevFilter)")
+      logger.debug("Calling GC (DevTransformer)")
       System.gc()
       report = JMemoryBuddyLive.getReport
     }

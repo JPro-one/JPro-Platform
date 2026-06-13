@@ -8,11 +8,11 @@ import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
 import one.jpro.platform.auth.routing.AuthBasicOAuth2Filter;
 import one.jpro.platform.auth.routing.UserSession;
-import one.jpro.platform.routing.Filter;
+import one.jpro.platform.routing.Transformer;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
-import one.jpro.platform.routing.dev.DevFilter;
-import one.jpro.platform.routing.dev.StatisticsFilter;
+import one.jpro.platform.routing.dev.DevTransformer;
+import one.jpro.platform.routing.dev.StatisticsTransformer;
 import one.jpro.platform.session.SessionManager;
 
 import java.net.URL;
@@ -88,11 +88,11 @@ public class OAuthApp extends BaseOAuthApp {
                                 .and(get("/google", request -> Response.node(new AuthProviderDiscoveryPage(this, googleAuth))))
                                 .and(get("/microsoft", request -> Response.node(new AuthProviderDiscoveryPage(this, microsoftAuth))))
                                 .and(get("/keycloak", request -> Response.node(new AuthProviderDiscoveryPage(this, keycloakAuth))))))
-                .filter(oauth2Filter(googleAuth))
-                .filter(oauth2Filter(microsoftAuth))
-                .filter(oauth2Filter(keycloakAuth))
-                .filter(StatisticsFilter.create())
-                .filter(DevFilter.create());
+                .transform(oauth2Filter(googleAuth))
+                .transform(oauth2Filter(microsoftAuth))
+                .transform(oauth2Filter(keycloakAuth))
+                .transform(StatisticsTransformer.create())
+                .transform(DevTransformer.create());
     }
 
     /**
@@ -102,9 +102,9 @@ public class OAuthApp extends BaseOAuthApp {
      * In case of an error, it sets the error details and redirects to the authentication error path.
      *
      * @param openIDAuthProvider The OAuth2 authentication provider used for the authentication process.
-     * @return A {@link Filter} object configured for OAuth2 authentication flow.
+     * @return A {@link Transformer} object configured for OAuth2 authentication flow.
      */
-    private Filter oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
+    private Transformer oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
         return AuthBasicOAuth2Filter.create(openIDAuthProvider, userSession, user -> {
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);

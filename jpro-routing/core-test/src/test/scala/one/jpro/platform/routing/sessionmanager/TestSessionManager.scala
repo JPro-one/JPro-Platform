@@ -2,7 +2,7 @@ package one.jpro.platform.routing.sessionmanager
 
 import javafx.scene.control.Label
 import javafx.scene.layout.StackPane
-import one.jpro.platform.routing.{Filters, Response, Route, RouteApp}
+import one.jpro.platform.routing.{Transformers, Response, Route, RouteApp}
 import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.core._
 import simplefx.util.Predef.intercept
@@ -70,7 +70,7 @@ class TestSessionManager {
       .and(Route.get("/",r => Response.node(new Label("Empty"))))
       .and(Route.get("/error", r => throw new Exception("Error")))
       .and(Route.get("/error2", r => Response.error(new Exception("Error2"))))
-      .filter(Filters.errorPage())
+      .transform(Transformers.errorPage())
 
     val app = new RouteApp {
       override def createRoute(): Route = route
@@ -96,8 +96,8 @@ class TestSessionManager {
   def testNotFoundPage(): Unit = {
     val route = Route.empty()
       .and(Route.get("/",r => Response.node(new Label("Empty"))))
-      .filter(Filters.notFoundPage())
-      .filter(Filters.notFoundPage(r => Response.node(new Label("Not Found: " + r.getPath()))))
+      .transform(Transformers.notFoundPage())
+      .transform(Transformers.notFoundPage(r => Response.node(new Label("Not Found: " + r.getPath()))))
 
 
     val app = new RouteApp {

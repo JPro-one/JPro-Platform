@@ -14,7 +14,7 @@ import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
-import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.dev.DevTransformer;
 import one.jpro.platform.session.SessionManager;
 
 import java.net.URL;
@@ -75,10 +75,10 @@ public class GoogleLoginApp extends RouteApp {
                 .and(Route.get("/", request -> Response.node(new LoginPage(googleAuthProvider, uiProvider))))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
-                .filter(AuthBasicOAuth2Filter.create(googleAuthProvider, userSession,
+                .transform(AuthBasicOAuth2Filter.create(googleAuthProvider, userSession,
                         user -> Response.redirect("/user/signed-in"),
                         error -> Response.node(new ErrorPage(error))))
-                .filter(DevFilter.create());
+                .transform(DevTransformer.create());
     }
 
     private boolean isUserAuthenticated() {

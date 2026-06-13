@@ -32,6 +32,6 @@ public class VideoRoomApp extends RouteApp {
                         return Response.empty();
                     }
                 })
-                .filter(Filters.fullscreen(true));
+                .transform(Transformers.fullscreen(true));
     }
 }

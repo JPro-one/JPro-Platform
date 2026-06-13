@@ -4,7 +4,7 @@ import javafx.scene.Node;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
-import one.jpro.platform.routing.Filter;
+import one.jpro.platform.routing.Transformer;
 import one.jpro.platform.routing.LinkUtil;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
@@ -29,9 +29,9 @@ public interface AuthBasicFilter {
      * @param credentials   basic (username and password) credentials
      * @param userFunction  operation on the given user argument
      * @param errorFunction operation on the given error argument
-     * @return a {@link Filter} object
+     * @return a {@link Transformer} object
      */
-    static Filter create(@NotNull BasicAuthenticationProvider authProvider,
+    static Transformer create(@NotNull BasicAuthenticationProvider authProvider,
                          @NotNull UsernamePasswordCredentials credentials,
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {

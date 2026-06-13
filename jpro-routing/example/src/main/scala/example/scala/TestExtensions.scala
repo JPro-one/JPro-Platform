@@ -8,10 +8,10 @@ import simplefx.core._
 import simplefx.experimental._
 
 import java.util.function.Supplier
-import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter.Link
+import one.jpro.platform.routing.extensions.linkheader.LinkHeaderTransformer.Link
 import fr.brouillard.oss.cssfx.CSSFX
-import one.jpro.platform.routing.{Filters, LinkUtil, Redirect, Request, Response, Route, RouteNode, RouteUtils}
-import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter
+import one.jpro.platform.routing.{Transformers, LinkUtil, Redirect, Request, Response, Route, RouteNode, RouteUtils}
+import one.jpro.platform.routing.extensions.linkheader.LinkHeaderTransformer
 import one.jpro.platform.routing.sessionmanager.SessionManager
 
 class TestExtensionsApp(stage: Stage) extends RouteNode(stage) {
@@ -22,7 +22,7 @@ class TestExtensionsApp(stage: Stage) extends RouteNode(stage) {
       .and(redirect("/", "/home"))
       .and(get("/home", (r) => Response.node(new Label("HOME"))))
       .and(get("/secret", (r) => Response.node(new Label("SECRET"))))
-      .filter(LinkHeaderFilter.create(Link("HOME","/home"), Link("SECRET","/secret")))
+      .transform(LinkHeaderTransformer.create(Link("HOME","/home"), Link("SECRET","/secret")))
   )
 
   CSSFX.start()

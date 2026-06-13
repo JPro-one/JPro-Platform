@@ -6,7 +6,7 @@ import one.jpro.platform.routing.LinkUtil._
 import one.jpro.platform.routing.Route._
 import one.jpro.platform.routing.sessionmanager.SessionManager
 import one.jpro.platform.routing._
-import one.jpro.platform.routing.dev.{DevFilter, StatisticsFilter}
+import one.jpro.platform.routing.dev.{DevTransformer, StatisticsTransformer}
 import one.jpro.platform.routing.performance.IncrementalLoading
 import org.controlsfx.control.PopOver
 import simplefx.all._
@@ -44,8 +44,8 @@ class TestWebApplication extends RouteApp {
       .and(get("/6400", (r) => Response.page(new ManyNodes(6400))))
       .and(get("/it's\" tricky", (r) => Response.page(new MainView)))
       .and(get("/it's\" tricky", (r) => Response.page(new MainView)))
-      .filter(DevFilter.create)
-      .filter(StatisticsFilter.create)
+      .transform(DevTransformer.create)
+      .transform(StatisticsTransformer.create)
   }
 
 

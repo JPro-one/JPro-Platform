@@ -31,7 +31,7 @@ object Route {
 /**
  * A route maps a Request to a Response. Routes are composable: combine alternatives
  * with {@code and}, scope them with {@code path} or {@code domain}, branch with
- * {@code when}, and wrap them with {@code filter}.
+ * {@code when}, and wrap them with {@code transform}.
  */
 @FunctionalInterface
 trait Route {
@@ -76,35 +76,35 @@ trait Route {
       Response.empty()
     }
   })
-  /** Returns this route wrapped by the given filter. */
-  def filter(filter: Filter): Route = filter(this)
+  /** Returns this route wrapped by the given transformer. */
+  def transform(transformer: Transformer): Route = transformer(this)
   /**
-   * Wraps this route with a filter created per request, but only when the condition holds;
+   * Wraps this route with a transformer created per request, but only when the condition holds;
    * otherwise this route is used unchanged.
    *
-   * @param cond   decides per request whether the filter applies
-   * @param filter creates the filter for a matching request
+   * @param cond        decides per request whether the transformer applies
+   * @param transformer creates the transformer for a matching request
    */
-  def filterWhen(cond: Predicate[Request], filter: (Request) => Filter): Route = { r =>
+  def transformWhen(cond: Predicate[Request], transformer: (Request) => Transformer): Route = { r =>
     if(cond.test(r)) {
-      // Wrap the user-supplied lambda so any StatefulFilter constructed
+      // Wrap the user-supplied lambda so any StatefulTransformer constructed
       // inside it is detected and reported as a fail-fast violation.
-      val resolved = StatefulFilterContext.runInRequestLambda(filter.apply(r))
+      val resolved = StatefulTransformerContext.runInRequestLambda(transformer.apply(r))
       resolved(this).apply(r)
     } else {
       this.apply(r)
     }
   }
   /**
-   * Like {@code filterWhen}, but the filter is created asynchronously.
+   * Like {@code transformWhen}, but the transformer is created asynchronously.
    *
-   * @param cond   decides per request whether the filter applies
-   * @param filter creates the future filter for a matching request
+   * @param cond        decides per request whether the transformer applies
+   * @param transformer creates the future transformer for a matching request
    */
-  def filterWhenFuture(cond: Predicate[Request], filter: (Request) => FXFuture[Filter]): Route = { r =>
+  def transformWhenFuture(cond: Predicate[Request], transformer: (Request) => FXFuture[Transformer]): Route = { r =>
     if(cond.test(r)) {
-      val future = StatefulFilterContext.runInRequestLambda(filter(r))
-      Response(future.flatMap(filter => filter(this).apply(r).future))
+      val future = StatefulTransformerContext.runInRequestLambda(transformer(r))
+      Response(future.flatMap(t => t(this).apply(r).future))
     } else {
       this.apply(r)
     }

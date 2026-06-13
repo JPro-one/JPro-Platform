@@ -5,18 +5,18 @@ import javafx.scene.Node
 import javafx.scene.layout.StackPane
 
 /**
- * A [[ContainerFilter]] that wraps the matched page in a `StackPane` whose
+ * A [[ContainerTransformer]] that wraps the matched page in a `StackPane` whose
  * `getStyleClass()` mirrors a caller-supplied `ObservableList[String]`.
  *
- * The mirror image of [[StylesheetsFilter]] but for style classes instead of
+ * The mirror image of [[StylesheetsTransformer]] but for style classes instead of
  * stylesheet URLs. CSS rules using these classes (e.g. `.light .h1`) match
  * descendants of the wrapper because JavaFX selector evaluation walks
  * ancestors regardless of which Parent owns the stylesheet.
  *
- * Compose with [[StylesheetsFilter]] when you want both — they stack as
+ * Compose with [[StylesheetsTransformer]] when you want both — they stack as
  * siblings in the route filter chain.
  */
-class StyleClassFilter(classes: ObservableList[String]) extends ContainerFilter {
+class StyleClassTransformer(classes: ObservableList[String]) extends ContainerTransformer {
 
   /** Convenience constructor for fixed (non-reactive) style class lists. */
   def this(classes: String*) = this(FXCollections.observableArrayList(classes: _*))
@@ -34,8 +34,8 @@ class StyleClassFilter(classes: ObservableList[String]) extends ContainerFilter 
   }
 }
 
-/** Internal wrapper Node for [[StyleClassFilter]]. Same GC pattern as
- *  [[StylesheetsFilter]] — strong listener field on the container, observed
+/** Internal wrapper Node for [[StyleClassTransformer]]. Same GC pattern as
+ *  [[StylesheetsTransformer]] — strong listener field on the container, observed
  *  via `WeakListChangeListener` so the source list doesn't pin the wrapper. */
 private final class StyleClassContainer(source: ObservableList[String]) extends StackPane {
   getStyleClass.setAll(source)

@@ -1,8 +1,8 @@
 package one.jpro.platform.routing.dev
 
 import com.jpro.webapi.WebAPI
-import one.jpro.platform.routing.filter.container.{ContainerFilter, ReactiveContainer}
-import one.jpro.platform.routing.Filter
+import one.jpro.platform.routing.filter.container.{ContainerTransformer, ReactiveContainer}
+import one.jpro.platform.routing.Transformer
 import org.slf4j.{Logger, LoggerFactory}
 import scala.language.postfixOps
 import simplefx.all._
@@ -11,18 +11,18 @@ import simplefx.experimental._
 import one.jpro.platform.routing.dev.NodesHelper._
 import one.jpro.platform.utils.TreeShowing
 
-object StatisticsFilter {
+object StatisticsTransformer {
 
   private lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  def create(): Filter = ContainerFilter.fromReactiveContainer(() => new StatisticsContainer)
+  def create(): Transformer = ContainerTransformer.fromReactiveContainer(() => new StatisticsContainer)
 
   private class StatisticsContainer extends VBox with ReactiveContainer { CONTAINER =>
-    stylesheets <++ DevFilter.getClass.getResource("/one/jpro/platform/routing/dev/statisticsfilter.css").toExternalForm
+    stylesheets <++ DevTransformer.getClass.getResource("/one/jpro/platform/routing/dev/statisticsfilter.css").toExternalForm
 
     styleClass <++ "statisticsfilter-vbox"
 
-    override def toString(): String = s"DevFilter(content=$content)"
+    override def toString(): String = s"DevTransformer(content=$content)"
 
     this <++ new TextFlow { // Should use flexbox later
 

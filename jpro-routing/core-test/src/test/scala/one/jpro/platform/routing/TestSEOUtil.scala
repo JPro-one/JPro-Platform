@@ -3,21 +3,15 @@ package one.jpro.platform.routing
 import javafx.application.Platform
 import javafx.scene.control.Label
 import org.junit.jupiter.api.{BeforeAll, Test}
+import simplefx.cores.default.inFX
 
 import java.util.concurrent.CountDownLatch
 
 object TestSEOUtil {
+  // inFX initializes the SimpleFX core on the FX thread; bare Platform.startup
+  // would leave the core uninitialized and poison it for the whole suite
   @BeforeAll
-  def init(): Unit = {
-    val latch = new CountDownLatch(1)
-    try {
-      Platform.startup(() => latch.countDown())
-    } catch {
-      case _: IllegalStateException =>
-        // Toolkit already initialized
-        latch.countDown()
-    }
-    latch.await()
+  def init(): Unit = inFX {
     Platform.setImplicitExit(false)
   }
 }

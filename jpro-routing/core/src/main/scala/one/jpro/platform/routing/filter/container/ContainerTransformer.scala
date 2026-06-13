@@ -2,7 +2,7 @@ package one.jpro.platform.routing.filter.container
 
 import java.lang.ref.WeakReference
 import javafx.scene.Node
-import one.jpro.platform.routing.{Request, Response, Route, StatefulFilter, Page}
+import one.jpro.platform.routing.{Request, Response, Route, StatefulTransformer, Page}
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -13,12 +13,12 @@ import org.slf4j.{Logger, LoggerFactory}
  * Subclasses implement [[createNode]], [[setContent]], and [[getContent]];
  * [[setRequest]] is an optional hook that defaults to a no-op.
  *
- * Identity is per-instance: two `ContainerFilter` objects own two distinct
- * containers, regardless of class. Because `ContainerFilter` extends
- * [[StatefulFilter]], it must be constructed at session-startup time and
- * held as a field — never inside per-request lambdas like `filterWhen`.
+ * Identity is per-instance: two `ContainerTransformer` objects own two distinct
+ * containers, regardless of class. Because `ContainerTransformer` extends
+ * [[StatefulTransformer]], it must be constructed at session-startup time and
+ * held as a field — never inside per-request lambdas like `transformWhen`.
  */
-abstract class ContainerFilter extends StatefulFilter {
+abstract class ContainerTransformer extends StatefulTransformer {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -83,23 +83,23 @@ abstract class ContainerFilter extends StatefulFilter {
   }
 }
 
-object ContainerFilter {
+object ContainerTransformer {
 
   /**
-   * Build a `ContainerFilter` from a supplier of a Node that implements the
-   * [[Container]] trait. Avoids subclassing `ContainerFilter` by hand.
+   * Build a `ContainerTransformer` from a supplier of a Node that implements the
+   * [[Container]] trait. Avoids subclassing `ContainerTransformer` by hand.
    *
-   * Example: `route.filter(ContainerFilter.fromContainer(MyContainer::new))`
+   * Example: `route.transform(ContainerTransformer.fromContainer(MyContainer::new))`
    *
    * @throws IllegalArgumentException at first use if the supplier produces
    *         an object that is not a `javafx.scene.Node`.
    */
-  def fromContainer(supplier: java.util.function.Supplier[_ <: Container]): ContainerFilter =
-    new ContainerFilter {
+  def fromContainer(supplier: java.util.function.Supplier[_ <: Container]): ContainerTransformer =
+    new ContainerTransformer {
       override def createNode(): Node = supplier.get() match {
         case n: Node => n
         case other => throw new IllegalArgumentException(
-          s"ContainerFilter.fromContainer requires a Node-implementing Container, " +
+          s"ContainerTransformer.fromContainer requires a Node-implementing Container, " +
           s"got: ${other.getClass.getName}")
       }
       override def setContent(c: Node, x: Node): Unit =
@@ -111,12 +111,12 @@ object ContainerFilter {
     }
 
   /**
-   * Build a `ContainerFilter` from a supplier of a Node that mixes in
+   * Build a `ContainerTransformer` from a supplier of a Node that mixes in
    * [[ReactiveContainer]] (simplefx `@Bind` vars). The simplefx-flavoured
    * counterpart of [[fromContainer]].
    */
-  def fromReactiveContainer(supplier: java.util.function.Supplier[_ <: ReactiveContainer]): ContainerFilter =
-    new ContainerFilter {
+  def fromReactiveContainer(supplier: java.util.function.Supplier[_ <: ReactiveContainer]): ContainerTransformer =
+    new ContainerTransformer {
       override def createNode(): Node = supplier.get().asInstanceOf[Node]
       override def setContent(c: Node, x: Node): Unit =
         c.asInstanceOf[ReactiveContainer].content = x

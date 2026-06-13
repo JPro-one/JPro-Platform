@@ -28,9 +28,9 @@ public interface AuthBasicOAuth2Filter {
      * @param openidAuthProvider the OpenID authentication provider
      * @param userFunction       operation on the given user argument
      * @param errorFunction      operation on the given error argument
-     * @return a {@link Filter} object
+     * @return a {@link Transformer} object
      */
-    static Filter create(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
+    static Transformer create(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {
         final var credentials = openidAuthProvider.getCredentials();
@@ -45,9 +45,9 @@ public interface AuthBasicOAuth2Filter {
      * @param userSession        the user session, when null the user will not be stored in the session
      * @param userFunction       operation on the given user argument
      * @param errorFunction      operation on the given error argument
-     * @return a {@link Filter} object
+     * @return a {@link Transformer} object
      */
-    static Filter create(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
+    static Transformer create(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
                          @NotNull UserSession userSession,
                          @NotNull Function<User, Response> userFunction,
                          @NotNull Function<Throwable, Response> errorFunction) {
@@ -65,9 +65,9 @@ public interface AuthBasicOAuth2Filter {
      * @param credentials   an OAuth2 credentials
      * @param userFunction  operation on the given user argument
      * @param errorFunction operation on the given error argument
-     * @return a {@link Filter} object
+     * @return a {@link Transformer} object
      */
-    static Filter create(@NotNull OAuth2AuthenticationProvider authProvider,
+    static Transformer create(@NotNull OAuth2AuthenticationProvider authProvider,
                          @Nullable UserSession userSession,
                          @NotNull OAuth2Credentials credentials,
                          @NotNull Function<User, Response> userFunction,

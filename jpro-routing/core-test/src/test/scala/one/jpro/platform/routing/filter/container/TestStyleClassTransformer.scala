@@ -13,14 +13,14 @@ import simplefx.experimental._
 import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
-object TestStyleClassFilter {
+object TestStyleClassTransformer {
   @BeforeAll
   def setup(): Unit = {
     Await.result(simplefx.cores.initializeCore(), (second))
   }
 }
 
-class TestStyleClassFilter {
+class TestStyleClassTransformer {
 
   private def runRequest(route: Route, req: Request): Node = {
     val result = inFX(route.apply(req).future).await
@@ -29,8 +29,8 @@ class TestStyleClassFilter {
 
   @Test
   def styleClassesAreAppliedToWrapper(): Unit = {
-    val filter = new StyleClassFilter("light", "background")
-    val route = Route.get("/", _ => Response.node(new Label())).filter(filter)
+    val filter = new StyleClassTransformer("light", "background")
+    val route = Route.get("/", _ => Response.node(new Label())).transform(filter)
     val container = runRequest(route, Request.fromString("http://localhost/")).asInstanceOf[StackPane]
 
     assert(container.getStyleClass.asScala.toList.contains("light"))
@@ -40,8 +40,8 @@ class TestStyleClassFilter {
   @Test
   def styleClassesReflectTheSourceObservableList(): Unit = {
     val classes = FXCollections.observableArrayList("light")
-    val filter = new StyleClassFilter(classes)
-    val route = Route.get("/", _ => Response.node(new Label())).filter(filter)
+    val filter = new StyleClassTransformer(classes)
+    val route = Route.get("/", _ => Response.node(new Label())).transform(filter)
     val container = runRequest(route, Request.fromString("http://localhost/")).asInstanceOf[StackPane]
 
     assert(container.getStyleClass.asScala.toList == List("light"))
@@ -62,10 +62,10 @@ class TestStyleClassFilter {
   def byNameOverloadTracksReactiveDependency(): Unit = {
     val toggle = inFX { new MobileToggle }
     val filter = inFX {
-      Filters.styleClasses(
+      Transformers.styleClasses(
         if (toggle.isMobile) List("light", "mobile") else List("light"))
     }
-    val route = Route.get("/", _ => Response.node(new Label())).filter(filter)
+    val route = Route.get("/", _ => Response.node(new Label())).transform(filter)
     val container = runRequest(route, Request.fromString("http://localhost/")).asInstanceOf[StackPane]
 
     assert(container.getStyleClass.asScala.toList == List("light"))
@@ -79,16 +79,16 @@ class TestStyleClassFilter {
 
   @Test
   def stackingStylesheetsAndStyleClasses(): Unit = {
-    val sheetsFilter = new StylesheetsFilter("/main.css")
-    val classesFilter = new StyleClassFilter("light")
+    val sheetsFilter = new StylesheetsTransformer("/main.css")
+    val classesFilter = new StyleClassTransformer("light")
     val route =
       Route.get("/", _ => Response.node(new Label("page")))
-        .filter(sheetsFilter)
-        .filter(classesFilter)
+        .transform(sheetsFilter)
+        .transform(classesFilter)
 
     // The outer filter (last one in the chain) wraps the result, so the
-    // returned wrapper is the StyleClassFilter's container; its child is
-    // the StylesheetsFilter's container.
+    // returned wrapper is the StyleClassTransformer's container; its child is
+    // the StylesheetsTransformer's container.
     val outer = runRequest(route, Request.fromString("http://localhost/")).asInstanceOf[StackPane]
     assert(outer.getStyleClass.asScala.toList.contains("light"))
 

@@ -6,11 +6,11 @@ import one.jpro.platform.mdfx.example.MarkdownViewSample;
 import one.jpro.platform.media.example.MediaPlayerSample;
 import one.jpro.platform.media.example.MediaRecorderAndPlayerSample;
 import one.jpro.platform.media.example.MediaRecorderSample;
-import one.jpro.platform.routing.Filters;
+import one.jpro.platform.routing.Transformers;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.RouteApp;
-import one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter;
+import one.jpro.platform.routing.extensions.linkheader.LinkHeaderTransformer;
 import one.jpro.platform.session.example.SessionManagerSample;
 
 import java.net.URL;
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import static one.jpro.platform.routing.Route.get;
 import static one.jpro.platform.routing.Route.redirect;
-import static one.jpro.platform.routing.extensions.linkheader.LinkHeaderFilter.Link;
+import static one.jpro.platform.routing.extensions.linkheader.LinkHeaderTransformer.Link;
 
 /**
  * Launcher class to switch example applications via routing.
@@ -65,7 +65,7 @@ public class Main extends RouteApp {
                         Response.node(new HTMLScrollPaneSample().createRoot())))
                 .and(get(sessionManagerLink.prefix(), request ->
                         Response.node(new SessionManagerSample().createRoot(getStage()))))
-                .filter(LinkHeaderFilter.create(links))
-                .filter(Filters.fullscreen(true));
+                .transform(LinkHeaderTransformer.create(links))
+                .transform(Transformers.fullscreen(true));
     }
 }

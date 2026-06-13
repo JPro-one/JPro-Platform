@@ -7,23 +7,23 @@ import org.slf4j.{Logger, LoggerFactory}
  * cache, a session token, an animation, etc. Such filters have meaningful
  * object identity and MUST be constructed once at session-startup time
  * (typically inside `RouteApp.createRoute()` or in a field on a Site object),
- * not inside per-request route lambdas like `filterWhen` / `filterWhenFuture`.
+ * not inside per-request route lambdas like `transformWhen` / `transformWhenFuture`.
  *
- * Constructing a `StatefulFilter` while a per-request lambda is on the stack
- * is reported via [[StatefulFilterContext.violationHandler]] — by default
+ * Constructing a `StatefulTransformer` while a per-request lambda is on the stack
+ * is reported via [[StatefulTransformerContext.violationHandler]] — by default
  * this throws an [[IllegalStateException]] (fail-fast). Tests can flip the
  * handler to a no-op or a logger to relax this.
  *
  * The check is best-effort: it relies on the framework wrapping its
- * user-callback invocations with [[StatefulFilterContext.runInRequestLambda]].
- * `Route.filterWhen` / `Route.filterWhenFuture` do this automatically.
+ * user-callback invocations with [[StatefulTransformerContext.runInRequestLambda]].
+ * `Route.transformWhen` / `Route.transformWhenFuture` do this automatically.
  */
-abstract class StatefulFilter extends Filter {
-  StatefulFilterContext.checkConstruction(getClass)
+abstract class StatefulTransformer extends Transformer {
+  StatefulTransformerContext.checkConstruction(getClass)
 }
 
-object StatefulFilterContext {
-  private val logger: Logger = LoggerFactory.getLogger(classOf[StatefulFilter])
+object StatefulTransformerContext {
+  private val logger: Logger = LoggerFactory.getLogger(classOf[StatefulTransformer])
 
   // Most routing happens on the FX thread; a single mutable flag is enough.
   // Saved/restored in runInRequestLambda so legitimate nesting works.
@@ -45,7 +45,7 @@ object StatefulFilterContext {
 
   /**
    * Marks the dynamic extent of `body` as "inside a per-request lambda".
-   * `StatefulFilter` constructors invoked from within `body` will trigger
+   * `StatefulTransformer` constructors invoked from within `body` will trigger
    * the violation handler.
    *
    * Saves and restores the flag so nested invocations are handled.
@@ -68,8 +68,8 @@ object StatefulFilterContext {
       violationHandler(
         s"Stateful filter ${filterClass.getName} was constructed inside a per-request route lambda. " +
         "This creates a new instance on every request, defeating any per-session state " +
-        "(e.g. ContainerFilter's container reuse). Hoist the filter outside of " +
-        "filterWhen / filterWhenFuture lambdas — typically as a field on your RouteApp " +
+        "(e.g. ContainerTransformer's container reuse). Hoist the filter outside of " +
+        "transformWhen / transformWhenFuture lambdas — typically as a field on your RouteApp " +
         "or a Site object — and reference the field from inside the lambda."
       )
     }

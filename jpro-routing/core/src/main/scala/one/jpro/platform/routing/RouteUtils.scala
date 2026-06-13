@@ -9,7 +9,7 @@ import java.util.function.Function
 
 object RouteUtils {
 
-  def transitionFilter(seconds: Double): Filter = route => { request => {
+  def transition(seconds: Double): Transformer = route => { request => {
     Response(route.apply(request).future.map{
       case x: Page =>
         val oldNode = request.getOldContent().get()
@@ -29,7 +29,7 @@ object RouteUtils {
       case x => x
     })
   }}
-  def sideTransitionFilter(seconds: Double): Filter = route => { request => {
+  def sideTransition(seconds: Double): Transformer = route => { request => {
     Response(route.apply(request).future.map{
       case x: Page =>
         val oldNode = request.getOldContent().get()

@@ -3,7 +3,7 @@ package one.jpro.platform.sipjs.example;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
 import one.jpro.platform.routing.RouteApp;
-import one.jpro.platform.routing.dev.DevFilter;
+import one.jpro.platform.routing.dev.DevTransformer;
 import one.jpro.platform.sipjs.example.page.*;
 
 public class SIPJSApp extends RouteApp {
@@ -19,7 +19,7 @@ public class SIPJSApp extends RouteApp {
                 .and(Route.get("/aliceAndBob", r -> Response.node(new AliceAndBobPage())))
                 .and(Route.get("/alice", r -> Response.node(new AlicePage())))
                 .and(Route.get("/bob", r -> Response.node(new BobPage())))
-                .filter(DevFilter.create())
+                .transform(DevTransformer.create())
                 .and(Route.empty());
     }
 }
