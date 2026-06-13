@@ -96,8 +96,27 @@ buildscript {
         classpath "one.jpro:jpro-gradle-plugin:$JPRO_VERSION"
         classpath "org.owasp:dependency-check-gradle:$DEPENDENCY_CHECK_PLUGIN_VERSION"
         classpath "tech.yanand.gradle:maven-central-publish:$MAVEN_CENTRAL_PUBLISH_PLUGIN_VERSION"
+        classpath "one.jpro.aidocs:ai-docs-gradle-plugin:$AI_DOCS_VERSION"
     }
 }
+apply plugin: 'one.jpro.aidocs'
+// The version is derived from the latest reachable git tag (X.Y.Z, no prefix):
+//   - HEAD exactly on the tag, clean tree  -> X.Y.Z (release build)
+//   - commits after the tag, or dirty tree -> X.Y.(Z+1)-SNAPSHOT
+//   - no tag / no git                      -> 0.7.0-SNAPSHOT
+def gitDescribe = providers.exec {
+    commandLine 'git', 'describe', '--tags', '--dirty', '--match', '[0-9]*'
+    ignoreExitValue = true
+}.standardOutput.asText.map { it.trim() }
+def jproPlatformVersion = {
+    def matcher = gitDescribe.getOrElse('') =~ /^(\d+)\.(\d+)\.(\d+)(-\d+-g[0-9a-f]+)?(-dirty)?$/
+    if (!matcher.matches()) return '0.7.0-SNAPSHOT'
+    def (major, minor, patch) = [matcher.group(1), matcher.group(2), matcher.group(3).toInteger()]
+    def isRelease = matcher.group(4) == null && matcher.group(5) == null
+    isRelease ? "${major}.${minor}.${patch}" : "${major}.${minor}.${patch + 1}-SNAPSHOT"
+}()
+logger.lifecycle("Version derived from git tags: {} (git describe: {})", jproPlatformVersion, gitDescribe.getOrElse('') ?: '<no tag found>')
+
 apply plugin: 'java'
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -199,7 +218,7 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
             mavenJava(MavenPublication) {
                 groupId = 'one.jpro.platform'
                 artifactId = isParentASubproject ? "${project.parent.name}-${project.name}" : "${project.name}"
-                version = JPRO_PLATFORM_VERSION
+                version = jproPlatformVersion
 
                 if (artifactId == rootProject.name) { // Only the root project
                     // Attach the combined DOCUMENTATION.md
@@ -267,7 +286,7 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                             def parentNode = asNode().appendNode('parent')
                             parentNode.appendNode('groupId', 'one.jpro.platform')
                             parentNode.appendNode('artifactId', rootProject.name)
-                            parentNode.appendNode('version', JPRO_PLATFORM_VERSION)
+                            parentNode.appendNode('version', jproPlatformVersion)
                         }
                     }
                 }
@@ -291,20 +310,23 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
                 }
             }
             maven {
-                name = 'publish-bundle'
+                name = 'centralBundle'
                 url = layout.buildDirectory.dir('publish-bundle')
             }
         }
     }
 
-    signing {
-        useInMemoryPgpKeys (
-                System.getenv("SANDEC_SIGNING_KEY_ID"),
-                System.getenv("SANDEC_SIGNING_SECRET_KEY"),
-                System.getenv("SANDEC_SIGNING_PASSWORD")
-        )
+    // Sign only when keys are present, so local and snapshot builds work without them
+    if (System.getenv("SANDEC_SIGNING_KEY_ID") != null) {
+        signing {
+            useInMemoryPgpKeys (
+                    System.getenv("SANDEC_SIGNING_KEY_ID"),
+                    System.getenv("SANDEC_SIGNING_SECRET_KEY"),
+                    System.getenv("SANDEC_SIGNING_PASSWORD")
+            )
 
-        sign publishing.publications.mavenJava
+            sign publishing.publications.mavenJava
+        }
     }
 
     mavenCentral {

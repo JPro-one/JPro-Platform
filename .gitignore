@@ -5,3 +5,4 @@ bin/
 build/
 example/logs/
 .DS_Store
+.claude/skills/docs/

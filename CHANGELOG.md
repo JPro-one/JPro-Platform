@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.6.4 (unreleased)
+### 0.7.0 (unreleased)
 
 #### Features
 * `jpro-routing`: `Transformers.mapPage(Page -> Page)` applies a transform to the route's pages, leaving redirects and empty responses untouched.
@@ -9,6 +9,8 @@
 #### Improvements
 * `jpro-routing`: Documented Pages, transformers, containers, popups and dev tools in the README.
 * `jpro-routing`: Page-decorating transformers now preserve all page properties (`onClose`, `saveScrollPosition`, `handleRequest`, `subPage`), not only title/description/content/fullscreen.
+* Updated SimpleFX to 3.3.2.
+* The build derives its version from git tags (see `RELEASING.md`); releases are cut with `./tagRelease.sh X.Y.Z`.
 
 #### Breaking
 * `jpro-routing`: Renamed `View` to `Page`. Affects `Response.page(...)` (was `Response.view`), `SessionManager.getPage()` (was `getView`), `Page.fromNode(...)`, `subPage()`, and `NodePage`.
