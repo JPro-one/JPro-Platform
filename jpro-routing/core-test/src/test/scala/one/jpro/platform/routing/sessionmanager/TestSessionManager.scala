@@ -80,14 +80,14 @@ class TestSessionManager {
 
     val res1 = inFX(app.getSessionManager().gotoURL("/error").future).await
     inFX {
-      val view = app.getSessionManager().view
-      assert(view.realContent.asInstanceOf[Label].getText.contains("Error"), view.realContent.asInstanceOf[Label].getText)
+      val page = app.getSessionManager().page
+      assert(page.realContent.asInstanceOf[Label].getText.contains("Error"), page.realContent.asInstanceOf[Label].getText)
     }
 
     val res2 = inFX(app.getSessionManager().gotoURL("/error2").future).await
     inFX {
-      val view = app.getSessionManager().view
-      assert(view.realContent.asInstanceOf[Label].getText.contains("Error2"), view.realContent.asInstanceOf[Label].getText)
+      val page = app.getSessionManager().page
+      assert(page.realContent.asInstanceOf[Label].getText.contains("Error2"), page.realContent.asInstanceOf[Label].getText)
     }
   }
 
@@ -108,9 +108,9 @@ class TestSessionManager {
 
     val res = inFX(app.getSessionManager().gotoURL("/notfound").future).await
     inFX {
-      val view = app.getSessionManager().view
-      assert(view.realContent.asInstanceOf[Label].getText.contains("Not Found"), view.realContent.asInstanceOf[Label].getText)
-      println("Label Text: " + view.realContent.asInstanceOf[Label].getText)
+      val page = app.getSessionManager().page
+      assert(page.realContent.asInstanceOf[Label].getText.contains("Not Found"), page.realContent.asInstanceOf[Label].getText)
+      println("Label Text: " + page.realContent.asInstanceOf[Label].getText)
     }
   }*/
 

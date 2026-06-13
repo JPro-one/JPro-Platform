@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.crawl
 
 import javafx.stage.Stage
-import one.jpro.platform.routing.{Request, Route, RouteNode, View}
+import one.jpro.platform.routing.{Request, Route, RouteNode, Page}
 import one.jpro.platform.routing.crawl.AppCrawler.{CrawlReportApp, routeToRouteNode}
 import org.slf4j.{Logger, LoggerFactory}
 import one.jpro.platform.scenegraph.SceneGraphSerializer
@@ -23,16 +23,16 @@ object SizeTester {
       val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
       assert(routeNode != null, "The routeNode must not return null ")
 
-      val view = routeNode.getSessionManager().gotoURL(pageURL).future.await
+      val page = routeNode.getSessionManager().gotoURL(pageURL).future.await
       inFX(routeNode.scene.root.applyCss())
 
-      assert(view.isInstanceOf[View])
+      assert(page.isInstanceOf[Page])
 
       //println(SceneGraphSerializer.serialize(routeNode))
       assert(routeNode.scene != null, "The routeNode must have a scene")
 
 
-      val node = view.asInstanceOf[View].realContent
+      val node = page.asInstanceOf[Page].realContent
       waitUntil(node.scene != null)
       inFX(assert(node.scene != null, "The node must have a scene"))
       val nodeMinWidth = node.minWidth(-1)

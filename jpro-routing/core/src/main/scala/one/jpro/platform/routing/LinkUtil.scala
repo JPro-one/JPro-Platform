@@ -269,7 +269,7 @@ object LinkUtil {
     }
   }
 
-  def setImageViewDescription(view: ImageView, description: String): Unit = {
-    view.setAccessibleRoleDescription(description)
+  def setImageViewDescription(page: ImageView, description: String): Unit = {
+    page.setAccessibleRoleDescription(description)
   }
 }

@@ -70,7 +70,7 @@ object DevFilter {
           LinkUtil.gotoPage(this, getText())
         }
       }
-      this <++ new Button("Scenic View") {
+      this <++ new Button("Scenic Page") {
         onAction --> {
           if (WebAPI.isBrowser) {
             val stage = new Stage()

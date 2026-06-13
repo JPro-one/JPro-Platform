@@ -5,7 +5,7 @@ import javafx.scene.Node
 import javafx.scene.layout.StackPane
 
 /**
- * A [[ContainerFilter]] that wraps the matched view in a `StackPane` whose
+ * A [[ContainerFilter]] that wraps the matched page in a `StackPane` whose
  * `getStylesheets()` mirrors a caller-supplied `ObservableList[String]`.
  * Stylesheets attach to the wrapper Parent (not the Scene), so CSS scoped to
  * one sub-route subtree cannot bleed into siblings. Mutating the source list

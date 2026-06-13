@@ -60,8 +60,8 @@ object IncrementalLoading {
 
       val sm: SessionManager = SessionManagerContext.getContext(x)
       if(sm == null) throw new RuntimeException("No JPro Rotuing SessionManager found")
-      val view = sm.view
-      val content = view.realContent
+      val page = sm.page
+      val content = page.realContent
       if(!content.getProperties.containsKey(IncrementalLoadingKey)) {
         val loader = new IncrementalLoader(content)
         content.getProperties.put(IncrementalLoadingKey, loader)

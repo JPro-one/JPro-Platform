@@ -4,7 +4,7 @@ import com.jpro.webapi.WebAPI
 import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
-import one.jpro.platform.routing.{HistoryEntry, Request, Response, ResponseResult, RouteNode, SessionManagerContext, View}
+import one.jpro.platform.routing.{HistoryEntry, Request, Response, ResponseResult, RouteNode, SessionManagerContext, Page}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
@@ -16,7 +16,7 @@ import java.util.function.Consumer
 
 
 /**
- * Manages the navigation of a routing application: the current URL and view,
+ * Manages the navigation of a routing application: the current URL and page,
  * the history, and programmatic navigation via {@code gotoURL}. There is one
  * SessionManager per application; obtain it via {@code RouteApp.getSessionManager()}
  * or {@code LinkUtil.getSessionManager(node)}. In the browser it is backed by the
@@ -41,10 +41,10 @@ trait SessionManager { THIS =>
   @Bind var historyForward : List[HistoryEntry] = getHistoryForwards.toBindable
 
   @Bind var url: String = null
-  @Bind var view: View = null
+  @Bind var page: Page = null
 
-  /** Returns the currently shown view. */
-  def getView(): View = view
+  /** Returns the currently shown page. */
+  def getPage(): Page = page
   /** Returns the URL currently shown. */
   def getURL(): String = url
 
@@ -92,7 +92,7 @@ trait SessionManager { THIS =>
     try {
       logger.debug(s"goto: $url2")
       val request = getRequest(url2)
-      val newView = if(view != null && view.handleRequest(request)) Response(FXFuture(view)) else {
+      val newView = if(page != null && page.handleRequest(request)) Response(FXFuture(page)) else {
         webApp.getRoute()(request)
       }
       Response.fromFuture(newView.future.map { response =>
@@ -109,27 +109,27 @@ trait SessionManager { THIS =>
   def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response
 
   def getRequest(url: String): Request = {
-    val node = if(view == null) null else view.realContent
+    val node = if(page == null) null else page.realContent
     Request.fromString(url, node)
   }
 
   def start(): Response
 
-  def markViewCollectable(view: View): Unit = {
-    JMemoryBuddyLive.markCollectable(s"Page url: ${view.url} title: ${view.title}", view.realContent)
+  def markPageCollectable(page: Page): Unit = {
+    JMemoryBuddyLive.markCollectable(s"Page url: ${page.url} title: ${page.title}", page.realContent)
   }
-  def markViewCollectable(oldView: View, newView: View): Unit = {
-//    logger.debug(s"depths: ${viewDepth(oldView)} - ${viewDepth(newView)}")
+  def markPageCollectable(oldView: Page, newView: Page): Unit = {
+//    logger.debug(s"depths: ${pageDepth(oldView)} - ${pageDepth(newView)}")
     if(oldView.realContent != newView.realContent) {
 //      logger.debug(s"nodes: ${oldView.realContent} - ${newView.realContent}")
       JMemoryBuddyLive.markCollectable(s"Page url: ${oldView.url} title: ${oldView.title}", oldView.realContent)
     }
-    if(oldView.subView() != null && newView.subView != null) {
-      markViewCollectable(oldView.subView(), newView.subView())
+    if(oldView.subPage() != null && newView.subPage != null) {
+      markPageCollectable(oldView.subPage(), newView.subPage())
     }
   }
-  def viewDepth(x: View): Int = {
-    if(x.subView() == null) 1 else 1 + viewDepth(x.subView())
+  def pageDepth(x: Page): Int = {
+    if(x.subPage() == null) 1 else 1 + pageDepth(x.subPage())
   }
 }
 

@@ -5,7 +5,7 @@ import javafx.scene.Node
 import javafx.scene.layout.StackPane
 
 /**
- * A [[ContainerFilter]] that wraps the matched view in a `StackPane` whose
+ * A [[ContainerFilter]] that wraps the matched page in a `StackPane` whose
  * `getStyleClass()` mirrors a caller-supplied `ObservableList[String]`.
  *
  * The mirror image of [[StylesheetsFilter]] but for style classes instead of

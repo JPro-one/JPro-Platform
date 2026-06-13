@@ -10,10 +10,10 @@ class TestSitemapGenerator {
   @Test
   def test(): Unit = {
     def route = Route.empty()
-        .and(get("/", r => Response.view(new Page1)))
-        .and(get("/page2", r => Response.view(new Page2)))
-        .and(get("/page4", r => Response.view(new Page2)))
-        .and(r => Response.view(new Page1))
+        .and(get("/", r => Response.page(new Page1)))
+        .and(get("/page2", r => Response.page(new Page2)))
+        .and(get("/page4", r => Response.page(new Page2)))
+        .and(r => Response.page(new Page1))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
     val sm = SitemapGenerator.createSitemap("http://localhost", result)
     println("Crawl Report: " + result)
@@ -27,7 +27,7 @@ class TestSitemapGenerator {
   @Test
   def testMailToRedirect(): Unit = {
     def route = Route.empty()
-      .and(get("/", r => Response.view(pageWithLink(List("/page2", "/page3", "mailto:something")))))
+      .and(get("/", r => Response.page(pageWithLink(List("/page2", "/page3", "mailto:something")))))
       .and(get("/page2", r => Response.redirect("mailto:something-2")))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
     println("got result: " + result)
