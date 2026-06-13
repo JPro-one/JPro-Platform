@@ -66,6 +66,6 @@ public class Main extends RouteApp {
                 .and(get(sessionManagerLink.prefix(), request ->
                         Response.node(new SessionManagerSample().createRoot(getStage()))))
                 .filter(LinkHeaderFilter.create(links))
-                .filter(Filters.FullscreenFilter(true));
+                .filter(Filters.fullscreen(true));
     }
 }

@@ -80,74 +80,33 @@ object Filters {
     new StyleClassFilter(list)
   }
 
-  def FullscreenFilter(fullscreenValue: Boolean): Filter = { route => { request =>
-      val r = route.apply(request)
+  // ----- Page transforms -----
 
-      Response(r.future.map {
-        case x: Page =>
-          new Page {
-            override def title: String = x.title
-            override def description: String = x.description
-            override def content: all.Node = x.realContent
-
-            override def fullscreen: Boolean = fullscreenValue
-          }
+  /**
+   * Applies {@code f} to the page produced by the route, leaving redirects and
+   * empty responses untouched. The building block for page-decorating filters
+   * such as {@link #fullscreen}, {@link #title} and {@link #description}.
+   */
+  def mapPage(f: Function[Page, Page]): Filter = { route => { request =>
+      Response(route.apply(request).future.map {
+        case page: Page => f.apply(page)
         case x => x
       })
     }
   }
-  def title(title: String): Filter = { route => { request =>
-      val r = route.apply(request)
-      val _title = title
 
-      Response(r.future.map {
-        case x: Page =>
-          new Page {
-            override def title: String = _title
-            override def description: String = x.description
-            override def content: all.Node = x.realContent
+  /** Sets the fullscreen flag of the route's pages. */
+  def fullscreen(fullscreenValue: Boolean): Filter = mapPage(_.withFullscreen(fullscreenValue))
 
-            override def fullscreen: Boolean = x.fullscreen
-          }
-        case x => x
-      })
-    }
-  }
-  def description(description: String): Filter = { route => { request =>
-      val r = route.apply(request)
-      val _description = description
+  /** Sets the title of the route's pages. */
+  def title(title: String): Filter = mapPage(_.withTitle(title))
 
-      Response(r.future.map {
-        case x: Page =>
-          new Page {
-            override def title: String = x.title
-            override def description: String = _description
-            override def content: all.Node = x.realContent
+  /** Sets the description of the route's pages. */
+  def description(description: String): Filter = mapPage(_.withDescription(description))
 
-            override def fullscreen: Boolean = x.fullscreen
-          }
-        case x => x
-      })
-    }
-  }
-  def titleAndDescription(title: String, description: String): Filter = { route => { request =>
-      val r = route.apply(request)
-      val _title = title
-      val _description = description
-
-      Response(r.future.map {
-        case x: Page =>
-          new Page {
-            override def title: String = _title
-            override def description: String = _description
-            override def content: all.Node = x.realContent
-
-            override def fullscreen: Boolean = x.fullscreen
-          }
-        case x => x
-      })
-    }
-  }
+  /** Sets the title and description of the route's pages. */
+  def titleAndDescription(title: String, description: String): Filter =
+    mapPage(_.withTitle(title).withDescription(description))
 
   def errorPage(): Filter = errorPage((request, ex) => Response.node(new Label("Error: " + ex.getMessage)))
   def errorPage(biFunction: BiFunction[Request, Throwable, Response]): Filter = {

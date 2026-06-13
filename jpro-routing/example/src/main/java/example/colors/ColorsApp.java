@@ -49,7 +49,7 @@ public class ColorsApp extends RouteApp {
                         Route.empty()
                                 .and(Route.get("/green", (r) -> gen("Green", r.resolve("/red"), Color.GREEN)))
                                 .and(Route.get("/red", (r) -> gen("Red", r.resolve("/green"), Color.RED))))
-                .filter(Filters.FullscreenFilter(true))
+                .filter(Filters.fullscreen(true))
                 .filter(RouteUtils.sideTransitionFilter(1))
                 .filter(DevFilter.create())
                 .filter(StatisticsFilter.create())

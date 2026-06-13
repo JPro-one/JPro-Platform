@@ -34,21 +34,47 @@ abstract class Page extends ResponseResult { THIS =>
    * @return whether the page handles the url change
    */
   def handleRequest(x: Request): Boolean = false
-  def mapContent(f: Node => Node): Page = new Page {
-    override def title: String = THIS.title
 
-    override def description: String = THIS.description
+  /** Returns a copy of this page with the content mapped through {@code f}. */
+  def mapContent(f: Node => Node): Page = new DelegatingPage(THIS) {
+    override protected def content: Node = f(THIS.realContent)
+  }
 
-    override def content: all.Node = f(THIS.realContent)
+  /** Returns a copy of this page with a different title. */
+  def withTitle(title: String): Page = {
+    val _title = title
+    new DelegatingPage(THIS) { override def title: String = _title }
+  }
 
-    override def fullscreen: Boolean = THIS.fullscreen
+  /** Returns a copy of this page with a different description. */
+  def withDescription(description: String): Page = {
+    val _description = description
+    new DelegatingPage(THIS) { override def description: String = _description }
+  }
 
-    override def setSessionManager(x: SessionManager): Unit = {
-      super.setSessionManager(x)
-      THIS.setSessionManager(x)
-    }
+  /** Returns a copy of this page with a different fullscreen setting. */
+  def withFullscreen(fullscreen: Boolean): Page = {
+    val _fullscreen = fullscreen
+    new DelegatingPage(THIS) { override def fullscreen: Boolean = _fullscreen }
+  }
+}
 
-    override def subPage(): Page = THIS
+/**
+ * A page that forwards every property to {@code original}. Used by the {@code with*}
+ * copy methods and {@code mapContent}: subclass it and override the one member to change.
+ */
+private[routing] class DelegatingPage(original: Page) extends Page {
+  override def title: String = original.title
+  override def description: String = original.description
+  override protected def content: Node = original.realContent
+  override def fullscreen: Boolean = original.fullscreen
+  override def saveScrollPosition: Boolean = original.saveScrollPosition
+  override def handleRequest(x: Request): Boolean = original.handleRequest(x)
+  override def onClose(): Unit = original.onClose()
+  override def subPage(): Page = original
+  override def setSessionManager(x: SessionManager): Unit = {
+    super.setSessionManager(x)
+    original.setSessionManager(x)
   }
 }
 

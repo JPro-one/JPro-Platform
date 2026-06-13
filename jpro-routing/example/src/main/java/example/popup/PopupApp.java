@@ -30,7 +30,7 @@ public class PopupApp extends RouteApp {
         return Route.empty()
                 .and(redirect("/", "/popup"))
                 .and(get("/popup", (r) -> Response.node(popupSampleButtons())))
-                .filter(Filters.FullscreenFilter(true))
+                .filter(Filters.fullscreen(true))
                 .filter(DevFilter.create())
                 .filter(PopupAPI.createPopupContainerFilter())
                 ;
