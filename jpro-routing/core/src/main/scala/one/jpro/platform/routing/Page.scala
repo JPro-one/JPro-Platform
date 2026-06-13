@@ -4,10 +4,10 @@ import one.jpro.platform.routing.sessionmanager.SessionManager
 import simplefx.all
 import simplefx.all._
 
-object View {
-  def fromNode(node: javafx.scene.Node): View = RouteUtils.viewFromNode(node)
+object Page {
+  def fromNode(node: javafx.scene.Node): Page = RouteUtils.pageFromNode(node)
 }
-abstract class View extends ResponseResult { THIS =>
+abstract class Page extends ResponseResult { THIS =>
   def title: String
   def description: String
   var url: String = null
@@ -24,17 +24,17 @@ abstract class View extends ResponseResult { THIS =>
   def saveScrollPosition = true
   def fullscreen = false
   def onClose(): Unit = {}
-  def subView(): View = null
+  def subPage(): Page = null
 
-  override def toString: String = s"View(title: $title, url: $url, description: $description)"
+  override def toString: String = s"Page(title: $title, url: $url, description: $description)"
 
   /**
    * Only overwrite this method, if you handle the url-change by yourself.
    * @param x path
-   * @return whether the view handles the url change
+   * @return whether the page handles the url change
    */
   def handleRequest(x: Request): Boolean = false
-  def mapContent(f: Node => Node): View = new View {
+  def mapContent(f: Node => Node): Page = new Page {
     override def title: String = THIS.title
 
     override def description: String = THIS.description
@@ -48,7 +48,7 @@ abstract class View extends ResponseResult { THIS =>
       THIS.setSessionManager(x)
     }
 
-    override def subView(): View = THIS
+    override def subPage(): Page = THIS
   }
 }
 

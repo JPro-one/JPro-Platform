@@ -2,11 +2,11 @@ package one.jpro.platform.routing.filter.container
 
 import java.lang.ref.WeakReference
 import javafx.scene.Node
-import one.jpro.platform.routing.{Request, Response, Route, StatefulFilter, View}
+import one.jpro.platform.routing.{Request, Response, Route, StatefulFilter, Page}
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
- * Base class for filters that wrap the matched view in a persistent
+ * Base class for filters that wrap the matched page in a persistent
  * "container" Node. The container is created lazily and reused across
  * navigations — only its inner content slot is swapped on each request.
  *
@@ -30,7 +30,7 @@ abstract class ContainerFilter extends StatefulFilter {
   /** Create the wrapper Node. Called at most once per filter instance. */
   def createNode(): Node
 
-  /** Replace the wrapper's content slot with the new view's content. */
+  /** Replace the wrapper's content slot with the new page's content. */
   def setContent(container: Node, content: Node): Unit
 
   /** Read the wrapper's current content slot. */
@@ -66,16 +66,16 @@ abstract class ContainerFilter extends StatefulFilter {
 
     val r = route.apply(request2)
     Response(r.future.map {
-      case view: View =>
+      case page: Page =>
         var container = containerRef.get()
         if (container == null) {
           container = createNode()
           containerRef = new WeakReference(container)
         }
         val finalContainer = container
-        view.mapContent { _ =>
+        page.mapContent { _ =>
           setRequest(finalContainer, request)
-          setContent(finalContainer, view.realContent)
+          setContent(finalContainer, page.realContent)
           finalContainer
         }
       case other => other

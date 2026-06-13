@@ -1,12 +1,12 @@
 package one.jpro.platform.routing.crawl
 
-import one.jpro.platform.routing.{LinkUtil, View}
+import one.jpro.platform.routing.{LinkUtil, Page}
 import simplefx.all._
 import simplefx.core._
 
 object TestUtils {
 
-  def pageWithLink(links: List[String]): View = new View {
+  def pageWithLink(links: List[String]): Page = new Page {
     def title = "title"
     def description = "desc"
     override def content: Node = new HBox {
@@ -18,7 +18,7 @@ object TestUtils {
     }
   }
 
-  class Page1 extends View {
+  class Page1 extends Page {
     def title = "title"
     def description = "desc"
 
@@ -39,7 +39,7 @@ object TestUtils {
     }
   }
 
-  class Page2 extends View {
+  class Page2 extends Page {
     def title = "title"
     def description = "desc"
 

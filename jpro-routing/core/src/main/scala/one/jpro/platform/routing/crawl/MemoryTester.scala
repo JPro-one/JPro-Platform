@@ -5,7 +5,7 @@ import one.jpro.jmemorybuddy.JMemoryBuddy
 import javafx.stage.Stage
 import one.jpro.platform.routing.crawl.AppCrawler.{CrawlReportApp, routeToRouteNode}
 import one.jpro.platform.routing.sessionmanager.SessionManagerDesktop
-import one.jpro.platform.routing.{Request, Route, RouteApp, RouteNode, View}
+import one.jpro.platform.routing.{Request, Route, RouteApp, RouteNode, Page}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.core._
 import simplefx.all._
@@ -28,13 +28,13 @@ object MemoryTester {
         val routeNode: RouteNode = inFX(routeToRouteNode(appFactory.get()))
         JMemoryBuddy.memoryTest(checker2 => {
           assert(routeNode != null, "The routeNode must not return null ")
-          val view = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
+          val page = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
           inFX(routeNode.scene.root.applyCss())
 
           checker2.setAsReferenced(routeNode)
-          checker2.assertCollectable(view) // Hm?
-          if(view.isInstanceOf[View]) {
-            checker2.assertCollectable(inFX(view.asInstanceOf[View].realContent))
+          checker2.assertCollectable(page) // Hm?
+          if(page.isInstanceOf[Page]) {
+            checker2.assertCollectable(inFX(page.asInstanceOf[Page].realContent))
           }
           routeNode.getSessionManager().gotoURL("/").future.await
         })
@@ -54,12 +54,12 @@ object MemoryTester {
           val result = inFX(runScheduler(routeNode.getSessionManager().gotoURL(pageURL))).future.await
 
           println("Got result: " + result)
-          if (result.isInstanceOf[View]) {
-            val view = result.asInstanceOf[View]
+          if (result.isInstanceOf[Page]) {
+            val page = result.asInstanceOf[Page]
             // Scene Graph:
-            println("Got result: " + view.realContent)
-            checker2.assertCollectable(inFX(view.realContent))
-            assert(view == routeNode.getSessionManager().getView(), "The view must be the same as in the session manager")
+            println("Got result: " + page.realContent)
+            checker2.assertCollectable(inFX(page.realContent))
+            assert(page == routeNode.getSessionManager().getPage(), "The page must be the same as in the session manager")
             inFX(routeNode.scene.root.applyCss())
           }
           routeNode.getSessionManager().gotoURL("/").future.await

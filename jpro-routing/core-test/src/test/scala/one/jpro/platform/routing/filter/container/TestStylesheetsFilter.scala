@@ -26,7 +26,7 @@ class TestStylesheetsFilter {
   /** Run a route on the FX thread, await its future, return the wrapper Node. */
   private def runRequest(route: Route, req: Request): Node = {
     val result = inFX(route.apply(req).future).await
-    result.asInstanceOf[View].realContent
+    result.asInstanceOf[Page].realContent
   }
 
   // ----- Container reuse -----

@@ -5,7 +5,7 @@ import simplefx.core._
 import TestUtils._
 import javafx.application.Platform
 import one.jpro.platform.routing.crawl.AppCrawler.LinkInfo
-import one.jpro.platform.routing.{LinkUtil, Response, Route, RouteNode, RouteUtils, View}
+import one.jpro.platform.routing.{LinkUtil, Response, Route, RouteNode, RouteUtils, Page}
 import simplefx.all
 import org.junit.jupiter.api.{BeforeAll, Test}
 import simplefx.util.Predef.intercept
@@ -43,8 +43,8 @@ class TestAppCrawler {
   @Test
   def testCrawlApp(): Unit = {
     def route = Route.empty()
-        .and(Route.get("/", r => Response.view(new Page1)))
-        .and(Route.get("/page2", r => Response.view(new Page2)))
+        .and(Route.get("/", r => Response.page(new Page1)))
+        .and(Route.get("/page2", r => Response.page(new Page2)))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
 
     assert(result.pages.contains("/"), result.pages)
@@ -56,7 +56,7 @@ class TestAppCrawler {
   @Test
   def testEmptyImage(): Unit = {
     def route = Route.empty()
-        .and(Route.get("/", r => Response.view(new View {
+        .and(Route.get("/", r => Response.page(new Page {
           override def title: String = ""
 
           override def description: String = ""
@@ -68,7 +68,7 @@ class TestAppCrawler {
 
   @Test
   def testIndexListview(): Unit = inFX{
-    val view = new View {
+    val page = new Page {
       override def title: String = ""
       override def description: String = ""
       val content: all.Node = new ListView[String] {
@@ -83,14 +83,14 @@ class TestAppCrawler {
         cellFactory = (v: ListView[String]) => new MyListCell
       }
     }
-    val r = AppCrawler.crawlPage(view)
+    val r = AppCrawler.crawlPage(page)
     assert(r.links.contains(LinkInfo("/list1","")))
     assert(r.links.contains(LinkInfo("/list9","")))
   }
 
   @Test
   def testScrollPane(): Unit = inFX{
-    val view = new View {
+    val page = new Page {
       override def title: String = ""
       override def description: String = ""
       val content: all.Node = new ScrollPane {
@@ -99,13 +99,13 @@ class TestAppCrawler {
         }
       }
     }
-    val r = AppCrawler.crawlPage(view)
+    val r = AppCrawler.crawlPage(page)
     assert(r.links.contains(LinkInfo("/scrollpane","")))
   }
 
   @Test
   def testImageInStyle (): Unit = {
-    def view = new View {
+    def page = new Page {
       override def title: String = ""
       override def description: String = ""
       val content: Node = new Region() {
@@ -113,7 +113,7 @@ class TestAppCrawler {
       }
     }
     val r = AppCrawler.crawlRoute("http://localhost", () =>
-      Route.empty().and(Route.get("/", r => Response.view(view)))
+      Route.empty().and(Route.get("/", r => Response.page(page)))
     )
     assert(r.pages.size() == 1)
     assert(!r.reports.get(0).pictures.isEmpty)
@@ -121,7 +121,7 @@ class TestAppCrawler {
 
   @Test
   def testAccessingSessionManager (): Unit = inFX {
-    val view = new View {
+    val page = new Page {
       override def title: String = ""
       override def description: String = ""
       val content: Node = new Region() {
@@ -132,7 +132,7 @@ class TestAppCrawler {
         })
       }
     }
-    val r = AppCrawler.crawlPage(view)
+    val r = AppCrawler.crawlPage(page)
   }
 
 }

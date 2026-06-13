@@ -31,31 +31,31 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
       case Redirect(url) =>
         logger.debug(s"redirect: ${_url} -> $url")
         redirect(url, _url)
-      case view: View =>
+      case page: Page =>
         redirectCounter = 0
-        val oldView = this.view
-        this.view = view
-        view.setSessionManager(this)
-        view.url = url
+        val oldView = this.page
+        this.page = page
+        page.setSessionManager(this)
+        page.url = url
 
-        isFullscreen = view.fullscreen
-        container.children = List(view.realContent)
+        isFullscreen = page.fullscreen
+        container.children = List(page.realContent)
         scrollpane.vvalue = 0.0
-        if(oldView != null && oldView != view) {
+        if(oldView != null && oldView != page) {
           oldView.onClose()
           oldView.setSessionManager(null)
-          markViewCollectable(oldView, view)
+          markPageCollectable(oldView, page)
         }
-        THIS.view = view
+        THIS.page = page
 
         if(pushState ) {
           historyForward = Nil
           if(historyCurrent != null) {
             historyBackward = historyCurrent :: historyBackward
           }
-          historyCurrent = HistoryEntry(url, view.title)
+          historyCurrent = HistoryEntry(url, page.title)
         }
-        Response.view(view)
+        Response.page(page)
     }
   }
   val container = new StackPane()
@@ -78,7 +78,7 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
   onceWhen(webApp.scene != null && webApp.scene.window != null) --> {
     val window = webApp.scene.window
     if(window.isInstanceOf[Stage]) {
-      window.asInstanceOf[Stage].title <-- (if(view != null) view.title else "")
+      window.asInstanceOf[Stage].title <-- (if(page != null) page.title else "")
     }
   }
 

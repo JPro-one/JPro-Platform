@@ -16,7 +16,7 @@ object Filters {
   // ----- Stylesheets -----
 
   /**
-   * Wraps the matched view in a `StackPane` whose `getStylesheets()` reflects
+   * Wraps the matched page in a `StackPane` whose `getStylesheets()` reflects
    * the given list. Mutating the list at runtime updates the wrapper's
    * stylesheets immediately — drive it from an `isMobile` subscription, a
    * theme switcher, etc.
@@ -54,7 +54,7 @@ object Filters {
   // ----- Style classes -----
 
   /**
-   * Wraps the matched view in a `StackPane` whose `getStyleClass()` reflects
+   * Wraps the matched page in a `StackPane` whose `getStyleClass()` reflects
    * the given list. Same usage and lifecycle constraints as
    * [[stylesheets]] — see its docs.
    *
@@ -84,8 +84,8 @@ object Filters {
       val r = route.apply(request)
 
       Response(r.future.map {
-        case x: View =>
-          new View {
+        case x: Page =>
+          new Page {
             override def title: String = x.title
             override def description: String = x.description
             override def content: all.Node = x.realContent
@@ -101,8 +101,8 @@ object Filters {
       val _title = title
 
       Response(r.future.map {
-        case x: View =>
-          new View {
+        case x: Page =>
+          new Page {
             override def title: String = _title
             override def description: String = x.description
             override def content: all.Node = x.realContent
@@ -118,8 +118,8 @@ object Filters {
       val _description = description
 
       Response(r.future.map {
-        case x: View =>
-          new View {
+        case x: Page =>
+          new Page {
             override def title: String = x.title
             override def description: String = _description
             override def content: all.Node = x.realContent
@@ -136,8 +136,8 @@ object Filters {
       val _description = description
 
       Response(r.future.map {
-        case x: View =>
-          new View {
+        case x: Page =>
+          new Page {
             override def title: String = _title
             override def description: String = _description
             override def content: all.Node = x.realContent

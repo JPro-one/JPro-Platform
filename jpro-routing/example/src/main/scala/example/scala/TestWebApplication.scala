@@ -22,28 +22,28 @@ class TestWebApplication extends RouteApp {
     }
 
     Route.empty()
-      .and(get("", (r) => Response.view(new MainView)))
-      .and(get("/", (r) => Response.view(new MainView)))
+      .and(get("", (r) => Response.page(new MainView)))
+      .and(get("/", (r) => Response.page(new MainView)))
       .and(get("/redirect2", r => Response.redirect("https://google.com")))
-      .and(get("/main", (r) => Response.view(new MainView)))
-      .and(get("/green", (r) => Response.view(new GreenView)))
-      .and(get("/sub", (r) => Response.view(new SubView)))
+      .and(get("/main", (r) => Response.page(new MainView)))
+      .and(get("/green", (r) => Response.page(new GreenView)))
+      .and(get("/sub", (r) => Response.page(new SubView)))
       .and(get("/redirect", r => Response.redirect( "/sub")))
-      .and(get("/paralax", (r) => Response.view(new ParalaxPage)))
-      .and(get("/pdf", (r) => Response.view(new PDFTest)))
-      .and(get("/leak", (r) => Response.view(new LeakingPage)))
-      .and(get("/collect", (r) => Response.view(new CollectingPage)))
-      .and(get("/incremental", (r) => Response.view(new IncrementalPage)))
-      .and(get("/jmemorybuddy", (r) => Response.view(new JMemoryBuddyPage)))
-      .and(get("/100", (r) => Response.view(new ManyNodes(100))))
-      .and(get("/200", (r) => Response.view(new ManyNodes(200))))
-      .and(get("/400", (r) => Response.view(new ManyNodes(400))))
-      .and(get("/800", (r) => Response.view(new ManyNodes(800))))
-      .and(get("/1600", (r) => Response.view(new ManyNodes(1600))))
-      .and(get("/3200", (r) => Response.view(new ManyNodes(3200))))
-      .and(get("/6400", (r) => Response.view(new ManyNodes(6400))))
-      .and(get("/it's\" tricky", (r) => Response.view(new MainView)))
-      .and(get("/it's\" tricky", (r) => Response.view(new MainView)))
+      .and(get("/paralax", (r) => Response.page(new ParalaxPage)))
+      .and(get("/pdf", (r) => Response.page(new PDFTest)))
+      .and(get("/leak", (r) => Response.page(new LeakingPage)))
+      .and(get("/collect", (r) => Response.page(new CollectingPage)))
+      .and(get("/incremental", (r) => Response.page(new IncrementalPage)))
+      .and(get("/jmemorybuddy", (r) => Response.page(new JMemoryBuddyPage)))
+      .and(get("/100", (r) => Response.page(new ManyNodes(100))))
+      .and(get("/200", (r) => Response.page(new ManyNodes(200))))
+      .and(get("/400", (r) => Response.page(new ManyNodes(400))))
+      .and(get("/800", (r) => Response.page(new ManyNodes(800))))
+      .and(get("/1600", (r) => Response.page(new ManyNodes(1600))))
+      .and(get("/3200", (r) => Response.page(new ManyNodes(3200))))
+      .and(get("/6400", (r) => Response.page(new ManyNodes(6400))))
+      .and(get("/it's\" tricky", (r) => Response.page(new MainView)))
+      .and(get("/it's\" tricky", (r) => Response.page(new MainView)))
       .filter(DevFilter.create)
       .filter(StatisticsFilter.create)
   }
@@ -51,7 +51,7 @@ class TestWebApplication extends RouteApp {
 
 }
 
-class Header(view: View, sessionManager: SessionManager) extends HBox {
+class Header(page: Page, sessionManager: SessionManager) extends HBox {
   padding = Insets(10)
   spacing = 10
   class HeaderLink(str: String, url: String) extends Label (str) {
@@ -93,8 +93,8 @@ class Header(view: View, sessionManager: SessionManager) extends HBox {
     setLink(this, "/?7", Some("/?7"))
   }
 }
-class Header2(view: View, sessionManager: SessionManager) extends HBox {
-  this <++ new Label(view.url)
+class Header2(page: Page, sessionManager: SessionManager) extends HBox {
+  this <++ new Label(page.url)
 
   this <++ new Button("Backward") {
     disable <-- (!WebAPI.isBrowser && sessionManager.historyBackward.isEmpty)
@@ -110,8 +110,8 @@ class Header2(view: View, sessionManager: SessionManager) extends HBox {
   }
   this <++ new Button("Backward2") {
     onAction --> { e =>
-      println("view.getSessionManager(): " + view.getSessionManager())
-      view.getSessionManager().goBack()
+      println("page.getSessionManager(): " + page.getSessionManager())
+      page.getSessionManager().goBack()
     }
   }
 }
@@ -127,14 +127,14 @@ class Footer(sessionManager: SessionManager) extends HBox {
   }
 }
 
-trait Page extends View { view =>
+trait SitePage extends Page { page =>
   override lazy val realContent: VBox = {
     new VBox {
   // Cousing leak? style = "-fx-background-color: white;"
     //  transform = Scale(1.3,1.3)
       spacing = 10
-      this <++ new Header(view, getSessionManager)
-      this <++ new Header2(view, getSessionManager)
+      this <++ new Header(page, getSessionManager)
+      this <++ new Header2(page, getSessionManager)
       val theContent = content
       javafx.scene.layout.VBox.setVgrow(theContent,Priority.ALWAYS)
       this <++ theContent
@@ -148,7 +148,7 @@ trait Page extends View { view =>
   }
 }
 
-class UnknownPage(x: String) extends Page {
+class UnknownPage(x: String) extends SitePage {
   def title = "Unknown page: " + x
   def description = "Unknown page: " + x
 
@@ -157,7 +157,7 @@ class UnknownPage(x: String) extends Page {
   def content = new Label("UNKNOWN PAGE: " + x) { font = new Font(60)}
 }
 
-class GreenView() extends Page {
+class GreenView() extends SitePage {
   def title = "Green Page"
   def description = "desc Main"
 
@@ -166,7 +166,7 @@ class GreenView() extends Page {
   def content = new StackPane { style = "-fx-background-color: green;"}
 }
 
-class MainView extends Page {
+class MainView extends SitePage {
   def title = "Main"
   def description = "desc Main"
 
@@ -226,7 +226,7 @@ class MainView extends Page {
   }
 }
 
-class ManyNodes(size: Int) extends Page {
+class ManyNodes(size: Int) extends SitePage {
   def title = "ManyNodes " + size
 
   def description = "desc ManyNodes"
@@ -244,7 +244,7 @@ class ManyNodes(size: Int) extends Page {
   }
 }
 
-class SubView extends Page {
+class SubView extends SitePage {
   def title = "SubView"
   def description = "desc Sub"
   override def fullscreen=false
@@ -258,7 +258,7 @@ class SubView extends Page {
   }
 }
 
-class IncrementalPage extends Page {
+class IncrementalPage extends SitePage {
   def title = "Incremental"
   def description = "desc Incremental"
 
@@ -271,7 +271,7 @@ class IncrementalPage extends Page {
   }
 }
 
-class PDFTest extends Page {
+class PDFTest extends SitePage {
   def title = "pdf"
   def description = "pdf desc"
 
@@ -286,7 +286,7 @@ class PDFTest extends Page {
 object LeakingPage {
   var instances: List[Page] = Nil
 }
-class LeakingPage extends Page {
+class LeakingPage extends SitePage {
   def title = "leak"
   def description = "leaks"
 
@@ -296,7 +296,7 @@ class LeakingPage extends Page {
     this <++ new Label("Leaks") { font = new Font(60)}
   }
 }
-class CollectingPage extends Page {
+class CollectingPage extends SitePage {
   def title = "collect"
   def description = "collect"
 
@@ -311,7 +311,7 @@ class CollectingPage extends Page {
     this <++ new Label("Leaks") { font = new Font(60)}
   }
 }
-class JMemoryBuddyPage extends Page {
+class JMemoryBuddyPage extends SitePage {
   def title = "buddy"
   def description = "buddy"
 
@@ -329,7 +329,7 @@ class JMemoryBuddyPage extends Page {
   }
 }
 
-class ParalaxPage extends Page {
+class ParalaxPage extends SitePage {
   def title = "Paralax"
   def description = "desc Para"
 

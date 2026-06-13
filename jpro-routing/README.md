@@ -101,7 +101,7 @@ Response static methods:
 ```
 Response.empty()
 Response.node(Node node)
-Response.view(View view)
+Response.page(Page page)
 Response.redirect(String to)
 Response.error(Exception ex)
 Response.fromFuture(FXFuture<Response> future)
@@ -164,7 +164,7 @@ If it's scrollable, the content is never cut off - but you usually get a scrollb
 On the browser, scrollable uses the native scrolling of the browser.
 
 This can be configured with the following methods
-1. Override the method `View.fullscreen()` in your View
+1. Override the method `Page.fullscreen()` in your Page
 2. Use the filter `Filters.FullscreenFilter(boolean)` to set it for a Route
 
 
@@ -178,25 +178,25 @@ checkout our sample project: https://github.com/JPro-one/jpro-routing-sample
 
 
 
-### Views
+### Pages
 
-`Response.node(...)` is the quickest way to show something — but wrapping content in a `View`
-gives a page its metadata and lifecycle:
+`Response.node(...)` is the quickest way to show something — but wrapping content in a `Page`
+gives it metadata and lifecycle:
 
 ```java
-public class HomePage extends View {
+public class HomePage extends Page {
     @Override public String title() { return "Home"; }
     @Override public String description() { return "The landing page of this application."; }
     @Override public Node content() { return new Label("Welcome!"); }
 }
 // in the route:
-Route.get("/", r -> Response.view(new HomePage()))
+Route.get("/", r -> Response.page(new HomePage()))
 ```
 
 - `title` and `description` are used for the browser tab and for SEO (and by the AppCrawler, see below)
 - `fullscreen()` — override to control fullscreen vs scrollable per page
 - `onClose()` — called when the user navigates away from the page
-- `handleRequest(Request)` — return true to handle URL changes inside the view yourself
+- `handleRequest(Request)` — return true to handle URL changes inside the page yourself
   (e.g. for tab navigation within one page, without recreating it)
 
 ### Built-in Filters

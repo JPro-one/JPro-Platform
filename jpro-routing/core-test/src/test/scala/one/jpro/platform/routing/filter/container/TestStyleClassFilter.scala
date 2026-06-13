@@ -24,7 +24,7 @@ class TestStyleClassFilter {
 
   private def runRequest(route: Route, req: Request): Node = {
     val result = inFX(route.apply(req).future).await
-    result.asInstanceOf[View].realContent
+    result.asInstanceOf[Page].realContent
   }
 
   @Test

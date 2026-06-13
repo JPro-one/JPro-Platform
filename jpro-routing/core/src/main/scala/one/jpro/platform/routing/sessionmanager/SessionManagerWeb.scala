@@ -1,7 +1,7 @@
 package one.jpro.platform.routing.sessionmanager
 
 import com.jpro.webapi.WebAPI
-import one.jpro.platform.routing.{Redirect, Response, ResponseResult, RouteNode, View}
+import one.jpro.platform.routing.{Redirect, Response, ResponseResult, RouteNode, Page}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 
@@ -24,11 +24,11 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
 
   if(webAPI != null) { // somtetimes webAPI is null, for example when crawling
     webAPI.addInstanceCloseListener(() => {
-      // if the session only has redirects, the view is null
-      if (THIS.view != null) {
-        THIS.view.onClose()
-        THIS.view.setSessionManager(null)
-        markViewCollectable(THIS.view)
+      // if the session only has redirects, the page is null
+      if (THIS.page != null) {
+        THIS.page.onClose()
+        THIS.page.setSessionManager(null)
+        markPageCollectable(THIS.page)
       }
     })
   }
@@ -44,21 +44,21 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
         } else {
           redirect(url, _url)
         }
-      case view: View =>
+      case page: Page =>
         redirectCounter = 0
         this.url = url
-        view.setSessionManager(this)
-        view.url = url
+        page.setSessionManager(this)
+        page.url = url
 
-        view.isMobile = webAPI.isMobile
+        page.isMobile = webAPI.isMobile
 
-        container.children = List(view.realContent)
-        if(THIS.view != null && THIS.view != view) {
-          THIS.view.onClose()
-          THIS.view.setSessionManager(null)
-          markViewCollectable(THIS.view, view)
+        container.children = List(page.realContent)
+        if(THIS.page != null && THIS.page != page) {
+          THIS.page.onClose()
+          THIS.page.setSessionManager(null)
+          markPageCollectable(THIS.page, page)
         }
-        THIS.view = view
+        THIS.page = page
 
 
         if(pushState) {
@@ -68,9 +68,9 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
           //                        |scrollTop: (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0)
           //                        |}, null, null);
           //                        |""".stripMargin)
-          webAPI.js().eval(s"""history.pushState(null, null, "${view.url.replace("\"","\\\"")}");""")
+          webAPI.js().eval(s"""history.pushState(null, null, "${page.url.replace("\"","\\\"")}");""")
         }
-        val initialState = if(view.saveScrollPosition) "{saveScroll: true}" else "{saveScroll: false}"
+        val initialState = if(page.saveScrollPosition) "{saveScroll: true}" else "{saveScroll: false}"
 
         webAPI.js().eval(
           """var scrollY = 0;
@@ -79,9 +79,9 @@ class SessionManagerWeb(val webApp: RouteNode, val webAPI: WebAPI) extends Sessi
             |}
             |scroll(0,scrollY)
           """.stripMargin)
-        webAPI.js().eval(s"""document.getElementsByTagName("jpro-app")[0].sfxelem.setFXHeight(${!view.fullscreen})""")
-        webAPI.js().eval(s"""document.title = "${Option(view.title).getOrElse("").replace("\"","\\\"")}";""")
-        webAPI.js().eval(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${Option(view.description).getOrElse("").replace("\"","\\\"")}");""")
+        webAPI.js().eval(s"""document.getElementsByTagName("jpro-app")[0].sfxelem.setFXHeight(${!page.fullscreen})""")
+        webAPI.js().eval(s"""document.title = "${Option(page.title).getOrElse("").replace("\"","\\\"")}";""")
+        webAPI.js().eval(s"""document.querySelector('meta[name="description"]').setAttribute("content", "${Option(page.description).getOrElse("").replace("\"","\\\"")}");""")
         webAPI.js().eval(s"history.replaceState($initialState, null, null)")
         Response.fromResult(x)
     }

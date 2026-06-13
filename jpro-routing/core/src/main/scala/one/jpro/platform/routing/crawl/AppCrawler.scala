@@ -2,7 +2,7 @@ package one.jpro.platform.routing.crawl
 
 import one.jpro.platform.routing.crawl.AppCrawler.{CrawlReportApp, CrawlReportPage}
 import one.jpro.platform.routing.sessionmanager.{SessionManager, SessionManagerDesktop, SessionManagerDummy}
-import one.jpro.platform.routing.{LinkUtil, Redirect, Request, Response, Route, RouteApp, RouteNode, SessionManagerContext, View}
+import one.jpro.platform.routing.{LinkUtil, Redirect, Request, Response, Route, RouteApp, RouteNode, SessionManagerContext, Page}
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
@@ -25,7 +25,7 @@ object AppCrawler {
   case class CrawlReportApp(pages: java.util.List[String], reports: java.util.List[CrawlReportPage], deadLinks: java.util.List[String])
 
 
-  def crawlPage(page: View): CrawlReportPage = {
+  def crawlPage(page: Page): CrawlReportPage = {
     var foundLinks: List[LinkInfo] = Nil
     var images: List[ImageInfo] = Nil
 
@@ -82,10 +82,10 @@ object AppCrawler {
         }
       }
       if (x.isInstanceOf[ImageView]) {
-        val view = x.asInstanceOf[ImageView]
-        if (view.image != null) {
-          val url = getImageURL(view.image)
-          val description = view.accessibleRoleDescription
+        val page = x.asInstanceOf[ImageView]
+        if (page.image != null) {
+          val url = getImageURL(page.image)
+          val description = page.accessibleRoleDescription
           if (url != null) {
             images ::= ImageInfo(url, description)
           }
@@ -222,25 +222,25 @@ class AppCrawler(prefix: String, createApp: Supplier[RouteNode]) {
         enqueue(url, crawlNext)
         fromSources.foreach(src => enqueue(url, src))
 
-      case view: View =>
-        println(s"View: ${view.url} crawlNext: $crawlNext")
+      case page: Page =>
+        println(s"Page: ${page.url} crawlNext: $crawlNext")
         try {
           val newReport = inFX {
             runScheduler {
-              LinkUtil.getSessionManager(app).gotoURL(crawlNext, view, pushState = false)
-              view.url = crawlNext
+              LinkUtil.getSessionManager(app).gotoURL(crawlNext, page, pushState = false)
+              page.url = crawlNext
               assert(app.scene != null, s"Scene is null for $crawlNext")
               assert(app.scene.root != null, s"Root is null for $crawlNext")
             }
             app.scene.root.applyCss()
-            assert(view.realContent.parent != null, s"Parent is null for $crawlNext")
-            assert(view.realContent.scene != null, s"Scene is null for $crawlNext")
+            assert(page.realContent.parent != null, s"Parent is null for $crawlNext")
+            assert(page.realContent.scene != null, s"Scene is null for $crawlNext")
             println(
               "SCENE WH: " +
-                view.realContent.scene.getWidth + " " +
-                view.realContent.scene.getHeight
+                page.realContent.scene.getWidth + " " +
+                page.realContent.scene.getHeight
             )
-            AppCrawler.crawlPage(view)
+            AppCrawler.crawlPage(page)
           }
 
           reports = newReport :: reports

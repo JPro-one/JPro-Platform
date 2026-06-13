@@ -11,7 +11,7 @@ object RouteUtils {
 
   def transitionFilter(seconds: Double): Filter = route => { request => {
     Response(route.apply(request).future.map{
-      case x: View =>
+      case x: Page =>
         val oldNode = request.getOldContent().get()
         val newNode = x.realContent
         val t = (seconds s)
@@ -31,7 +31,7 @@ object RouteUtils {
   }}
   def sideTransitionFilter(seconds: Double): Filter = route => { request => {
     Response(route.apply(request).future.map{
-      case x: View =>
+      case x: Page =>
         val oldNode = request.getOldContent().get()
         val newNode = x.realContent
         val t = (seconds s)
@@ -59,7 +59,7 @@ object RouteUtils {
     })
   }}
 
-  def viewFromNode(x: Node): View = new View {
+  def pageFromNode(x: Node): Page = new Page {
     override def title: String = null
     override def description: String = ""
     override def content: all.Node = x

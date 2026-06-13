@@ -3,17 +3,28 @@ package one.jpro.platform.routing.crawl
 import one.jpro.platform.routing.Route._
 import one.jpro.platform.routing.crawl.TestUtils._
 import one.jpro.platform.routing.{Redirect, Response, Route, RouteNode}
-import org.junit.jupiter.api.Test
+import javafx.application.Platform
+import org.junit.jupiter.api.{BeforeAll, Test}
+import simplefx.all._
+import simplefx.core._
 import simplefx.experimental._
 
+object TestSitemapGenerator {
+  // Initialize the SimpleFX core on the FX thread; without this, running this
+  // class before any FX-initializing test poisons simplefx core for the whole suite
+  @BeforeAll
+  def init(): Unit = inFX {
+    Platform.setImplicitExit(false)
+  }
+}
 class TestSitemapGenerator {
   @Test
   def test(): Unit = {
     def route = Route.empty()
-        .and(get("/", r => Response.view(new Page1)))
-        .and(get("/page2", r => Response.view(new Page2)))
-        .and(get("/page4", r => Response.view(new Page2)))
-        .and(r => Response.view(new Page1))
+        .and(get("/", r => Response.page(new Page1)))
+        .and(get("/page2", r => Response.page(new Page2)))
+        .and(get("/page4", r => Response.page(new Page2)))
+        .and(r => Response.page(new Page1))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
     val sm = SitemapGenerator.createSitemap("http://localhost", result)
     println("Crawl Report: " + result)
@@ -27,7 +38,7 @@ class TestSitemapGenerator {
   @Test
   def testMailToRedirect(): Unit = {
     def route = Route.empty()
-      .and(get("/", r => Response.view(pageWithLink(List("/page2", "/page3", "mailto:something")))))
+      .and(get("/", r => Response.page(pageWithLink(List("/page2", "/page3", "mailto:something")))))
       .and(get("/page2", r => Response.redirect("mailto:something-2")))
     val result = AppCrawler.crawlRoute("http://localhost", () => route)
     println("got result: " + result)

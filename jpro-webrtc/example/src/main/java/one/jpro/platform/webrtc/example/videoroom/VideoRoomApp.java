@@ -7,7 +7,7 @@ import simplefx.experimental.parts.FXFuture;
 
 import java.util.regex.Pattern;
 
-import static one.jpro.platform.routing.RouteUtils.viewFromNode;
+import static one.jpro.platform.routing.RouteUtils.pageFromNode;
 
 public class VideoRoomApp extends RouteApp {
 

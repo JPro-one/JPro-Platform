@@ -1,5 +1,13 @@
 # Changelog
 
+### 0.6.4 (unreleased)
+
+#### Improvements
+* `jpro-routing`: Documented Pages, filters, containers, popups and dev tools in the README.
+
+#### Breaking
+* `jpro-routing`: Renamed `View` to `Page`. Affects `Response.page(...)` (was `Response.view`), `SessionManager.getPage()` (was `getView`), `Page.fromNode(...)`, `subPage()`, and `NodePage`.
+
 ### 0.6.3 (May 25, 2026)
 
 #### Features
