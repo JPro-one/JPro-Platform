@@ -178,6 +178,96 @@ checkout our sample project: https://github.com/JPro-one/jpro-routing-sample
 
 
 
+### Views
+
+`Response.node(...)` is the quickest way to show something — but wrapping content in a `View`
+gives a page its metadata and lifecycle:
+
+```java
+public class HomePage extends View {
+    @Override public String title() { return "Home"; }
+    @Override public String description() { return "The landing page of this application."; }
+    @Override public Node content() { return new Label("Welcome!"); }
+}
+// in the route:
+Route.get("/", r -> Response.view(new HomePage()))
+```
+
+- `title` and `description` are used for the browser tab and for SEO (and by the AppCrawler, see below)
+- `fullscreen()` — override to control fullscreen vs scrollable per page
+- `onClose()` — called when the user navigates away from the page
+- `handleRequest(Request)` — return true to handle URL changes inside the view yourself
+  (e.g. for tab navigation within one page, without recreating it)
+
+### Built-in Filters
+
+A `Filter` wraps a `Route` and can decorate every page. The library ships several:
+
+```java
+route
+    .filter(Filters.FullscreenFilter(true))                  // force fullscreen
+    .filter(Filters.titleAndDescription("My App", "..."))    // default title/description
+    .filter(Filters.stylesheets(new String[]{"/css/main.css"})) // wrap pages with stylesheets
+    .filter(Filters.styleClasses(new String[]{"dark-theme"}))   // wrap pages with style classes
+    .filter(Filters.errorPage())                             // show exceptions instead of failing
+    .filter(Filters.notFoundPage())                          // fallback page for unmatched paths
+    .filter(RouteUtils.transitionFilter(0.5))                // fade between pages
+    .filter(RouteUtils.sideTransitionFilter(0.5))            // slide between pages
+```
+
+- `Filters.errorPage((request, exception) -> Response...)` customizes error rendering.
+- `Filters.notFoundPage(route)` takes any `Route` as the fallback.
+- `Filters.stylesheets`/`styleClasses` also accept an `ObservableList` — mutate it at
+  runtime (e.g. switching a theme, or mobile vs desktop) and the pages update immediately.
+
+#### Custom Containers
+
+To wrap every page in your own layout (navigation menu, header, footer), implement the
+`Container` interface (a Node with a `contentProperty` and a `requestProperty`) and apply it with:
+
+```java
+route.filter(ContainerFilter.fromContainer(() -> new MyMenuContainer()));
+```
+
+See `SimpleHamburgerMenu` in the example project for a responsive menu implemented this way.
+
+### Popups
+
+The module `one.jpro.platform:jpro-routing-popup` provides popups that work in routed
+applications, on desktop and in the browser:
+
+```java
+// once, at the end of the route definition:
+route.filter(PopupAPI.createPopupContainerFilter())
+
+// anywhere in the application (node = any node in the scene graph):
+PopupAPI.openPopup(node, SimplePopups.infoPopup("Info", "Saved successfully."));
+PopupAPI.closePopup(anyNodeInsidePopup);
+
+// show a loading overlay until a future completes:
+PopupAPI.showLoadingScreen(node, someFXFuture);
+```
+
+`SimplePopup` is a prebuilt popup with title, content and buttons; `SimplePopups` contains
+factories for common cases.
+
+### Development Tools
+
+The module `one.jpro.platform:jpro-routing-dev` provides overlays for development:
+
+```java
+route
+    .filter(DevFilter.create())          // dev toolbar
+    .filter(StatisticsFilter.create())   // performance statistics (browser)
+```
+
+- **DevFilter** — a toolbar with back/forward/refresh, an editable URL bar, a ScenicView
+  launcher, a "pages uncollected" memory counter, and a force-GC button.
+- **StatisticsFilter** — live statistics when running in the browser: latency, bytes
+  sent/received, synchronized/created/collected nodes, and load times.
+
+Remove these filters for production builds (or apply them conditionally).
+
 ### Additional Features
 
 #### Incremental Loading
@@ -195,3 +285,13 @@ parent.getChildren().add(IncrementalLoading.loadNode(yourNode));
 
 When this is done - JPro sends one Node at a time to the client.
 This allows the client to render the frame as soon as possible - ensuring early visible content for the user.
+
+### Server-Side Features (crawling, SEO, sitemaps, HTTP)
+
+Because a `Route` is a plain function, the whole application can be traversed without a browser.
+This enables a set of server-side and tooling features — `AppCrawler` (page/link/image
+discovery), `SitemapGenerator`, `MemoryTester` (leak-testing every page from a unit test),
+`SizeTester`, and `RouteHTTP` (serving the app and its `/sitemap.xml`).
+
+> **Note:** these features are still evolving and not yet documented in detail. See the
+> `crawl` and `server` packages and the `core-test` module for current usage.
