@@ -115,7 +115,7 @@ def jproPlatformVersion = {
     def isRelease = matcher.group(4) == null && matcher.group(5) == null
     isRelease ? "${major}.${minor}.${patch}" : "${major}.${minor}.${patch + 1}-SNAPSHOT"
 }()
-logger.lifecycle("Version derived from git tags: {} (git describe: {})", jproPlatformVersion, gitDescribe.getOrElse('') ?: '<no tag found>')
+logger.quiet("Version derived from git tags: {} (git describe: {})", jproPlatformVersion, gitDescribe.getOrElse('') ?: '<no tag found>')
 
 apply plugin: 'java'
 java {
