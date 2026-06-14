@@ -4,9 +4,11 @@
 
 #### Features
 * `jpro-auth-routing`: Added `RoutingAuth`, a high-level entry point for adding Google / OAuth2 / username-password login to a `RouteApp` (plus `dummy`/`defaultUser` logins for tests and desktop). See the module README and the `routing-auth` example.
+* `jpro-webrtc`: Added a README and Javadoc, plus an `RTCPeerConnection.addStream(MediaStream)` convenience.
 
 #### Breaking
 * `jpro-auth-routing`: Renamed the auth route transformers from `*Filter` to `*Transformer` (`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`) and `AuthUIProvider.createFilter()` to `createTransformer()`.
+* `jpro-webrtc`: Encapsulated the public API — connection states are read-only properties (`connectionStateProperty()`, …), `getTracks()`/`getIceCandidates()` replace the public lists, `setOnNewIceCandidate`/`setOnNegotiationNeeded` replace the public callback fields, and `MediaStream.js` is now `MediaStream.js()`.
 
 ### 0.7.1 (June 14, 2026)
 

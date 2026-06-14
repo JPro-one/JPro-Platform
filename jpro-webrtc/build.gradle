@@ -5,6 +5,12 @@ dependencies {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            // Add README.md as an artifact named DOCUMENTATION.md
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'DOCUMENTATION'
+                extension 'md'
+            }
+
             pom {
                 name = 'JPro WebRTC'
                 description = 'A module that makes easy to add real-time communication capabilities to your web applications running with JPro.'
@@ -12,3 +18,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme

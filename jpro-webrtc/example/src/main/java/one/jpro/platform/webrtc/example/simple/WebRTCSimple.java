@@ -26,14 +26,14 @@ public class WebRTCSimple extends JProApplication {
         var video1 = new VideoFrame(getWebAPI());
         var video2 = new VideoFrame(getWebAPI());
 
-        rtc1.tracks.addListener((ListChangeListener<? super JSVariable>)  change -> {
+        rtc1.getTracks().addListener((ListChangeListener<? super JSVariable>)  change -> {
             while(change.next()) {
                 if(change.wasAdded()) {
                     video1.setStream(change.getAddedSubList().get(0));
                 }
             }
         });
-        rtc2.tracks.addListener((ListChangeListener<? super JSVariable>)  change -> {
+        rtc2.getTracks().addListener((ListChangeListener<? super JSVariable>)  change -> {
             while(change.next()) {
                 if(change.wasAdded()) {
                     video2.setStream(change.getAddedSubList().get(0));
@@ -41,12 +41,8 @@ public class WebRTCSimple extends JProApplication {
             }
         });
 
-        var f1 = MediaStream.getCameraStream(rtc1.getWebAPI()).js.thenAccept(stream -> {
-            rtc1.addStream(stream);
-        });
-        var f2 = MediaStream.getCameraStream(rtc2.getWebAPI()).js.thenAccept(stream -> {
-            rtc2.addStream(stream);
-        });
+        var f1 = rtc1.addStream(MediaStream.getCameraStream(rtc1.getWebAPI()));
+        var f2 = rtc2.addStream(MediaStream.getCameraStream(rtc2.getWebAPI()));
 
         (f1.thenCompose(a -> f2)).thenAccept( r ->
             RTCPeerConnection.connectConnections(rtc1, rtc2)

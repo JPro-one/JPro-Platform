@@ -1,52 +1,38 @@
 package one.jpro.platform.webrtc;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 /**
- * This class shows various details of an RTCPeerConnection.
+ * A small debug view that shows the live state of an {@link RTCPeerConnection} — its connection,
+ * ICE and signaling states, and the number of ICE candidates and tracks.
  */
 public class RTCDetails extends VBox {
 
-    private RTCPeerConnection rtc;
     public RTCDetails(RTCPeerConnection rtc) {
-        this.rtc = rtc;
+        getChildren().add(createLabel("connectionState", rtc.connectionStateProperty()));
+        getChildren().add(createLabel("iceConnectionState", rtc.iceConnectionStateProperty()));
+        getChildren().add(createLabel("iceGatheringState", rtc.iceGatheringStateProperty()));
+        getChildren().add(createLabel("signalingState", rtc.signalingStateProperty()));
 
-
-        getChildren().add(createLabel("connectionState", rtc.connectionState));
-        getChildren().add(createLabel("iceConnectionState", rtc.iceConnectionState));
-        getChildren().add(createLabel("iceGatheringState", rtc.iceGatheringState));
-        getChildren().add(createLabel("signalingState", rtc.signalingState));
-
-        getChildren().add(createSizeLabel("iceCandidates", rtc.iceCandidates));
-        getChildren().add(createSizeLabel("trackCount", rtc.tracks));
+        getChildren().add(createSizeLabel("iceCandidates", rtc.getIceCandidates()));
+        getChildren().add(createSizeLabel("trackCount", rtc.getTracks()));
     }
 
-    private Label createLabel(String name, StringProperty prop) {
+    private Label createLabel(String name, ReadOnlyStringProperty prop) {
         var label = new Label();
         label.textProperty().bind(Bindings.concat(name, ": ", prop));
         return label;
     }
 
     private <T> Label createSizeLabel(String name, ObservableList<T> list) {
-        var label = new Label();
-        //label.textProperty().bind(Bindings.concat(name, ": ", Bindings.size(list)));
-        // put in the whole list
-        //label.textProperty().bind(Bindings.concat(name, ": ", list));
-        // but add listener for List
-        list.addListener((ListChangeListener<? super T>) change -> {
-            while(change.next()) {
-                if(change.wasAdded()) {
-                    label.setText(name + ": " + list.size());
-                }
-            }
-        });
-        label.wrapTextProperty().setValue(true);
+        var label = new Label(name + ": " + list.size());
+        list.addListener((ListChangeListener<? super T>) change -> label.setText(name + ": " + list.size()));
+        label.setWrapText(true);
         return label;
     }
-
 }
