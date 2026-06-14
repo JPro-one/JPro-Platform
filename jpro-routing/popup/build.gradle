@@ -9,6 +9,12 @@ dependencies {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            // Add README.md as an artifact named DOCUMENTATION.md
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'DOCUMENTATION'
+                extension 'md'
+            }
+
             pom {
                 name = 'JPro Routing Popup'
                 description = 'A module that provides utility methods for managing popups in a JPro/JavaFX application.'
@@ -16,3 +22,11 @@ publishing {
         }
     }
 }
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
