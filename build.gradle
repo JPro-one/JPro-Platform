@@ -39,6 +39,9 @@ def subprojectsWithDocs = [
         "jpro-routing/dev",
         "jpro-routing/popup",
         "jpro-scenegraph",
+        "jpro-session",
+        "jpro-html-scrollpane",
+        "jpro-youtube",
         "jpro-utils"
 ]
 
