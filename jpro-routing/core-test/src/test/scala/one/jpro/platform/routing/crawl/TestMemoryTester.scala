@@ -51,6 +51,25 @@ class TestMemoryTester {
   }
 
 
+  // Mirrors jpro-website CheckForLeaks.routeWithLeaf: same shape, only the "/x" leaf differs.
+  private def routeWithLeaf(leaf: () => javafx.scene.Node): () => Route = () =>
+    Route.empty()
+      .and(Route.get("/", r => {
+        val link = new javafx.scene.control.Label("to x")
+        one.jpro.platform.routing.LinkUtil.setLink(link, "/x", "desc")
+        Response.node(new javafx.scene.layout.VBox(link))
+      }))
+      .and(Route.get("/x", r => Response.node(leaf())))
+
+  private def crawlAndCheck(route: () => Route): Unit = {
+    val result = AppCrawler.crawlRoute("http://localhost", () => route())
+    MemoryTester.testForLeaks(result, () => route())
+  }
+
+  @Test
+  def textFlowLeakTest(): Unit =
+    crawlAndCheck(routeWithLeaf(() => new javafx.scene.text.TextFlow(new javafx.scene.text.Text("hello world"))))
+
   @Test
   def simpleFailingTest3(): Unit = {
 
