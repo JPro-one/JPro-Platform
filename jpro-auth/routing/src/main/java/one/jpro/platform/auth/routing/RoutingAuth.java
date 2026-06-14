@@ -5,17 +5,11 @@ import javafx.collections.ObservableMap;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.basic.UserManager;
-import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
-import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.routing.buttons.GoogleLoginButton;
-import one.jpro.platform.routing.LinkUtil;
 import one.jpro.platform.routing.Request;
 import one.jpro.platform.routing.Response;
 import one.jpro.platform.routing.Route;
@@ -209,14 +203,15 @@ public final class RoutingAuth {
                         .clientSecret(clientSecret)
                         .redirectUri(redirectUri)
                         .create(app.getStage());
-                return oauthUI(provider, session, GoogleLoginButton::new);
+                return AuthUIProviders.createOAuth2(provider, session, GoogleLoginButton::new, onLoginRedirect(), onError);
             });
             return this;
         }
 
         /** Adds a generic OAuth2/OpenID login for an already-configured provider. */
         public Builder oauth2(OpenIDAuthenticationProvider provider) {
-            methods.add((app, session) -> oauthUI(provider, session, () -> new Button("Login")));
+            methods.add((app, session) -> AuthUIProviders.createOAuth2(provider, session,
+                    () -> new Button("Login"), onLoginRedirect(), onError));
             return this;
         }
 
@@ -224,14 +219,14 @@ public final class RoutingAuth {
         public Builder usernamePassword(UserManager userManager, String... roles) {
             methods.add((app, session) -> {
                 var provider = AuthAPI.basicAuth().userManager(userManager).roles(roles).create();
-                return basicUI(provider, session);
+                return AuthUIProviders.createBasicProvider(provider, session, onLogin, loginRedirect);
             });
             return this;
         }
 
         /** Adds a one-click fake login as the given user — for local testing. */
         public Builder dummy(String name, Set<String> roles) {
-            methods.add((app, session) -> AuthUIProviders.dummy(new User(name, roles), session, loginRedirect));
+            methods.add((app, session) -> AuthUIProviders.dummy(new User(name, roles), session, loginRedirect, onLogin));
             return this;
         }
 
@@ -259,6 +254,7 @@ public final class RoutingAuth {
 
             if (autoLoginUser != null && !userSession.isLoggedIn()) {
                 userSession.setUser(autoLoginUser);
+                onLogin.accept(autoLoginUser);
             }
 
             List<AuthUIProvider> providers = new ArrayList<>();
@@ -271,60 +267,12 @@ public final class RoutingAuth {
             return new RoutingAuth(userSession, combined, loginUrl, loginResp);
         }
 
-        private AuthUIProvider oauthUI(OpenIDAuthenticationProvider provider, UserSession session,
-                                       java.util.function.Supplier<Button> button) {
-            return new AuthUIProvider() {
-                @Override
-                public Node createAuthenticationNode() {
-                    Button b = button.get();
-                    b.setOnAction(e -> AuthBasicOAuth2Transformer.authorize(b, provider));
-                    return b;
-                }
-
-                @Override
-                public Transformer createTransformer() {
-                    return AuthBasicOAuth2Transformer.create(provider, session, user -> {
-                        onLogin.accept(user);
-                        return Response.redirect(loginRedirect);
-                    }, onError);
-                }
+        // OAuth2 success: run the onLogin hook, then redirect to loginRedirect.
+        private Function<User, Response> onLoginRedirect() {
+            return user -> {
+                onLogin.accept(user);
+                return Response.redirect(loginRedirect);
             };
         }
-
-        private AuthUIProvider basicUI(BasicAuthenticationProvider provider, UserSession session) {
-            return new AuthUIProvider() {
-                @Override
-                public Node createAuthenticationNode() {
-                    var box = new VBox();
-                    var username = new TextField();
-                    var password = new PasswordField();
-                    var button = new Button("Login");
-                    var info = new Label();
-                    box.getChildren().addAll(new Label("Username:"), username,
-                            new Label("Password:"), password, button, info);
-                    Runnable login = () -> provider.authenticate(
-                                    new UsernamePasswordCredentials(username.getText(), password.getText()))
-                            .thenAccept(user -> {
-                                session.setUser(user);
-                                onLogin.accept(user);
-                                LinkUtil.getSessionManager(button).gotoURL(loginRedirect);
-                            })
-                            .exceptionally(error -> {
-                                info.setText(error.getCause() != null ? error.getCause().getMessage()
-                                        : error.getMessage());
-                                return null;
-                            });
-                    button.setOnAction(e -> login.run());
-                    password.setOnAction(e -> login.run());
-                    return box;
-                }
-
-                @Override
-                public Transformer createTransformer() {
-                    return Transformer.empty();
-                }
-            };
-        }
-
     }
 }

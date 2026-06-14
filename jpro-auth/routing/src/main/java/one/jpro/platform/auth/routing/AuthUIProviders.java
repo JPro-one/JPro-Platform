@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import javafx.scene.layout.Pane;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class AuthUIProviders {
@@ -46,6 +48,27 @@ public class AuthUIProviders {
     public static AuthUIProvider createOAuth2(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
                                                       @NotNull UserSession userSession,
                                                       @NotNull Supplier<Button> createButton) {
+        return createOAuth2(openidAuthProvider, userSession, createButton,
+                user -> Response.redirect("/"), // That's ok, let the app handle it.
+                err -> {throw new RuntimeException(err);});
+    }
+
+    /**
+     * Creates an AuthUIProvider for OAuth2/OpenID authentication with a custom button and
+     * explicit success/error handling.
+     *
+     * @param openidAuthProvider the OpenID authentication provider
+     * @param userSession        the user session to be used
+     * @param createButton       a supplier that provides the button to be used for authentication
+     * @param onSuccess          turns the authenticated user into the response (e.g. a redirect)
+     * @param onError            turns a failed authentication into the response
+     * @return an AuthUIProvider that provides a button for OAuth2 authentication
+     */
+    public static AuthUIProvider createOAuth2(@NotNull OpenIDAuthenticationProvider openidAuthProvider,
+                                                      @NotNull UserSession userSession,
+                                                      @NotNull Supplier<Button> createButton,
+                                                      @NotNull Function<User, Response> onSuccess,
+                                                      @NotNull Function<Throwable, Response> onError) {
         return new AuthUIProvider() {
             @Override
             public Node createAuthenticationNode() {
@@ -56,9 +79,7 @@ public class AuthUIProviders {
 
             @Override
             public Transformer createTransformer() {
-                return AuthBasicOAuth2Transformer.create(openidAuthProvider, userSession,
-                        user -> Response.redirect("/"), // That's ok, let the app handle it.
-                        err -> {throw new RuntimeException(err);});
+                return AuthBasicOAuth2Transformer.create(openidAuthProvider, userSession, onSuccess, onError);
             }
         };
     }
@@ -74,14 +95,32 @@ public class AuthUIProviders {
 
     /**
      * Creates an AuthUIProvider for basic authentication using a username and password.
+     * After a successful login it navigates to {@code "/"}.
      */
     public static AuthUIProvider createBasicProvider(@NotNull BasicAuthenticationProvider authProvider,
                                                                     @NotNull UserSession userSession) {
+        return createBasicProvider(authProvider, userSession, user -> {}, "/");
+    }
+
+    /**
+     * Creates an AuthUIProvider for basic (username/password) authentication. On success the user
+     * is stored in the session, {@code onSuccess} is invoked, and the app navigates to
+     * {@code redirectUrl}; a failed login is shown inline in the form.
+     *
+     * @param authProvider the basic authentication provider
+     * @param userSession  the user session to store the user in
+     * @param onSuccess    invoked with the user after a successful login
+     * @param redirectUrl  where to navigate after a successful login
+     * @return an AuthUIProvider rendering a username/password form
+     */
+    public static AuthUIProvider createBasicProvider(@NotNull BasicAuthenticationProvider authProvider,
+                                                      @NotNull UserSession userSession,
+                                                      @NotNull Consumer<User> onSuccess,
+                                                      @NotNull String redirectUrl) {
         return new AuthUIProvider() {
             @Override
             public Node createAuthenticationNode() {
                 return new VBox() {{
-                    // Use LoginPane?
                     getChildren().add(new Label("Username:"));
                     var username = new TextField();
                     getChildren().add(username);
@@ -95,19 +134,16 @@ public class AuthUIProviders {
                     Runnable loginAction = () -> {
                         authProvider.authenticate(new UsernamePasswordCredentials(username.getText(), password.getText())).thenAccept(user -> {
                             userSession.setUser(user);
-                            LinkUtil.getSessionManager(button).gotoURL("/");
+                            onSuccess.accept(user);
+                            LinkUtil.getSessionManager(button).gotoURL(redirectUrl);
                         }).exceptionally(error -> {
-                            error.printStackTrace();
-                            infoLabel.setText(error.getCause().getMessage());
+                            infoLabel.setText(error.getCause() != null ? error.getCause().getMessage()
+                                    : error.getMessage());
                             return null;
                         });
                     };
-                    password.setOnAction(event -> {
-                        loginAction.run();
-                    });
-                    button.setOnAction(event -> {
-                        loginAction.run();
-                    });
+                    password.setOnAction(event -> loginAction.run());
+                    button.setOnAction(event -> loginAction.run());
                 }};
             }
 
@@ -141,12 +177,28 @@ public class AuthUIProviders {
      */
     public static AuthUIProvider dummy(@NotNull User user, @NotNull UserSession userSession,
                                        @NotNull String redirectUrl) {
+        return dummy(user, userSession, redirectUrl, u -> {});
+    }
+
+    /**
+     * Creates a fake one-click login as the given user, invoking {@code onSuccess} and navigating
+     * to {@code redirectUrl} after login — for local testing or automated tests.
+     *
+     * @param user        the user to log in as
+     * @param userSession the user session to store the user in
+     * @param redirectUrl where to navigate after the fake login
+     * @param onSuccess   invoked with the user after the fake login
+     * @return an AuthUIProvider that logs in the given user when its button is clicked
+     */
+    public static AuthUIProvider dummy(@NotNull User user, @NotNull UserSession userSession,
+                                       @NotNull String redirectUrl, @NotNull Consumer<User> onSuccess) {
         return new AuthUIProvider() {
             @Override
             public Node createAuthenticationNode() {
                 var button = new Button("Login as " + user.getName());
                 button.setOnAction(event -> {
                     userSession.setUser(user);
+                    onSuccess.accept(user);
                     LinkUtil.getSessionManager(button).gotoURL(redirectUrl);
                 });
                 return button;
