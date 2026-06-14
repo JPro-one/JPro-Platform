@@ -4,9 +4,16 @@
 # Tags have no prefix, matching this repository's existing tags.
 set -e
 
-VERSION=$1
+# First arg is the project name, guarding against running this in the wrong repo.
+PROJECT="jpro-platform"
+if [ "$1" != "$PROJECT" ]; then
+    echo "usage: ./tagRelease.sh $PROJECT X.Y.Z"
+    exit 1
+fi
+
+VERSION=$2
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "usage: ./tagRelease.sh X.Y.Z"
+    echo "usage: ./tagRelease.sh $PROJECT X.Y.Z"
     exit 1
 fi
 
