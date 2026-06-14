@@ -39,7 +39,12 @@ class SessionManagerDesktop(val webApp: RouteNode) extends SessionManager { THIS
         page.url = url
 
         isFullscreen = page.fullscreen
+        // JFX removed-children retention workaround: swap while the container is not tree-visible
+        // so Parent skips adding the old page to the NG peer's removed-list (which a broken/absent
+        // render pulse would otherwise never clear).
+        container.setVisible(false)
         container.children = List(page.realContent)
+        container.setVisible(true)
         scrollpane.vvalue = 0.0
         if(oldView != null && oldView != page) {
           oldView.onClose()
