@@ -35,7 +35,14 @@ def subprojectsWithDocs = [
         "jpro-mdfx",
         "jpro-flexbox",
         "jpro-media",
-        "jpro-routing"
+        "jpro-routing",
+        "jpro-routing/dev",
+        "jpro-routing/popup",
+        "jpro-scenegraph",
+        "jpro-session",
+        "jpro-html-scrollpane",
+        "jpro-youtube",
+        "jpro-utils"
 ]
 
 tasks.register('combineDocumentationFull') {
