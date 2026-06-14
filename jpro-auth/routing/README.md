@@ -1,9 +1,13 @@
 # JPro Auth Routing
 
 `jpro-auth-routing` combines [`jpro-auth-core`](../README.md) with
-[`jpro-routing`](../../jpro-routing/README.md), so authentication can be wired into a `RouteApp`
-as a single route filter. It adds the login UI, the session storage, and the route filters that
-handle the authentication callback.
+[`jpro-routing`](../../jpro-routing/README.md) so authentication can be wired into a `RouteApp`
+with very little code.
+
+The recommended entry point is **`RoutingAuth`** — a single, central configuration that owns the
+user session, builds the login UI, serves the login page, and produces the route filters. The
+lower-level building blocks it is built on (`UserSession`, `AuthUIProviders`, the filters) are
+documented further down for advanced use.
 
 ## Dependency
 
@@ -13,163 +17,161 @@ dependencies {
 }
 ```
 
-`jpro-auth-core` is pulled in transitively, so you don't need to add it explicitly.
+`jpro-auth-core` is pulled in transitively.
 
-## Concepts
+## Quick start
 
-| Type | Purpose |
-|---|---|
-| `UserSession` | Stores the authenticated `User` in the JPro session (as JSON under the key `"user"`). |
-| `AuthUIProvider` | An authentication method: a UI node (`createAuthenticationNode()`) plus a route filter (`createFilter()`). |
-| `AuthUIProviders` | Factories for ready-made providers (`createGoogle`, `createOAuth2`, `createBasicProvider`, `combine`). |
-| `AuthBasicFilter` | Route filter for username/password authentication. |
-| `AuthBasicOAuth2Filter` | Route filter for OAuth2 / OpenID authentication. |
-| `AuthRestrictionFilter` | Makes an entire route subtree accessible only to authenticated users. |
-| `GoogleLoginButton` | A `Button` pre-styled with Google's "Sign in with Google" branding. |
-
-## UserSession
-
-`UserSession` wraps the routing session map and is the single source of truth for "who is logged
-in". Create it once in `createRoute()` from the `SessionManager`, choosing the browser or desktop
-session depending on the runtime:
+Declare the login methods you want, bind to the app, and apply two transforms to your route:
 
 ```java
-var session = WebAPI.isBrowser() ? sessionManager.getSession(getWebAPI())
-                                 : sessionManager.getSession("user-session");
-UserSession userSession = new UserSession(session);
+public class MyApp extends RouteApp {
 
-userSession.setUser(user);   // store after a successful login
-userSession.getUser();       // null when not logged in
-userSession.isLoggedIn();    // convenience for getUser() != null
-userSession.logout();        // clears the stored user
-```
-
-The filters below call `setUser(...)` for you; you typically only call `getUser()`/`isLoggedIn()`
-when building routes and `logout()` from a sign-out action.
-
-## Login UI: AuthUIProviders
-
-An `AuthUIProvider` bundles the login UI with the matching filter. Use the factories:
-
-```java
-// Google "Sign in with Google" button
-AuthUIProvider google = AuthUIProviders.createGoogle(openidAuthProvider, userSession);
-
-// Generic OAuth2/OpenID, default "Login" button
-AuthUIProvider oauth2 = AuthUIProviders.createOAuth2(openidAuthProvider, userSession);
-
-// Generic OAuth2/OpenID with a custom button
-AuthUIProvider oauth2custom =
-        AuthUIProviders.createOAuth2(openidAuthProvider, userSession, () -> new Button("Sign in"));
-
-// Username/password form (text fields + login button)
-AuthUIProvider basic = AuthUIProviders.createBasicProvider(basicAuthProvider, userSession);
-
-// Offer several methods on one page
-AuthUIProvider combined = AuthUIProviders.combine(google, basic);
-```
-
-Render the UI with `provider.createAuthenticationNode()`.
-
-> Note: `createBasicProvider` performs the login inside its UI node (it calls `authenticate` and
-> `userSession.setUser(...)` directly), so its `createFilter()` returns `Transformer.empty()`. The
-> OAuth2 providers, by contrast, rely on a redirect callback and therefore need their filter
-> applied to the route (see below).
-
-## Route filters
-
-### AuthBasicFilter
-
-```java
-static Transformer create(BasicAuthenticationProvider authProvider,
-                          UsernamePasswordCredentials credentials,
-                          Function<User, Response> onSuccess,
-                          Function<Throwable, Response> onError)
-
-static void authorize(Node node, BasicAuthenticationProvider basicAuthProvider)
-```
-
-`create(...)` returns a filter that triggers when the request path equals the provider's
-`getAuthorizationPath()`. It authenticates the `credentials`, then runs `onSuccess`/`onError`.
-`authorize(node, provider)` navigates to that authorization path (e.g. from a button action).
-
-### AuthBasicOAuth2Filter
-
-```java
-// 1. OpenID provider, no session storage
-static Transformer create(OpenIDAuthenticationProvider openidAuthProvider,
-                          Function<User, Response> onSuccess,
-                          Function<Throwable, Response> onError)
-
-// 2. OpenID provider, store user in session (recommended)
-static Transformer create(OpenIDAuthenticationProvider openidAuthProvider,
-                          UserSession userSession,
-                          Function<User, Response> onSuccess,
-                          Function<Throwable, Response> onError)
-
-// 3. Full control: explicit provider, optional session, explicit credentials
-static Transformer create(OAuth2AuthenticationProvider authProvider,
-                          @Nullable UserSession userSession,
-                          OAuth2Credentials credentials,
-                          Function<User, Response> onSuccess,
-                          Function<Throwable, Response> onError)
-
-// Start the flow from a UI node:
-static void authorize(Node node, OpenIDAuthenticationProvider openidAuthProvider)
-static void authorize(Node node, OAuth2AuthenticationProvider authProvider, OAuth2Credentials credentials)
-```
-
-The `create(...)` filter triggers when the request matches the credentials' `redirectUri`
-(via `Request.matchesSoft`). It exchanges the authorization code for tokens, stores the resulting
-`User` in the `UserSession` (when one is given), and runs your `onSuccess`/`onError` callback.
-
-`authorize(...)` builds the provider's authorization URL and starts the flow. In the browser JPro
-redirects automatically; on the desktop it calls `gotoURL(...)` so the route reaches the redirect
-URI. Overloads 1/2 take the provider's pre-configured credentials; overload with explicit
-`OAuth2Credentials` is for advanced cases.
-
-### AuthRestrictionFilter
-
-```java
-static Transformer create(AuthUIProvider authProvider, UserSession userSession)
-```
-
-Wraps a route so that unauthenticated users see `authProvider.createAuthenticationNode()` instead
-of the protected content; authenticated users pass through.
-
-## Example: OAuth2 with Google
-
-```java
-public class GoogleLoginApp extends RouteApp {
-
-    private static final SessionManager sessionManager = new SessionManager("google-login-app");
-    private UserSession userSession;
+    private RoutingAuth auth;
 
     @Override
     public Route createRoute() {
-        var session = WebAPI.isBrowser() ? sessionManager.getSession(getWebAPI())
-                                         : sessionManager.getSession("user-session");
-        userSession = new UserSession(session);
-
-        var googleAuthProvider = AuthAPI.googleAuth()
-                .clientId("your-client-id")
-                .clientSecret("your-client-secret")
-                .redirectUri("/auth/google")
-                .create(getStage());
-
-        var uiProvider = AuthUIProviders.createGoogle(googleAuthProvider, userSession);
+        auth = RoutingAuth.config()
+                .google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)   // add login methods
+                .usernamePassword(userManager)
+                .loginRedirect("/home")                           // where to land after login
+                .build(this);                                     // call inside createRoute()
 
         return Route.empty()
-                .and(Route.get("/", request -> Response.node(uiProvider.createAuthenticationNode())))
-                .when(request -> userSession.isLoggedIn(), Route.empty()
-                        .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .transform(AuthBasicOAuth2Filter.create(googleAuthProvider, userSession,
-                        user -> Response.redirect("/user/signed-in"),
-                        error -> Response.node(new ErrorPage(error))));
+                .and(Route.get("/", request -> Response.node(new PublicHome())))      // public
+                .and(Route.empty()
+                        .and(Route.get("/home", request -> Response.node(new Home(auth.getUser()))))
+                        .transform(auth.requireLogin()))                              // protected
+                .transform(auth.filter());   // serves /login and handles login callbacks
     }
 }
 ```
 
-You can register several OAuth2 providers (Google, Microsoft, Keycloak) by applying one
-`AuthBasicOAuth2Filter.create(...)` transform per provider, each matching its own `redirectUri`.
-See the `jpro-auth/example` module for runnable samples.
+That's the whole integration: one method per login option, `requireLogin()` on what you want
+protected, and `filter()` on the whole route.
+
+> **Why `auth` is a field and `build(...)` is called inside `createRoute()`:** OAuth2 providers
+> need the JavaFX `Stage`, which only exists once the app has started — so build the configuration
+> in `createRoute()`. Keeping `auth` in a field lets pages and `loginResponse` reach it.
+
+## Login methods
+
+| Method | Adds |
+|---|---|
+| `.google(clientId, clientSecret)` | "Sign in with Google" (OAuth2/OpenID) |
+| `.google(clientId, clientSecret, redirectUri)` | as above, with an explicit redirect URI |
+| `.oauth2(OpenIDAuthenticationProvider)` | a generic OAuth2/OpenID provider you configured |
+| `.usernamePassword(UserManager, roles...)` | a username/password form |
+| `.dummy(name, roles)` | a one-click fake login — for local testing |
+| `.defaultUser(name, roles)` / `.defaultUser(User)` | auto-login as a fixed user, no UI |
+
+You can add several; their UIs are stacked on the login screen.
+
+## Public vs. protected pages
+
+`requireLogin()` is a route filter you apply to whatever you want to protect. When the user is
+logged in the wrapped route is used unchanged; otherwise the request is redirected to the login
+page (and the protected page is never built while logged out).
+
+- **Gate the whole app:** apply it to the entire route.
+- **Mix public and protected:** put the guarded sub-route *after* your public routes — because
+  `and` tries earlier routes first, the guard only ever sees requests the public routes didn't
+  claim.
+
+```java
+return Route.empty()
+        .and(publicRoutes)                                    // matched first → stay public
+        .and(protectedRoutes.transform(auth.requireLogin()))  // gated, placed after
+        .transform(auth.filter());
+```
+
+## The login page
+
+`auth.filter()` serves the login page automatically at `loginUrl` (default `/login`) — you do
+**not** need to declare a `/login` route. This makes adding auth to an existing app nearly free.
+
+Customize it as needed:
+
+| Config | Effect |
+|---|---|
+| `.loginUrl("/signin")` | move the login page (the gate redirects here) |
+| `.loginResponse(r -> Response.node(new MyLoginPage()))` | render your own login page |
+| `.loginRedirect("/home")` | where to navigate after a successful login |
+
+A custom login page can still reuse the built-in provider buttons via `auth.loginScreen()`:
+
+```java
+auth = RoutingAuth.config()
+        .google(CLIENT_ID, CLIENT_SECRET)
+        .loginResponse(r -> Response.node(new VBox(new Label("Please sign in"), auth.loginScreen())))
+        .build(this);
+```
+
+## Testing & desktop "local user"
+
+Swap the configuration to log in without a real identity provider — handy for local development,
+automated tests, or a desktop build that should always run as a local user:
+
+```java
+// one-click fake login button:
+RoutingAuth.config().dummy("tester", Set.of("USER")).build(this);
+
+// already signed in, no UI (e.g. desktop local user, real login on the web):
+var config = RoutingAuth.config();
+if (PlatformUtils.isDesktop()) config.defaultUser("localuser", Set.of("USER"));
+else                           config.google(CLIENT_ID, CLIENT_SECRET);
+RoutingAuth auth = config.build(this);
+```
+
+## RoutingAuth reference
+
+Configuration (`RoutingAuth.config()` → `Builder`):
+
+| Method | Default | Purpose |
+|---|---|---|
+| `google` / `oauth2` / `usernamePassword` / `dummy` / `defaultUser` | — | add a login method |
+| `sessionName(String)` | `"app"` | namespaces the session storage |
+| `loginUrl(String)` | `"/login"` | login page path |
+| `loginResponse(Request → Response)` | combined login screen | what to show at the login page |
+| `loginRedirect(String)` | `"/"` | where to go after a successful login |
+| `onLogin(Consumer<User>)` | no-op | hook run after an interactive login (OAuth2 / username-password) |
+| `onError(Throwable → Response)` | message node | how to render a failed OAuth2 login |
+| `build(RouteApp)` | — | materialize the configuration |
+
+Result (`RoutingAuth`):
+
+| Method | Returns |
+|---|---|
+| `filter()` | the transform to apply to the whole route (serves the login page + handles callbacks) |
+| `requireLogin()` | the transform that protects the route/sub-route it wraps |
+| `loginScreen()` | the combined login UI node |
+| `getUser()` / `isLoggedIn()` / `logout()` | current user state |
+| `userSession()` | the underlying `UserSession` |
+
+## Lower-level building blocks
+
+`RoutingAuth` is a thin facade over these; use them directly only when you need finer control.
+
+- **`UserSession`** — stores the authenticated `User` in the JPro session (as JSON under the key
+  `"user"`). `getUser()` / `setUser(user)` / `isLoggedIn()` / `logout()`.
+- **`AuthUIProvider`** — an authentication method: a UI node (`createAuthenticationNode()`) plus a
+  route filter (`createFilter()`).
+- **`AuthUIProviders`** — factories for providers: `createGoogle`, `createOAuth2`,
+  `createBasicProvider`, `dummy(user, session)`, and `combine(...)` to merge several.
+- **`AuthBasicFilter`** — route filter for username/password authentication
+  (`create(provider, credentials, onSuccess, onError)`, `authorize(node, provider)`).
+- **`AuthBasicOAuth2Filter`** — route filter for OAuth2/OpenID
+  (`create(...)` overloads, `authorize(node, provider[, credentials])`).
+- **`AuthRestrictionFilter`** — `create(authProvider, userSession)`: shows the login node in place
+  for unauthenticated users (an alternative to `requireLogin()`'s redirect behavior).
+
+See the [`jpro-auth-core` README](../README.md) for providers, credentials and `AuthAPI`.
+
+## Runnable example
+
+```bash
+./gradlew jpro-auth:example:run -Psample=routing-auth
+```
+
+A self-contained desktop demo (no network): a public home page and a protected `/secret` page,
+with a dummy one-click login and a username/password form (`admin` / `password`).
+See `jpro-auth/example/.../proto/RoutingAuthExample.java`.
