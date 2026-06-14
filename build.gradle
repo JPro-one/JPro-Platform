@@ -28,6 +28,7 @@ tasks.register('combineDocumentation') {
 
 def subprojectsWithDocs = [
         "jpro-auth",
+        "jpro-auth/routing",
         "jpro-dynamic-css",
         "jpro-file",
         "jpro-mail",

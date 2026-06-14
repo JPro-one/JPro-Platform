@@ -19,8 +19,9 @@ The derived version is printed at the start of every build.
 The first argument is the project name, guarding against running this in the wrong repo.
 
 The script only tags: it verifies a clean tree on an up-to-date `main` and a dated
-`### 0.7.0` CHANGELOG entry, then tags and pushes `0.7.0`. The tag push triggers
-`.github/workflows/release.yml`, which builds and publishes via the scripts:
+`### 0.7.0` CHANGELOG entry, and that all README version pins already match `0.7.0`,
+then tags and pushes `0.7.0`. The tag push triggers `.github/workflows/release.yml`,
+which builds and publishes via the scripts:
 
 | Script | Registry | Versions |
 |---|---|---|
@@ -39,6 +40,6 @@ become `X.Y.(Z+1)-SNAPSHOT`.
 ## Notes
 
 - Transition: the latest existing tag is `0.6.3`, so until the first `0.7.0` tag exists, builds derive `0.6.4-SNAPSHOT` even though the next release is `0.7.0`. The first `./tagRelease.sh jpro-platform 0.7.0` realigns everything.
-- To release `0.7.0`: set the date on the `### 0.7.0` CHANGELOG entry (remove `(unreleased)`), commit, then `./tagRelease.sh jpro-platform 0.7.0`.
+- To release `0.7.0`: set the date on the `### 0.7.0` CHANGELOG entry (remove `(unreleased)`), run `./syncReadmeVersions.sh 0.7.0` to update the README version pins, commit, then `./tagRelease.sh jpro-platform 0.7.0`. The READMEs are published as `DOCUMENTATION` artifacts, so their pins are kept in sync with each release.
 - CI checkouts use `fetch-depth: 0` (configured) — a shallow clone can't see tags and would fall back to the SNAPSHOT default.
 - Set `MAVEN_CENTRAL_PUBLISHING_TYPE=USER_MANAGED` to review the deployment in the portal before it goes live; default is `AUTOMATIC`.

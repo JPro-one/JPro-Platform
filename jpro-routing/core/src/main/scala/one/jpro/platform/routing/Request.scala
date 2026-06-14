@@ -6,7 +6,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import java.lang.ref.WeakReference
 import java.net.URI
-import java.util.{Map => JMap}
+import java.util.{Map => JMap, Optional}
 
 /**
  * An incoming request, carrying the parsed URL (protocol, domain, port, path,
@@ -43,8 +43,10 @@ case class Request (
   def getPath(): String = path
   /** Returns the directory this request is mounted at, "/" by default. */
   def getDirectory(): String = directory
-  /** Returns the query parameter, or an empty Option when absent. */
-  def getQueryParameter(key: String): Option[String] = queryParameters.get(key)
+  /** Returns the query parameter, or an empty {@link Optional} when absent. */
+  def getQueryParameter(key: String): Optional[String] = Optional.ofNullable(queryParameters.getOrElse(key, null))
+  /** Scala variant of {@link getQueryParameter}, returning a Scala {@code Option}. */
+  def getQueryParameterScala(key: String): Option[String] = queryParameters.get(key)
   /** Returns the query parameter, or the default when absent. */
   def getQueryParameterOrElse(key: String, default: String): String = queryParameters.getOrElse(key, default)
 

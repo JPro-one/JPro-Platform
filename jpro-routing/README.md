@@ -116,9 +116,9 @@ String           request.getPath()
 String           request.getDomain()
 String           request.getProtocol()
 int              request.getPort()
-Optional<String> request.getQueryParameter(String name)     // Scala Option
-String           request.getQueryParameterOrElse(String name, String default)
-Map<String,String> request.getQueryParameters()
+Optional<String>     request.getQueryParameter(String name)   // java.util.Optional
+String               request.getQueryParameterOrElse(String name, String default)
+java.util.Map<String,String> request.getQueryParameters()
 ```
 
 ### Setting Links

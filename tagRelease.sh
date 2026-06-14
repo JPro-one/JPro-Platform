@@ -48,6 +48,14 @@ if grep "^### $VERSION " CHANGELOG.md | grep -qi "unreleased"; then
     exit 1
 fi
 
+STALE_READMES=$(./syncReadmeVersions.sh --check "$VERSION") || true
+if [ -n "$STALE_READMES" ]; then
+    echo "error: README.md files pin one.jpro.platform versions that don't match $VERSION:"
+    echo "$STALE_READMES"
+    echo "run './syncReadmeVersions.sh $VERSION', commit, then re-run."
+    exit 1
+fi
+
 git tag "$VERSION"
 git push origin "$VERSION"
 echo "Tagged and pushed $VERSION — the release workflow takes it from here:"

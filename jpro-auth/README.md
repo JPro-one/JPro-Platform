@@ -101,7 +101,7 @@ processes. Add the following configuration to your project based on the build to
 - Gradle
     ```groovy
     dependencies {
-          implementation("one.jpro.platform:jpro-auth:0.6.3")
+          implementation("one.jpro.platform:jpro-auth-core:0.7.1")
     }
     ```
 - Maven
@@ -110,7 +110,7 @@ processes. Add the following configuration to your project based on the build to
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-auth-core</artifactId>
-        <version>0.6.3</version>
+        <version>0.7.1</version>
       </dependency>
     </dependencies>
     ```
@@ -121,7 +121,7 @@ the authentication process. Add the following configuration to your project base
 - Gradle
     ```groovy
     dependencies {
-          implementation("one.jpro.platform:jpro-auth-routing:0.6.3")
+          implementation("one.jpro.platform:jpro-auth-routing:0.7.1")
     }
     ```
 - Maven
@@ -130,7 +130,7 @@ the authentication process. Add the following configuration to your project base
       <dependency>
         <groupId>one.jpro.platform</groupId>
         <artifactId>jpro-auth-routing</artifactId>
-        <version>0.6.3</version>
+        <version>0.7.1</version>
       </dependency>
     </dependencies>
     ```
@@ -167,75 +167,91 @@ so there is no need to add it explicitly.
     ```
   
 ### Combined with the Routing API
-By simply adding the `jpro-auth-routing` dependency to your project, the authentication process can be simplified even 
-further resulting in a more concise and readable code. The following example shows how to authenticate a user with a 
-username and password using the `BasicAuthenticationProvider` in combination with `UsernamePasswordCredentials` class
-and the `AuthFilter` class provided by this module.
+Adding the `jpro-auth-routing` dependency lets you wire authentication into a `RouteApp` with a
+single route filter. The module provides:
+
+- `UserSession` — stores the logged-in `User` in the JPro session.
+- `AuthUIProviders` — factories for the login UI (`createGoogle`, `createOAuth2`, `createBasicProvider`, `combine`).
+- `AuthBasicFilter` — route filter for username/password authentication.
+- `AuthBasicOAuth2Filter` — route filter for OAuth2/OpenID authentication.
+
+> The full reference for these classes lives in the [`jpro-auth-routing` README](routing/README.md).
+
+**Username/password** with `BasicAuthenticationProvider` and `AuthBasicFilter`:
 
 ```java
-public class BasicAuthExample extends RouteApp {
-    
-    // Create a basic AuthenticationProvider with a single role "USER"
-    BasicAuthenticationProvider basicAuthProvider = AuthAPI.basicAuth()
-            .roles(Set.of("USER"))
-            .create();
+public class BasicLoginApp extends RouteApp {
 
-    // Username and Password Credentials holds the username and password
-    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials();
-    
+    private final UserManager userManager = new InMemoryUserManager();
+    private final BasicAuthenticationProvider basicAuthProvider = AuthAPI.basicAuth()
+            .userManager(userManager)
+            .roles("USER", "ADMIN")
+            .create();
+    private final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials();
+
+    private static final SessionManager sessionManager = new SessionManager("basic-login-app");
+    private UserSession userSession;
+
     @Override
     public Route createRoute() {
+        var session = WebAPI.isBrowser() ? sessionManager.getSession(getWebAPI())
+                                         : sessionManager.getSession("user-session");
+        userSession = new UserSession(session);
+        var authUIProvider = AuthUIProviders.createBasicProvider(basicAuthProvider, userSession);
+
         return Route.empty()
-                .and(Route.get("/", request -> Response.node(new LoginPage(this, basicAuthProvider, credentials))))
-                .when(request -> isUserAuthenticated(), Route.empty()
+                .and(Route.get("/", request -> userSession.isLoggedIn()
+                        ? Response.redirect("/user/signed-in")
+                        : Response.node(authUIProvider.createAuthenticationNode())))
+                .when(request -> userSession.isLoggedIn(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .transform(AuthFilter.create(basicAuthProvider, credentials, user -> {
-                    setUser(user);
-                    return Response.redirect("/user/signed-in");
-                }, error -> Response.node(new ErrorPage(error))));
+                .transform(AuthBasicFilter.create(basicAuthProvider, credentials,
+                        user -> {
+                            userSession.setUser(user);
+                            return Response.redirect("/user/signed-in");
+                        },
+                        error -> Response.node(new ErrorPage(error))));
     }
 }
 ```
 
-Another example shows how to authenticate a user with an OAuth2 provider using the `GoogleAuthenticationProvider` in
-combination with the `OAuth2Filter` class provided by this module.
+**OAuth2 (Google)** with `AuthUIProviders.createGoogle` and `AuthBasicOAuth2Filter`:
 
 ```java
-public class OAuth2Example extends RouteApp {
-    
+public class GoogleLoginApp extends RouteApp {
+
+    private static final SessionManager sessionManager = new SessionManager("google-login-app");
+    private UserSession userSession;
+
     @Override
     public Route createRoute() {
-        // Create an OAuth2 AuthenticationProvider for Google
-        GoogleAuthenticationProvider googleAuthProvider = AuthAPI.googleAuth()
+        var session = WebAPI.isBrowser() ? sessionManager.getSession(getWebAPI())
+                                         : sessionManager.getSession("user-session");
+        userSession = new UserSession(session);
+
+        var googleAuthProvider = AuthAPI.googleAuth()
                 .clientId("your-client-id")
                 .clientSecret("your-client-secret")
+                .redirectUri("/auth/google")
                 .create(getStage());
-        
-        return Route.empty()
-                .and(Route.get("/", request -> Response.node(new LoginPage(googleAuthProvider))))
-                .when(request -> isUserAuthenticated(), Route.empty()
-                        .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this, googleAuthProvider)))))
-                .transform(OAuth2Filter.create(googleAuthProvider, user -> {
-                    setUser(user);
-                    return Response.redirect("/user/signed-in");
-                }, error -> Response.node(new ErrorPage(error))));
-    }
-}
-```
-Inside the `LoginPage` class, the `googleAuthProvider` is used to create a login button that redirects the user to the
-Google's login page.
 
-```java
-public class LoginPage extends VBox {
-    
-    public LoginPage(GoogleAuthenticationProvider googleAuthProvider) {
-        Button loginButton = new Button("Login with Google");
-        googleProviderButton.setOnAction(event -> OAuth2Filter.authorize(loginButton, googleAuthProvider));
-        
-        getChildren().add(loginButton);
+        // Renders a "Sign in with Google" button that starts the OAuth2 flow.
+        var uiProvider = AuthUIProviders.createGoogle(googleAuthProvider, userSession);
+
+        return Route.empty()
+                .and(Route.get("/", request -> Response.node(uiProvider.createAuthenticationNode())))
+                .when(request -> userSession.isLoggedIn(), Route.empty()
+                        .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
+                .transform(AuthBasicOAuth2Filter.create(googleAuthProvider, userSession,
+                        user -> Response.redirect("/user/signed-in"),
+                        error -> Response.node(new ErrorPage(error))));
     }
 }
 ```
+
+The OAuth2 filter matches the provider's `redirectUri` (here `/auth/google`), exchanges the
+authorization code for tokens, stores the resulting `User` in the `UserSession`, and then runs
+your success/error callback.
 
 
 ### Launch the examples
