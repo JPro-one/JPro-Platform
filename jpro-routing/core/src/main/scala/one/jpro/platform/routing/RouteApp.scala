@@ -6,6 +6,7 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.stage.{Stage, StageStyle}
 import one.jpro.platform.routing.sessionmanager.SessionManager
+import org.jetbrains.annotations.Nullable
 import simplefx.core._
 import simplefx.all._
 import simplefx.experimental.FXFuture
@@ -29,7 +30,7 @@ abstract class RouteApp extends Application {
   def getSessionManager(): SessionManager = _sessionManager
   def getRouteNode(): RouteNode = routeNode
   /** Returns the WebAPI when running in the browser, or null on desktop. */
-  def getWebAPI(): WebAPI = if(WebAPI.isBrowser) WebAPI.getWebAPI(getStage()) else null
+  @Nullable def getWebAPI(): WebAPI = if(WebAPI.isBrowser) WebAPI.getWebAPI(getStage()) else null
 
   override def start(stage: Stage): Unit = {
     startFuture(stage)

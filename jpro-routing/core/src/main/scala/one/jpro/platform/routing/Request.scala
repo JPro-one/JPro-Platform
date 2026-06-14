@@ -4,6 +4,8 @@ import javafx.scene.Node
 import one.jpro.platform.routing.LinkUtil.isValidLink
 import org.slf4j.{Logger, LoggerFactory}
 
+import org.jetbrains.annotations.Nullable
+
 import java.lang.ref.WeakReference
 import java.net.URI
 import java.util.{Map => JMap, Optional}
@@ -32,9 +34,9 @@ case class Request (
   /** Returns the full URL this request was created from. */
   def getUrl(): String = url
   /** Returns the protocol, e.g. "http" — may be null for plain paths. */
-  def getProtocol(): String = protocol
+  @Nullable def getProtocol(): String = protocol
   /** Returns the domain, e.g. "example.com" — may be null for plain paths. */
-  def getDomain(): String = domain
+  @Nullable def getDomain(): String = domain
   /** Returns the port, or -1 when not specified. */
   def getPort(): Int = port
   /** Returns the path as requested, unaffected by {@code Route.path} mounting. */
@@ -54,12 +56,17 @@ case class Request (
     import scala.collection.JavaConverters._
     queryParameters.asJava
   }
+  /** Returns all query parameters as an immutable {@link java.util.Map}. */
   def getQueryParameters(): JMap[String,String] = immutableJavaMap
+  /** Returns a weak reference to the original previous content (before any {@link #mapContent}). */
   def getOriginalOldContent(): WeakReference[Node] = origOldContent
+  /** Returns a weak reference to the previous page's content node; the referent may be null. */
   def getOldContent(): WeakReference[Node] = oldContent
 
+  /** Scala variant of {@link #getQueryParameters}, returning a Scala {@code Map}. */
   def getQueryParametersScala(): Map[String,String] = queryParameters
 
+  /** Resolves a path (absolute or relative) against this request's mount directory. */
   def resolve(path: String): String = {
     assert(path.startsWith("/") || path.startsWith("./") || path.startsWith("../"), s"Path must start with / or ./ or ../ but was: ${path}")
 
@@ -74,6 +81,7 @@ case class Request (
     }
   }
 
+  /** Returns a copy of this request with the previous content mapped through {@code f}. */
   def mapContent(f: Node => Node) = {
     val oldContentV = oldContent.get()
     val oldContentVW = if(oldContentV eq null) {
@@ -90,10 +98,12 @@ object Request {
 
   private var wref_null = new WeakReference[Node](null)
 
+  /** Parses a request from a URL string, remembering {@code oldView} as the previous content. */
   def fromString(s: String, oldView: Node): Request = {
     val oldViewW = new WeakReference(oldView)
     Request.fromString(s).copy(oldContent = oldViewW, origOldContent = oldViewW)
   }
+  /** Parses a request from a URL string (path, query, and — for full URLs — protocol/host/port). */
   def fromString(s: String): Request = {
     try {
       if(!isValidLink(s)) {

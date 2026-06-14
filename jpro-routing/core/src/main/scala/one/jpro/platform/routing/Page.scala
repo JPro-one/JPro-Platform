@@ -1,15 +1,17 @@
 package one.jpro.platform.routing
 
 import one.jpro.platform.routing.sessionmanager.SessionManager
+import org.jetbrains.annotations.Nullable
 import simplefx.all
 import simplefx.all._
 
 object Page {
+  /** Wraps a plain JavaFX `Node` in a minimal [[Page]]. */
   def fromNode(node: javafx.scene.Node): Page = RouteUtils.pageFromNode(node)
 }
 abstract class Page extends ResponseResult { THIS =>
   /** The page title; used for the browser tab and for SEO. May be `null`. */
-  def title: String
+  @Nullable def title: String
   /** The page description; used for SEO and by the `AppCrawler`. */
   def description: String
   /** The URL this page was created for; set by the router. May be `null` before routing. */
@@ -19,7 +21,7 @@ abstract class Page extends ResponseResult { THIS =>
 
   private var sessionManager: SessionManager = null
   /** Returns the [[SessionManager]] for this page, or `null` if it has not been set yet. */
-  def getSessionManager(): SessionManager = sessionManager
+  @Nullable def getSessionManager(): SessionManager = sessionManager
   /** Sets the [[SessionManager]] for this page (normally called by the router). */
   def setSessionManager(x: SessionManager): Unit = {
     sessionManager = x
@@ -36,7 +38,7 @@ abstract class Page extends ResponseResult { THIS =>
   /** Called when the user navigates away from this page. Override to release resources. */
   def onClose(): Unit = {}
   /** The currently active sub-page, or `null` if there is none. */
-  def subPage(): Page = null
+  @Nullable def subPage(): Page = null
 
   override def toString: String = s"Page(title: $title, url: $url, description: $description)"
 

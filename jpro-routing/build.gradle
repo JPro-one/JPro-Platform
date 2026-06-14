@@ -33,6 +33,7 @@ configure([project(':jpro-routing:core')]) {
         api project(":jpro-scenegraph")
         api "SANDEC:simplefx-extended_2.13:$SIMPLEFX_VERSION"
         api "org.scala-lang:scala-library:2.13.18"
+        compileOnly "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     }
 
     publishing {

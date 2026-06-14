@@ -5,6 +5,7 @@ import one.jpro.jmemorybuddy.JMemoryBuddyLive
 import javafx.beans.property.{ObjectProperty, SimpleObjectProperty}
 import javafx.collections.{FXCollections, ObservableList}
 import one.jpro.platform.routing.{HistoryEntry, Request, Response, ResponseResult, RouteNode, SessionManagerContext, Page}
+import org.jetbrains.annotations.Nullable
 import org.slf4j.{Logger, LoggerFactory}
 import simplefx.all._
 import simplefx.core._
@@ -43,10 +44,10 @@ trait SessionManager { THIS =>
   @Bind var url: String = null
   @Bind var page: Page = null
 
-  /** Returns the currently shown page. */
-  def getPage(): Page = page
-  /** Returns the URL currently shown. */
-  def getURL(): String = url
+  /** Returns the currently shown page, or `null` before the first navigation. */
+  @Nullable def getPage(): Page = page
+  /** Returns the URL currently shown, or `null` before the first navigation. */
+  @Nullable def getURL(): String = url
 
   /** Navigates back in the history. */
   def goBack(): Unit
@@ -87,6 +88,7 @@ trait SessionManager { THIS =>
       gotoURL(url,true)
     }
   }
+  /** Navigates to the given URL, optionally without pushing a new history entry. */
   def gotoURL(url: String, pushState: Boolean = true): Response = {
     val url2 = SessionManager.mergeURLs(THIS.url, url)
     try {
@@ -108,11 +110,13 @@ trait SessionManager { THIS =>
   }
   def gotoURL(_url: String, x: ResponseResult, pushState: Boolean): Response
 
+  /** Builds a {@link Request} for the given URL, carrying the current page's content as the previous view. */
   def getRequest(url: String): Request = {
     val node = if(page == null) null else page.realContent
     Request.fromString(url, node)
   }
 
+  /** Performs the initial navigation for the application; called once by the router on startup. */
   def start(): Response
 
   def markPageCollectable(page: Page): Unit = {
