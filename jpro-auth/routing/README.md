@@ -58,12 +58,32 @@ Route.empty().and(publicRoutes).and(secret.transform(auth.requireLogin())).trans
 
 ## Options
 
-`RoutingAuth.config()` — login methods `.google` / `.oauth2` / `.usernamePassword` / `.dummy` /
-`.defaultUser`, then `.loginUrl` (`/login`), `.loginResponse`, `.loginRedirect` (`/`),
-`.sessionName` (`app`), `.onLogin`, `.onError`, `.build(app)`.
+Configure with `RoutingAuth.config()`:
 
-`RoutingAuth` — `filter()`, `requireLogin()`, `loginScreen()`,
-`getUser()` / `isLoggedIn()` / `logout()`, `userSession()`.
+| | |
+|---|---|
+| `.google(id, secret)` | "Sign in with Google" (add `redirectUri` as a 3rd arg to override) |
+| `.oauth2(provider)` | a generic OAuth2/OpenID provider you configured |
+| `.usernamePassword(userManager, roles…)` | a username/password form |
+| `.dummy(name, roles)` | one-click fake login — for testing |
+| `.defaultUser(name, roles)` · `.defaultUser(user)` | auto-login as a fixed user, no UI |
+| `.loginUrl(path)` | login page path — default `/login` |
+| `.loginResponse(r -> Response)` | what `/login` shows — default: the combined login screen |
+| `.loginRedirect(path)` | where to go after a successful login — default `/` |
+| `.sessionName(name)` | session-storage namespace — default `app` |
+| `.onLogin(user -> void)` | hook run after an interactive login |
+| `.onError(err -> Response)` | how to render a failed OAuth2 login |
+| `.build(app)` | materialize the config (call inside `createRoute()`) |
+
+The resulting `RoutingAuth`:
+
+| | |
+|---|---|
+| `filter()` | transform for the **whole** route — serves `/login` and handles login callbacks |
+| `requireLogin()` | transform for a route/sub-route — protects it (redirects to the login page) |
+| `loginScreen()` | the combined login UI node, for embedding in a custom login page |
+| `getUser()` · `isLoggedIn()` · `logout()` | current user state |
+| `userSession()` | the underlying `UserSession` |
 
 ## Under the hood
 
