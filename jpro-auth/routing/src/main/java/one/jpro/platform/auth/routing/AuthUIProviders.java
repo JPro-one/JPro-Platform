@@ -118,14 +118,24 @@ public class AuthUIProviders {
     }
 
     /**
-     * Combines multiple AuthUIProviders into a single AuthUIProvider.
+     * Combines multiple {@link AuthUIProvider}s into one, stacking their authentication
+     * nodes in a {@link VBox} and composing their filters. Lets an application offer
+     * several login methods (e.g. Google and basic) on the same page.
+     *
+     * @param providers the providers to combine
+     * @return a single provider that renders and filters all of them
      */
     public static AuthUIProvider combine(AuthUIProvider... providers) {
         return combine(() -> new VBox(), providers);
     }
 
     /**
+     * Combines multiple {@link AuthUIProvider}s into one, using the given pane as the
+     * layout for their authentication nodes and composing their filters.
      *
+     * @param paneSupplier supplies the pane that hosts the authentication nodes
+     * @param providers    the providers to combine
+     * @return a single provider that renders and filters all of them
      */
     public static AuthUIProvider combine(Supplier<Pane> paneSupplier, AuthUIProvider... providers) {
         return new AuthUIProvider() {

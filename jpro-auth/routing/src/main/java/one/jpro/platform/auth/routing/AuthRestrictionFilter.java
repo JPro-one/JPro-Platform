@@ -12,7 +12,6 @@ public class AuthRestrictionFilter {
                                                  @NotNull UserSession userSession) {
         var filter = routingAuthenticationProvider.createFilter();
         Transformer result1 = (route) -> (request) -> {
-            System.out.println("Got user: " + userSession.getUser());
             if (userSession.getUser() != null) {
                 return route.apply(request);
             } else {

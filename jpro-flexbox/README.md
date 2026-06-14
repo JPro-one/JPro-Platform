@@ -8,7 +8,7 @@ A CSS FlexBox layout implementation for JavaFX. All properties are styleable via
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-flexbox:0.6.0-SNAPSHOT")
+    implementation("one.jpro.platform:jpro-flexbox:0.7.1")
 }
 ```
 
@@ -18,7 +18,7 @@ dependencies {
 <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-flexbox</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.7.1</version>
 </dependency>
 ```
 

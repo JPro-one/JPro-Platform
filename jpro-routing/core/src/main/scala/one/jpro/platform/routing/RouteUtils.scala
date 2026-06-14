@@ -9,6 +9,12 @@ import java.util.function.Function
 
 object RouteUtils {
 
+  /**
+   * A [[Transformer]] that fades from the previous page to the new one over `seconds` seconds.
+   * Apply it with `route.transform(RouteUtils.transition(0.5))`.
+   *
+   * @param seconds duration of the fade
+   */
   def transition(seconds: Double): Transformer = route => { request => {
     Response(route.apply(request).future.map{
       case x: Page =>
@@ -29,6 +35,12 @@ object RouteUtils {
       case x => x
     })
   }}
+  /**
+   * A [[Transformer]] that slides the new page in from the side while the previous page slides
+   * out, over `seconds` seconds. Apply it with `route.transform(RouteUtils.sideTransition(0.5))`.
+   *
+   * @param seconds duration of the slide
+   */
   def sideTransition(seconds: Double): Transformer = route => { request => {
     Response(route.apply(request).future.map{
       case x: Page =>
@@ -59,6 +71,7 @@ object RouteUtils {
     })
   }}
 
+  /** Wraps a plain JavaFX `Node` in a minimal [[Page]] (no title, empty description). */
   def pageFromNode(x: Node): Page = new Page {
     override def title: String = null
     override def description: String = ""
