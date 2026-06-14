@@ -12,7 +12,7 @@ import one.jpro.platform.auth.example.basic.page.ErrorPage;
 import one.jpro.platform.auth.example.basic.page.LoginPage;
 import one.jpro.platform.auth.example.basic.page.SignedInPage;
 import one.jpro.platform.auth.example.oauth.OAuthApp;
-import one.jpro.platform.auth.routing.AuthBasicFilter;
+import one.jpro.platform.auth.routing.AuthBasicTransformer;
 import one.jpro.platform.auth.routing.AuthUIProvider;
 import one.jpro.platform.auth.routing.AuthUIProviders;
 import one.jpro.platform.auth.routing.UserSession;
@@ -95,7 +95,7 @@ public class BasicLoginApp extends RouteApp {
                 }))
                 .when(request -> isUserAuthenticated(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .transform(AuthBasicFilter.create(basicAuthProvider, credentials, user -> {
+                .transform(AuthBasicTransformer.create(basicAuthProvider, credentials, user -> {
                     userSession.setUser(user);
                     return Response.redirect("/user/signed-in");
                 }, error -> Response.node(new ErrorPage(error))))

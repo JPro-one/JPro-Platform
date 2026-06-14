@@ -19,7 +19,7 @@ import java.util.function.Function;
  *
  * @author Besmir Beqiri
  */
-public interface AuthBasicFilter {
+public interface AuthBasicTransformer {
 
     /**
      * Creates {@link Route} filter from a given {@link BasicAuthenticationProvider},

@@ -1,5 +1,13 @@
 # Changelog
 
+### 0.7.2 (unreleased)
+
+#### Features
+* `jpro-auth-routing`: Added `RoutingAuth`, a high-level entry point for adding Google / OAuth2 / username-password login to a `RouteApp`. One central, swappable configuration owns the session, builds the login UI, auto-serves the login page, and provides `requireLogin()` (gate a route or sub-route) and `install()` (wire in the login page + callbacks). Includes `dummy(...)` and `defaultUser(...)` for tests, local development and desktop "local user" setups. See the module README.
+
+#### Breaking
+* `jpro-auth-routing`: Renamed the route-transformer classes to match the routing `Transformer` vocabulary (reversing the 0.7.0 decision to keep the `Filter` name): `AuthBasicFilter` → `AuthBasicTransformer`, `AuthBasicOAuth2Filter` → `AuthBasicOAuth2Transformer`, `AuthRestrictionFilter` → `AuthRestrictionTransformer`, and `AuthUIProvider.createFilter()` → `createTransformer()`.
+
 ### 0.7.1 (June 14, 2026)
 
 #### Bugfixes

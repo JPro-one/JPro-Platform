@@ -24,5 +24,5 @@ public interface AuthUIProvider {
      *
      * @return a {@link Transformer} to apply to the application route
      */
-    Transformer createFilter();
+    Transformer createTransformer();
 }

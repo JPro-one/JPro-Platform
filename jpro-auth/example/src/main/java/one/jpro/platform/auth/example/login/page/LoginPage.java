@@ -4,7 +4,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
-import one.jpro.platform.auth.routing.AuthBasicOAuth2Filter;
+import one.jpro.platform.auth.routing.AuthBasicOAuth2Transformer;
 import one.jpro.platform.auth.routing.AuthUIProvider;
 
 import java.util.Optional;

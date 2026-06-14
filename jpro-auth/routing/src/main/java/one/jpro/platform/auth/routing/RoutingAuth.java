@@ -47,9 +47,9 @@ import java.util.function.Function;
  *         .build(this);
  *
  * return Route.empty()
- *         .and(Route.get("/login", r -> Response.node(auth.loginScreen())))
- *         .and(Route.get("/home",  r -> Response.node(new HomePage())))
- *         .transform(auth.requireLogin());
+ *         .and(Route.get("/home", r -> Response.node(new HomePage())))
+ *         .transform(auth.requireLogin())   // gate the route(s)
+ *         .transform(auth.install());       // serve /login + handle callbacks
  * }</pre>
  *
  * For a desktop local user, automated tests, or local development, swap the configuration:
@@ -90,13 +90,13 @@ public final class RoutingAuth {
 
     /**
      * The transform that wires auth into the app: it serves the login page at the configured
-     * {@code loginPage} path and handles the login callbacks (e.g. OAuth2 redirects). Apply it
-     * to the whole route (outermost). With this in place you don't need to declare a
-     * {@code /login} route yourself — adding auth to an existing app is just this transform
-     * plus {@link #requireLogin()} on the parts you want protected.
+     * {@code loginUrl} and handles the login callbacks (e.g. OAuth2 redirects). Apply it to the
+     * whole route (outermost). With this in place you don't need to declare a {@code /login}
+     * route yourself — adding auth to an existing app is just this transform plus
+     * {@link #requireLogin()} on the parts you want protected.
      */
-    public Transformer filter() {
-        Transformer callbacks = combined.createFilter();
+    public Transformer install() {
+        Transformer callbacks = combined.createTransformer();
         return route -> {
             Route inner = callbacks.apply(route);
             return request -> request.getPath().equals(loginUrl)
@@ -112,7 +112,7 @@ public final class RoutingAuth {
      *
      * <p>Apply it to the whole route to gate the entire app, or place a guarded sub-route
      * <em>after</em> your public routes (so they match first) to mix public and protected pages.
-     * Apply {@link #filter()} to the whole route as well, so login callbacks are always handled.</p>
+     * Apply {@link #install()} to the whole route as well, so login callbacks are always handled.</p>
      */
     public Transformer requireLogin() {
         return route -> request -> userSession.isLoggedIn()
@@ -166,7 +166,7 @@ public final class RoutingAuth {
         }
 
         /** The URL of the login page (default {@code "/login"}); {@link RoutingAuth#requireLogin()}
-         * redirects there and {@link RoutingAuth#filter()} serves it. */
+         * redirects there and {@link RoutingAuth#install()} serves it. */
         public Builder loginUrl(String path) {
             this.loginUrl = path;
             return this;
@@ -277,13 +277,13 @@ public final class RoutingAuth {
                 @Override
                 public Node createAuthenticationNode() {
                     Button b = button.get();
-                    b.setOnAction(e -> AuthBasicOAuth2Filter.authorize(b, provider));
+                    b.setOnAction(e -> AuthBasicOAuth2Transformer.authorize(b, provider));
                     return b;
                 }
 
                 @Override
-                public Transformer createFilter() {
-                    return AuthBasicOAuth2Filter.create(provider, session, user -> {
+                public Transformer createTransformer() {
+                    return AuthBasicOAuth2Transformer.create(provider, session, user -> {
                         onLogin.accept(user);
                         return Response.redirect(loginRedirect);
                     }, onError);
@@ -320,7 +320,7 @@ public final class RoutingAuth {
                 }
 
                 @Override
-                public Transformer createFilter() {
+                public Transformer createTransformer() {
                     return Transformer.empty();
                 }
             };

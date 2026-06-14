@@ -6,7 +6,7 @@ import javafx.collections.ObservableMap;
 import one.jpro.platform.auth.core.AuthAPI;
 import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import one.jpro.platform.auth.example.oauth.page.*;
-import one.jpro.platform.auth.routing.AuthBasicOAuth2Filter;
+import one.jpro.platform.auth.routing.AuthBasicOAuth2Transformer;
 import one.jpro.platform.auth.routing.UserSession;
 import one.jpro.platform.routing.Transformer;
 import one.jpro.platform.routing.Response;
@@ -105,7 +105,7 @@ public class OAuthApp extends BaseOAuthApp {
      * @return A {@link Transformer} object configured for OAuth2 authentication flow.
      */
     private Transformer oauth2Filter(OpenIDAuthenticationProvider openIDAuthProvider) {
-        return AuthBasicOAuth2Filter.create(openIDAuthProvider, userSession, user -> {
+        return AuthBasicOAuth2Transformer.create(openIDAuthProvider, userSession, user -> {
             setAuthProvider(openIDAuthProvider);
             return Response.redirect(USER_CONSOLE_PATH);
         }, error -> {

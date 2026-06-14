@@ -54,7 +54,7 @@ public class RoutingAuthExample extends RouteApp {
         return Route.empty()
                 .and(Route.get("/", request -> Response.node(publicHome())))
                 .and(protectedRoutes)
-                .transform(auth.filter());  // serves /login + handles callbacks (no /login route needed)
+                .transform(auth.install());  // serves /login + handles callbacks (no /login route needed)
     }
 
     private Node publicHome() {

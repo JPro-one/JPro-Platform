@@ -3,7 +3,7 @@ package one.jpro.platform.auth.example.basic.page;
 import one.jpro.platform.auth.core.basic.LoginPane;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
-import one.jpro.platform.auth.routing.AuthBasicFilter;
+import one.jpro.platform.auth.routing.AuthBasicTransformer;
 import one.jpro.platform.auth.routing.AuthUIProvider;
 
 /**

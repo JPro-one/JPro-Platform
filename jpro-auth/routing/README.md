@@ -25,12 +25,12 @@ public class MyApp extends RouteApp {
                 .and(Route.get("/", r -> Response.node(new PublicHome())))        // public
                 .and(Route.get("/home", r -> Response.node(new Home(auth.getUser())))
                         .transform(auth.requireLogin()))                          // protected
-                .transform(auth.filter());   // serves /login + handles login callbacks
+                .transform(auth.install());   // serves /login + handles login callbacks
     }
 }
 ```
 
-One method per login option, `requireLogin()` on what to protect, `filter()` on the whole route —
+One method per login option, `requireLogin()` on what to protect, `install()` on the whole route —
 and `/login` is served for you. That's the whole integration; everything below is just variations.
 
 > Build inside `createRoute()` (OAuth2 needs the started `Stage`), and keep `auth` in a field so
@@ -40,7 +40,7 @@ and `/login` is served for you. That's the whole integration; everything below i
 
 **Mix public and protected** — place guarded routes *after* public ones (`and` tries earlier routes first):
 ```java
-Route.empty().and(publicRoutes).and(secret.transform(auth.requireLogin())).transform(auth.filter());
+Route.empty().and(publicRoutes).and(secret.transform(auth.requireLogin())).transform(auth.install());
 ```
 
 **Customize the login page** — `loginResponse` decides what `/login` shows; reuse the built-in buttons via `auth.loginScreen()`:
@@ -79,7 +79,7 @@ The resulting `RoutingAuth`:
 
 | | |
 |---|---|
-| `filter()` | transform for the **whole** route — serves `/login` and handles login callbacks |
+| `install()` | transform for the **whole** route — serves `/login` and handles login callbacks |
 | `requireLogin()` | transform for a route/sub-route — protects it (redirects to the login page) |
 | `loginScreen()` | the combined login UI node, for embedding in a custom login page |
 | `getUser()` · `isLoggedIn()` · `logout()` | current user state |
@@ -89,7 +89,7 @@ The resulting `RoutingAuth`:
 
 `RoutingAuth` is a thin facade over `UserSession`, `AuthUIProviders`
 (`createGoogle` / `createOAuth2` / `createBasicProvider` / `dummy` / `combine`) and the filters
-`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`. Use those directly for finer
+`AuthBasicTransformer`, `AuthBasicOAuth2Transformer`, `AuthRestrictionTransformer`. Use those directly for finer
 control — see the Javadoc and the [`jpro-auth-core` README](../README.md).
 
 ## Try it
