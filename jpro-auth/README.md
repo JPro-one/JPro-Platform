@@ -167,17 +167,32 @@ so there is no need to add it explicitly.
     ```
   
 ### Combined with the Routing API
-Adding the `jpro-auth-routing` dependency lets you wire authentication into a `RouteApp` with a
-single route filter. The module provides:
+Adding the `jpro-auth-routing` dependency lets you wire authentication into a `RouteApp`.
+
+The easiest way is **`RoutingAuth`** — a single, central configuration that declares your login
+methods and produces the login UI, the login page and the route transformers:
+
+```java
+RoutingAuth auth = RoutingAuth.config()
+        .google(CLIENT_ID, CLIENT_SECRET)
+        .usernamePassword(userManager)
+        .build(this);
+
+return Route.empty()
+        .and(protectedRoutes.transform(auth.requireLogin()))
+        .transform(auth.install());   // serves /login + handles callbacks
+```
+
+See the [`jpro-auth-routing` README](routing/README.md) for the full guide (it also covers dummy /
+desktop "local user" logins). The lower-level building blocks below are what `RoutingAuth` is built
+on, for when you need finer control:
 
 - `UserSession` — stores the logged-in `User` in the JPro session.
-- `AuthUIProviders` — factories for the login UI (`createGoogle`, `createOAuth2`, `createBasicProvider`, `combine`).
-- `AuthBasicFilter` — route filter for username/password authentication.
-- `AuthBasicOAuth2Filter` — route filter for OAuth2/OpenID authentication.
+- `AuthUIProviders` — factories for the login UI (`createGoogle`, `createOAuth2`, `createBasicProvider`, `dummy`, `combine`).
+- `AuthBasicTransformer` — route transformer for username/password authentication.
+- `AuthBasicOAuth2Transformer` — route transformer for OAuth2/OpenID authentication.
 
-> The full reference for these classes lives in the [`jpro-auth-routing` README](routing/README.md).
-
-**Username/password** with `BasicAuthenticationProvider` and `AuthBasicFilter`:
+**Username/password** with `BasicAuthenticationProvider` and `AuthBasicTransformer`:
 
 ```java
 public class BasicLoginApp extends RouteApp {
@@ -205,7 +220,7 @@ public class BasicLoginApp extends RouteApp {
                         : Response.node(authUIProvider.createAuthenticationNode())))
                 .when(request -> userSession.isLoggedIn(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .transform(AuthBasicFilter.create(basicAuthProvider, credentials,
+                .transform(AuthBasicTransformer.create(basicAuthProvider, credentials,
                         user -> {
                             userSession.setUser(user);
                             return Response.redirect("/user/signed-in");
@@ -215,7 +230,7 @@ public class BasicLoginApp extends RouteApp {
 }
 ```
 
-**OAuth2 (Google)** with `AuthUIProviders.createGoogle` and `AuthBasicOAuth2Filter`:
+**OAuth2 (Google)** with `AuthUIProviders.createGoogle` and `AuthBasicOAuth2Transformer`:
 
 ```java
 public class GoogleLoginApp extends RouteApp {
@@ -242,7 +257,7 @@ public class GoogleLoginApp extends RouteApp {
                 .and(Route.get("/", request -> Response.node(uiProvider.createAuthenticationNode())))
                 .when(request -> userSession.isLoggedIn(), Route.empty()
                         .and(Route.get("/user/signed-in", request -> Response.node(new SignedInPage(this)))))
-                .transform(AuthBasicOAuth2Filter.create(googleAuthProvider, userSession,
+                .transform(AuthBasicOAuth2Transformer.create(googleAuthProvider, userSession,
                         user -> Response.redirect("/user/signed-in"),
                         error -> Response.node(new ErrorPage(error))));
     }

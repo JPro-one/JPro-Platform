@@ -4,13 +4,13 @@ import one.jpro.platform.routing.Transformer;
 import one.jpro.platform.routing.Response;
 import org.jetbrains.annotations.NotNull;
 
-public class AuthRestrictionFilter {
+public class AuthRestrictionTransformer {
     /**
      * This makes the whole UI only accessible to authenticated users.
      */
     public static Transformer create(AuthUIProvider routingAuthenticationProvider,
                                                  @NotNull UserSession userSession) {
-        var filter = routingAuthenticationProvider.createFilter();
+        var filter = routingAuthenticationProvider.createTransformer();
         Transformer result1 = (route) -> (request) -> {
             if (userSession.getUser() != null) {
                 return route.apply(request);

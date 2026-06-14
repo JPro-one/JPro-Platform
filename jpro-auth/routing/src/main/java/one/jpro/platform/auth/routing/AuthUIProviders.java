@@ -50,13 +50,13 @@ public class AuthUIProviders {
             @Override
             public Node createAuthenticationNode() {
                 var button = createButton.get();
-                button.setOnAction(event -> AuthBasicOAuth2Filter.authorize(button, openidAuthProvider));
+                button.setOnAction(event -> AuthBasicOAuth2Transformer.authorize(button, openidAuthProvider));
                 return button;
             }
 
             @Override
-            public Transformer createFilter() {
-                return AuthBasicOAuth2Filter.create(openidAuthProvider, userSession,
+            public Transformer createTransformer() {
+                return AuthBasicOAuth2Transformer.create(openidAuthProvider, userSession,
                         user -> Response.redirect("/"), // That's ok, let the app handle it.
                         err -> {throw new RuntimeException(err);});
             }
@@ -112,7 +112,7 @@ public class AuthUIProviders {
             }
 
             @Override
-            public Transformer createFilter() {
+            public Transformer createTransformer() {
                 return Transformer.empty();
             }
         };
@@ -153,7 +153,7 @@ public class AuthUIProviders {
             }
 
             @Override
-            public Transformer createFilter() {
+            public Transformer createTransformer() {
                 return Transformer.empty();
             }
         };
@@ -191,9 +191,9 @@ public class AuthUIProviders {
             }
 
             @Override
-            public Transformer createFilter() {
+            public Transformer createTransformer() {
                 return Arrays.stream(providers)
-                        .map(AuthUIProvider::createFilter)
+                        .map(AuthUIProvider::createTransformer)
                         .reduce(Transformer::compose).orElse(Transformer.empty());
             }
         };
