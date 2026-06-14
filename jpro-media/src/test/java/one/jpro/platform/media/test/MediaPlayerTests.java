@@ -49,6 +49,10 @@ public class MediaPlayerTests {
     // Seeking snaps to the nearest decodable frame, so current time lands within ~1 frame (~33 ms at 30 fps) of the request.
     private static final double SEEK_TOLERANCE_MS = 50.0;
 
+    // When the player keeps playing across the position check, current time drifts forward past the
+    // seek target during the wait (timing-dependent); bound that forward drift generously.
+    private static final double PLAYBACK_DRIFT_TOLERANCE_MS = 1000.0;
+
     private static final String MEDIA_SOURCE = System.getProperty("MEDIA_MP4_TEST_URL");
     private MediaPlayer mediaPlayer;
     private MediaView mediaView;
@@ -336,7 +340,7 @@ public class MediaPlayerTests {
         mediaPlayer.seek(seekTime);
         WaitForAsyncUtils.waitForFxEvents();
         log.debug("Check current time is {} seconds", seekTime.toSeconds());
-        assertCurrentTimeCloseTo(seekTime);
+        assertCurrentTimeAfterSeekWhilePlaying(seekTime);
         log.debug("Run additional checks...");
         assertThat(playButton.isDisable()).isTrue();
         assertThat(pauseButton.isDisable()).isFalse();
@@ -593,6 +597,15 @@ public class MediaPlayerTests {
     private void assertCurrentTimeCloseTo(Duration expectedTime) {
         assertThat(mediaPlayer.getCurrentTime().toMillis())
                 .isCloseTo(expectedTime.toMillis(), within(SEEK_TOLERANCE_MS));
+    }
+
+    // Position check for a seek performed while the player keeps playing: current time lands at the
+    // target (within one frame) and may have advanced forward by the time we read it, so allow drift.
+    private void assertCurrentTimeAfterSeekWhilePlaying(Duration expectedTime) {
+        final double actualMs = mediaPlayer.getCurrentTime().toMillis();
+        final double targetMs = expectedTime.toMillis();
+        assertThat(actualMs).isGreaterThanOrEqualTo(targetMs - SEEK_TOLERANCE_MS);
+        assertThat(actualMs).isLessThanOrEqualTo(targetMs + PLAYBACK_DRIFT_TOLERANCE_MS);
     }
 
     private void waitForStatus(Status status) throws TimeoutException {
