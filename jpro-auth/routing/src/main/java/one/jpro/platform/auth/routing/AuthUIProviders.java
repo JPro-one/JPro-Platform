@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.basic.LoginPane;
 import one.jpro.platform.auth.core.basic.UsernamePasswordCredentials;
 import one.jpro.platform.auth.core.basic.provider.BasicAuthenticationProvider;
@@ -108,6 +109,47 @@ public class AuthUIProviders {
                         loginAction.run();
                     });
                 }};
+            }
+
+            @Override
+            public Transformer createFilter() {
+                return Transformer.empty();
+            }
+        };
+    }
+
+    /**
+     * Creates a fake one-click login as the given user — for local testing or automated tests.
+     * After login it navigates to {@code "/"}.
+     *
+     * @param user        the user to log in as
+     * @param userSession the user session to store the user in
+     * @return an AuthUIProvider that logs in the given user when its button is clicked
+     */
+    public static AuthUIProvider dummy(@NotNull User user, @NotNull UserSession userSession) {
+        return dummy(user, userSession, "/");
+    }
+
+    /**
+     * Creates a fake one-click login as the given user, navigating to {@code redirectUrl}
+     * after login — for local testing or automated tests.
+     *
+     * @param user        the user to log in as
+     * @param userSession the user session to store the user in
+     * @param redirectUrl where to navigate after the fake login
+     * @return an AuthUIProvider that logs in the given user when its button is clicked
+     */
+    public static AuthUIProvider dummy(@NotNull User user, @NotNull UserSession userSession,
+                                       @NotNull String redirectUrl) {
+        return new AuthUIProvider() {
+            @Override
+            public Node createAuthenticationNode() {
+                var button = new Button("Login as " + user.getName());
+                button.setOnAction(event -> {
+                    userSession.setUser(user);
+                    LinkUtil.getSessionManager(button).gotoURL(redirectUrl);
+                });
+                return button;
             }
 
             @Override
