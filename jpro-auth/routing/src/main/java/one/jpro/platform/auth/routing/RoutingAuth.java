@@ -36,7 +36,8 @@ import java.util.function.Function;
  * <p>Declare the login methods you want, then bind to the app. The result owns the user
  * session, builds a combined login UI, and produces the route filter — so adding Google,
  * generic OAuth2 or username/password login is a single call each, configured in one place
- * that is easy to swap for tests (see {@code dummy(...)} / {@code dummyAutoLogin(...)}).</p>
+ * that is easy to swap for tests or a desktop local user (see {@code dummy(...)} /
+ * {@code defaultUser(...)}).</p>
  *
  * <pre>{@code
  * RoutingAuth auth = RoutingAuth.config()
@@ -51,14 +52,14 @@ import java.util.function.Function;
  *         .transform(auth.requireLogin());
  * }</pre>
  *
- * For local testing or automated tests, swap the configuration:
+ * For a desktop local user, automated tests, or local development, swap the configuration:
  * <pre>{@code
  * RoutingAuth auth = RoutingAuth.config()
  *         .dummy("tester", Set.of("USER"))   // one-click fake login
  *         .build(this);
- * // or, fully headless (already authenticated, no UI):
+ * // or, already signed in with no UI (desktop "local user" / headless tests):
  * RoutingAuth auth = RoutingAuth.config()
- *         .dummyAutoLogin(new User("tester", Set.of("USER")))
+ *         .defaultUser("localuser", Set.of("USER"))
  *         .build(this);
  * }</pre>
  */
@@ -234,10 +235,19 @@ public final class RoutingAuth {
             return this;
         }
 
-        /** Logs in as the given user immediately and without any UI — for automated tests. */
-        public Builder dummyAutoLogin(User user) {
+        /**
+         * Logs in as the given user immediately and without any UI. Useful for a desktop
+         * "local user" (e.g. always signed in as {@code localuser} on desktop, real login on
+         * the web) or for headless automated tests.
+         */
+        public Builder defaultUser(User user) {
             this.autoLoginUser = user;
             return this;
+        }
+
+        /** Convenience for {@link #defaultUser(User)} with a name and roles. */
+        public Builder defaultUser(String name, Set<String> roles) {
+            return defaultUser(new User(name, roles));
         }
 
         /** Materializes the configuration against the running application. */
