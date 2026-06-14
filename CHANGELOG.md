@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.7.1 (June 14, 2026)
+
+#### Bugfixes
+* Updated SimpleFX to 3.3.3, fixing Maven dependency resolution. 0.7.0 failed for Maven consumers because the SimpleFX umbrella was a JAR used as a Maven `<parent>`, which dropped the transitive simplefx modules; `jpro-routing` and `jpro-dynamic-css` now depend on `simplefx-extended`.
+
 ### 0.7.0 (June 13, 2026)
 
 #### Features

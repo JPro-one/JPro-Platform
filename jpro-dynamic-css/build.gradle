@@ -15,7 +15,7 @@ buildscript {
 apply plugin: 'de.sandec.simplefx'
 
 dependencies {
-    api "SANDEC:simplefx_2.13:$SIMPLEFX_VERSION"
+    api "SANDEC:simplefx-extended_2.13:$SIMPLEFX_VERSION"
     api "org.scala-lang:scala-library:2.13.18"
 }
 
