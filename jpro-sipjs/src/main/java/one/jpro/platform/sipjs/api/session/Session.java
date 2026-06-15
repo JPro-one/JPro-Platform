@@ -70,7 +70,7 @@ public class Session {
      * @param stream
      */
     public void switchToStream(MediaStream stream) {
-        stream.js.thenAccept(js -> {
+        stream.js().thenAccept(js -> {
             webapi.js().eval("var videoTrack = "+js.getName()+".getVideoTracks()[0];\n" +
                     "var sender = "+session.getName()+".sessionDescriptionHandler.peerConnection.getSenders().find(function(s) {\n" +
                     "  return s.track.kind == videoTrack.kind;\n" +

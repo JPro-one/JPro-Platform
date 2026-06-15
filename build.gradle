@@ -42,7 +42,8 @@ def subprojectsWithDocs = [
         "jpro-session",
         "jpro-html-scrollpane",
         "jpro-youtube",
-        "jpro-utils"
+        "jpro-utils",
+        "jpro-webrtc"
 ]
 
 tasks.register('combineDocumentationFull') {

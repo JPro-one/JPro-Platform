@@ -51,16 +51,16 @@ public class VideoRoom {
         var video1 = new VideoFrame(webAPI1);
         var video2 = new VideoFrame(webAPI2);
 
-        rtc1.tracks.addListener((ListChangeListener<? super JSVariable>) change -> {
-            System.out.println("tracks size for user 1: " + rtc1.tracks.size());
+        rtc1.getTracks().addListener((ListChangeListener<? super JSVariable>) change -> {
+            System.out.println("tracks size for user 1: " + rtc1.getTracks().size());
             while(change.next()) {
                 if(change.wasAdded()) {
                     video1.setStream(change.getAddedSubList().get(0));
                 }
             }
         });
-        rtc2.tracks.addListener((ListChangeListener<? super JSVariable>)  change -> {
-            System.out.println("tracks size for user 2: " + rtc2.tracks.size());
+        rtc2.getTracks().addListener((ListChangeListener<? super JSVariable>)  change -> {
+            System.out.println("tracks size for user 2: " + rtc2.getTracks().size());
             while(change.next()) {
                 if(change.wasAdded()) {
                     video2.setStream(change.getAddedSubList().get(0));
@@ -72,7 +72,7 @@ public class VideoRoom {
             try {
                 //rtc1.removeAllTracks();
                 rtc1.removeStream(oldValue);
-                newValue.js.thenAccept(stream -> {
+                newValue.js().thenAccept(stream -> {
                     rtc1.addStream(stream);
                 });
             } catch (Exception e) {
@@ -83,17 +83,17 @@ public class VideoRoom {
             try {
                 //rtc2.removeAllTracks();
                 rtc2.removeStream(oldValue);
-                newValue.js.thenAccept(stream -> {
+                newValue.js().thenAccept(stream -> {
                     rtc2.addStream(stream);
                 });
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        var f1 = user1.mediaStream.get().js.thenAccept(stream -> {
+        var f1 = user1.mediaStream.get().js().thenAccept(stream -> {
             rtc1.addStream(stream);
         });
-        var f2 = user2.mediaStream.get().js.thenAccept(stream -> {
+        var f2 = user2.mediaStream.get().js().thenAccept(stream -> {
             rtc2.addStream(stream);
         });
 

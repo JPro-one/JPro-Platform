@@ -149,7 +149,7 @@ public class User extends VBox {
             isScreenSharing = !isScreenSharing;
             var stream = isScreenSharing ? MediaStream.getScreenStream(webapi)
                     : MediaStream.getCameraStream(webapi);
-            stream.js.exceptionally(e -> {
+            stream.js().exceptionally(e -> {
                 System.out.println("Error getting video stream");
                 e.printStackTrace();
                 return null;
