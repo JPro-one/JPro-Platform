@@ -161,17 +161,22 @@ Files go to `build/playwright-screenshots/` (override with `-Djpro.test.screensh
 
 ## Installing the browser
 
-Playwright drives a real Chromium that must be installed once per project. Add an install task and run it before the tests:
+Playwright drives a real Chromium that must be installed once per project. Add an install task and make `test` depend on it, so CI provisions the browser with no separate step:
 
 ```groovy
 tasks.register('installPlaywright', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.microsoft.playwright.CLI'
-    args = ['install', '--with-deps', 'chromium']
+    args = ['install', '--with-deps', 'chromium']   // --with-deps installs Linux system libs (CI)
+}
+
+test {
+    dependsOn 'installPlaywright'
+    environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'   // already provisioned; don't re-download
 }
 ```
 
-Set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` on the `test` task so it won't auto-download mid-run. Pass `-Djpro.test.headless=false` to watch the browser (read by `JProPlaywrightTest`).
+Pass `-Djpro.test.headless=false` to watch the browser (read by `JProPlaywrightTest`).
 
 ## Gotchas
 

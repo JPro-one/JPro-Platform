@@ -7,18 +7,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    // Ensure the Chromium the Playwright tests drive is installed first (CI has no separate step).
+    dependsOn 'installPlaywright'
     // Forward an explicit port override; otherwise JProPlaywrightTest picks a free port.
     if (System.getProperty('jpro.test.port') != null) {
         systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
     }
-    // The Playwright tests start the :jpro-playwright:example JPro server via Gradle and
-    // drive a real browser, so they need a Chromium installed once via installPlaywright.
-    // Don't let Playwright download browsers during the test run itself.
+    // installPlaywright already provisioned the browser — don't re-download during the run.
     environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
 }
 
-// Installs the Chromium build Playwright drives. Run once before the tests:
-//   ./gradlew :jpro-playwright:installPlaywright && ./gradlew :jpro-playwright:test
+// Installs the Chromium build Playwright drives (with system deps, as CI needs them).
 tasks.register('installPlaywright', JavaExec) {
     group = 'verification'
     description = 'Install the Chromium browser used by the Playwright tests'
