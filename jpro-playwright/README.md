@@ -156,23 +156,17 @@ errors.assertNoErrors();
 
 Capture what the app actually looks like — invaluable when a selector or assertion fails, since the tests run headless.
 
-`JProPlaywrightTest` provides a helper that writes a full-page PNG and logs its absolute path:
+`JProPlaywrightTest` provides two overloads that write a PNG and log its absolute path. The two standard cases:
 
 ```java
-screenshot(page, "after-typing");   // -> build/playwright-screenshots/after-typing.png
+// Full app (whole page)
+screenshot(page, "after-typing");                          // -> build/playwright-screenshots/after-typing.png
+
+// A single element, by id
+screenshot(page.locator("#jpro-textfield"), "field");      // -> build/playwright-screenshots/field.png
 ```
 
-It is most useful in a `catch`/teardown block, to snapshot the failure state. Override the output directory with `-Djpro.test.screenshotDir=...`.
-
-Or use the Playwright API directly — for the full page or a single element:
-
-```java
-page.screenshot(new Page.ScreenshotOptions()
-        .setPath(Paths.get("build/page.png")).setFullPage(true));
-
-page.locator("#jpro-textfield").screenshot(
-        new Locator.ScreenshotOptions().setPath(Paths.get("build/field.png")));
-```
+They are most useful in a `catch`/teardown block, to snapshot the failure state. Override the output directory with `-Djpro.test.screenshotDir=...`. Both return the absolute path; the underlying Playwright `Page.screenshot` / `Locator.screenshot` are still available if you need options like clipping or quality.
 
 ## Installing the browser
 
