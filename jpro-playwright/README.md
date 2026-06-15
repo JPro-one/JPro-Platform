@@ -4,6 +4,29 @@ Utilities and conventions for writing [Playwright](https://playwright.dev/java/)
 
 JPro renders a JavaFX scene graph into the browser and relays events back to the JVM over a WebSocket. That round-trip, plus the fact that JavaFX controls are not native DOM elements, makes a handful of things non-obvious — especially keyboard input. This module captures the working patterns as reusable helpers and documents the rules an agent or developer needs to avoid getting stuck.
 
+## Dependency
+
+It is a test-only library — add it to your test configuration (it brings Playwright and JUnit 5 transitively).
+
+Gradle:
+
+```groovy
+dependencies {
+    testImplementation("one.jpro.platform:jpro-playwright:0.7.1")
+}
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-playwright</artifactId>
+    <version>0.7.1</version>
+    <scope>test</scope>
+</dependency>
+```
+
 ## Quick start
 
 A test extends `JProPlaywrightTest`, starts the app's JPro server, and drives it with Playwright.
