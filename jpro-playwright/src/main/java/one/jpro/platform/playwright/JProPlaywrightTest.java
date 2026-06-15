@@ -15,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -73,6 +74,21 @@ public abstract class JProPlaywrightTest {
     /** Repository root (directory containing {@code gradlew}). */
     protected static File projectRoot() {
         return PROJECT_ROOT;
+    }
+
+    /**
+     * Capture a full-page PNG of {@code page} and return its absolute path (also logged). Since
+     * tests run headless, this is usually the only way to actually look at the rendered app —
+     * call it in a {@code catch}/teardown to snapshot a failure. The directory defaults to
+     * {@code build/playwright-screenshots} and is overridable with {@code -Djpro.test.screenshotDir}.
+     */
+    protected static Path screenshot(Page page, String name) {
+        String dir = System.getProperty("jpro.test.screenshotDir", "build/playwright-screenshots");
+        Path path = Path.of(dir, name + ".png");
+        page.screenshot(new Page.ScreenshotOptions().setPath(path).setFullPage(true));
+        Path absolute = path.toAbsolutePath();
+        System.out.println("[jpro-screenshot] " + absolute);
+        return absolute;
     }
 
     /** Wait for the {@code jpro-app} element to report {@code data-status="running"}. */

@@ -152,6 +152,28 @@ BrowserErrorCollector errors = new BrowserErrorCollector(page);
 errors.assertNoErrors();
 ```
 
+## Taking screenshots
+
+Capture what the app actually looks like — invaluable when a selector or assertion fails, since the tests run headless.
+
+`JProPlaywrightTest` provides a helper that writes a full-page PNG and logs its absolute path:
+
+```java
+screenshot(page, "after-typing");   // -> build/playwright-screenshots/after-typing.png
+```
+
+It is most useful in a `catch`/teardown block, to snapshot the failure state. Override the output directory with `-Djpro.test.screenshotDir=...`.
+
+Or use the Playwright API directly — for the full page or a single element:
+
+```java
+page.screenshot(new Page.ScreenshotOptions()
+        .setPath(Paths.get("build/page.png")).setFullPage(true));
+
+page.locator("#jpro-textfield").screenshot(
+        new Locator.ScreenshotOptions().setPath(Paths.get("build/field.png")));
+```
+
 ## Installing the browser
 
 Playwright drives a real Chromium, which must be installed once in any project that runs these tests.
