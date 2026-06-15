@@ -129,16 +129,21 @@ BrowserErrorCollector errors = new BrowserErrorCollector(page);
 errors.assertNoErrors();
 ```
 
-## Running the tests
+## Installing the browser
 
-The Playwright tests drive a real Chromium, which must be installed once.
+Playwright drives a real Chromium, which must be installed once in any project that runs these tests.
 
-```bash
-./gradlew :jpro-playwright:installPlaywright   # one-time: downloads Chromium + system deps
-./gradlew :jpro-playwright:test                # starts the example app and runs the tests
+Add an install task to your build and run it before the tests (CI included):
+
+```groovy
+tasks.register('installPlaywright', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args = ['install', '--with-deps', 'chromium']
+}
 ```
 
-The test JVM does not auto-download browsers (`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`); run `installPlaywright` first. Pass `-Djpro.test.headless=false` to watch the browser.
+To stop the test JVM from auto-downloading a browser mid-run, set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` on the `test` task and rely on the install step above. Pass `-Djpro.test.headless=false` to watch the browser while debugging (read by `JProPlaywrightTest`).
 
 ## Gotchas and pitfalls
 

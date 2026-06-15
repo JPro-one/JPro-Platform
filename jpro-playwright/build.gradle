@@ -17,8 +17,8 @@ test {
     environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
 }
 
-// Installs the Chromium build Playwright drives. Run once before -PrunPlaywrightTests:
-//   ./gradlew :jpro-playwright:installPlaywright
+// Installs the Chromium build Playwright drives. Run once before the tests:
+//   ./gradlew :jpro-playwright:installPlaywright && ./gradlew :jpro-playwright:test
 tasks.register('installPlaywright', JavaExec) {
     group = 'verification'
     description = 'Install the Chromium browser used by the Playwright tests'
