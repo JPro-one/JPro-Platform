@@ -1,0 +1,25 @@
+plugins {
+    id 'org.openjfx.javafxplugin'
+    id 'jpro-gradle-plugin'
+}
+
+dependencies {
+    implementation project(":jpro-routing:core")
+    runtimeOnly "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+}
+
+javafx {
+    version = "$JAVAFX_EXAMPLES_VERSION"
+    configurations = ["implementation"]
+    modules = ['javafx.graphics', 'javafx.controls']
+}
+
+application {
+    mainClass = 'one.jpro.platform.playwright.testapp.Main'
+}
+
+jpro {
+    // Playwright tests pass -Pjpro.test.port; fall back to 8080 for manual `jproRun`.
+    port = project.hasProperty('jpro.test.port') ? project.property('jpro.test.port') as int : 8080
+    openURLOnStartup = false
+}

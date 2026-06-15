@@ -1,0 +1,54 @@
+dependencies {
+    // Playwright is the core of this module's public API.
+    api "com.microsoft.playwright:playwright:$PLAYWRIGHT_VERSION"
+    // The base test class and helpers expose JUnit 5 (annotations / assertions).
+    api "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+}
+
+test {
+    useJUnitPlatform()
+    // Forward an explicit port override; otherwise JProPlaywrightTest picks a free port.
+    if (System.getProperty('jpro.test.port') != null) {
+        systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
+    }
+    // The Playwright tests start the :jpro-playwright:example JPro server via Gradle and
+    // drive a real browser, so they need a Chromium installed once via installPlaywright.
+    // Don't let Playwright download browsers during the test run itself.
+    environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
+}
+
+// Installs the Chromium build Playwright drives. Run once before -PrunPlaywrightTests:
+//   ./gradlew :jpro-playwright:installPlaywright
+tasks.register('installPlaywright', JavaExec) {
+    group = 'verification'
+    description = 'Install the Chromium browser used by the Playwright tests'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args = ['install', '--with-deps', 'chromium']
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // Add README.md as an artifact named DOCUMENTATION.md (picked up by ai-docs).
+            artifact(source: file('build/docs/DOCUMENTATION.md')) {
+                classifier 'DOCUMENTATION'
+                extension 'md'
+            }
+
+            pom {
+                name = 'JPro Playwright'
+                description = 'Utilities and conventions for writing Playwright end-to-end tests ' +
+                        'against JPro/JavaFX applications running in the browser.'
+            }
+        }
+    }
+}
+
+tasks.register('renameReadme', Copy) {
+    from 'README.md'
+    into layout.buildDirectory.dir('docs')
+    rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
