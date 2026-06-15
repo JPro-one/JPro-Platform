@@ -30,10 +30,10 @@ import java.util.concurrent.TimeUnit;
  *   <li>A shared headless Chromium ({@link #setupBrowser()} / {@link #teardownBrowser()}).</li>
  *   <li>A {@link #PORT} (from {@code -Djpro.test.port} or a free port in 9100–9200) and the
  *       derived {@link #BASE_URL}.</li>
- *   <li>{@link #startServer(String, String...)} / {@link #stopServer(String)} that launch and
- *       stop a JPro server via its Gradle {@code jproStart} / {@code jproStop} tasks, and
- *       {@link #stopAndAssertNoServerErrors(String, File)} that also fails the test on any
- *       exception in the server logs.</li>
+ *   <li>{@link #startServer(File, String...)} / {@link #stopServer(String...)} that launch and
+ *       stop a JPro server via a command (e.g. its Gradle {@code jproStart} / {@code jproStop}
+ *       tasks), and {@link #stopAndAssertNoServerErrors(File, String...)} that also fails the
+ *       test on any exception in the server logs.</li>
  *   <li>{@link #waitForRunning(Page)} — wait until the {@code jpro-app} element reports
  *       {@code data-status="running"} before interacting.</li>
  * </ul>

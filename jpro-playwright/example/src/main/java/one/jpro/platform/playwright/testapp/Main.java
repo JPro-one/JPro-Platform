@@ -1,5 +1,6 @@
 package one.jpro.platform.playwright.testapp;
 
+import com.jpro.webapi.WebAPI;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -25,6 +26,15 @@ public class Main extends RouteApp {
         return Route.empty()
                 .and(redirect("/", "/textinput"))
                 .and(get("/textinput", request -> Response.node(createView())))
+                // A page that triggers a browser-side console.error on load — exercises
+                // BrowserErrorCollector. Not reachable from the UI; navigated to directly in tests.
+                .and(get("/jserror", request -> {
+                    if (WebAPI.isBrowser()) {
+                        WebAPI.getWebAPI(getStage())
+                                .executeScript("console.error('intentional test error from /jserror')");
+                    }
+                    return Response.node(new Label("js-error page"));
+                }))
                 .transform(Transformers.fullscreen(true));
     }
 

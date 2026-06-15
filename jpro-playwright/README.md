@@ -148,6 +148,8 @@ BrowserErrorCollector errors = new BrowserErrorCollector(page);
 errors.assertNoErrors();   // in teardown
 ```
 
+Note: JPro also forwards browser `console.error` into the server log, so `stopAndAssertNoServerErrors` catches those too — a test that intentionally provokes a browser error should not also assert a clean server log.
+
 ## Taking screenshots
 
 Tests run headless, so a screenshot is often the only way to see the app. `JProPlaywrightTest` writes a PNG and logs its absolute path:
