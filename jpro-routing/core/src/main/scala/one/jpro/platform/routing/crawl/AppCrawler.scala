@@ -100,6 +100,10 @@ object AppCrawler {
   }
 
   def crawlRoute(prefix: String, createRoute: Supplier[Route]): CrawlReportApp = {
+    // SimpleFX must be first touched on the FX thread; bootstrap it here so callers don't have to
+    // (otherwise the first off-FX-thread touch fails with "Core was first triggered from thread ...").
+    scala.concurrent.Await.result(simplefx.cores.initializeCore(),
+      scala.concurrent.duration.Duration(30, java.util.concurrent.TimeUnit.SECONDS))
     val crawler = new AppCrawler(prefix, () => {
       routeToRouteNode(createRoute.get())
     })
