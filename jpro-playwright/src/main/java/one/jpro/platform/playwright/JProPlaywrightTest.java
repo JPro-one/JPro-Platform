@@ -121,7 +121,7 @@ public abstract class JProPlaywrightTest {
     /**
      * Start a JPro server by running an arbitrary {@code command} (build-tool agnostic) from the
      * project root, clearing {@code logsDir} first and blocking until {@code /status/alive} answers
-     * 200. Build the command with {@link #gradleCommand} or {@link #mavenCommand}, or pass your own.
+     * 200. Build the command with {@link #gradleCommand}, or pass your own (Maven, Docker, ...).
      *
      * @param logsDir the server's log directory, cleared before start (e.g. {@code <module>/logs})
      * @param command the full start command, including the port (the helpers add it for you)
@@ -154,7 +154,7 @@ public abstract class JProPlaywrightTest {
      * {@code finally} so logs appear on CI even if the stop command throws or the assertion fails.
      *
      * @param logsDir     the server's log directory (typically {@code <module>/logs})
-     * @param stopCommand the full stop command (see {@link #gradleCommand} / {@link #mavenCommand})
+     * @param stopCommand the full stop command (see {@link #gradleCommand})
      */
     protected static void stopAndAssertNoServerErrors(File logsDir, String... stopCommand)
             throws IOException, InterruptedException {
@@ -168,29 +168,14 @@ public abstract class JProPlaywrightTest {
 
     /**
      * Build a Gradle command for {@code task} using the project's {@code gradlew} wrapper, passing
-     * the test port as {@code -Pjpro.test.port=<PORT>}. Extra args are appended.
+     * the test port as {@code -Pjpro.test.port=<PORT>}. Extra args are appended. For Maven or any
+     * other tool, pass your own command to {@link #startServer} (include {@code -Djpro.test.port}).
      */
     protected static String[] gradleCommand(String task, String... extraArgs) {
         String wrapper = isWindows() ? "gradlew.bat" : "gradlew";
         String gradlew = new File(PROJECT_ROOT, wrapper).getAbsolutePath();
         List<String> cmd = new ArrayList<>(List.of(gradlew, task, "-Pjpro.test.port=" + PORT));
         cmd.addAll(Arrays.asList(extraArgs));
-        return cmd.toArray(new String[0]);
-    }
-
-    /**
-     * Build a Maven command using the project's {@code mvnw} wrapper if present (else {@code mvn}),
-     * passing the test port as {@code -Djpro.test.port=<PORT>} — have the POM bind the JPro plugin's
-     * port to {@code ${jpro.test.port}}. The {@code args} are the goals and flags, e.g.
-     * {@code mavenCommand("-pl", "my-app", "jpro:run")}.
-     */
-    protected static String[] mavenCommand(String... args) {
-        File mvnw = new File(PROJECT_ROOT, isWindows() ? "mvnw.cmd" : "mvnw");
-        String mvn = mvnw.exists() ? mvnw.getAbsolutePath() : (isWindows() ? "mvn.cmd" : "mvn");
-        List<String> cmd = new ArrayList<>();
-        cmd.add(mvn);
-        cmd.addAll(Arrays.asList(args));
-        cmd.add("-Djpro.test.port=" + PORT);
         return cmd.toArray(new String[0]);
     }
 
