@@ -11,7 +11,7 @@ import java.util.concurrent.{CountDownLatch, TimeUnit}
 /**
  * crawlRoute must bootstrap the SimpleFX core itself, so a caller that only started the FX toolkit
  * (no inFX / no FXCoreInitListener) does not hit "Core was first triggered from thread ...".
- * Relies on forkEvery=1 so this class starts with a cold SimpleFX.
+ * Run in isolation (e.g. --tests TestCrawlInitializesCore) to exercise the cold-start path.
  */
 class TestCrawlInitializesCore {
 

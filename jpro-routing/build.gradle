@@ -106,9 +106,6 @@ configure([project(':jpro-routing:core-test')]) {
     test {
         jvmArgs = [
                 "-Dglass.platform=Monocle", "-Dmonocle.platform=Headless"]
-        // Fresh JVM per test class: keeps JavaFX/SimpleFX global state isolated between classes
-        // (e.g. so the SimpleFX-cold-start test really starts cold).
-        forkEvery = 1
     }
 }
 
