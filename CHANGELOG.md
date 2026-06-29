@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.7.2 (unreleased)
+### 0.7.2 (june 29, 2026)
 
 #### Features
 * `jpro-auth-routing`: Added `RoutingAuth`, a high-level entry point for adding Google / OAuth2 / username-password login to a `RouteApp` (plus `dummy`/`defaultUser` logins for tests and desktop). See the module README and the `routing-auth` example.
