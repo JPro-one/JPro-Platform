@@ -5,6 +5,10 @@
 #### Features
 * `jpro-auth-routing`: Added `RoutingAuth`, a high-level entry point for adding Google / OAuth2 / username-password login to a `RouteApp` (plus `dummy`/`defaultUser` logins for tests and desktop). See the module README and the `routing-auth` example.
 * `jpro-webrtc`: Added a README and Javadoc, plus an `RTCPeerConnection.addStream(MediaStream)` convenience.
+* `jpro-playwright`: New module with Playwright-based test utilities. (#122)
+
+#### Bugfixes
+* `jpro-routing`: Fixed a removed-children memory leak on JavaFX 25. (#115)
 
 #### Breaking
 * `jpro-auth-routing`: Renamed the auth route transformers from `*Filter` to `*Transformer` (`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`) and `AuthUIProvider.createFilter()` to `createTransformer()`.
