@@ -14,7 +14,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    testImplementation("one.jpro.platform:jpro-playwright:0.7.1")
+    testImplementation("one.jpro.platform:jpro-playwright:0.7.2")
 }
 ```
 
@@ -24,7 +24,7 @@ Maven:
 <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-playwright</artifactId>
-    <version>0.7.1</version>
+    <version>0.7.2</version>
     <scope>test</scope>
 </dependency>
 ```

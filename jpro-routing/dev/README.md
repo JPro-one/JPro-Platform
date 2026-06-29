@@ -8,7 +8,7 @@ production builds.
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-dev:0.7.1")
+    implementation("one.jpro.platform:jpro-routing-dev:0.7.2")
 }
 ```
 

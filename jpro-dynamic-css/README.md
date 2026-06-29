@@ -8,7 +8,7 @@ Apply CSS strings to JavaFX scenes and parents at runtime. Each call replaces th
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-dynamic-css:0.7.1")
+    implementation("one.jpro.platform:jpro-dynamic-css:0.7.2")
 }
 ```
 
@@ -18,7 +18,7 @@ dependencies {
 <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-dynamic-css</artifactId>
-    <version>0.7.1</version>
+    <version>0.7.2</version>
 </dependency>
 ```
 

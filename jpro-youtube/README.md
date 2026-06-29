@@ -7,7 +7,7 @@ the browser it uses a native YouTube `<iframe>`; on the desktop it falls back to
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-youtube:0.7.1")
+    implementation("one.jpro.platform:jpro-youtube:0.7.2")
 }
 ```
 

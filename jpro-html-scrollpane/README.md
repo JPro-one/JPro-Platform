@@ -12,7 +12,7 @@ web deployments, while still working on the desktop.
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-html-scrollpane:0.7.1")
+    implementation("one.jpro.platform:jpro-html-scrollpane:0.7.2")
 }
 ```
 
