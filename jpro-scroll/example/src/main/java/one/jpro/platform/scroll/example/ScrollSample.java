@@ -40,7 +40,7 @@ public class ScrollSample extends Application {
         final var header = new Label("Sticky header");
         header.setMinHeight(48);
         header.setMaxWidth(Double.MAX_VALUE);
-        Scroll.setPosition(header, ScrollPosition.STICKY);
+        Scroll.setStickyPosition(header);
 
         final var content = new VBox();
         for (int i = 1; i <= 100; i++) {
