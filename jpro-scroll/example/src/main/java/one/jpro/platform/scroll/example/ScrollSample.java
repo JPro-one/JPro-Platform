@@ -40,6 +40,8 @@ public class ScrollSample extends Application {
         final var header = new Label("Sticky header");
         header.setMinHeight(48);
         header.setMaxWidth(Double.MAX_VALUE);
+        // A solid background so scrolled content slides underneath, not through, the pinned header.
+        header.setStyle("-fx-background-color: #2b6cb0; -fx-text-fill: white; -fx-font-size: 18; -fx-padding: 12;");
         Scroll.setStickyPosition(header);
 
         final var content = new VBox();

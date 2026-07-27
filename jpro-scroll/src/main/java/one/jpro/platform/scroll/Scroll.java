@@ -46,6 +46,9 @@ public final class Scroll {
     /** Property key under which the pinning offset (px) is stored on a node. */
     private static final Object OFFSET_KEY = new Object();
 
+    /** Property key under which the active {@link ScrollOverride} is stashed on a node. */
+    private static final Object OVERRIDE_KEY = new Object();
+
     private Scroll() {
         // utility class
     }
@@ -160,11 +163,11 @@ public final class Scroll {
         node.getProperties().put(SIDE_KEY, side);
         node.getProperties().put(OFFSET_KEY, offset);
 
-        // TODO(M3): install the compositor override + scroll/bounds listeners for this
-        //  mode (ported from the jpro-scenegraph override proven in M1) and stash a
-        //  teardown handle on the node so teardown(node) can reverse it. Register a
-        //  jmemorybuddy CleanupDetector so resources release if the node is GC'd.
-        LOGGER.debug("Scroll position {} ({} +{}) requested for node {}", position, side, offset, node);
+        // Install the compositor override and stash it so teardown(node) can reverse it.
+        final ScrollOverride override = new ScrollOverride(node, position, side, offset);
+        node.getProperties().put(OVERRIDE_KEY, override);
+        override.install();
+        LOGGER.debug("Scroll position {} ({} +{}) applied to node {}", position, side, offset, node);
     }
 
     /**
@@ -191,7 +194,9 @@ public final class Scroll {
      * is in normal flow.
      */
     private static void teardown(Node node) {
-        // TODO(M3): pull the stashed teardown handle and run it (override.uninstall(),
-        //  listener unsubscribe). Left as a no-op until the compositor override lands.
+        final Object override = node.getProperties().remove(OVERRIDE_KEY);
+        if (override instanceof ScrollOverride) {
+            ((ScrollOverride) override).uninstall();
+        }
     }
 }
