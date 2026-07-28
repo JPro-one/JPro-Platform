@@ -1,7 +1,6 @@
 package one.jpro.platform.scroll;
 
 import com.jpro.webapi.WebAPI;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
@@ -69,7 +68,6 @@ final class ScrollOverride {
     private final InvalidationListener relayout = obs -> sync();
     private ChangeListener<Scene> sceneWaiter;
     private boolean installedCompositor = false;
-    private boolean installing = false;
     private String lastSig = "";
     private boolean torndown = false;
 
@@ -211,22 +209,13 @@ final class ScrollOverride {
         final String sig = natTop + "|" + relLimitServer + "|" + local.getX() + "|" + docH;
 
         if (!installedCompositor) {
-            // First install is deferred: the element's DOM peer may not exist at first sync.
-            if (!installing) {
-                installing = true;
-                final double fx = local.getX();
-                final String fSig = sig;
-                LOGGER.debug("jpro-scroll[{}]: scheduling first compositor install (w={}, natTop={})", jsKey, w, natTop);
-                Platform.runLater(() -> {
-                    if (torndown) {
-                        return;
-                    }
-                    installCompositor(fx, natTop, inset, relLimitServer);
-                    installedCompositor = true;
-                    lastSig = fSig;
-                    LOGGER.debug("jpro-scroll[{}]: compositor installed", jsKey);
-                });
-            }
+            // Install inline on the first sync with a real width. The node's DOM peer may still be
+            // unregistered at this instant, but the injected script resolves it via its own retry
+            // loop (see installCompositor), so no server-side deferral (a runLater pulse) is needed.
+            installCompositor(local.getX(), natTop, inset, relLimitServer);
+            installedCompositor = true;
+            lastSig = sig;
+            LOGGER.debug("jpro-scroll[{}]: compositor installed (w={}, natTop={})", jsKey, w, natTop);
         } else if (!sig.equals(lastSig)) {
             installCompositor(local.getX(), natTop, inset, relLimitServer);
             lastSig = sig;
@@ -234,36 +223,60 @@ final class ScrollOverride {
     }
 
     /**
-     * (Re-)installs a scroll-timeline animation on the node's own div element. The renderer
-     * positions the node via inline {@code style.transform}; a running CSS animation outranks
-     * inline styles in the cascade, so this overrides that pin with a compositor-driven pure
-     * function of scroll. Assumes an svg scale of 1 (true for native-scrolling pages).
+     * (Re-)installs the scroll-timeline animation that pins the node. The animation is realised
+     * entirely inside an injected {@code <style>} sheet: the {@code @keyframes} plus a rule that
+     * binds them to the node via its stable {@code [jpro-id]} attribute selector. The renderer
+     * positions the node with inline {@code style.transform}, but a running CSS animation outranks
+     * inline styles in the cascade, so the animation overrides that pin with a compositor-driven
+     * pure function of scroll. Assumes an svg scale of 1 (true for native-scrolling pages).
+     * <p>
+     * <strong>Robust against the JPro readiness race.</strong> Two things make first install
+     * reliable on fresh loads. First, the {@code <style>} and keyframes are written unconditionally,
+     * with no dependency on the node's DOM peer existing yet. Second, the element reference
+     * ({@code jpro.getValue(n)}) <em>throws</em> until JPro's render pulse has registered the node,
+     * so it is resolved inside a {@code requestAnimationFrame} retry loop guarded by try/catch;
+     * once resolved, its {@code jpro-id} is cached and the binding is emitted as a selector rule.
+     * Because JPro re-emits {@code jpro-id} on every render of the node, that rule re-applies by
+     * itself after any DOM re-render or reconnect — nothing to re-push from the server.
      */
     private void installCompositor(double x, double natTop, double inset, double relLimitServer) {
         final String d = webapi.getElement(node).getName();
         final String js =
                 "(function(){\n" +
-                "  var d = " + d + ";\n" +
                 "  var reg = (window.__jproScrollC = window.__jproScrollC || {});\n" +
                 "  var st = reg['" + jsKey + "'] = reg['" + jsKey + "'] || {};\n" +
                 "  if(!st.style){ st.style = document.createElement('style');\n" +
                 "    st.style.setAttribute('data-jpro-scroll','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.key = 'jpro-scroll-" + jsKey + "';\n" +
+                // Latest geometry, baked in server-side; render() reads these so a re-install (on a
+                // geometry-signature change) just updates them and rewrites the sheet.
+                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + inset + "; st.relServer = " + relLimitServer + ";\n" +
+                "  st.render = function(){\n" +
+                "    if(st.jid == null) return;\n" +
                 // Document extent (scrollHeight), NOT the scroll max (scrollHeight - clientHeight):
                 // the latter folds in viewport height, leaving the unbounded range stale on resize.
-                "  var docExtent = document.documentElement.scrollHeight;\n" +
-                "  var relLimit = (" + relLimitServer + " < 0) ? (docExtent + " + inset + ") : " + relLimitServer + ";\n" +
-                "  var sPin = " + natTop + " - " + inset + "; if(sPin < 0) sPin = 0;\n" +
-                "  var sRel = relLimit - " + inset + "; if(sRel < sPin + 1) sRel = sPin + 1;\n" +
-                "  st.style.textContent = '@keyframes ' + st.key +\n" +
-                "    '{from{transform:translate(" + x + "px," + natTop + "px);}to{transform:translate(" + x + "px,' + relLimit + 'px);}}';\n" +
-                "  d.style.animationName = st.key;\n" +
-                "  d.style.animationTimingFunction = 'linear';\n" +
-                "  d.style.animationFillMode = 'both';\n" +
-                "  d.style.animationDuration = 'auto';\n" +
-                "  d.style.animationTimeline = 'scroll(root block)';\n" +
-                "  d.style.animationRangeStart = sPin + 'px';\n" +
-                "  d.style.animationRangeEnd = sRel + 'px';\n" +
+                "    var docExtent = document.documentElement.scrollHeight;\n" +
+                "    var relLimit = (st.relServer < 0) ? (docExtent + st.inset) : st.relServer;\n" +
+                "    var sPin = st.natTop - st.inset; if(sPin < 0) sPin = 0;\n" +
+                "    var sRel = relLimit - st.inset; if(sRel < sPin + 1) sRel = sPin + 1;\n" +
+                "    st.style.textContent = '@keyframes ' + st.key +\n" +
+                "      '{from{transform:translate(' + st.x + 'px,' + st.natTop + 'px);}to{transform:translate(' + st.x + 'px,' + relLimit + 'px);}}' +\n" +
+                "      '[jpro-id=\"' + st.jid + '\"]{' +\n" +
+                "      'animation-name:' + st.key + ';' +\n" +
+                "      'animation-timing-function:linear;animation-fill-mode:both;animation-duration:auto;' +\n" +
+                "      'animation-timeline:scroll(root block);' +\n" +
+                "      'animation-range:' + sPin + 'px ' + sRel + 'px;}';\n" +
+                "  };\n" +
+                // Fast path for a re-install: the node's jpro-id is already known, so just re-render.
+                "  if(st.jid != null){ st.render(); return; }\n" +
+                // First install: the element ref throws until JPro registers the node's DOM peer, so
+                // retry (bounded to ~5s at 60fps) until it resolves, then cache jpro-id and render.
+                "  var tries = 0;\n" +
+                "  (function resolve(){\n" +
+                "    var el = null; try { el = " + d + "; } catch(e){ el = null; }\n" +
+                "    if(el && el.getAttribute){ st.jid = el.getAttribute('jpro-id'); st.render(); }\n" +
+                "    else if(tries++ < 300){ requestAnimationFrame(resolve); }\n" +
+                "  })();\n" +
                 "})();";
         webapi.executeScript(js);
     }
@@ -302,15 +315,10 @@ final class ScrollOverride {
             node.setManaged(true);
         }
 
-        // Clear the compositor animation on the element and drop its style + registry entry.
+        // The animation lives entirely in the injected <style> (bound by a [jpro-id] rule, not by
+        // inline styles on the element), so dropping that sheet removes the pin. No need to touch
+        // the element ref here — which would reintroduce the readiness race in teardown.
         if (webapi != null && installedCompositor) {
-            final String d = webapi.getElement(node).getName();
-            webapi.executeScript(
-                    "(function(){\n" +
-                    "  var d = " + d + ";\n" +
-                    "  d.style.animationName = ''; d.style.animationTimeline = '';\n" +
-                    "  d.style.animationRangeStart = ''; d.style.animationRangeEnd = '';\n" +
-                    "})();");
             removeCompositorStyle(webapi, jsKey);
         }
     }
