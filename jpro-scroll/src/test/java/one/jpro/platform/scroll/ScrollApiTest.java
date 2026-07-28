@@ -2,6 +2,7 @@ package one.jpro.platform.scroll;
 
 import com.jpro.webapi.WebAPI;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -212,8 +213,114 @@ class ScrollApiTest {
     }
 
     // ---------------------------------------------------------------------
+    // Canonical ScrollAnchor setter + fixed convenience record FIXED
+    // ---------------------------------------------------------------------
+
+    @Test
+    void canonicalAnchorSetterRecordsMode() {
+        Label node = new Label();
+        Scroll.setScrollPosition(node, ScrollPosition.FIXED, ScrollAnchor.of().bottom(0).right(0));
+        assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
+    }
+
+    @Test
+    void setFixedPositionWithAnchorRecordsFixed() {
+        Label node = new Label();
+        Scroll.setFixedPosition(node, ScrollAnchor.of().centerX().centerY());
+        assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
+    }
+
+    @Test
+    void setFixedPositionWithPosRecordsFixed() {
+        Label node = new Label();
+        Scroll.setFixedPosition(node, Pos.BOTTOM_RIGHT, 24);
+        assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
+    }
+
+    @Test
+    void setFixedBarRecordsFixed() {
+        Label node = new Label();
+        Scroll.setFixedBar(node, Side.BOTTOM);
+        assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
+    }
+
+    @Test
+    void setFixedFullscreenRecordsFixed() {
+        Label node = new Label();
+        Scroll.setFixedFullscreen(node);
+        assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
+    }
+
+    @Test
+    void stickyWithExplicitContainerRecordsSticky() {
+        Label node = new Label();
+        VBox container = new VBox(node);
+        Scroll.setStickyPosition(node, Side.TOP, 0, container);
+        assertEquals(ScrollPosition.STICKY, Scroll.getScrollPosition(node));
+    }
+
+    // ---------------------------------------------------------------------
+    // STICKY guard — sticky pins edges only, CENTER/STRETCH are FIXED-only
+    // ---------------------------------------------------------------------
+
+    @Test
+    void stickyRejectsCenterAnchor() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Scroll.setScrollPosition(new Label(), ScrollPosition.STICKY,
+                        ScrollAnchor.of().centerX()));
+    }
+
+    @Test
+    void stickyRejectsStretchAnchor() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Scroll.setScrollPosition(new Label(), ScrollPosition.STICKY,
+                        ScrollAnchor.of().left(0).right(0)));
+    }
+
+    @Test
+    void stickyAcceptsEdgeAnchor() {
+        Label node = new Label();
+        Scroll.setScrollPosition(node, ScrollPosition.STICKY, ScrollAnchor.of().top(8));
+        assertEquals(ScrollPosition.STICKY, Scroll.getScrollPosition(node));
+    }
+
+    @Test
+    void rejectedStickyAnchorLeavesNodeStatic() {
+        Label node = new Label();
+        assertThrows(IllegalArgumentException.class,
+                () -> Scroll.setScrollPosition(node, ScrollPosition.STICKY, ScrollAnchor.of().centerX()));
+        assertEquals(ScrollPosition.STATIC, Scroll.getScrollPosition(node));
+        assertTrue(node.getProperties().isEmpty(), "a rejected apply must not stash any state");
+    }
+
+    @Test
+    void fixedAcceptsCenterAndStretch() {
+        // The full model is FIXED-only but valid there — no exception.
+        Scroll.setFixedPosition(new Label(), ScrollAnchor.of().centerX().centerY());
+        Scroll.setFixedFullscreen(new Label());
+    }
+
+    // ---------------------------------------------------------------------
     // Argument contract
     // ---------------------------------------------------------------------
+
+    @Test
+    void nullAnchorIsRejected() {
+        assertThrows(NullPointerException.class,
+                () -> Scroll.setScrollPosition(new Label(), ScrollPosition.FIXED, (ScrollAnchor) null));
+    }
+
+    @Test
+    void nullPosIsRejected() {
+        assertThrows(NullPointerException.class,
+                () -> Scroll.setFixedPosition(new Label(), (Pos) null));
+    }
+
+    @Test
+    void nullWithinIsRejected() {
+        assertThrows(NullPointerException.class,
+                () -> Scroll.setStickyPosition(new Label(), Side.TOP, 0, null));
+    }
 
     @Test
     void nullNodeIsRejected() {

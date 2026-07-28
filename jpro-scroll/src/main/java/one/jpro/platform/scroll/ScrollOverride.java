@@ -5,7 +5,6 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.geometry.Side;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -13,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.jmemorybuddy.CleanupDetector;
+import one.jpro.platform.scroll.ScrollAnchor.Axis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +34,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * When running as a desktop application the {@link WebAPI} consumer never fires, so installation
  * is a no-op and the node keeps its normal flow positioning.
  * <p>
- * <strong>v1 scope.</strong> Only the {@link Side#TOP} edge is realised (the proven case); other
- * sides log a warning and fall back to top pinning. The placeholder mirrors the node full-width,
- * matching the proven full-width-bar case.
+ * <strong>Anchoring.</strong> The {@link ScrollAnchor} resolves the horizontal and vertical axes
+ * independently (STICKY_DESIGN.md §18). The vertical axis drives the scroll-timeline keyframe (pin
+ * line, ride, and — for bounded sticky — release); the horizontal axis is a constant baked into the
+ * keyframe (the page does not scroll horizontally). {@link ScrollAnchor.Mode#STRETCH} resizes the
+ * node to span the axis; {@link ScrollPosition#FIXED} is the degenerate pin (from scroll 0, no ride
+ * and — being viewport-anchored — no containment release).
  *
  * @author Tobias Horak
  */
@@ -52,8 +55,9 @@ final class ScrollOverride {
 
     private final Node node;
     private final ScrollPosition position;
-    private final Side side;
-    private final double offset;
+    private final ScrollAnchor anchor;
+    /** Explicit containment override for STICKY; {@code null} defaults to the original parent. */
+    private final Node within;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
 
     // Resolved at install time.
@@ -63,6 +67,8 @@ final class ScrollOverride {
     private Pane originalParent;
     private int originalIndex = -1;
     private Parent root;
+    /** The containing block that bounds a STICKY pin (null => document-long / unbounded). */
+    private Node container;
 
     // Reactive plumbing. A single listener re-syncs geometry on any relevant change.
     private final InvalidationListener relayout = obs -> sync();
@@ -71,11 +77,11 @@ final class ScrollOverride {
     private String lastSig = "";
     private boolean torndown = false;
 
-    ScrollOverride(Node node, ScrollPosition position, Side side, double offset) {
+    ScrollOverride(Node node, ScrollPosition position, ScrollAnchor anchor, Node within) {
         this.node = node;
         this.position = position;
-        this.side = side;
-        this.offset = offset;
+        this.anchor = anchor;
+        this.within = within;
     }
 
     /**
@@ -83,9 +89,6 @@ final class ScrollOverride {
      * never fires and the node keeps its normal flow positioning.
      */
     void install() {
-        if (side != Side.TOP) {
-            LOGGER.warn("jpro-scroll: side {} is not yet supported; falling back to TOP for node {}.", side, node);
-        }
         WebAPI.getWebAPI(node, this::onWebAPI);
     }
 
@@ -133,6 +136,11 @@ final class ScrollOverride {
         }
         this.root = node.getScene().getRoot();
 
+        // STICKY is bounded by its containing block (CSS-native): the explicit `within` override if
+        // given, else the node's original parent. FIXED is viewport-anchored and ignores containment.
+        this.container = (position == ScrollPosition.FIXED) ? null
+                : (within != null ? within : originalParent);
+
         placeholder = new Region();
         placeholder.setMaxWidth(Double.MAX_VALUE);
 
@@ -142,13 +150,18 @@ final class ScrollOverride {
         overlay.getChildren().add(node);
         node.applyCss();
 
-        // Signals that require a re-sync: the placeholder's geometry (flow position/size),
-        // the browser viewport (the moving signal under native scroll), and the document
-        // extent (grow/shrink -> the unbounded pin range must refresh).
+        // Signals that require a re-sync: the placeholder's geometry (flow position/size), the
+        // browser viewport (the moving signal under native scroll, and the size for end/center/
+        // stretch anchors), the document extent (grow/shrink -> the unbounded pin range refreshes),
+        // and — for bounded sticky — the container's geometry (its bottom sets the release point).
         placeholder.layoutBoundsProperty().addListener(relayout);
         placeholder.localToSceneTransformProperty().addListener(relayout);
         webapi.browserViewport().addListener(relayout);
         root.layoutBoundsProperty().addListener(relayout);
+        if (container != null && container != root) {
+            container.layoutBoundsProperty().addListener(relayout);
+            container.localToSceneTransformProperty().addListener(relayout);
+        }
 
         registerCleanup();
         LOGGER.debug("jpro-scroll[{}]: attached (overlay={}, parent={})", jsKey,
@@ -164,62 +177,158 @@ final class ScrollOverride {
         if (torndown || placeholder == null) {
             return;
         }
-        final double w = placeholder.getWidth();
-        if (w <= 0) {
-            LOGGER.debug("jpro-scroll[{}]: sync skipped, placeholder width={}", jsKey, w);
+        final double flowW = placeholder.getWidth();
+        if (flowW <= 0) {
+            LOGGER.debug("jpro-scroll[{}]: sync skipped, placeholder width={}", jsKey, flowW);
             return;
         }
         final boolean fixed = position == ScrollPosition.FIXED;
-
-        // Fresh (post-applyCss) height so the placeholder mirrors the node's real layout height.
-        // prefHeight alone ignores minHeight, so a min-constrained node would reserve too little.
-        final double h;
-        if (node instanceof Region) {
-            final Region region = (Region) node;
-            h = Math.max(region.prefHeight(w), region.minHeight(w));
-        } else {
-            h = node.getLayoutBounds().getHeight();
-        }
-        // FIXED is out of flow: the placeholder reserves no vertical space. STICKY keeps its slot.
-        placeholder.setPrefHeight(fixed ? 0 : h);
-        node.resize(w, h);
-
-        // naturalTop is scroll-independent: native scroll moves the browser, not the FX scene.
-        final Point2D naturalTopLeft = placeholder.localToScene(0, 0);
-        final double x = naturalTopLeft.getX();
-        final double flowTop = naturalTopLeft.getY();
-        final double inset = offset;
+        final Axis hz = anchor.horizontal();
+        final Axis vt = anchor.vertical();
 
         final Rectangle2D vp = webapi.getBrowserViewport();
         final double viewportTop = (vp == null) ? 0.0 : vp.getMinY();
+        final double viewportW = (vp == null) ? 0.0 : vp.getWidth();
+        final double viewportH = (vp == null) ? 0.0 : vp.getHeight();
 
-        // natTop drives the keyframe 'from'. STICKY rides the flow from its natural top; FIXED
-        // pins from the very top (natTop == inset => the compositor's sPin becomes 0).
-        final double natTop = fixed ? inset : flowTop;
-        // Server-side pin (also the no-compositor fallback): clamp to the viewport inset line.
-        final double targetSceneY = fixed ? (viewportTop + inset) : Math.max(flowTop, viewportTop + inset);
-        final Point2D local = overlay.sceneToLocal(x, targetSceneY);
+        // End/center/stretch anchors need a real viewport size; skip until one is known (the
+        // browserViewport listener re-syncs once it arrives).
+        if (needsViewportSize() && (viewportW <= 0 || viewportH <= 0)) {
+            LOGGER.debug("jpro-scroll[{}]: sync skipped, viewport size {}x{}", jsKey, viewportW, viewportH);
+            return;
+        }
+
+        // The node's flow anchor (scroll-independent: native scroll moves the browser, not the scene).
+        final Point2D flowTopLeft = placeholder.localToScene(0, 0);
+        final double flowX = flowTopLeft.getX();
+        final double flowTop = flowTopLeft.getY();
+
+        // --- Horizontal axis: resolve node width and the constant viewport x. ---
+        final double nodeW;
+        final double x;
+        switch (hz.mode) {
+            case STRETCH:
+                nodeW = Math.max(0, viewportW - hz.start - hz.end);
+                x = hz.start;
+                break;
+            case PIN_START:
+                nodeW = naturalWidth();
+                x = hz.start;
+                break;
+            case PIN_END:
+                nodeW = naturalWidth();
+                x = viewportW - nodeW - hz.end;
+                break;
+            case CENTER:
+                nodeW = naturalWidth();
+                x = (viewportW - nodeW) / 2.0 + hz.start;
+                break;
+            default: // NATURAL: sticky keeps its full flow width; fixed is a natural-width chip.
+                nodeW = fixed ? naturalWidth() : flowW;
+                x = flowX;
+        }
+
+        // --- Vertical axis: resolve node height and the viewport pin line y0. ---
+        final double nodeH;
+        final double y0;
+        switch (vt.mode) {
+            case STRETCH:
+                nodeH = Math.max(0, viewportH - vt.start - vt.end);
+                y0 = vt.start;
+                break;
+            case PIN_END:
+                nodeH = naturalHeight(nodeW);
+                y0 = viewportH - nodeH - vt.end;
+                break;
+            case CENTER:
+                nodeH = naturalHeight(nodeW);
+                y0 = (viewportH - nodeH) / 2.0 + vt.start;
+                break;
+            default: // NATURAL / PIN_START: pin line is the start inset (0 for a bare NATURAL).
+                nodeH = naturalHeight(nodeW);
+                y0 = vt.start;
+        }
+
+        node.resize(nodeW, nodeH);
+        // FIXED is out of flow: the placeholder reserves no vertical space. STICKY keeps its slot.
+        placeholder.setPrefHeight(fixed ? 0 : nodeH);
+
+        // natTop drives the keyframe 'from'. STICKY rides the flow from its natural top; FIXED pins
+        // from the very top (natTop == y0 => the compositor's sPin becomes 0, no ride).
+        final double natTop = fixed ? y0 : flowTop;
+
+        // STICKY release limit: the containing block's bottom minus the node height (the proven
+        // 'containerBottom - h'); -1 (unbounded) for FIXED or a page-spanning container.
+        final double relLimitServer = releaseLimit(nodeH);
+
+        // Server-side pin (also the no-compositor fallback, and what picking sees): clamp to the
+        // viewport pin line while pinned, ride the flow before, and honour the release limit.
+        double serverY = fixed ? (viewportTop + y0) : Math.max(flowTop, viewportTop + y0);
+        if (!fixed && relLimitServer >= 0) {
+            serverY = Math.min(serverY, relLimitServer);
+        }
+        final Point2D local = overlay.sceneToLocal(x, serverY);
         node.setLayoutX(local.getX());
         node.setLayoutY(local.getY());
 
-        // relLimit < 0 means unbounded (document-bounded) pin. docH is in the signature so the
-        // unbounded range refreshes on document grow/shrink.
-        final double relLimitServer = -1.0;
         final double docH = root.getLayoutBounds().getHeight();
-        final String sig = natTop + "|" + relLimitServer + "|" + local.getX() + "|" + docH;
+        final String sig = natTop + "|" + y0 + "|" + local.getX() + "|" + relLimitServer + "|"
+                + nodeW + "|" + nodeH + "|" + docH;
 
         if (!installedCompositor) {
             // Install inline on the first sync with a real width. The node's DOM peer may still be
             // unregistered at this instant, but the injected script resolves it via its own retry
             // loop (see installCompositor), so no server-side deferral (a runLater pulse) is needed.
-            installCompositor(local.getX(), natTop, inset, relLimitServer);
+            installCompositor(local.getX(), natTop, y0, relLimitServer);
             installedCompositor = true;
             lastSig = sig;
-            LOGGER.debug("jpro-scroll[{}]: compositor installed (w={}, natTop={})", jsKey, w, natTop);
+            LOGGER.debug("jpro-scroll[{}]: compositor installed (w={}, natTop={}, y0={})", jsKey, nodeW, natTop, y0);
         } else if (!sig.equals(lastSig)) {
-            installCompositor(local.getX(), natTop, inset, relLimitServer);
+            installCompositor(local.getX(), natTop, y0, relLimitServer);
             lastSig = sig;
         }
+    }
+
+    /** @return whether any axis needs the viewport size (end/center/stretch anchors). */
+    private boolean needsViewportSize() {
+        return isViewportSized(anchor.horizontal()) || isViewportSized(anchor.vertical());
+    }
+
+    private static boolean isViewportSized(Axis axis) {
+        return axis.mode == ScrollAnchor.Mode.PIN_END
+                || axis.mode == ScrollAnchor.Mode.CENTER
+                || axis.mode == ScrollAnchor.Mode.STRETCH;
+    }
+
+    /**
+     * The scene-y at which a bounded STICKY node releases (rides up out of its containing block):
+     * {@code containerBottom - nodeH}. Returns {@code -1} (unbounded, document-long) for FIXED, for
+     * an absent container, or when the container is the scene root (a page-spanning header).
+     */
+    private double releaseLimit(double nodeH) {
+        if (container == null || container == root) {
+            return -1.0;
+        }
+        final double containerBottom =
+                container.localToScene(0, container.getLayoutBounds().getHeight()).getY();
+        return containerBottom - nodeH;
+    }
+
+    private double naturalWidth() {
+        if (node instanceof Region) {
+            final Region r = (Region) node;
+            return Math.max(r.prefWidth(-1), r.minWidth(-1));
+        }
+        return node.getLayoutBounds().getWidth();
+    }
+
+    private double naturalHeight(double forWidth) {
+        // prefHeight alone ignores minHeight, so a min-constrained node would reserve too little.
+        if (node instanceof Region) {
+            final Region r = (Region) node;
+            return Math.max(r.prefHeight(forWidth), r.minHeight(forWidth));
+        }
+        return node.getLayoutBounds().getHeight();
     }
 
     /**
@@ -230,6 +339,10 @@ final class ScrollOverride {
      * inline styles in the cascade, so the animation overrides that pin with a compositor-driven
      * pure function of scroll. Assumes an svg scale of 1 (true for native-scrolling pages).
      * <p>
+     * {@code natTop} is the keyframe 'from' (the flow top for sticky, the pin line for fixed);
+     * {@code y0} is the viewport pin line; {@code relLimitServer} is the scene-y release point
+     * ({@code < 0} = unbounded, resolved browser-side to the document extent).
+     * <p>
      * <strong>Robust against the JPro readiness race.</strong> Two things make first install
      * reliable on fresh loads. First, the {@code <style>} and keyframes are written unconditionally,
      * with no dependency on the node's DOM peer existing yet. Second, the element reference
@@ -239,7 +352,7 @@ final class ScrollOverride {
      * Because JPro re-emits {@code jpro-id} on every render of the node, that rule re-applies by
      * itself after any DOM re-render or reconnect — nothing to re-push from the server.
      */
-    private void installCompositor(double x, double natTop, double inset, double relLimitServer) {
+    private void installCompositor(double x, double natTop, double y0, double relLimitServer) {
         final String d = webapi.getElement(node).getName();
         final String js =
                 "(function(){\n" +
@@ -250,7 +363,7 @@ final class ScrollOverride {
                 "  st.key = 'jpro-scroll-" + jsKey + "';\n" +
                 // Latest geometry, baked in server-side; render() reads these so a re-install (on a
                 // geometry-signature change) just updates them and rewrites the sheet.
-                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + inset + "; st.relServer = " + relLimitServer + ";\n" +
+                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + ";\n" +
                 "  st.render = function(){\n" +
                 "    if(st.jid == null) return;\n" +
                 // Document extent (scrollHeight), NOT the scroll max (scrollHeight - clientHeight):
@@ -301,6 +414,10 @@ final class ScrollOverride {
         }
         if (root != null) {
             root.layoutBoundsProperty().removeListener(relayout);
+        }
+        if (container != null && container != root) {
+            container.layoutBoundsProperty().removeListener(relayout);
+            container.localToSceneTransformProperty().removeListener(relayout);
         }
 
         // Restore the node to its flow slot.
