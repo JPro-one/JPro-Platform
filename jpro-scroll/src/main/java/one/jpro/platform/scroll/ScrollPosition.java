@@ -3,7 +3,7 @@ package one.jpro.platform.scroll;
 /**
  * The positioning mode of a node relative to the scrolling viewport, mirroring the
  * CSS {@code position} property. The mode drives how the node behaves as the page
- * scrolls and is applied via {@link Scroll#setPosition(javafx.scene.Node, ScrollPosition)}.
+ * scrolls and is applied via {@link Scroll#setScrollPosition(javafx.scene.Node, ScrollPosition)}.
  *
  * @author Tobias Horak
  */
