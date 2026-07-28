@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>JPro Sticky Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <link href="/jpro/img/favicon.png" rel="icon">
+    <link rel="stylesheet" type="text/css" href="/jpro/css/jpro.css">
+    <script src="/jpro/js/jpro.js" type="text/javascript"></script>
+
+    <!-- jpro-sticky needs the page to scroll natively so the compositor scroll-timeline
+         override has a scroll to track. Enable it on the app tag below and let the body scroll. -->
+    <style>
+      html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+        margin: 0px;
+      }
+    </style>
+</head>
+
+<body>
+    <jpro-app href="/app/default" nativescrolling="true" fxHeight="true" nativeZooming="true"></jpro-app>
+</body>
+
+</html>

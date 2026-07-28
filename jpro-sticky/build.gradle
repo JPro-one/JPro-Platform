@@ -1,0 +1,31 @@
+dependencies {
+  api project(":jpro-utils")
+  implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
+  implementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
+  implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      // Add README.md as an artifact named DOCUMENTATION.md
+      artifact(source: file('build/docs/DOCUMENTATION.md')) {
+        classifier 'DOCUMENTATION'
+        extension 'md'
+      }
+
+      pom {
+        name = 'JPro Sticky'
+        description = 'Scroll-aware positioning (sticky and fixed) for JavaFX nodes on the web'
+      }
+    }
+  }
+}
+
+tasks.register('renameReadme', Copy) {
+  from 'README.md'
+  into layout.buildDirectory.dir('docs')
+  rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme

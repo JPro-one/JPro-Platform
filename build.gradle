@@ -41,7 +41,7 @@ def subprojectsWithDocs = [
         "jpro-scenegraph",
         "jpro-session",
         "jpro-html-scrollpane",
-        "jpro-scroll",
+        "jpro-sticky",
         "jpro-youtube",
         "jpro-utils",
         "jpro-webrtc",
@@ -220,7 +220,7 @@ configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpr
            project("jpro-mdfx"),
            project("jpro-media"), project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"),
            project("jpro-utils"), project("jpro-playwright"), project("jpro-html-scrollpane"),
-           project("jpro-scroll"),
+           project("jpro-sticky"),
            project("jpro-routing:core"),
            project("jpro-routing:dev"), project("jpro-routing:popup"), project("jpro-webrtc"),
            project("jpro-youtube"), rootProject]) {
