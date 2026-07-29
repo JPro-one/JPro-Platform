@@ -305,10 +305,11 @@ public final class Scroll {
         node.getProperties().put(POSITION_KEY, position);
         node.getProperties().put(ANCHOR_KEY, anchor);
 
-        // Install the compositor override and stash it so teardown(node) can reverse it.
-        final ScrollOverride override = new ScrollOverride(node, position, anchor, within);
-        node.getProperties().put(OVERRIDE_KEY, override);
-        override.install();
+        // Select the implementation (desktop FX vs web compositor) once the node is in a scene, and
+        // stash it so teardown(node) can reverse it. The choice is invisible to the caller.
+        final ScrollImpl impl = new ScrollDispatcher(node, position, anchor, within);
+        node.getProperties().put(OVERRIDE_KEY, impl);
+        impl.install();
         LOGGER.debug("Scroll position {} applied to node {}", position, node);
     }
 
@@ -384,9 +385,9 @@ public final class Scroll {
      * is in normal flow.
      */
     private static void teardown(Node node) {
-        final Object override = node.getProperties().remove(OVERRIDE_KEY);
-        if (override instanceof ScrollOverride) {
-            ((ScrollOverride) override).uninstall();
+        final Object impl = node.getProperties().remove(OVERRIDE_KEY);
+        if (impl instanceof ScrollImpl) {
+            ((ScrollImpl) impl).uninstall();
         }
     }
 }

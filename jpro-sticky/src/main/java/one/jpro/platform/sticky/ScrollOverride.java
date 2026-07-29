@@ -12,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.jmemorybuddy.CleanupDetector;
-import one.jpro.platform.sticky.ScrollAnchor.Axis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,25 +42,12 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Tobias Horak
  */
-final class ScrollOverride {
+final class ScrollOverride implements ScrollImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScrollOverride.class);
 
     /** Sequence for unique per-node JS registry keys. */
     private static final AtomicLong KEY_SEQ = new AtomicLong();
-
-    /**
-     * Monotonic order in which overrides are constructed (i.e. the order {@code setScrollPosition}
-     * is called). The overlay is kept sorted by it so the stacking/paint order is deterministic and
-     * follows source order, rather than the async order in which installs happen to complete.
-     */
-    private static final AtomicLong STACK_SEQ = new AtomicLong();
-
-    /** Scene property key under which the shared sticky overlay {@link Group} is cached. */
-    private static final Object OVERLAY_KEY = new Object();
-
-    /** Node property key stashing a reparented node's {@link #stackOrder}, read by sibling overrides. */
-    private static final Object STACK_ORDER_KEY = new Object();
 
     private final Node node;
     private final ScrollPosition position;
@@ -69,7 +55,12 @@ final class ScrollOverride {
     /** Explicit containment override for STICKY; {@code null} defaults to the original parent. */
     private final Node within;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
-    private final long stackOrder = STACK_SEQ.getAndIncrement();
+    /**
+     * Source-order stack value: the overlay is kept sorted by it (see {@link StickyOverlay}) so the
+     * stacking/paint order follows the order {@code setScrollPosition} was called, rather than the
+     * async order in which installs happen to complete.
+     */
+    private final long stackOrder = StickyOverlay.nextStackOrder();
 
     // Resolved at install time.
     private WebAPI webapi;
@@ -99,7 +90,8 @@ final class ScrollOverride {
      * Installs the override. Only meaningful under JPro: on desktop the {@link WebAPI} consumer
      * never fires and the node keeps its normal flow positioning.
      */
-    void install() {
+    @Override
+    public void install() {
         WebAPI.getWebAPI(node, this::onWebAPI);
     }
 
@@ -133,7 +125,7 @@ final class ScrollOverride {
                     parent == null ? "null" : parent.getClass().getSimpleName(), node);
             return;
         }
-        final Group ov = overlayFor(node.getScene());
+        final Group ov = StickyOverlay.forScene(node.getScene());
         if (ov == null) {
             LOGGER.warn("jpro-sticky: scene root is not a Pane/Group; no overlay host for {}. Node stays in flow.", node);
             return;
@@ -162,8 +154,7 @@ final class ScrollOverride {
         // viewOrder remains the explicit per-node override (JPro/JavaFX sort by viewOrder first).
         originalParent.getChildren().set(originalIndex, placeholder);
         node.setManaged(false);
-        node.getProperties().put(STACK_ORDER_KEY, stackOrder);
-        insertIntoOverlaySorted();
+        StickyOverlay.insertSorted(overlay, node, stackOrder);
         node.applyCss();
 
         // Signals that require a re-sync: the placeholder's geometry (flow position/size), the
@@ -199,8 +190,6 @@ final class ScrollOverride {
             return;
         }
         final boolean fixed = position == ScrollPosition.FIXED;
-        final Axis hz = anchor.horizontal();
-        final Axis vt = anchor.vertical();
 
         final Rectangle2D vp = webapi.getBrowserViewport();
         final double viewportTop = (vp == null) ? 0.0 : vp.getMinY();
@@ -209,7 +198,7 @@ final class ScrollOverride {
 
         // End/center/stretch anchors need a real viewport size; skip until one is known (the
         // browserViewport listener re-syncs once it arrives).
-        if (needsViewportSize() && (viewportW <= 0 || viewportH <= 0)) {
+        if (AnchorGeometry.needsAvailableSize(anchor) && (viewportW <= 0 || viewportH <= 0)) {
             LOGGER.debug("jpro-sticky[{}]: sync skipped, viewport size {}x{}", jsKey, viewportW, viewportH);
             return;
         }
@@ -219,51 +208,15 @@ final class ScrollOverride {
         final double flowX = flowTopLeft.getX();
         final double flowTop = flowTopLeft.getY();
 
-        // --- Horizontal axis: resolve node width and the constant viewport x. ---
-        final double nodeW;
-        final double x;
-        switch (hz.mode) {
-            case STRETCH:
-                nodeW = Math.max(0, viewportW - hz.start - hz.end);
-                x = hz.start;
-                break;
-            case PIN_START:
-                nodeW = naturalWidth();
-                x = hz.start;
-                break;
-            case PIN_END:
-                nodeW = naturalWidth();
-                x = viewportW - nodeW - hz.end;
-                break;
-            case CENTER:
-                nodeW = naturalWidth();
-                x = (viewportW - nodeW) / 2.0 + hz.start;
-                break;
-            default: // NATURAL: sticky keeps its full flow width; fixed is a natural-width chip.
-                nodeW = fixed ? naturalWidth() : flowW;
-                x = flowX;
-        }
-
-        // --- Vertical axis: resolve node height and the viewport pin line y0. ---
-        final double nodeH;
-        final double y0;
-        switch (vt.mode) {
-            case STRETCH:
-                nodeH = Math.max(0, viewportH - vt.start - vt.end);
-                y0 = vt.start;
-                break;
-            case PIN_END:
-                nodeH = naturalHeight(nodeW);
-                y0 = viewportH - nodeH - vt.end;
-                break;
-            case CENTER:
-                nodeH = naturalHeight(nodeW);
-                y0 = (viewportH - nodeH) / 2.0 + vt.start;
-                break;
-            default: // NATURAL / PIN_START: pin line is the start inset (0 for a bare NATURAL).
-                nodeH = naturalHeight(nodeW);
-                y0 = vt.start;
-        }
+        // Resolve the anchor against the browser viewport (the same resolver the desktop path uses
+        // against the scene), so web and desktop pin identical geometry from the same anchor.
+        final AnchorGeometry g = AnchorGeometry.resolve(anchor, viewportW, viewportH,
+                AnchorGeometry.naturalWidth(node), w -> AnchorGeometry.naturalHeight(node, w),
+                flowX, flowW, fixed);
+        final double nodeW = g.nodeW;
+        final double nodeH = g.nodeH;
+        final double x = g.x;
+        final double y0 = g.y0;
 
         node.resize(nodeW, nodeH);
         // FIXED is out of flow: the placeholder reserves no vertical space. STICKY keeps its slot.
@@ -305,17 +258,6 @@ final class ScrollOverride {
         }
     }
 
-    /** @return whether any axis needs the viewport size (end/center/stretch anchors). */
-    private boolean needsViewportSize() {
-        return isViewportSized(anchor.horizontal()) || isViewportSized(anchor.vertical());
-    }
-
-    private static boolean isViewportSized(Axis axis) {
-        return axis.mode == ScrollAnchor.Mode.PIN_END
-                || axis.mode == ScrollAnchor.Mode.CENTER
-                || axis.mode == ScrollAnchor.Mode.STRETCH;
-    }
-
     /**
      * The scene-y at which a bounded STICKY node releases (rides up out of its containing block):
      * {@code containerBottom - nodeH}. Returns {@code -1} (unbounded, document-long) for FIXED, for
@@ -328,23 +270,6 @@ final class ScrollOverride {
         final double containerBottom =
                 container.localToScene(0, container.getLayoutBounds().getHeight()).getY();
         return containerBottom - nodeH;
-    }
-
-    private double naturalWidth() {
-        if (node instanceof Region) {
-            final Region r = (Region) node;
-            return Math.max(r.prefWidth(-1), r.minWidth(-1));
-        }
-        return node.getLayoutBounds().getWidth();
-    }
-
-    private double naturalHeight(double forWidth) {
-        // prefHeight alone ignores minHeight, so a min-constrained node would reserve too little.
-        if (node instanceof Region) {
-            final Region r = (Region) node;
-            return Math.max(r.prefHeight(forWidth), r.minHeight(forWidth));
-        }
-        return node.getLayoutBounds().getHeight();
     }
 
     /**
@@ -414,7 +339,8 @@ final class ScrollOverride {
      * Reverses everything this override installed: deregisters listeners, restores the node to
      * its flow slot, and clears the compositor animation and its {@code <style>} element.
      */
-    void uninstall() {
+    @Override
+    public void uninstall() {
         torndown = true;
 
         if (sceneWaiter != null) {
@@ -437,10 +363,7 @@ final class ScrollOverride {
         }
 
         // Restore the node to its flow slot.
-        if (overlay != null) {
-            overlay.getChildren().remove(node);
-        }
-        node.getProperties().remove(STACK_ORDER_KEY);
+        StickyOverlay.remove(overlay, node);
         if (originalParent != null && placeholder != null) {
             final int idx = originalParent.getChildren().indexOf(placeholder);
             if (idx >= 0) {
@@ -470,29 +393,6 @@ final class ScrollOverride {
         });
     }
 
-    /**
-     * Adds {@link #node} to the overlay at the index that keeps the overlay's children ordered by
-     * {@link #stackOrder} ascending, so a later-declared node ends up later in the list (painted on
-     * top). Every overlay child is a reparented sticky/fixed node carrying {@link #STACK_ORDER_KEY}.
-     */
-    private void insertIntoOverlaySorted() {
-        final var kids = overlay.getChildren();
-        int insertAt = kids.size();
-        for (int i = 0; i < kids.size(); i++) {
-            if (stackOrderOf(kids.get(i)) > stackOrder) {
-                insertAt = i;
-                break;
-            }
-        }
-        kids.add(insertAt, node);
-    }
-
-    /** The {@link #stackOrder} stashed on a reparented node, or {@code MIN_VALUE} if absent. */
-    private static long stackOrderOf(Node n) {
-        final Object v = n.getProperties().get(STACK_ORDER_KEY);
-        return (v instanceof Long) ? (Long) v : Long.MIN_VALUE;
-    }
-
     private static void removeCompositorStyle(WebAPI webapi, String jsKey) {
         webapi.executeScript(
                 "(function(){\n" +
@@ -501,33 +401,5 @@ final class ScrollOverride {
                 "  if(st.style && st.style.parentNode) st.style.parentNode.removeChild(st.style);\n" +
                 "  delete reg['" + jsKey + "'];\n" +
                 "})();");
-    }
-
-    /**
-     * Returns the scene's shared sticky overlay, creating it on first use. A {@link Group} (not a
-     * {@link Pane}): JPro picks server-side in the FX graph, so a Group's pick is the union of its
-     * children (empty = transparent to clicks) whereas a full-document Pane would swallow them.
-     * Unmanaged and left at layout origin, so it shares the scene's (document) coordinate space.
-     *
-     * @return the overlay, or {@code null} if the scene root cannot host one
-     */
-    private static Group overlayFor(Scene scene) {
-        final Object existing = scene.getProperties().get(OVERLAY_KEY);
-        if (existing instanceof Group) {
-            return (Group) existing;
-        }
-        final Parent sceneRoot = scene.getRoot();
-        final Group ov = new Group();
-        ov.setManaged(false);
-        ov.setId("jpro-sticky-overlay");
-        if (sceneRoot instanceof Pane) {
-            ((Pane) sceneRoot).getChildren().add(ov);
-        } else if (sceneRoot instanceof Group) {
-            ((Group) sceneRoot).getChildren().add(ov);
-        } else {
-            return null;
-        }
-        scene.getProperties().put(OVERLAY_KEY, ov);
-        return ov;
     }
 }
