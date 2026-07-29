@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -26,6 +27,9 @@ import one.jpro.platform.sticky.ScrollPosition;
  *       (bounded by the page-spanning root, so effectively document-long);</li>
  *   <li>a bounded section whose sticky sub-header pins while the section is in view and then
  *       <em>releases</em> at the section's end (CSS-native containment);</li>
+ *   <li>a {@link javafx.scene.control.ScrollPane} section whose sub-header pins to the viewport top
+ *       and then releases. This is the sticky path that runs on the <em>desktop</em> (and in the browser
+ *       when the scroll is a server-side FX ScrollPane), so desktop and web share one code path;</li>
  *   <li>{@link ScrollPosition#FIXED fixed} elements at every anchor kind: a full-width bottom bar
  *       (stretch), a bottom-right FAB (corner), a top-centered toast (center), and a translucent
  *       full-viewport frame (stretch on both axes).</li>
@@ -72,6 +76,15 @@ public class ScrollSample extends Application {
         final var flowButton = countButton("Flow button (not pinned)");
         VBox.setMargin(flowButton, new Insets(12, 16, 4, 16));
         root.getChildren().add(flowButton);
+
+        // A JavaFX ScrollPane section, wrapped in a titled card so it reads as one contained panel. This
+        // is the one demo that exercises STICKY on the DESKTOP: desktop content only scrolls through a
+        // ScrollPane, so that is where sticky lives (FXStickyImpl). The same code runs in the browser too,
+        // because there the scroll is a server-driven FX ScrollPane. One code path, both platforms. Placed
+        // high so it is visible in the desktop window.
+        final var scrollSection = scrollPaneSection();
+        VBox.setMargin(scrollSection, new Insets(12, 16, 8, 16));
+        root.getChildren().add(scrollSection);
 
         root.getChildren().addAll(filler(1, 25));
 
@@ -132,6 +145,57 @@ public class ScrollSample extends Application {
 
         VBox.setVgrow(root, Priority.ALWAYS);
         return root;
+    }
+
+    /**
+     * A {@link ScrollPane} section whose sub-header pins to the viewport top while its sub-section
+     * scrolls through, then <em>releases</em> at the sub-section's end (the containing block). This is
+     * the {@link one.jpro.platform.sticky.ScrollPosition#STICKY STICKY} path that runs on the desktop:
+     * on desktop, content scrolls only through a ScrollPane, and in the browser the very same code runs
+     * because the scroll is a server-side FX ScrollPane. The sub-header is a click-counting button, so
+     * it also proves picking lands while pinned.
+     *
+     * @return a titled card wrapping a ScrollPane with a bounded sticky sub-header over tall content
+     */
+    private static VBox scrollPaneSection() {
+        final var content = new VBox();
+
+        // A short lead-in so the sub-header starts unpinned and visibly pins as you scroll into it.
+        content.getChildren().addAll(filler(1, 4));
+
+        // The bounded sub-section: its sub-header pins at the viewport top, then releases at the bottom.
+        final var sub = new VBox();
+        final var subHeader = barButton("ScrollPane sticky header (pins, then releases)", Styles.ACCENT);
+        subHeader.setMinHeight(40);
+        sub.getChildren().add(subHeader);
+        sub.getChildren().addAll(filler(5, 24));
+        content.getChildren().add(sub);
+
+        // Trailing content so the sub-section can scroll fully past and the release is visible.
+        content.getChildren().addAll(filler(25, 32));
+
+        final var scrollPane = new ScrollPane(content);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefViewportHeight(240);
+        scrollPane.setMinHeight(240);
+        // Let the card border be the only frame: drop the ScrollPane's own border and background.
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+
+        // Pin the sub-header to the viewport top, bounded by its parent sub-section (the default block).
+        Scroll.setStickyPosition(subHeader);
+
+        // Wrap in a titled, bordered card so it is obvious where the ScrollPane begins and ends (its rows
+        // would otherwise blend into the page content below). Theme colours only, no new dependencies.
+        final var title = new Label("JavaFX ScrollPane: Sticky works on desktop in addition to web.");
+        title.getStyleClass().add(Styles.TEXT_MUTED);
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.setStyle("-fx-background-color: -color-bg-subtle; -fx-background-radius: 7 7 0 0; "
+                + "-fx-padding: 8 12; -fx-border-color: -color-border-muted; -fx-border-width: 0 0 1 0;");
+
+        final var card = new VBox(title, scrollPane);
+        card.setStyle("-fx-border-color: -color-border-default; -fx-border-width: 1; "
+                + "-fx-border-radius: 8; -fx-background-radius: 8;");
+        return card;
     }
 
     /**
