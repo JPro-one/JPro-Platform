@@ -50,8 +50,18 @@ final class ScrollOverride {
     /** Sequence for unique per-node JS registry keys. */
     private static final AtomicLong KEY_SEQ = new AtomicLong();
 
+    /**
+     * Monotonic order in which overrides are constructed (i.e. the order {@code setScrollPosition}
+     * is called). The overlay is kept sorted by it so the stacking/paint order is deterministic and
+     * follows source order, rather than the async order in which installs happen to complete.
+     */
+    private static final AtomicLong STACK_SEQ = new AtomicLong();
+
     /** Scene property key under which the shared sticky overlay {@link Group} is cached. */
     private static final Object OVERLAY_KEY = new Object();
+
+    /** Node property key stashing a reparented node's {@link #stackOrder}, read by sibling overrides. */
+    private static final Object STACK_ORDER_KEY = new Object();
 
     private final Node node;
     private final ScrollPosition position;
@@ -59,6 +69,7 @@ final class ScrollOverride {
     /** Explicit containment override for STICKY; {@code null} defaults to the original parent. */
     private final Node within;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
+    private final long stackOrder = STACK_SEQ.getAndIncrement();
 
     // Resolved at install time.
     private WebAPI webapi;
@@ -144,10 +155,15 @@ final class ScrollOverride {
         placeholder = new Region();
         placeholder.setMaxWidth(Double.MAX_VALUE);
 
-        // Swap node -> placeholder in the flow, and move the node into the overlay.
+        // Swap node -> placeholder in the flow, and move the node into the overlay. Insert so the
+        // overlay stays sorted by stackOrder: the paint/stacking order then follows the order
+        // setScrollPosition was called (source order) instead of the async order installs complete.
+        // The library takes no stance on fixed-vs-sticky; a later-declared node paints on top, and
+        // viewOrder remains the explicit per-node override (JPro/JavaFX sort by viewOrder first).
         originalParent.getChildren().set(originalIndex, placeholder);
         node.setManaged(false);
-        overlay.getChildren().add(node);
+        node.getProperties().put(STACK_ORDER_KEY, stackOrder);
+        insertIntoOverlaySorted();
         node.applyCss();
 
         // Signals that require a re-sync: the placeholder's geometry (flow position/size), the
@@ -424,6 +440,7 @@ final class ScrollOverride {
         if (overlay != null) {
             overlay.getChildren().remove(node);
         }
+        node.getProperties().remove(STACK_ORDER_KEY);
         if (originalParent != null && placeholder != null) {
             final int idx = originalParent.getChildren().indexOf(placeholder);
             if (idx >= 0) {
@@ -451,6 +468,29 @@ final class ScrollOverride {
                 removeCompositorStyle(w, key);
             }
         });
+    }
+
+    /**
+     * Adds {@link #node} to the overlay at the index that keeps the overlay's children ordered by
+     * {@link #stackOrder} ascending, so a later-declared node ends up later in the list (painted on
+     * top). Every overlay child is a reparented sticky/fixed node carrying {@link #STACK_ORDER_KEY}.
+     */
+    private void insertIntoOverlaySorted() {
+        final var kids = overlay.getChildren();
+        int insertAt = kids.size();
+        for (int i = 0; i < kids.size(); i++) {
+            if (stackOrderOf(kids.get(i)) > stackOrder) {
+                insertAt = i;
+                break;
+            }
+        }
+        kids.add(insertAt, node);
+    }
+
+    /** The {@link #stackOrder} stashed on a reparented node, or {@code MIN_VALUE} if absent. */
+    private static long stackOrderOf(Node n) {
+        final Object v = n.getProperties().get(STACK_ORDER_KEY);
+        return (v instanceof Long) ? (Long) v : Long.MIN_VALUE;
     }
 
     private static void removeCompositorStyle(WebAPI webapi, String jsKey) {
