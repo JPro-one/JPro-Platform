@@ -4,9 +4,9 @@
 content until it reaches an edge, then stays pinned) or **fixed** (always pinned to the viewport).
 It mirrors the CSS `position` property for nodes rendered by JPro.
 
-On the web the pinning runs as a **compositor scroll-timeline override**, so scrolling stays smooth
-with no JavaFX layout pass per scroll event. On the desktop the mode is a no-op and the node keeps
-its normal flow positioning, so the same code runs in both targets.
+The same code runs on the web and the desktop, with no platform-specific branches. On the web the pin
+is a compositor effect, so scrolling stays smooth without a JavaFX layout pass per scroll event. Two
+setup caveats apply; see [Usage notes](#usage-notes).
 
 ## Installation
 
@@ -97,10 +97,10 @@ chip). For a full-span bar use `setFixedBar`.
 
 ### The anchor model
 
-Under the convenience methods sits `ScrollAnchor`, an immutable value object that resolves the
+Under the convenience methods is `ScrollAnchor`, an immutable value object that resolves the
 horizontal and vertical axes **independently**. Each axis takes one of: pin start, pin end, center,
-or stretch (pin both edges). This is what lets a single model express corners, bars, toasts, and
-overlays. Build one fluently from `ScrollAnchor.of()`:
+or stretch (pin both edges). Those four modes cover corners, bars, toasts, and overlays. Build one
+fluently from `ScrollAnchor.of()`:
 
 ```java
 import one.jpro.platform.sticky.ScrollAnchor;
@@ -119,8 +119,7 @@ Scroll.setFixedPosition(toast, ScrollAnchor.of().top(16).centerX());
 ```
 
 Setting two conflicting things on one axis (for example `centerX()` and `left(0)`) throws
-`IllegalStateException`. Setting a `CENTER` or `STRETCH` axis on a **sticky** node throws
-`IllegalArgumentException`, since CSS sticky neither centers nor stretches.
+`IllegalStateException`.
 
 ## Canonical setter
 
@@ -138,11 +137,23 @@ Scroll.setScrollPosition(subHeader, ScrollPosition.STICKY, ScrollAnchor.of().top
 Edge-based overloads (`setScrollPosition(node, position, Side, offset)` and the bare
 `setScrollPosition(node, position)`) cover the single-edge case.
 
-## Native-scrolling page requirement
+**Note:** with `STICKY`, the anchor must pin edges only. An anchor that centers or stretches an axis
+throws `IllegalArgumentException` (those are fixed-only). The `setStickyPosition` convenience methods
+can't hit this, since they take a `Side`.
 
-The web override tracks the page's own scroll, so the hosting page **must scroll natively**. Enable
-native scrolling on the `<jpro-app>` tag and let the body scroll. Without this there is no scroll for
-the compositor timeline to follow and nothing pins:
+## Usage notes
+
+The same `Scroll` calls work on the web and the desktop. Two things to know:
+
+**Sticky needs something to scroll.** A sticky node pins against its scrolling container: the page on
+the web, or an enclosing `ScrollPane` on either target. A sticky node on the desktop with no
+scrolling ancestor never moves, just as `position: sticky` does on a page that doesn't scroll. Fixed
+has no such condition; it always pins to the viewport.
+
+**On the web, enable native scrolling.** Sticky and fixed track the page's own scroll, so the
+hosting page must scroll natively: set `nativescrolling="true"` on `<jpro-app>` and let the body
+scroll. Without it there is no page scroll to follow and nothing pins. (A node that only pins inside
+a `ScrollPane` doesn't need this.)
 
 ```html
 <style>
@@ -156,22 +167,35 @@ the compositor timeline to follow and nothing pins:
 <jpro-app href="/app/default" nativescrolling="true" fxHeight="true" nativeZooming="true"></jpro-app>
 ```
 
-## Scope and limits (v1)
+### Stacking order
 
-- **Web only.** The pin is a browser compositor effect. On the desktop every mode is an inert no-op
-  and the node stays in normal flow.
-- **Native scrolling required.** See the section above.
-- **Sticky is edge-only.** Center and stretch anchors are rejected for sticky; they are valid for
-  fixed.
+When pinned nodes overlap, stacking follows the order you set them in: the node whose position you
+set last paints on top. To control it explicitly, set the JavaFX `viewOrder` property, which takes
+precedence over call order. A node with a lower `viewOrder` paints in front:
+
+```java
+Scroll.setFixedPosition(dialog, Pos.CENTER);
+Scroll.setFixedFullscreen(scrim);   // set later, so by default it would cover the dialog
+dialog.setViewOrder(0);             // lower viewOrder wins: dialog paints in front
+scrim.setViewOrder(1);
+```
+
+### Under the hood
+
+**Pinned nodes are reparented.** While a node is fixed (web and desktop) or page-level sticky on the
+web, it is moved into a scene overlay, with a zero-size placeholder left in its original layout slot.
+So `node.getParent()` and scene-graph lookups see it relocated until you clear the position. A sticky
+node inside a `ScrollPane` is the exception: it stays in place.
 
 ## Running the example
 
 `ScrollSample` demonstrates the full surface: a sticky page header, a bounded sticky section
 sub-header that releases at the section end, and fixed elements at every anchor kind (bottom bar,
 corner FAB, centered toast, full-viewport frame). Several of them are click-counter buttons so
-picking through the overlay is visible.
+picking through the overlay is visible. It also includes a `ScrollPane` card whose sticky header
+pins inside the pane, which behaves the same on desktop and web.
 
-Because it needs a native-scrolling page, run it on the web with the JPro Gradle plugin:
+Run it on the web with the JPro Gradle plugin (the page-level elements need native scrolling):
 
 ```shell
 ./gradlew jpro-sticky:example:jproRun
