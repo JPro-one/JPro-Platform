@@ -1,0 +1,186 @@
+package one.jpro.platform.sticky;
+
+import com.jpro.webapi.WebAPI;
+import javafx.geometry.Side;
+import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * Headless JavaFX tests of the desktop implementations selected by {@link ScrollDispatcher} when
+ * {@link WebAPI#isBrowser()} is false: {@link FXFixedImpl} (a scene-root overlay) and
+ * {@link FXStickyImpl} (a {@code translate} pin inside a {@link ScrollPane}). They drive the public
+ * {@link Scroll} facade end-to-end and assert the observable desktop behaviour — reparenting, the pin
+ * offset, containment release, and clean teardown — that STICKY_DESIGN.md §5/§8 promises is identical
+ * to the web path.
+ * <p>
+ * {@code isBrowser()} is stubbed to {@code false} <em>inside</em> the FX-thread action, because a
+ * {@link MockedStatic} is confined to the thread that opens it and installation runs on the FX thread.
+ * Layout is forced synchronously so the {@code ScrollPane} yields real viewport bounds.
+ *
+ * @author Tobias Horak
+ */
+class DesktopScrollImplTest {
+
+    private static final double EPS = 1e-6;
+
+    @BeforeAll
+    static void initToolkit() throws InterruptedException {
+        FxTestSupport.startToolkit();
+    }
+
+    /** Applies CSS and lays out the tree so ScrollPane skins produce real viewport bounds. */
+    private static void layout(Parent root) {
+        root.applyCss();
+        root.layout();
+    }
+
+    // ---------------------------------------------------------------------
+    // FIXED (desktop) -> FXFixedImpl: node moves into the scene overlay, restores on clear
+    // ---------------------------------------------------------------------
+
+    @Test
+    void fixedReparentsNodeIntoOverlayAndRestoresOnClear() {
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label above = new Label("above");
+                Label node = new Label("fixed");
+                Label below = new Label("below");
+                VBox parent = new VBox(above, node, below);
+                StackPane root = new StackPane(parent);
+                Scene scene = new Scene(root, 400, 600);
+                layout(root);
+                assertSame(parent, node.getParent());
+                int originalIndex = parent.getChildren().indexOf(node);
+
+                Scroll.setFixedPosition(node, Side.TOP, 0);
+
+                // The node is lifted out of the VBox into the shared scene overlay; a placeholder holds
+                // its slot so the flow does not collapse.
+                Group overlay = StickyOverlay.forScene(scene);
+                assertSame(overlay, node.getParent(), "fixed node should be mounted in the overlay");
+                assertFalse(parent.getChildren().contains(node), "node should have left its flow parent");
+                assertEquals(3, parent.getChildren().size(), "placeholder should keep the slot count");
+                assertFalse(node.isManaged(), "an overlay-mounted fixed node is unmanaged");
+
+                Scroll.clearScrollPosition(node);
+
+                // Clearing puts the node back exactly where it was and empties the overlay.
+                assertSame(parent, node.getParent(), "node should return to its flow parent");
+                assertEquals(originalIndex, parent.getChildren().indexOf(node), "node should return to its slot");
+                assertEquals(3, parent.getChildren().size());
+                assertTrue(node.isManaged(), "restored node should be managed again");
+                assertFalse(overlay.getChildren().contains(node), "overlay should no longer hold the node");
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------------
+    // STICKY (desktop, ScrollPane ancestor) -> FXStickyImpl: translate pins to the pin line
+    // ---------------------------------------------------------------------
+
+    @Test
+    void stickyPinsToViewportTopWhenScrolledPast() {
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label header = new Label("HEADER");
+                header.setPrefHeight(40);
+                VBox content = tallContent(header);
+                ScrollPane sp = new ScrollPane(content);
+                sp.setPrefViewportHeight(300);
+                sp.setPrefViewportWidth(320);
+                StackPane root = new StackPane(sp);
+                new Scene(root, 320, 300);
+                layout(root);
+
+                Scroll.setStickyPosition(header, Side.TOP, 0);
+                assertEquals(0, header.getTranslateY(), EPS, "unscrolled: header sits in flow");
+
+                sp.setVvalue(sp.getVmax()); // scroll to the bottom; the sticky listener re-pins
+                layout(root);
+
+                // Pinned to the top edge: the header rides down by exactly the scroll offset so it stays
+                // at the viewport top, and while stuck it paints in front (negative viewOrder).
+                double scrollOffset = content.getLayoutBounds().getHeight() - sp.getViewportBounds().getHeight();
+                assertTrue(scrollOffset > 0, "test setup must actually scroll");
+                assertEquals(scrollOffset, header.getTranslateY(), EPS, "header should pin to the viewport top");
+                assertTrue(header.getViewOrder() < 0, "a stuck header should paint above its siblings");
+
+                Scroll.clearScrollPosition(header);
+                assertEquals(0, header.getTranslateY(), EPS, "clearing restores the flow position");
+                assertEquals(0, header.getViewOrder(), EPS, "clearing restores the resting viewOrder");
+            }
+        });
+    }
+
+    @Test
+    void stickyReleasesAtContainingBlockBottom() {
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label header = new Label("HEADER");
+                header.setPrefHeight(40);
+                Region sectionBody = new Region();
+                sectionBody.setPrefHeight(160);
+                VBox section = new VBox(header, sectionBody); // 200px containing block at the very top
+                VBox content = new VBox(section);
+                for (int i = 0; i < 40; i++) {
+                    Region filler = new Region();
+                    filler.setPrefHeight(50);
+                    content.getChildren().add(filler); // make the document tall enough to scroll well past
+                }
+                ScrollPane sp = new ScrollPane(content);
+                sp.setPrefViewportHeight(300);
+                sp.setPrefViewportWidth(320);
+                StackPane root = new StackPane(sp);
+                new Scene(root, 320, 300);
+                layout(root);
+
+                // Bind the pin to the 200px section: the header may only ride to the section's bottom.
+                Scroll.setStickyPosition(header, Side.TOP, 0, section);
+
+                sp.setVvalue(sp.getVmax());
+                layout(root);
+
+                double unboundedPin = content.getLayoutBounds().getHeight() - sp.getViewportBounds().getHeight();
+                double releaseCap = section.getLayoutBounds().getHeight() - header.getLayoutBounds().getHeight();
+                assertTrue(unboundedPin > releaseCap,
+                        "test must scroll past the release point (" + unboundedPin + " vs " + releaseCap + ")");
+                // Clamped to the containing block: the header stops at (section height - its own height)
+                // instead of following the scroll all the way — the CSS sticky release.
+                assertEquals(releaseCap, header.getTranslateY(), EPS,
+                        "header should release at the section bottom, not follow the scroll");
+            }
+        });
+    }
+
+    /** A VBox whose first child is {@code header} (40px) followed by 40 x 50px rows: 2040px tall. */
+    private static VBox tallContent(Label header) {
+        VBox content = new VBox(header);
+        for (int i = 0; i < 40; i++) {
+            Region row = new Region();
+            row.setPrefHeight(50);
+            content.getChildren().add(row);
+        }
+        return content;
+    }
+}
