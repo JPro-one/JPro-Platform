@@ -95,9 +95,6 @@ tasks.register('copyChangelog') {
 
 buildscript {
     repositories {
-        // TEMP (M3): consume the locally-published jpro 2026.3.1-SNAPSHOT (M1 viewport API).
-        // Revert with the JPRO_VERSION bump once M1 lands in a released JPro.
-        mavenLocal()
         gradlePluginPortal()
         maven {
             url "https://sandec.jfrog.io/artifactory/repo"
@@ -146,9 +143,6 @@ subprojects {
     }
 
     repositories {
-        // TEMP (M3): consume the locally-published jpro 2026.3.1-SNAPSHOT (M1 viewport API).
-        // Revert with the JPRO_VERSION bump once M1 lands in a released JPro.
-        mavenLocal()
         mavenCentral()
         maven {
             url "https://sandec.jfrog.io/artifactory/repo"
