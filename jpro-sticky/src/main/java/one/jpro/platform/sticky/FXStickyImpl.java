@@ -8,6 +8,8 @@ import javafx.scene.control.ScrollPane;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
 import one.jpro.platform.sticky.ScrollAnchor.Mode;
 
+import java.util.function.Consumer;
+
 /**
  * The {@link ScrollPosition#STICKY} implementation for a node inside a JavaFX {@link ScrollPane} —
  * used on desktop, and also in the browser when the scroll is a server-driven FX {@code ScrollPane}
@@ -42,6 +44,8 @@ final class FXStickyImpl implements ScrollImpl {
     /** Containing block that bounds the pin; {@code null} falls back to the node's parent at attach. */
     private final Node within;
     private final ScrollPane scrollPane;
+    /** Pin/unpin transition sink (the node's stuck channels); {@code null} if unobserved. */
+    private final Consumer<Boolean> stuckSink;
 
     private Node content;
     private Node container;
@@ -51,11 +55,13 @@ final class FXStickyImpl implements ScrollImpl {
     private final InvalidationListener relayout = obs -> sync();
     private boolean torndown;
 
-    FXStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane) {
+    FXStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane,
+                 Consumer<Boolean> stuckSink) {
         this.node = node;
         this.anchor = anchor;
         this.within = within;
         this.scrollPane = scrollPane;
+        this.stuckSink = stuckSink;
     }
 
     @Override
@@ -116,6 +122,9 @@ final class FXStickyImpl implements ScrollImpl {
         if (nowStuck != stuck) {
             stuck = nowStuck;
             node.setViewOrder(nowStuck ? STUCK_VIEW_ORDER : restingViewOrder);
+            if (stuckSink != null) {
+                stuckSink.accept(nowStuck);
+            }
         }
     }
 

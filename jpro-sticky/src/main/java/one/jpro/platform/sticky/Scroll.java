@@ -1,11 +1,15 @@
 package one.jpro.platform.sticky;
 
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.css.PseudoClass;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
 import one.jpro.platform.sticky.ScrollAnchor.Mode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.Consumer;
 
 /**
  * Entry point for applying scroll-aware positioning ({@link ScrollPosition#STICKY sticky}
@@ -53,6 +57,19 @@ public final class Scroll {
 
     /** Property key under which the active {@link ScrollOverride} is stashed on a node. */
     private static final Object OVERRIDE_KEY = new Object();
+
+    /** Property key under which the node's {@link StuckState} (pin-state channels) is stashed. */
+    private static final Object STUCK_STATE_KEY = new Object();
+
+    /**
+     * The {@code :stuck} JavaFX pseudo-class, toggled on a {@link ScrollPosition#STICKY} node while it
+     * is currently pinned. It is a JavaFX pseudo-class (resolved server-side under JPro, like
+     * {@code :hover}), so it works identically on desktop and web:
+     * <pre>{@code .site-header:stuck { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4); } }</pre>
+     * Equivalent to {@code PseudoClass.getPseudoClass("stuck")}, exposed for programmatic styling and
+     * testing.
+     */
+    public static final PseudoClass STUCK_PSEUDO_CLASS = StuckState.STUCK;
 
     private Scroll() {
         // utility class
@@ -291,6 +308,13 @@ public final class Scroll {
         // switching sticky <-> fixed (or clearing) never leaks the previous override/listeners.
         teardown(node);
 
+        // A prior pin's stuck state is meaningless once its impl is gone: clear it up front (which
+        // removes the :stuck pseudo-class) so switching sticky -> fixed/static never leaves it set.
+        final StuckState existing = stuckState(node, false);
+        if (existing != null) {
+            existing.set(false);
+        }
+
         if (position == ScrollPosition.STATIC) {
             node.getProperties().remove(POSITION_KEY);
             node.getProperties().remove(ANCHOR_KEY);
@@ -305,9 +329,15 @@ public final class Scroll {
         node.getProperties().put(POSITION_KEY, position);
         node.getProperties().put(ANCHOR_KEY, anchor);
 
+        // STICKY publishes its pin state through the node's StuckState (stuckProperty + :stuck); the
+        // active sticky impl drives it via this sink. FIXED is always pinned -> never transitions ->
+        // no sink (and it never touches the stuck channels).
+        final Consumer<Boolean> stuckSink =
+                (position == ScrollPosition.STICKY) ? stuckState(node, true)::set : null;
+
         // Select the implementation (desktop FX vs web compositor) once the node is in a scene, and
         // stash it so teardown(node) can reverse it. The choice is invisible to the caller.
-        final ScrollImpl impl = new ScrollDispatcher(node, position, anchor, within);
+        final ScrollImpl impl = new ScrollDispatcher(node, position, anchor, within, stuckSink);
         node.getProperties().put(OVERRIDE_KEY, impl);
         impl.install();
         LOGGER.debug("Scroll position {} applied to node {}", position, node);
@@ -328,8 +358,69 @@ public final class Scroll {
     }
 
     // ---------------------------------------------------------------------
+    // Observability — is a sticky node currently pinned ("stuck")?
+    // ---------------------------------------------------------------------
+
+    /**
+     * A read-only property that is {@code true} while a {@link ScrollPosition#STICKY} node is currently
+     * pinned ("stuck") and {@code false} otherwise. Publishes the same pin-state transition as the
+     * {@link #STUCK_PSEUDO_CLASS} pseudo-class, so the two never drift.
+     * <p>
+     * The returned property is <strong>stable</strong>: the same instance is handed back across
+     * clear / re-apply, so a listener attached once survives mode swaps. A {@link ScrollPosition#STATIC}
+     * or {@link ScrollPosition#FIXED} node reads {@code false} (a fixed node is always pinned, so its
+     * stuck state never carries information). A sticky node with nothing to scroll against (desktop,
+     * no scroll ancestor) also stays {@code false} — matching CSS sticky in a non-scrolling page.
+     * <p>
+     * On the web compositor path the flip tracks the {@link com.jpro.webapi.WebAPI#browserViewport()}
+     * sync cadence (the same fidelity picking already has), not per animation frame; see the module
+     * README's observability note.
+     *
+     * @param node the node to observe; must not be {@code null}
+     * @return the node's stable stuck property
+     */
+    public static ReadOnlyBooleanProperty stuckProperty(Node node) {
+        if (node == null) {
+            throw new NullPointerException("node must not be null");
+        }
+        return stuckState(node, true).property();
+    }
+
+    /**
+     * Whether the node is currently pinned ("stuck"). Shorthand for {@code stuckProperty(node).get()}.
+     *
+     * @param node the node to query; must not be {@code null}
+     * @return {@code true} if the node is a sticky node that is currently pinned
+     */
+    public static boolean isStuck(Node node) {
+        if (node == null) {
+            throw new NullPointerException("node must not be null");
+        }
+        final StuckState state = stuckState(node, false);
+        return state != null && state.get();
+    }
+
+    // ---------------------------------------------------------------------
     // Internals
     // ---------------------------------------------------------------------
+
+    /**
+     * Looks up the node's {@link StuckState}, optionally creating (and caching) it. Created lazily on
+     * first sticky application or first {@link #stuckProperty} call and kept for the node's life so the
+     * property instance — and thus listener identity — stays stable.
+     */
+    private static StuckState stuckState(Node node, boolean create) {
+        final Object value = node.getProperties().get(STUCK_STATE_KEY);
+        if (value instanceof StuckState) {
+            return (StuckState) value;
+        }
+        if (!create) {
+            return null;
+        }
+        final StuckState created = new StuckState(node);
+        node.getProperties().put(STUCK_STATE_KEY, created);
+        return created;
+    }
 
     /** Builds a single-edge {@link ScrollAnchor} from a {@link Side} and offset. */
     private static ScrollAnchor anchorForEdge(Side side, double offset) {

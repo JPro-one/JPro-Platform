@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * The scroll-aware pinning for a single {@link Node}, realised on the web side through a
@@ -49,11 +50,18 @@ final class ScrollOverride implements ScrollImpl {
     /** Sequence for unique per-node JS registry keys. */
     private static final AtomicLong KEY_SEQ = new AtomicLong();
 
+    /** Slack (px) below which the server pin is treated as sitting at the natural flow position. */
+    private static final double STUCK_EPS = 0.5;
+
     private final Node node;
     private final ScrollPosition position;
     private final ScrollAnchor anchor;
     /** Explicit containment override for STICKY; {@code null} defaults to the original parent. */
     private final Node within;
+    /** Pin/unpin transition sink (the node's stuck channels); {@code null} for FIXED or unobserved. */
+    private final Consumer<Boolean> stuckSink;
+    /** Last stuck value pushed to {@link #stuckSink}, so we only fire on change. */
+    private boolean lastStuck;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
     /**
      * Source-order stack value: the overlay is kept sorted by it (see {@link StickyOverlay}) so the
@@ -79,11 +87,13 @@ final class ScrollOverride implements ScrollImpl {
     private String lastSig = "";
     private boolean torndown = false;
 
-    ScrollOverride(Node node, ScrollPosition position, ScrollAnchor anchor, Node within) {
+    ScrollOverride(Node node, ScrollPosition position, ScrollAnchor anchor, Node within,
+                   Consumer<Boolean> stuckSink) {
         this.node = node;
         this.position = position;
         this.anchor = anchor;
         this.within = within;
+        this.stuckSink = stuckSink;
     }
 
     /**
@@ -239,6 +249,17 @@ final class ScrollOverride implements ScrollImpl {
         final Point2D local = overlay.sceneToLocal(x, serverY);
         node.setLayoutX(local.getX());
         node.setLayoutY(local.getY());
+
+        // Publish the pin state (STICKY only): stuck iff the applied server pin differs from the
+        // natural flow top — the same rule FXStickyImpl uses (appear != natural), so both paths agree.
+        // Fidelity is the browserViewport() sync cadence, not per-frame (the compositor drives motion).
+        if (!fixed && stuckSink != null) {
+            final boolean nowStuck = Math.abs(serverY - flowTop) > STUCK_EPS;
+            if (nowStuck != lastStuck) {
+                lastStuck = nowStuck;
+                stuckSink.accept(nowStuck);
+            }
+        }
 
         final double docH = root.getLayoutBounds().getHeight();
         final String sig = natTop + "|" + y0 + "|" + local.getX() + "|" + relLimitServer + "|"

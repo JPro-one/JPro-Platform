@@ -8,6 +8,8 @@ import javafx.scene.control.ScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Consumer;
+
 /**
  * Selects and installs the concrete {@link ScrollImpl} for a node once it enters a scene — the point
  * at which its parent chain (and thus any {@link ScrollPane} ancestor) is realised. The choice is the
@@ -34,16 +36,20 @@ final class ScrollDispatcher implements ScrollImpl {
     private final ScrollPosition position;
     private final ScrollAnchor anchor;
     private final Node within;
+    /** Sink the chosen STICKY impl feeds pin/unpin transitions to; {@code null} for FIXED. */
+    private final Consumer<Boolean> stuckSink;
 
     private ScrollImpl delegate;
     private ChangeListener<Scene> sceneWaiter;
     private boolean torndown;
 
-    ScrollDispatcher(Node node, ScrollPosition position, ScrollAnchor anchor, Node within) {
+    ScrollDispatcher(Node node, ScrollPosition position, ScrollAnchor anchor, Node within,
+                     Consumer<Boolean> stuckSink) {
         this.node = node;
         this.position = position;
         this.anchor = anchor;
         this.within = within;
+        this.stuckSink = stuckSink;
     }
 
     @Override
@@ -78,20 +84,21 @@ final class ScrollDispatcher implements ScrollImpl {
 
     private ScrollImpl select() {
         if (position == ScrollPosition.FIXED) {
-            // Fixed is viewport/scene-anchored regardless of any ScrollPane ancestry.
+            // Fixed is viewport/scene-anchored regardless of any ScrollPane ancestry. It never
+            // transitions, so stuckSink is null here and no stuck state is published.
             return WebAPI.isBrowser()
-                    ? new ScrollOverride(node, position, anchor, within)
+                    ? new ScrollOverride(node, position, anchor, within, stuckSink)
                     : new FXFixedImpl(node, anchor);
         }
         // STICKY: an FX ScrollPane ancestor means the scroll is server-driven (both on desktop and in
         // the browser), so the pure-FX pin stays in sync by construction.
         final ScrollPane scrollPane = nearestScrollPane(node);
         if (scrollPane != null) {
-            return new FXStickyImpl(node, anchor, within, scrollPane);
+            return new FXStickyImpl(node, anchor, within, scrollPane, stuckSink);
         }
         if (WebAPI.isBrowser()) {
             // Natively scrolled browser document: the compositor override.
-            return new ScrollOverride(node, position, anchor, within);
+            return new ScrollOverride(node, position, anchor, within, stuckSink);
         }
         // Desktop with no scroll ancestor: nothing scrolls, so a sticky element never moves — the
         // same result CSS gives for a sticky element in a non-scrolling page.
