@@ -141,6 +141,37 @@ Edge-based overloads (`setScrollPosition(node, position, Side, offset)` and the 
 throws `IllegalArgumentException` (those are fixed-only). The `setStickyPosition` convenience methods
 can't hit this, since they take a `Side`.
 
+## Observability
+
+You can observe when a sticky node is currently **pinned** ("stuck"). Applying sticky wires this up
+automatically. It is sticky-only: a fixed or static node, or a sticky node with nothing to scroll
+against, always reads `false`.
+
+**CSS channel: the `:stuck` pseudo-class.** A sticky node carries the `:stuck` JavaFX pseudo-class
+while it is pinned. Restyle a stuck header in JavaFX CSS with no Java, the same way you use `:hover`
+or `:focused`:
+
+```css
+.site-header:stuck {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 12, 0, 0, 4);
+}
+```
+
+**Java channel: `stuckProperty`.** For logic and bindings, observe the read-only property:
+
+```java
+import javafx.beans.property.ReadOnlyBooleanProperty;
+
+ReadOnlyBooleanProperty stuck = Scroll.stuckProperty(header);
+stuck.addListener((obs, was, is) -> elevateOnStick(is));
+
+boolean nowPinned = Scroll.isStuck(header);   // == stuckProperty(header).get()
+```
+
+The property is stable: the same instance is returned across clear and re-apply, so a listener
+attached once survives mode swaps. Clearing the position (or switching to fixed or static) sets it
+back to `false` and removes `:stuck`.
+
 ## Usage notes
 
 The same `Scroll` calls work on the web and the desktop. Two things to know:
@@ -187,13 +218,19 @@ web, it is moved into a scene overlay, with a zero-size placeholder left in its 
 So `node.getParent()` and scene-graph lookups see it relocated until you clear the position. A sticky
 node inside a `ScrollPane` is the exception: it stays in place.
 
+**The stuck flip can lag on the web.** There, `:stuck` and `stuckProperty` track the browser-viewport
+sync cadence, so they can lag the visual transition by up to one sync interval. Inside a `ScrollPane`
+the flip is exact.
+
 ## Running the example
 
 `ScrollSample` demonstrates the full surface: a sticky page header, a bounded sticky section
 sub-header that releases at the section end, and fixed elements at every anchor kind (bottom bar,
 corner FAB, centered toast, full-viewport frame). Several of them are click-counter buttons so
 picking through the overlay is visible. It also includes a `ScrollPane` card whose sticky header
-pins inside the pane, which behaves the same on desktop and web.
+pins inside the pane, which behaves the same on desktop and web. It also shows the two observability
+channels: both sticky headers take a drop-shadow from the `:stuck` pseudo-class while pinned (see
+`sticky-sample.css`), and the page header logs its `stuckProperty` transitions to the console.
 
 Run it on the web with the JPro Gradle plugin (the page-level elements need native scrolling):
 
