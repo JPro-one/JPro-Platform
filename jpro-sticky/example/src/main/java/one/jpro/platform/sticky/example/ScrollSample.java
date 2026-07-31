@@ -39,6 +39,12 @@ import one.jpro.platform.sticky.ScrollPosition;
  * the mechanism: clicks must land on a reparented, server-pinned element while it is pinned, and must
  * pass <em>through</em> the mouse-transparent overlay to the content underneath.
  * <p>
+ * <strong>Observability.</strong> The sticky page header and the ScrollPane sub-header carry the
+ * {@code sticky-demo-header} style class, and {@code sticky-sample.css} gives them a drop-shadow via
+ * the auto-toggled {@link Scroll#STUCK_PSEUDO_CLASS :stuck} pseudo-class while they are pinned — the
+ * CSS channel, styled with no Java beyond the sticky call. The page header additionally logs its
+ * {@link Scroll#stuckProperty} transitions — the Java channel. Both flip together from one source.
+ * <p>
  * Styling uses the AtlantaFX {@link CupertinoLight} theme (matching the other platform examples), so
  * the demo reads as one system without any hand-rolled colours.
  *
@@ -50,6 +56,9 @@ public class ScrollSample extends Application {
     public void start(Stage primaryStage) {
         Scene scene = new Scene(createRoot(), 400, 600);
         scene.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
+        // The observability CSS channel: sticky-sample.css restyles a pinned header via the :stuck
+        // pseudo-class alone (see the .sticky-demo-header rule). No Java beyond the sticky call.
+        scene.getStylesheets().add(ScrollSample.class.getResource("sticky-sample.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -68,7 +77,12 @@ public class ScrollSample extends Application {
         // page-spanning root, so it stays pinned document-long.
         final var header = barButton("Sticky page header", Styles.ACCENT);
         header.setMinHeight(48);
+        // Observability: the style class + sticky-sample.css give it a drop-shadow via the :stuck
+        // pseudo-class while it is pinned (the CSS channel), and stuckProperty() feeds the Java channel.
+        header.getStyleClass().add("sticky-demo-header");
         Scroll.setStickyPosition(header);
+        Scroll.stuckProperty(header).addListener((obs, was, is) ->
+                System.out.println("[jpro-sticky] page header stuck=" + is));
         root.getChildren().add(header);
 
         // A normal in-flow button just below the header: clicking it confirms clicks pass through the
@@ -167,6 +181,9 @@ public class ScrollSample extends Application {
         final var sub = new VBox();
         final var subHeader = barButton("ScrollPane sticky header (pins, then releases)", Styles.ACCENT);
         subHeader.setMinHeight(40);
+        // Same :stuck restyle as the page header, but on the FXStickyImpl path, so the CSS channel is
+        // verifiable on the desktop too (the ScrollPane is the desktop scroll surface).
+        subHeader.getStyleClass().add("sticky-demo-header");
         sub.getChildren().add(subHeader);
         sub.getChildren().addAll(filler(5, 24));
         content.getChildren().add(sub);

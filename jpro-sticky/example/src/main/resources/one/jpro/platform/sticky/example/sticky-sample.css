@@ -1,0 +1,9 @@
+/*
+ * Demonstrates the observability CSS channel: the ':stuck' JavaFX pseudo-class that jpro-sticky
+ * auto-toggles on a STICKY node while it is pinned. Restyling a stuck header takes zero Java beyond
+ * the Scroll.setStickyPosition(...) call - a designer just writes this rule. It is a JavaFX
+ * pseudo-class (resolved server-side under JPro), so the same rule applies on desktop and on the web.
+ */
+.sticky-demo-header:stuck {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 12, 0, 0, 4);
+}
