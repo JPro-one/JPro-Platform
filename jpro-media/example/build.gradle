@@ -32,11 +32,15 @@ def examples = [
         'media-recorder-and-player': 'one.jpro.platform.media.example.MediaRecorderAndPlayerSample'
 ]
 
+def mediaTestFile = project(':jpro-media').layout.buildDirectory.file("test-media/BigBuckBunny_320x180.mp4")
+
 application {
     mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["media-recorder-and-player"]
     mainModule = 'one.jpro.platform.media.example'
     applicationDefaultJvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media",
-            "-DMEDIA_MP4_TEST_URL=${MEDIA_MP4_TEST_URL}"
+            "-DMEDIA_MP4_TEST_URL=${project.hasProperty('MEDIA_MP4_TEST_URL') ? project.property('MEDIA_MP4_TEST_URL') : mediaTestFile.get().asFile.toURI()}"
     ]
 }
+
+run.dependsOn ':jpro-media:downloadTestMedia'
