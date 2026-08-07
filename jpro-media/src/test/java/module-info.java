@@ -8,7 +8,7 @@ open module one.jpro.platform.media.test {
     requires org.slf4j;
 
     requires org.junit.jupiter;
-    requires org.testfx.core;
+    requires org.testfx;
     requires org.testfx.junit5;
     requires org.assertj.core;
 
