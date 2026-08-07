@@ -1,6 +1,9 @@
 # Changelog
 
-### 0.7.2 (june 29, 2026)
+### 0.7.3 (August 7, 2026)
+Removed the old unmaintained JPMS dependencies. 
+
+### 0.7.2 (June 29, 2026)
 
 #### Features
 * `jpro-auth-routing`: Added `RoutingAuth`, a high-level entry point for adding Google / OAuth2 / username-password login to a `RouteApp` (plus `dummy`/`defaultUser` logins for tests and desktop). See the module README and the `routing-auth` example.
