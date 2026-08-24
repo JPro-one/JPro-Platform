@@ -219,7 +219,7 @@ class StuckObservabilityTest {
                 new Scene(root, 400, 600);
                 layout(root);
 
-                Scroll.setFixedBar(fixed, Side.TOP);
+                Scroll.setFixedPosition(fixed, Side.TOP, 0);
                 layout(root);
                 assertFalse(Scroll.isStuck(fixed), "a fixed node is always pinned, so it carries no stuck state");
                 assertFalse(fixed.getPseudoClassStates().contains(Scroll.STUCK_PSEUDO_CLASS),

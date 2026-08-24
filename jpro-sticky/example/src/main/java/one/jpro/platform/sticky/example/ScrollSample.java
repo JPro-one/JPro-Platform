@@ -117,9 +117,9 @@ public class ScrollSample extends Application {
         // sub-header visibly releases (a short page would run out of scroll while it is still pinned).
         root.getChildren().addAll(filler(66, 160));
 
-        // Fixed bottom bar, floated 5px off the left, right, and bottom edges: stretch horizontal (with
-        // insets) + pin above the bottom. Uses the canonical anchor since setFixedBar only insets the
-        // pinned edge. AtlantaFX has no .button.warning accent, so the amber comes from the theme colour.
+        // Fixed bottom bar, floated 5px off the left, right, and bottom edges: a bar is just a stretch
+        // anchor (pin one edge, stretch the perpendicular axis), here with a 5px inset on all three.
+        // AtlantaFX has no .button.warning accent, so the amber comes from the theme colour.
         final var bottomBar = barButton("Fixed bottom bar", null);
         bottomBar.setStyle("-fx-background-radius: 8; -fx-background-color: -color-warning-emphasis; "
                 + "-fx-text-fill: -color-fg-emphasis;");

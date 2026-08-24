@@ -34,7 +34,7 @@ import java.util.function.Consumer;
  * <pre>{@code
  * Scroll.setStickyPosition(header);                          // sticky, pinned to the top
  * Scroll.setFixedPosition(fab, javafx.geometry.Pos.BOTTOM_RIGHT, 24);  // fixed bottom-right corner
- * Scroll.setFixedBar(banner, Side.BOTTOM);                   // fixed full-width bottom bar
+ * Scroll.setFixedPosition(bar, ScrollAnchor.of().bottom(0).left(0).right(0)); // fixed full-width bottom bar
  * Scroll.clearScrollPosition(header);                        // back to normal flow
  * }</pre>
  * <p>
@@ -176,8 +176,8 @@ public final class Scroll {
 
     /**
      * Pins the node with {@link ScrollPosition#FIXED fixed} positioning to the given edge, leaving
-     * the perpendicular axis at its natural size (a chip, not a bar; use {@link #setFixedBar} for a
-     * full-span bar).
+     * the perpendicular axis at its natural size (a chip, not a bar; for a full-span bar stretch the
+     * perpendicular axis, e.g. {@code setFixedPosition(node, ScrollAnchor.of().top(0).left(0).right(0))}).
      *
      * @param node   the node to position; must not be {@code null}
      * @param side   the edge to pin to; must not be {@code null}
@@ -226,40 +226,6 @@ public final class Scroll {
     }
 
     /**
-     * Pins the node with {@link ScrollPosition#FIXED fixed} positioning as a full-span bar: pinned
-     * to {@code side} at the edge and stretched across the perpendicular axis.
-     *
-     * @param node the node to position; must not be {@code null}
-     * @param side the edge to pin the bar to; must not be {@code null}
-     */
-    public static void setFixedBar(Node node, Side side) {
-        setFixedBar(node, side, DEFAULT_OFFSET);
-    }
-
-    /**
-     * Pins the node with {@link ScrollPosition#FIXED fixed} positioning as a full-span bar, inset
-     * {@code offset} from the pinned edge.
-     *
-     * @param node   the node to position; must not be {@code null}
-     * @param side   the edge to pin the bar to; must not be {@code null}
-     * @param offset the inset (px) from the pinned edge
-     */
-    public static void setFixedBar(Node node, Side side, double offset) {
-        if (side == null) {
-            throw new NullPointerException("side must not be null");
-        }
-        final ScrollAnchor anchor;
-        switch (side) {
-            case TOP:    anchor = ScrollAnchor.of().left(0).right(0).top(offset); break;
-            case BOTTOM: anchor = ScrollAnchor.of().left(0).right(0).bottom(offset); break;
-            case LEFT:   anchor = ScrollAnchor.of().top(0).bottom(0).left(offset); break;
-            case RIGHT:  anchor = ScrollAnchor.of().top(0).bottom(0).right(offset); break;
-            default:     anchor = ScrollAnchor.of().left(0).right(0).top(offset);
-        }
-        setScrollPosition(node, ScrollPosition.FIXED, anchor, null);
-    }
-
-    /**
      * Pins the node with {@link ScrollPosition#FIXED fixed} positioning stretched to fill the whole
      * viewport (a full-screen overlay). Shorthand for {@code setFixedPosition(node, of().all(0))}.
      *
@@ -276,35 +242,13 @@ public final class Scroll {
      * @param node the node to reset; must not be {@code null}
      */
     public static void clearScrollPosition(Node node) {
-        setScrollPosition(node, ScrollPosition.STATIC);
+        // STATIC ignores the anchor; pass a default so the non-null anchor contract holds.
+        setScrollPosition(node, ScrollPosition.STATIC, anchorForEdge(DEFAULT_SIDE, DEFAULT_OFFSET));
     }
 
     // ---------------------------------------------------------------------
     // Canonical API: programmatic / data-driven callers
     // ---------------------------------------------------------------------
-
-    /**
-     * Applies a scroll positioning mode to the node, pinned to the top edge with no offset.
-     * Convenience for {@code setScrollPosition(node, position, Side.TOP, 0)}.
-     *
-     * @param node     the node to position; must not be {@code null}
-     * @param position the positioning mode; must not be {@code null}
-     */
-    public static void setScrollPosition(Node node, ScrollPosition position) {
-        setScrollPosition(node, position, anchorForEdge(DEFAULT_SIDE, DEFAULT_OFFSET), null);
-    }
-
-    /**
-     * Applies a scroll positioning mode to the node, pinned to a single edge.
-     *
-     * @param node     the node to position; must not be {@code null}
-     * @param position the positioning mode; must not be {@code null}
-     * @param side     the edge to pin to; must not be {@code null} (ignored for {@link ScrollPosition#STATIC})
-     * @param offset   the inset (px) from that edge (ignored for {@link ScrollPosition#STATIC})
-     */
-    public static void setScrollPosition(Node node, ScrollPosition position, Side side, double offset) {
-        setScrollPosition(node, position, anchorForEdge(side, offset), null);
-    }
 
     /**
      * Applies a scroll positioning mode to the node at an explicit {@link ScrollAnchor}.

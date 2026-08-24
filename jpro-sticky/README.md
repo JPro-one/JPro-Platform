@@ -42,7 +42,6 @@ import one.jpro.platform.sticky.Scroll;
 
 Scroll.setStickyPosition(header);                     // sticky, pinned to the top edge
 Scroll.setFixedPosition(fab, Pos.BOTTOM_RIGHT, 24);   // fixed bottom-right corner, 24px inset
-Scroll.setFixedBar(banner, Side.BOTTOM);              // fixed full-width bar at the bottom
 Scroll.setFixedFullscreen(overlay);                   // fixed, filling the viewport
 Scroll.clearScrollPosition(header);                   // back to normal flow
 ```
@@ -88,12 +87,12 @@ methods first:
 Scroll.setFixedPosition(node);                        // top edge
 Scroll.setFixedPosition(node, Side.BOTTOM, 16);       // 16px up from the bottom (a chip, not a bar)
 Scroll.setFixedPosition(node, Pos.TOP_CENTER, 24);    // any of the 9 Pos anchors, inset from pinned edges
-Scroll.setFixedBar(node, Side.BOTTOM);                // full-width bar pinned to an edge
 Scroll.setFixedFullscreen(node);                      // stretched to fill the viewport
 ```
 
 `setFixedPosition(node, Side, offset)` pins one edge and leaves the other axis at its natural size (a
-chip). For a full-span bar use `setFixedBar`.
+chip). A full-span **bar** is just a stretch: pin one edge and stretch the other axis with an anchor,
+`ScrollAnchor.of().bottom(0).left(0).right(0)` (see the anchor model below).
 
 ### The anchor model
 
@@ -134,8 +133,8 @@ Scroll.setScrollPosition(node, ScrollPosition.FIXED,  ScrollAnchor.of().bottom(0
 Scroll.setScrollPosition(subHeader, ScrollPosition.STICKY, ScrollAnchor.of().top(48), section);
 ```
 
-Edge-based overloads (`setScrollPosition(node, position, Side, offset)` and the bare
-`setScrollPosition(node, position)`) cover the single-edge case.
+The single-edge case is just a one-edge anchor (`ScrollAnchor.of().top(0)`); for hand-written call
+sites the `setSticky*` / `setFixed*` helpers above are usually clearer.
 
 **Note:** with `STICKY`, the anchor must pin edges only. An anchor that centers or stretches an axis
 throws `IllegalArgumentException` (those are fixed-only). The `setStickyPosition` convenience methods

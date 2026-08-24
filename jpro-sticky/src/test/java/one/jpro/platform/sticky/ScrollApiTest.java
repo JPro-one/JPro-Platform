@@ -107,22 +107,15 @@ class ScrollApiTest {
     @Test
     void canonicalSetterRecordsPosition() {
         Label node = new Label();
-        Scroll.setScrollPosition(node, ScrollPosition.FIXED);
+        Scroll.setScrollPosition(node, ScrollPosition.FIXED, ScrollAnchor.of().top(0));
         assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
-    }
-
-    @Test
-    void canonicalSetterWithSideAndOffsetRecordsPosition() {
-        Label node = new Label();
-        Scroll.setScrollPosition(node, ScrollPosition.STICKY, Side.TOP, 10);
-        assertEquals(ScrollPosition.STICKY, Scroll.getScrollPosition(node));
     }
 
     @Test
     void canonicalSetterWithStaticClears() {
         Label node = new Label();
         Scroll.setStickyPosition(node);
-        Scroll.setScrollPosition(node, ScrollPosition.STATIC);
+        Scroll.setScrollPosition(node, ScrollPosition.STATIC, ScrollAnchor.of().top(0));
         assertEquals(ScrollPosition.STATIC, Scroll.getScrollPosition(node));
     }
 
@@ -238,13 +231,6 @@ class ScrollApiTest {
     }
 
     @Test
-    void setFixedBarRecordsFixed() {
-        Label node = new Label();
-        Scroll.setFixedBar(node, Side.BOTTOM);
-        assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(node));
-    }
-
-    @Test
     void setFixedFullscreenRecordsFixed() {
         Label node = new Label();
         Scroll.setFixedFullscreen(node);
@@ -325,7 +311,8 @@ class ScrollApiTest {
     @Test
     void nullNodeIsRejected() {
         assertThrows(NullPointerException.class, () -> Scroll.getScrollPosition(null));
-        assertThrows(NullPointerException.class, () -> Scroll.setScrollPosition(null, ScrollPosition.STICKY));
+        assertThrows(NullPointerException.class,
+                () -> Scroll.setScrollPosition(null, ScrollPosition.STICKY, ScrollAnchor.of().top(0)));
         assertThrows(NullPointerException.class, () -> Scroll.setStickyPosition(null));
         assertThrows(NullPointerException.class, () -> Scroll.setFixedPosition(null));
         assertThrows(NullPointerException.class, () -> Scroll.clearScrollPosition(null));
@@ -334,12 +321,12 @@ class ScrollApiTest {
     @Test
     void nullPositionIsRejected() {
         assertThrows(NullPointerException.class,
-                () -> Scroll.setScrollPosition(new Label(), null));
+                () -> Scroll.setScrollPosition(new Label(), null, ScrollAnchor.of().top(0)));
     }
 
     @Test
     void nullSideIsRejected() {
         assertThrows(NullPointerException.class,
-                () -> Scroll.setScrollPosition(new Label(), ScrollPosition.STICKY, null, 0));
+                () -> Scroll.setStickyPosition(new Label(), null, 0));
     }
 }
