@@ -9,7 +9,7 @@ module one.jpro.platform.utils.test {
     requires org.slf4j;
 
     requires org.junit.jupiter;
-    requires org.testfx.core;
+    requires org.testfx;
     requires org.testfx.junit5;
     requires org.assertj.core;
     requires org.mockito;

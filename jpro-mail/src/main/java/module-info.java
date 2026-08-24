@@ -8,7 +8,7 @@ module one.jpro.platform.mail {
     requires transitive org.eclipse.collections.api;
 
     requires jakarta.mail;
-    requires org.eclipse.collections;
+    requires org.eclipse.collections.impl;
     requires org.jetbrains.annotations;
 
     exports one.jpro.platform.mail;

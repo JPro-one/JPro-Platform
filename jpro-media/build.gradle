@@ -8,9 +8,8 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
     implementation "org.json:json:$JSON_VERSION"
 
-    testImplementation "one.jpro.platform.jpms:testfx-junit5:$TESTFX_VERSION"
-    testImplementation "one.jpro.platform.jpms:testfx-core:$TESTFX_VERSION"
-    //testImplementation "one.jpro.platform.jpms:openjfx-monocle:$MONOCLE_VERSION"
+    testImplementation "org.testfx:testfx-junit5:$TESTFX_VERSION"
+    testImplementation "org.testfx:testfx-core:$TESTFX_VERSION"
     testImplementation "org.testfx:openjfx-monocle:$MONOCLE_VERSION"
     testImplementation "org.bytedeco:javacv-platform:$JAVACV_VERSION"
     testImplementation "org.bytedeco:javacpp-platform:$JAVACPP_VERSION"
@@ -21,14 +20,38 @@ compileJava {
     options.compilerArgs = ["--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media"]
 }
 
+def mediaTestFile = layout.buildDirectory.file("test-media/BigBuckBunny_320x180.mp4")
+
+tasks.register('downloadTestMedia') {
+    onlyIf { !mediaTestFile.get().asFile.exists() }
+    doLast {
+        def mp4 = mediaTestFile.get().asFile
+        def zip = new File(mp4.parentFile, mp4.name + ".zip")
+        mp4.parentFile.mkdirs()
+        new URI(MEDIA_MP4_TEST_ZIP_URL).toURL().withInputStream { i -> zip.withOutputStream { o -> o << i } }
+        copy {
+            from zipTree(zip)
+            into mp4.parentFile
+        }
+        zip.delete()
+    }
+}
+
 test {
+    if (!project.hasProperty("MEDIA_MP4_TEST_URL")) {
+        dependsOn downloadTestMedia
+        doFirst {
+            systemProperty "MEDIA_MP4_TEST_URL", mediaTestFile.get().asFile.toURI().toString()
+        }
+    }
+
     jvmArgs = [
             "-Dtestfx.headless=true", "-Dtestfx.robot=glass", "-Djava.awt.headless=true",
-            "--add-opens", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
-            "--add-opens", "javafx.graphics/com.sun.glass.ui=org.testfx.core",
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=org.testfx",
+            "--add-opens", "javafx.graphics/com.sun.glass.ui=org.testfx",
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.media",
             "--add-exports", "javafx.base/com.sun.javafx.logging=org.testfx.monocle",
-            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx.core",
+            "--add-exports", "javafx.graphics/com.sun.javafx.application=org.testfx",
             "--add-exports", "javafx.graphics/com.sun.javafx.util=org.testfx.monocle",
             "--add-exports", "javafx.graphics/com.sun.glass.ui=org.testfx.monocle"
     ]
