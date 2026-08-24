@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * covered here: it only exists under a live JPro session and is verified manually in the browser,
  * matching every other module's browser behaviour.
  * <p>
- * Applying a non-static mode installs a {@link ScrollOverride}, whose {@code install()} calls
+ * Applying a non-static mode installs a {@link one.jpro.platform.sticky.impl.WebScrollImpl}, whose {@code install()} calls
  * {@link WebAPI#getWebAPI(javafx.scene.Node, com.jpro.webapi.WebAPIConsumer)}. On a real desktop
  * JPro runtime that consumer never fires, so installation is inert; in a bare unit test the
  * runtime is not bootstrapped and the same call would throw. We therefore stub that static as a

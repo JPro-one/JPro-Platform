@@ -1,4 +1,4 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -10,6 +10,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import one.jpro.platform.sticky.ScrollAnchor;
+import one.jpro.platform.sticky.ScrollPosition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,8 @@ import org.slf4j.LoggerFactory;
  * The desktop {@link ScrollPosition#FIXED} implementation: mounts the node into the per-scene
  * {@link StickyOverlay} and anchors it to the scene, re-resolving on scene resize. Pure JavaFX, no
  * {@link com.jpro.webapi.WebAPI}, no core change. On a plain desktop window (nothing scrolls) fixed
- * is exactly a scene-anchored overlay.
+ * is exactly a scene-anchored overlay. In the browser, fixed goes through {@link WebScrollImpl}
+ * instead.
  * <p>
  * The geometry is resolved by {@link AnchorGeometry} against the scene size, the same resolver the
  * web path uses against the browser viewport, so a fixed node lands in the identical place whether
@@ -25,9 +28,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Horak
  */
-final class FXFixedImpl implements ScrollImpl {
+public final class DesktopFixedImpl implements ScrollImpl {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FXFixedImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DesktopFixedImpl.class);
 
     private final Node node;
     private final ScrollAnchor anchor;
@@ -47,7 +50,7 @@ final class FXFixedImpl implements ScrollImpl {
     private ChangeListener<Scene> placeholderSceneWaiter;
     private boolean torndown;
 
-    FXFixedImpl(Node node, ScrollAnchor anchor) {
+    public DesktopFixedImpl(Node node, ScrollAnchor anchor) {
         this.node = node;
         this.anchor = anchor;
     }

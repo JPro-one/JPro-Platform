@@ -21,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Headless JavaFX tests of the desktop implementations selected by {@link ScrollDispatcher} when
- * {@link WebAPI#isBrowser()} is false: {@link FXFixedImpl} (a scene-root overlay) and
- * {@link FXStickyImpl} (a {@code translate} pin inside a {@link ScrollPane}). They drive the public
- * {@link Scroll} facade end-to-end and assert the observable desktop behaviour — reparenting, the pin
- * offset, containment release, and clean teardown — that STICKY_DESIGN.md §5/§8 promises is identical
- * to the web path.
+ * Headless JavaFX tests of the desktop implementations selected by
+ * {@link one.jpro.platform.sticky.impl.ScrollDispatcher} when {@link WebAPI#isBrowser()} is false:
+ * {@link one.jpro.platform.sticky.impl.DesktopFixedImpl} (a scene-root overlay) and
+ * {@link one.jpro.platform.sticky.impl.ScrollPaneStickyImpl} (a {@code translate} pin inside a
+ * {@link ScrollPane}). They drive the public {@link Scroll} facade end-to-end and assert the observable
+ * desktop behaviour: reparenting, the pin offset, containment release, and clean teardown.
  * <p>
  * {@code isBrowser()} is stubbed to {@code false} <em>inside</em> the FX-thread action, because a
  * {@link MockedStatic} is confined to the thread that opens it and installation runs on the FX thread.
@@ -50,7 +50,7 @@ class DesktopScrollImplTest {
     }
 
     // ---------------------------------------------------------------------
-    // FIXED (desktop) -> FXFixedImpl: node moves into the scene overlay, restores on clear
+    // FIXED (desktop) -> DesktopFixedImpl: node moves into the scene overlay, restores on clear
     // ---------------------------------------------------------------------
 
     @Test
@@ -93,7 +93,7 @@ class DesktopScrollImplTest {
     }
 
     // ---------------------------------------------------------------------
-    // STICKY (desktop, ScrollPane ancestor) -> FXStickyImpl: translate pins to the pin line
+    // STICKY (desktop, ScrollPane ancestor) -> ScrollPaneStickyImpl: translate pins to the pin line
     // ---------------------------------------------------------------------
 
     @Test

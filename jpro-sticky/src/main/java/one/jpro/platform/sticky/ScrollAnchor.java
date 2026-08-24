@@ -34,7 +34,7 @@ package one.jpro.platform.sticky;
 public final class ScrollAnchor {
 
     /** The anchoring mode of a single axis. */
-    enum Mode {
+    public enum Mode {
         /** Keep the node's flow position (and size) on this axis. */
         NATURAL,
         /** Pin to the start edge (top or left) at {@link Axis#start}. */
@@ -52,12 +52,12 @@ public final class ScrollAnchor {
      * {@link Mode#PIN_START} the inset is {@link #start}, for {@link Mode#PIN_END} it is {@link #end},
      * for {@link Mode#CENTER} the shift is {@link #start}, and for {@link Mode#STRETCH} both apply.
      */
-    static final class Axis {
+    public static final class Axis {
         static final Axis NATURAL = new Axis(Mode.NATURAL, 0, 0);
 
-        final Mode mode;
-        final double start;
-        final double end;
+        public final Mode mode;
+        public final double start;
+        public final double end;
 
         private Axis(Mode mode, double start, double end) {
             this.mode = mode;
@@ -222,13 +222,13 @@ public final class ScrollAnchor {
         return top(px).right(px).bottom(px).left(px);
     }
 
-    /** @return the resolved horizontal axis (package-private, for the override impl). */
-    Axis horizontal() {
+    /** @return the resolved horizontal axis, consumed by the {@code impl} geometry resolver. */
+    public Axis horizontal() {
         return horizontal;
     }
 
-    /** @return the resolved vertical axis (package-private, for the override impl). */
-    Axis vertical() {
+    /** @return the resolved vertical axis, consumed by the {@code impl} geometry resolver. */
+    public Axis vertical() {
         return vertical;
     }
 }

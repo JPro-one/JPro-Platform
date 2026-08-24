@@ -1,7 +1,9 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
+import one.jpro.platform.sticky.FxTestSupport;
+import one.jpro.platform.sticky.ScrollAnchor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -12,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Unit tests for {@link AnchorGeometry} — the shared resolver that both the web ({@link ScrollOverride})
- * and desktop ({@link FXFixedImpl}) paths use to turn a {@link ScrollAnchor} plus an available box into
+ * Unit tests for {@link AnchorGeometry} — the shared resolver that both the web ({@link WebScrollImpl})
+ * and desktop ({@link DesktopFixedImpl}) paths use to turn a {@link ScrollAnchor} plus an available box into
  * concrete geometry. Because it is one pure function, the same anchor and size yield identical geometry
- * on both platforms; these tests pin the geometry down mode-by-mode, axis-by-axis (STICKY_DESIGN.md §18).
+ * on both platforms; these tests pin the geometry down mode-by-mode, axis-by-axis.
  * <p>
  * {@link #resolve} needs no toolkit (it is arithmetic over doubles and a height function); the
  * {@link #naturalWidth}/{@link #naturalHeight} helpers touch {@link Region}, so those run on the FX thread.

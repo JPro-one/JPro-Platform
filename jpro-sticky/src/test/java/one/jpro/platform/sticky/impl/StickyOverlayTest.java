@@ -1,10 +1,13 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import one.jpro.platform.sticky.FxTestSupport;
+import one.jpro.platform.sticky.Scroll;
+import one.jpro.platform.sticky.ScrollPosition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link StickyOverlay} — the per-scene host that both the web and desktop paths mount
- * pinned nodes into, and the source-order stacking model shared between them (STICKY_DESIGN.md §8).
- * These run on the JavaFX thread but need no layout: they exercise the overlay's structure and the
- * {@code insertSorted}/{@code remove} bookkeeping directly.
+ * pinned nodes into, and the source-order stacking model shared between them. These run on the JavaFX
+ * thread but need no layout: they exercise the overlay's structure and the {@code insertSorted}/
+ * {@code remove} bookkeeping directly.
  *
  * @author Tobias Horak
  */

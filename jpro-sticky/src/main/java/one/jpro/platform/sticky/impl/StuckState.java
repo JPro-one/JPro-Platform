@@ -1,9 +1,11 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
+import one.jpro.platform.sticky.Scroll;
+import one.jpro.platform.sticky.ScrollPosition;
 
 /**
  * Per-node holder for a {@link ScrollPosition#STICKY} node's <em>stuck</em> (currently pinned) state,
@@ -20,7 +22,7 @@ import javafx.scene.Node;
  *
  * @author Tobias Horak
  */
-final class StuckState {
+public final class StuckState {
 
     /**
      * The {@code :stuck} JavaFX pseudo-class, toggled on a sticky node while it is pinned. It is a
@@ -28,23 +30,23 @@ final class StuckState {
      * pseudo-class, so it behaves identically on desktop and web and is used exactly like
      * {@code :hover} / {@code :focused}.
      */
-    static final PseudoClass STUCK = PseudoClass.getPseudoClass("stuck");
+    public static final PseudoClass STUCK = PseudoClass.getPseudoClass("stuck");
 
     private final Node node;
     private final ReadOnlyBooleanWrapper stuck;
 
-    StuckState(Node node) {
+    public StuckState(Node node) {
         this.node = node;
         this.stuck = new ReadOnlyBooleanWrapper(node, "stuck", false);
     }
 
     /** The read-only Java channel: {@code true} while the node is pinned. */
-    ReadOnlyBooleanProperty property() {
+    public ReadOnlyBooleanProperty property() {
         return stuck.getReadOnlyProperty();
     }
 
     /** The current stuck state. */
-    boolean get() {
+    public boolean get() {
         return stuck.get();
     }
 
@@ -54,7 +56,7 @@ final class StuckState {
      *
      * @param value {@code true} if the node is now pinned
      */
-    void set(boolean value) {
+    public void set(boolean value) {
         if (stuck.get() == value) {
             return;
         }

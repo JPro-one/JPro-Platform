@@ -1,16 +1,17 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import one.jpro.platform.sticky.ScrollPosition;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * The overlay that hosts reparented sticky/fixed nodes, shared by the web ({@link ScrollOverride})
- * and desktop ({@link FXFixedImpl}) implementations so the stacking order is one consistent model
+ * The overlay that hosts reparented sticky/fixed nodes, shared by the web ({@link WebScrollImpl})
+ * and desktop ({@link DesktopFixedImpl}) implementations so the stacking order is one consistent model
  * regardless of which mechanism mounts a node.
  * <p>
  * <strong>Where the overlay lands.</strong> At pin time the node is resolved to its
@@ -34,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Tobias Horak
  */
-final class StickyOverlay {
+public final class StickyOverlay {
 
     /** {@link Parent} (host) property key under which that host's overlay {@link Group} is cached. */
     private static final Object OVERLAY_KEY = new Object();
@@ -95,7 +96,7 @@ final class StickyOverlay {
      *
      * @param host the pane to register; must not be {@code null}
      */
-    static void registerHost(Pane host) {
+    public static void registerHost(Pane host) {
         host.getProperties().put(HOST_KEY, Boolean.TRUE);
     }
 

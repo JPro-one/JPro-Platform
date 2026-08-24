@@ -23,18 +23,19 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Headless JavaFX tests of the sticky <em>observability</em> channels ({@code STICKY_OBSERVABILITY_PLAN.md}):
- * the {@link Scroll#stuckProperty} Java channel and the {@link Scroll#STUCK_PSEUDO_CLASS} CSS channel,
- * driven through {@link FXStickyImpl} (the desktop / FX-ScrollPane path). Both channels flip from a
- * single write point ({@link StuckState}), so these assert they move together as a {@link ScrollPane}
- * scrolls past the pin line and back, that the property instance is stable across clear / re-apply, and
- * that a non-sticky (STATIC / FIXED) node reads {@code false}.
+ * Headless JavaFX tests of the sticky <em>observability</em> channels: the {@link Scroll#stuckProperty}
+ * Java channel and the {@link Scroll#STUCK_PSEUDO_CLASS} CSS channel, driven through
+ * {@link one.jpro.platform.sticky.impl.ScrollPaneStickyImpl} (the FX-ScrollPane path). Both channels
+ * flip from a single write point ({@link one.jpro.platform.sticky.impl.StuckState}), so these assert
+ * they move together as a {@link ScrollPane} scrolls past the pin line and back, that the property
+ * instance is stable across clear / re-apply, and that a non-sticky (STATIC / FIXED) node reads
+ * {@code false}.
  * <p>
- * The web {@link ScrollOverride} path derives {@code stuck} from the same rule (server pin vs flow top)
- * but cannot run headless (it needs a live {@link WebAPI}); it is covered by the shared rule here plus a
- * manual browser check on {@code ScrollSample}. {@code isBrowser()} is stubbed {@code false} inside the
- * FX-thread action for the same reason as {@link DesktopScrollImplTest} (a {@link MockedStatic} is
- * thread-confined).
+ * The web {@link one.jpro.platform.sticky.impl.WebScrollImpl} path derives {@code stuck} from the same
+ * rule (server pin vs flow top) but cannot run headless (it needs a live {@link WebAPI}); it is covered
+ * by the shared rule here plus a manual browser check on {@code ScrollSample}. {@code isBrowser()} is
+ * stubbed {@code false} inside the FX-thread action for the same reason as {@link DesktopScrollImplTest}
+ * (a {@link MockedStatic} is thread-confined).
  *
  * @author Tobias Horak
  */

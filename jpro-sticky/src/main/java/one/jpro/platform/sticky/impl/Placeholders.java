@@ -1,11 +1,11 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 
 /**
- * Builds the layout-mirroring placeholder that both the web ({@link ScrollOverride}) and desktop
- * ({@link FXFixedImpl}) paths leave in a pinned node's flow slot when they reparent it into the
+ * Builds the layout-mirroring placeholder that both the web ({@link WebScrollImpl}) and desktop
+ * ({@link DesktopFixedImpl}) paths leave in a pinned node's flow slot when they reparent it into the
  * {@link StickyOverlay}.
  * <p>
  * Reparenting moves the node out of its flow parent, so the placeholder has to stand in for it or the

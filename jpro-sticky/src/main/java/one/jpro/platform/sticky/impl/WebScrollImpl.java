@@ -1,4 +1,4 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import com.jpro.webapi.WebAPI;
 import javafx.application.Platform;
@@ -13,6 +13,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.jmemorybuddy.CleanupDetector;
+import one.jpro.platform.sticky.ScrollAnchor;
+import one.jpro.platform.sticky.ScrollPosition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +45,9 @@ import java.util.function.Consumer;
  *
  * @author Tobias Horak
  */
-final class ScrollOverride implements ScrollImpl {
+public final class WebScrollImpl implements ScrollImpl {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScrollOverride.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebScrollImpl.class);
 
     /** Sequence for unique per-node JS registry keys. */
     private static final AtomicLong KEY_SEQ = new AtomicLong();
@@ -92,8 +94,8 @@ final class ScrollOverride implements ScrollImpl {
     private String lastSig = "";
     private boolean torndown = false;
 
-    ScrollOverride(Node node, ScrollPosition position, ScrollAnchor anchor, Node within,
-                   Consumer<Boolean> stuckSink) {
+    public WebScrollImpl(Node node, ScrollPosition position, ScrollAnchor anchor, Node within,
+                         Consumer<Boolean> stuckSink) {
         this.node = node;
         this.position = position;
         this.anchor = anchor;
@@ -297,7 +299,7 @@ final class ScrollOverride implements ScrollImpl {
         final double hostOffsetY = overlay.localToScene(0, 0).getY();
 
         // Publish the pin state (STICKY only): stuck iff the applied server pin differs from the
-        // natural flow top, the same rule FXStickyImpl uses (appear != natural), so both paths agree.
+        // natural flow top, the same rule ScrollPaneStickyImpl uses (appear != natural), so both paths agree.
         // Fidelity is the browserViewport() sync cadence, not per-frame (the compositor drives motion).
         if (!fixed && stuckSink != null) {
             final boolean nowStuck = Math.abs(serverY - flowTop) > STUCK_EPS;

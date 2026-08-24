@@ -1,7 +1,8 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
+import one.jpro.platform.sticky.ScrollAnchor;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
 
 import java.util.function.DoubleUnaryOperator;
@@ -12,8 +13,8 @@ import java.util.function.DoubleUnaryOperator;
  * available box ({@link #x}/{@link #y0}). The two axes are resolved independently: each of
  * {@code NATURAL / PIN_START / PIN_END / CENTER / STRETCH} maps to a size and offset.
  * <p>
- * This is shared by the web ({@link ScrollOverride}, resolving against the browser viewport) and the
- * desktop ({@link FXFixedImpl}, resolving against the scene) so both compute <em>identical</em>
+ * This is shared by the web ({@link WebScrollImpl}, resolving against the browser viewport) and the
+ * desktop ({@link DesktopFixedImpl}, resolving against the scene) so both compute <em>identical</em>
  * geometry from the same anchor. That is what keeps the desktop/web split invisible.
  *
  * @author Tobias Horak

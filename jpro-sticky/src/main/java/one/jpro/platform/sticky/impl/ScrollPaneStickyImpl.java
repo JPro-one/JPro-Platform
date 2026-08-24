@@ -1,20 +1,22 @@
-package one.jpro.platform.sticky;
+package one.jpro.platform.sticky.impl;
 
 import javafx.beans.InvalidationListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import one.jpro.platform.sticky.ScrollAnchor;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
 import one.jpro.platform.sticky.ScrollAnchor.Mode;
+import one.jpro.platform.sticky.ScrollPosition;
 
 import java.util.function.Consumer;
 
 /**
- * The {@link ScrollPosition#STICKY} implementation for a node inside a JavaFX {@link ScrollPane}.
- * Used on desktop, and also in the browser when the scroll is a server-driven FX {@code ScrollPane}
- * (so the pin stays in sync with the scroll by construction). Pure JavaFX: no reparenting, no
- * {@link com.jpro.webapi.WebAPI}, no core change.
+ * The {@link ScrollPosition#STICKY} implementation for a node inside a JavaFX {@link ScrollPane},
+ * selected whenever the node has a {@code ScrollPane} ancestor (on desktop, or in the browser when
+ * the scroll is a server-driven FX {@code ScrollPane}). The pin stays in sync with the scroll by
+ * construction. Pure JavaFX: no reparenting, no {@link com.jpro.webapi.WebAPI}, no core change.
  * <p>
  * The node stays in its flow slot; a {@code translate} holds it at the pin line while scrolled past,
  * clamped so it never leaves its containing block (the {@code within} override, else the node's
@@ -34,7 +36,7 @@ import java.util.function.Consumer;
  *
  * @author Tobias Horak
  */
-final class FXStickyImpl implements ScrollImpl {
+public final class ScrollPaneStickyImpl implements ScrollImpl {
 
     /** viewOrder applied while stuck; lower paints in front (JPro/JavaFX sort by it first). */
     private static final double STUCK_VIEW_ORDER = -1.0;
@@ -55,8 +57,8 @@ final class FXStickyImpl implements ScrollImpl {
     private final InvalidationListener relayout = obs -> sync();
     private boolean torndown;
 
-    FXStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane,
-                 Consumer<Boolean> stuckSink) {
+    public ScrollPaneStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane,
+                                Consumer<Boolean> stuckSink) {
         this.node = node;
         this.anchor = anchor;
         this.within = within;

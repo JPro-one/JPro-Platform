@@ -7,6 +7,10 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
 import one.jpro.platform.sticky.ScrollAnchor.Mode;
+import one.jpro.platform.sticky.impl.ScrollDispatcher;
+import one.jpro.platform.sticky.impl.ScrollImpl;
+import one.jpro.platform.sticky.impl.StickyOverlay;
+import one.jpro.platform.sticky.impl.StuckState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +60,8 @@ public final class Scroll {
     /** Property key under which the resolved {@link ScrollAnchor} is stored on a node. */
     private static final Object ANCHOR_KEY = new Object();
 
-    /** Property key under which the active {@link ScrollOverride} is stashed on a node. */
-    private static final Object OVERRIDE_KEY = new Object();
+    /** Property key under which the active {@link ScrollImpl} is stashed on a node. */
+    private static final Object IMPL_KEY = new Object();
 
     /** Property key under which the node's {@link StuckState} (pin-state channels) is stashed. */
     private static final Object STUCK_STATE_KEY = new Object();
@@ -344,7 +348,7 @@ public final class Scroll {
         }
 
         // Applying any mode must first tear down whatever was installed before, so
-        // switching sticky <-> fixed (or clearing) never leaks the previous override/listeners.
+        // switching sticky <-> fixed (or clearing) never leaks the previous impl/listeners.
         teardown(node);
 
         // A prior pin's stuck state is meaningless once its impl is gone: clear it up front (which
@@ -377,7 +381,7 @@ public final class Scroll {
         // Select the implementation (desktop FX vs web compositor) once the node is in a scene, and
         // stash it so teardown(node) can reverse it. The choice is invisible to the caller.
         final ScrollImpl impl = new ScrollDispatcher(node, position, anchor, within, stuckSink);
-        node.getProperties().put(OVERRIDE_KEY, impl);
+        node.getProperties().put(IMPL_KEY, impl);
         impl.install();
         LOGGER.debug("Scroll position {} applied to node {}", position, node);
     }
@@ -515,7 +519,7 @@ public final class Scroll {
      * is in normal flow.
      */
     private static void teardown(Node node) {
-        final Object impl = node.getProperties().remove(OVERRIDE_KEY);
+        final Object impl = node.getProperties().remove(IMPL_KEY);
         if (impl instanceof ScrollImpl) {
             ((ScrollImpl) impl).uninstall();
         }

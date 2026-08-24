@@ -93,7 +93,7 @@ public class ScrollSample extends Application {
 
         // A JavaFX ScrollPane section, wrapped in a titled card so it reads as one contained panel. This
         // is the one demo that exercises STICKY on the DESKTOP: desktop content only scrolls through a
-        // ScrollPane, so that is where sticky lives (FXStickyImpl). The same code runs in the browser too,
+        // ScrollPane, so that is where sticky lives (ScrollPaneStickyImpl). The same code runs in the browser too,
         // because there the scroll is a server-driven FX ScrollPane. One code path, both platforms. Placed
         // high so it is visible in the desktop window.
         final var scrollSection = scrollPaneSection();
@@ -181,7 +181,7 @@ public class ScrollSample extends Application {
         final var sub = new VBox();
         final var subHeader = barButton("ScrollPane sticky header (pins, then releases)", Styles.ACCENT);
         subHeader.setMinHeight(40);
-        // Same :stuck restyle as the page header, but on the FXStickyImpl path, so the CSS channel is
+        // Same :stuck restyle as the page header, but on the ScrollPaneStickyImpl path, so the CSS channel is
         // verifiable on the desktop too (the ScrollPane is the desktop scroll surface).
         subHeader.getStyleClass().add("sticky-demo-header");
         sub.getChildren().add(subHeader);
