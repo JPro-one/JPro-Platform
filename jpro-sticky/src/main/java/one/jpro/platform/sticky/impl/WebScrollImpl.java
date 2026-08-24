@@ -62,6 +62,8 @@ public final class WebScrollImpl implements ScrollImpl {
     private final Node within;
     /** Pin/unpin transition sink (the node's stuck channels); {@code null} for FIXED or unobserved. */
     private final Consumer<Boolean> stuckSink;
+    /** Called when the flow slot leaves the scene, so the dispatcher can re-pin on re-entry. */
+    private final Runnable onDetach;
     /** Last stuck value pushed to {@link #stuckSink}, so we only fire on change. */
     private boolean lastStuck;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
@@ -95,12 +97,13 @@ public final class WebScrollImpl implements ScrollImpl {
     private boolean torndown = false;
 
     public WebScrollImpl(Node node, ScrollPosition position, ScrollAnchor anchor, Node within,
-                         Consumer<Boolean> stuckSink) {
+                         Consumer<Boolean> stuckSink, Runnable onDetach) {
         this.node = node;
         this.position = position;
         this.anchor = anchor;
         this.within = within;
         this.stuckSink = stuckSink;
+        this.onDetach = onDetach;
         this.stackOrder = StickyOverlay.nextStackOrder(position);
     }
 
@@ -215,7 +218,13 @@ public final class WebScrollImpl implements ScrollImpl {
             if (scene == null && !torndown) {
                 Platform.runLater(() -> {
                     if (!torndown && placeholder != null && placeholder.getScene() == null) {
-                        uninstall();
+                        // Hand back to the dispatcher: it uninstalls this delegate but stays alive to
+                        // re-pin if the route returns. Fall back to a direct uninstall if unwired.
+                        if (onDetach != null) {
+                            onDetach.run();
+                        } else {
+                            uninstall();
+                        }
                     }
                 });
             }

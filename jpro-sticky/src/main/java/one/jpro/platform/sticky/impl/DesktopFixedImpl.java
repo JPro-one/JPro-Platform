@@ -34,6 +34,8 @@ public final class DesktopFixedImpl implements ScrollImpl {
 
     private final Node node;
     private final ScrollAnchor anchor;
+    /** Called when the flow slot leaves the scene, so the dispatcher can re-pin on re-entry. */
+    private final Runnable onDetach;
     private final long stackOrder = StickyOverlay.nextStackOrder(ScrollPosition.FIXED);
 
     private Scene scene;
@@ -45,30 +47,21 @@ public final class DesktopFixedImpl implements ScrollImpl {
     private double originalX;
 
     private final InvalidationListener relayout = obs -> sync();
-    private ChangeListener<Scene> sceneWaiter;
     /** Fires teardown when the placeholder (and thus the route subtree) leaves the scene. */
     private ChangeListener<Scene> placeholderSceneWaiter;
     private boolean torndown;
 
-    public DesktopFixedImpl(Node node, ScrollAnchor anchor) {
+    public DesktopFixedImpl(Node node, ScrollAnchor anchor, Runnable onDetach) {
         this.node = node;
         this.anchor = anchor;
+        this.onDetach = onDetach;
     }
 
     @Override
     public void install() {
-        if (node.getScene() != null) {
-            attach();
-        } else {
-            sceneWaiter = (obs, old, s) -> {
-                if (s != null) {
-                    node.sceneProperty().removeListener(sceneWaiter);
-                    sceneWaiter = null;
-                    attach();
-                }
-            };
-            node.sceneProperty().addListener(sceneWaiter);
-        }
+        // The dispatcher only installs the delegate once the node is in a scene, so its parent chain
+        // is realised and attach() can resolve the overlay host and flow slot immediately.
+        attach();
     }
 
     private void attach() {
@@ -119,7 +112,13 @@ public final class DesktopFixedImpl implements ScrollImpl {
             if (s == null && !torndown) {
                 Platform.runLater(() -> {
                     if (!torndown && placeholder != null && placeholder.getScene() == null) {
-                        uninstall();
+                        // Hand back to the dispatcher: it uninstalls this delegate but stays alive to
+                        // re-pin if the route returns. Fall back to a direct uninstall if unwired.
+                        if (onDetach != null) {
+                            onDetach.run();
+                        } else {
+                            uninstall();
+                        }
                     }
                 });
             }
@@ -151,10 +150,6 @@ public final class DesktopFixedImpl implements ScrollImpl {
     @Override
     public void uninstall() {
         torndown = true;
-        if (sceneWaiter != null) {
-            node.sceneProperty().removeListener(sceneWaiter);
-            sceneWaiter = null;
-        }
         if (scene != null) {
             scene.widthProperty().removeListener(relayout);
             scene.heightProperty().removeListener(relayout);

@@ -216,6 +216,63 @@ class DesktopScrollImplTest {
         });
     }
 
+    // ---------------------------------------------------------------------
+    // Re-mount (route navigate away, then back): a positioned node whose flow subtree leaves the
+    // scene and later returns must re-pin. Today the placeholder teardown is terminal — the
+    // dispatcher keeps IMPL_KEY but its delegate is gone and nothing re-attaches on re-entry, so the
+    // node reverts to plain flow while getScrollPosition() still reports FIXED. This asserts the fix.
+    // ---------------------------------------------------------------------
+
+    @Test
+    void fixedReAttachesWhenTheRouteReturnsToTheScene() {
+        final Label[] nodeRef = new Label[1];
+        final VBox[] parentRef = new VBox[1];
+        final StackPane[] rootRef = new StackPane[1];
+
+        // Pin, then unmount the route (parent holding the placeholder leaves the scene).
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label node = new Label("fixed");
+                VBox parent = new VBox(node);
+                StackPane root = new StackPane(parent);
+                new Scene(root, 400, 600);
+                layout(root);
+
+                Scroll.setFixedPosition(node, Side.TOP, 0);
+                assertEquals("jpro-sticky-overlay", ((Group) node.getParent()).getId(),
+                        "node should start mounted in the overlay");
+
+                nodeRef[0] = node;
+                parentRef[0] = parent;
+                rootRef[0] = root;
+
+                root.getChildren().remove(parent); // navigate away
+            }
+        });
+
+        // The guarded teardown has now run (this onFx is enqueued after that runLater). Navigate back:
+        // re-add the same subtree to the scene.
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+                rootRef[0].getChildren().add(parentRef[0]); // navigate back
+                layout(rootRef[0]);
+            }
+        });
+
+        // A pulse later, the node must be pinned again: re-selected and re-installed into the overlay,
+        // with getScrollPosition() still consistent. Today it is orphaned in plain flow -> this fails.
+        FxTestSupport.onFx(() -> {
+            assertEquals(ScrollPosition.FIXED, Scroll.getScrollPosition(nodeRef[0]),
+                    "position mode should survive a route round-trip");
+            assertTrue(nodeRef[0].getParent() instanceof Group
+                            && "jpro-sticky-overlay".equals(((Group) nodeRef[0].getParent()).getId()),
+                    "returning to the scene must re-pin the node into the overlay, not leave it in plain flow");
+        });
+    }
+
     @Test
     void fixedDoesNotTearDownOnASamePulseDetachReattach() {
         final Label[] nodeRef = new Label[1];
