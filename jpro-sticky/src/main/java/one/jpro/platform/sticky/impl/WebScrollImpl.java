@@ -10,7 +10,6 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.jmemorybuddy.CleanupDetector;
 import one.jpro.platform.sticky.ScrollAnchor;
@@ -75,12 +74,13 @@ public final class WebScrollImpl implements ScrollImpl {
      */
     private final long stackOrder;
 
+    /** The shared reparent-into-overlay mechanic (flow slot, placeholder, overlay). */
+    private final OverlayMount mount;
+
     // Resolved at install time.
     private WebAPI webapi;
     private Group overlay;
     private Region placeholder;
-    private Pane originalParent;
-    private int originalIndex = -1;
     private Parent root;
     /** The containing block that bounds a STICKY pin (null => document-long / unbounded). */
     private Node container;
@@ -105,6 +105,7 @@ public final class WebScrollImpl implements ScrollImpl {
         this.stuckSink = stuckSink;
         this.onDetach = onDetach;
         this.stackOrder = StickyOverlay.nextStackOrder(position);
+        this.mount = new OverlayMount(node, stackOrder);
     }
 
     /**
@@ -158,45 +159,22 @@ public final class WebScrollImpl implements ScrollImpl {
             }
             return;
         }
-        if (!(parent instanceof Pane)) {
-            LOGGER.warn("jpro-sticky: node's parent is {} (not a Pane); cannot pin {}. Node stays in flow.",
-                    parent == null ? "null" : parent.getClass().getSimpleName(), node);
-            return;
+        // Lift the node into the overlay, leaving a mirrored placeholder in its flow slot. Its height
+        // is left unset here (FIXED collapses it to 0, STICKY reserves the node height) and applied in
+        // sync().
+        final Region ph = mount.mount();
+        if (ph == null) {
+            return; // could not mount (no Pane parent / overlay host); the node stays in flow
         }
-        // Resolve the overlay from the node's nearest registered host (else the scene root) BEFORE
-        // reparenting, while the node's real parent chain still leads up to that host.
-        final Group ov = StickyOverlay.overlayForNode(node);
-        if (ov == null) {
-            LOGGER.warn("jpro-sticky: no overlay host for {} (outside a scene, or host not a Pane/Group)."
-                    + " Node stays in flow.", node);
-            return;
-        }
-
-        this.overlay = ov;
-        this.originalParent = (Pane) parent;
-        this.originalIndex = originalParent.getChildren().indexOf(node);
-        if (originalIndex < 0) {
-            return;
-        }
+        this.placeholder = ph;
+        this.overlay = mount.overlay();
         this.root = node.getScene().getRoot();
 
         // STICKY is bounded by its containing block: the explicit `within` if given, else the node's
         // original parent. FIXED is viewport-anchored, so it ignores containment.
         this.container = (position == ScrollPosition.FIXED) ? null
-                : (within != null ? within : originalParent);
+                : (within != null ? within : mount.originalParent());
 
-        placeholder = new Region();
-        placeholder.setMaxWidth(Double.MAX_VALUE);
-        // Mirror the node's layout constraints and width onto the placeholder so the flow slot doesn't
-        // shift. Its height comes later, in sync().
-        Placeholders.mirror(node, placeholder);
-
-        // Swap node -> placeholder in flow, then mount the node into the overlay. insertSorted keeps it
-        // ordered by stackOrder, so paint order follows source order, not install order. StickyOverlay
-        // documents the full ordering contract.
-        originalParent.getChildren().set(originalIndex, placeholder);
-        node.setManaged(false);
-        StickyOverlay.insertSorted(overlay, node, stackOrder);
         node.applyCss();
 
         // Re-sync on anything that moves the pin: the placeholder's geometry, the browser viewport
@@ -233,7 +211,7 @@ public final class WebScrollImpl implements ScrollImpl {
 
         registerCleanup();
         LOGGER.debug("jpro-sticky[{}]: attached (overlay={}, parent={})", jsKey,
-                overlay.getId(), originalParent.getClass().getSimpleName());
+                overlay.getId(), mount.originalParent().getClass().getSimpleName());
         sync();
     }
 
@@ -457,14 +435,7 @@ public final class WebScrollImpl implements ScrollImpl {
         }
 
         // Restore the node to its flow slot.
-        StickyOverlay.remove(overlay, node);
-        if (originalParent != null && placeholder != null) {
-            final int idx = originalParent.getChildren().indexOf(placeholder);
-            if (idx >= 0) {
-                originalParent.getChildren().set(idx, node);
-            }
-            node.setManaged(true);
-        }
+        mount.unmount();
 
         // The animation lives entirely in the injected <style> (bound by a [jpro-id] rule, not by
         // inline styles on the element), so dropping that sheet removes the pin without touching the

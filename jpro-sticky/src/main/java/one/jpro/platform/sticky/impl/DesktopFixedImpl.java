@@ -6,21 +6,17 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.platform.sticky.ScrollAnchor;
 import one.jpro.platform.sticky.ScrollPosition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The desktop {@link ScrollPosition#FIXED} implementation: mounts the node into the per-scene
- * {@link StickyOverlay} and anchors it to the scene, re-resolving on scene resize. Pure JavaFX, no
- * {@link com.jpro.webapi.WebAPI}, no core change. On a plain desktop window (nothing scrolls) fixed
- * is exactly a scene-anchored overlay. In the browser, fixed goes through {@link WebScrollImpl}
- * instead.
+ * {@link StickyOverlay} (via {@link OverlayMount}) and anchors it to the scene, re-resolving on scene
+ * resize. Pure JavaFX, no {@link com.jpro.webapi.WebAPI}, no core change. On a plain desktop window
+ * (nothing scrolls) fixed is exactly a scene-anchored overlay. In the browser, fixed goes through
+ * {@link WebScrollImpl} instead.
  * <p>
  * The geometry is resolved by {@link AnchorGeometry} against the scene size, the same resolver the
  * web path uses against the browser viewport, so a fixed node lands in the identical place whether
@@ -30,19 +26,16 @@ import org.slf4j.LoggerFactory;
  */
 public final class DesktopFixedImpl implements ScrollImpl {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DesktopFixedImpl.class);
-
     private final Node node;
     private final ScrollAnchor anchor;
     /** Called when the flow slot leaves the scene, so the dispatcher can re-pin on re-entry. */
     private final Runnable onDetach;
-    private final long stackOrder = StickyOverlay.nextStackOrder(ScrollPosition.FIXED);
+    /** The shared reparent-into-overlay mechanic (flow slot, placeholder, overlay). */
+    private final OverlayMount mount;
 
     private Scene scene;
     private Group overlay;
     private Region placeholder;
-    private Pane originalParent;
-    private int originalIndex = -1;
     /** The node's scene x before mounting, used when the horizontal axis is left NATURAL. */
     private double originalX;
 
@@ -55,6 +48,7 @@ public final class DesktopFixedImpl implements ScrollImpl {
         this.node = node;
         this.anchor = anchor;
         this.onDetach = onDetach;
+        this.mount = new OverlayMount(node, StickyOverlay.nextStackOrder(ScrollPosition.FIXED));
     }
 
     @Override
@@ -69,36 +63,17 @@ public final class DesktopFixedImpl implements ScrollImpl {
             return;
         }
         this.scene = node.getScene();
-        final Parent parent = node.getParent();
-        if (!(parent instanceof Pane)) {
-            LOGGER.warn("jpro-sticky: node's parent is {} (not a Pane); cannot fix {}. Node stays in flow.",
-                    parent == null ? "null" : parent.getClass().getSimpleName(), node);
-            return;
-        }
-        final Group ov = StickyOverlay.overlayForNode(node);
-        if (ov == null) {
-            LOGGER.warn("jpro-sticky: no overlay host for {} (outside a scene, or host not a Pane/Group)."
-                    + " Node stays in flow.", node);
-            return;
-        }
-        this.overlay = ov;
-        this.originalParent = (Pane) parent;
-        this.originalIndex = originalParent.getChildren().indexOf(node);
-        if (originalIndex < 0) {
-            return;
-        }
+        // Capture the flow x before mounting (the node is still in its slot), for a NATURAL horizontal axis.
         this.originalX = node.localToScene(0, 0).getX();
 
-        // Fixed is out of flow, so the placeholder is zero-height. Mirror the node's constraints and
-        // width onto it so the surrounding layout doesn't shift, then mount the node into the shared
-        // overlay (sorted by stackOrder).
-        placeholder = new Region();
-        placeholder.setMaxWidth(Double.MAX_VALUE);
-        Placeholders.mirror(node, placeholder);
+        final Region ph = mount.mount();
+        if (ph == null) {
+            return; // could not mount; the node stays in flow
+        }
+        this.placeholder = ph;
+        this.overlay = mount.overlay();
+        // Fixed is out of flow, so its slot collapses to zero height.
         placeholder.setPrefHeight(0);
-        originalParent.getChildren().set(originalIndex, placeholder);
-        node.setManaged(false);
-        StickyOverlay.insertSorted(overlay, node, stackOrder);
 
         // End/center/stretch anchors depend on the scene size, and the node's own size can change too.
         scene.widthProperty().addListener(relayout);
@@ -159,14 +134,6 @@ public final class DesktopFixedImpl implements ScrollImpl {
             placeholder.sceneProperty().removeListener(placeholderSceneWaiter);
             placeholderSceneWaiter = null;
         }
-
-        StickyOverlay.remove(overlay, node);
-        if (originalParent != null && placeholder != null) {
-            final int idx = originalParent.getChildren().indexOf(placeholder);
-            if (idx >= 0) {
-                originalParent.getChildren().set(idx, node);
-            }
-            node.setManaged(true);
-        }
+        mount.unmount();
     }
 }
