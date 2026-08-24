@@ -5,12 +5,12 @@ package one.jpro.platform.sticky;
  * {@link ScrollPosition#FIXED fixed} node is anchored, resolved on the horizontal and vertical
  * axes <em>independently</em>. Each axis carries exactly one {@link Mode}:
  * <ul>
- *   <li>{@link Mode#NATURAL} — keep the node's flow position/size on that axis (nothing set);</li>
- *   <li>{@link Mode#PIN_START} — pin to the top/left edge at an offset ({@link #top}/{@link #left});</li>
- *   <li>{@link Mode#PIN_END} — pin to the bottom/right edge at an offset ({@link #bottom}/{@link #right});</li>
- *   <li>{@link Mode#CENTER} — center on that axis, an offset shifts toward the end
+ *   <li>{@link Mode#NATURAL}: keep the node's flow position/size on that axis (nothing set);</li>
+ *   <li>{@link Mode#PIN_START}: pin to the top/left edge at an offset ({@link #top}/{@link #left});</li>
+ *   <li>{@link Mode#PIN_END}: pin to the bottom/right edge at an offset ({@link #bottom}/{@link #right});</li>
+ *   <li>{@link Mode#CENTER}: center on that axis, an offset shifts toward the end
  *       ({@link #centerX}/{@link #centerY});</li>
- *   <li>{@link Mode#STRETCH} — resize the node to span both edges of the axis (both a start and an
+ *   <li>{@link Mode#STRETCH}: resize the node to span both edges of the axis (both a start and an
  *       end offset set on the same axis).</li>
  * </ul>
  * A corner is a PIN on each axis, an edge bar is a STRETCH on one axis and a PIN on the other, a
@@ -112,7 +112,7 @@ public final class ScrollAnchor {
     }
 
     /**
-     * Returns an anchor that is {@link Mode#NATURAL} on both axes — the starting point for the
+     * Returns an anchor that is {@link Mode#NATURAL} on both axes, the starting point for the
      * fluent withers.
      *
      * @return a fresh anchor with no axis claimed
@@ -212,8 +212,8 @@ public final class ScrollAnchor {
     }
 
     /**
-     * Stretches the node to fill both axes, insetting {@code px} from every edge — the
-     * full-viewport overlay case. Shorthand for {@code top(px).right(px).bottom(px).left(px)}.
+     * Stretches the node to fill both axes, insetting {@code px} from every edge (the
+     * full-viewport overlay case). Shorthand for {@code top(px).right(px).bottom(px).left(px)}.
      *
      * @param px the uniform inset (px) from all four edges
      * @return a new anchor stretched on both axes

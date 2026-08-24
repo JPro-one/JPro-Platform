@@ -6,14 +6,14 @@ package one.jpro.platform.sticky;
  * {@link Scroll} selects one implementation per node at install time and stashes it on the node so
  * a later {@code setScrollPosition} (or {@code clearScrollPosition}) can tear it down cleanly:
  * <ul>
- *   <li>{@link ScrollOverride} — the web path: a compositor scroll-timeline override, used for
+ *   <li>{@link ScrollOverride}, the web path: a compositor scroll-timeline override, used for
  *       natively scrolled browser documents;</li>
- *   <li>{@link FXStickyImpl} — the desktop (and FX-scrolled {@code ScrollPane}) sticky path: pure
+ *   <li>{@link FXStickyImpl}, the desktop (and FX-scrolled {@code ScrollPane}) sticky path: pure
  *       JavaFX, pinning by {@code translate} within the scrolled content;</li>
- *   <li>{@link FXFixedImpl} — the desktop fixed path: a scene-root overlay anchored to the scene.</li>
+ *   <li>{@link FXFixedImpl}, the desktop fixed path: a scene-root overlay anchored to the scene.</li>
  * </ul>
  * The split is invisible to callers: whichever implementation is chosen, the positioning behaviour
- * is the same (STICKY_DESIGN.md §5).
+ * is the same.
  *
  * @author Tobias Horak
  */

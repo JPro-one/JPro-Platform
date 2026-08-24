@@ -41,9 +41,9 @@ import one.jpro.platform.sticky.ScrollPosition;
  * <p>
  * <strong>Observability.</strong> The sticky page header and the ScrollPane sub-header carry the
  * {@code sticky-demo-header} style class, and {@code sticky-sample.css} gives them a drop-shadow via
- * the auto-toggled {@link Scroll#STUCK_PSEUDO_CLASS :stuck} pseudo-class while they are pinned — the
- * CSS channel, styled with no Java beyond the sticky call. The page header additionally logs its
- * {@link Scroll#stuckProperty} transitions — the Java channel. Both flip together from one source.
+ * the auto-toggled {@link Scroll#STUCK_PSEUDO_CLASS :stuck} pseudo-class while they are pinned (the
+ * CSS channel, styled with no Java beyond the sticky call). The page header additionally logs its
+ * {@link Scroll#stuckProperty} transitions (the Java channel). Both flip together from one source.
  * <p>
  * Styling uses the AtlantaFX {@link CupertinoLight} theme (matching the other platform examples), so
  * the demo reads as one system without any hand-rolled colours.
@@ -103,7 +103,7 @@ public class ScrollSample extends Application {
         root.getChildren().addAll(filler(1, 25));
 
         // Bounded section: the sub-header pins while the section scrolls through, then releases at the
-        // section's bottom (its containing block). No explicit container needed — the parent bounds it.
+        // section's bottom (its containing block). No explicit container needed; the parent bounds it.
         final var section = new VBox();
         final var sectionHeader = barButton("Section sub-header (pins, then releases)", Styles.SUCCESS);
         sectionHeader.setMinHeight(40);

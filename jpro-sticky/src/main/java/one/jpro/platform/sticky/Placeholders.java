@@ -16,8 +16,8 @@ import javafx.scene.layout.Region;
  * <p>
  * <strong>Width vs height.</strong> This mirrors the constraint keys and the horizontal footprint.
  * The vertical footprint stays the caller's concern via {@code prefHeight}, because it differs by mode:
- * STICKY keeps the node height (the slot stays reserved), FIXED collapses to 0 (it is out of flow) —
- * so pinning a {@code minHeight} here would fight the FIXED collapse. The caller keeps
+ * STICKY keeps the node height (the slot stays reserved), FIXED collapses to 0 (it is out of flow), so
+ * pinning a {@code minHeight} here would fight the FIXED collapse. The caller keeps
  * {@code maxWidth = MAX_VALUE} for fill.
  *
  * @author Tobias Horak
@@ -58,7 +58,7 @@ final class Placeholders {
         });
 
         // Reserve the node's on-screen width so siblings don't reclaim the slot. prefWidth (a
-        // preference, not a floor) lets a fill slot still shrink with its container; an explicit
+        // preference, not a floor) lets a fill slot still shrink with its container. An explicit
         // minWidth the node itself enforced is carried through as a real floor.
         final double width = node.getLayoutBounds().getWidth();
         if (width > 0) {

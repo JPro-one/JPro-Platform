@@ -77,7 +77,7 @@ public final class Scroll {
     }
 
     // ---------------------------------------------------------------------
-    // Overlay host registration — where pinned nodes are reparented to
+    // Overlay host registration: where pinned nodes are reparented to
     // ---------------------------------------------------------------------
 
     /**
@@ -85,26 +85,25 @@ public final class Scroll {
      * <p>
      * To pin a node without a JavaFX layout pass per scroll event, jpro-sticky reparents it into an
      * overlay layered over the page. By default that overlay is the scene root, which moves a pinned
-     * node <em>out</em> of its route subtree — severing everything scoped below the scene root:
-     * route CSS and looked-up colour tokens (JavaFX resolves both up the real parent chain), and any
-     * parent-chain framework context (e.g. the routing popup container a dropdown needs). Registering
-     * a host that sits <em>below</em> those scopes makes the reparented node a real {@code getParent()}
-     * descendant of them again, so all of it resolves exactly as it does in flow — with no per-node
-     * styling workarounds.
+     * node <em>out</em> of its route subtree, severing anything scoped below the scene root: route CSS
+     * and looked-up colour tokens (JavaFX resolves both up the real parent chain), and any parent-chain
+     * framework context (e.g. the routing popup container a dropdown needs). Registering a host that
+     * sits <em>below</em> those scopes makes the reparented node a real {@code getParent()} descendant
+     * of them again, so all of it resolves exactly as it does in flow.
      * <p>
-     * At pin time each node is mounted into the overlay of its <strong>nearest registered host</strong>
-     * on the parent chain (else the scene root, the default). Registration is idempotent and is a
-     * setup-time call — the pinning calls ({@link #setStickyPosition}, {@link #setFixedPosition}, …)
-     * stay argument-free.
+     * At pin time each node is mounted into the overlay of its nearest registered host on the parent
+     * chain (else the scene root). Registration is idempotent and is a setup-time call; the pinning
+     * methods ({@link #setStickyPosition}, {@link #setFixedPosition}, and so on) stay argument-free.
      * <p>
-     * <strong>Styling is all-or-nothing.</strong> A host below the route's CSS scope → <em>all</em>
-     * route CSS applies to the pinned node exactly as in flow; no host (scene-root default) → <em>no</em>
-     * route CSS reaches it and the node must be styling-self-sufficient. There is no partial middle.
+     * <strong>Styling is all-or-nothing.</strong> A host below the route's CSS scope applies
+     * <em>all</em> route CSS to the pinned node exactly as in flow; with no host (the scene-root
+     * default) <em>no</em> route CSS reaches it and the node must be styling-self-sufficient.
      * <p>
      * <strong>Constrain the host to identity/translation.</strong> The overlay shares the host's
-     * coordinate space; a scaled or rotated host would distort the pin. A routing app's popup container
-     * (an untransformed, non-clipping {@code StackPane} that already holds viewport-relative overlays)
-     * is the canonical host — registering it makes sticky pins and popups share one overlay layer.
+     * coordinate space, so a scaled or rotated host would distort the pin. A routing app's popup
+     * container (an untransformed, non-clipping {@code StackPane} that already holds viewport-relative
+     * overlays) is the canonical host: registering it makes sticky pins and popups share one overlay
+     * layer.
      *
      * @param host the pane to register as an overlay host; must not be {@code null}
      */
@@ -116,7 +115,7 @@ public final class Scroll {
     }
 
     // ---------------------------------------------------------------------
-    // Sticky convenience — the everyday, hand-written API (edge-based)
+    // Sticky convenience: the everyday, hand-written API (edge-based)
     // ---------------------------------------------------------------------
 
     /**
@@ -159,7 +158,7 @@ public final class Scroll {
     }
 
     // ---------------------------------------------------------------------
-    // Fixed convenience — corner / edge / stretch / center
+    // Fixed convenience: corner / edge / stretch / center
     // ---------------------------------------------------------------------
 
     /**
@@ -173,7 +172,7 @@ public final class Scroll {
 
     /**
      * Pins the node with {@link ScrollPosition#FIXED fixed} positioning to the given edge, leaving
-     * the perpendicular axis at its natural size (a chip, not a bar — use {@link #setFixedBar} for a
+     * the perpendicular axis at its natural size (a chip, not a bar; use {@link #setFixedBar} for a
      * full-span bar).
      *
      * @param node   the node to position; must not be {@code null}
@@ -277,7 +276,7 @@ public final class Scroll {
     }
 
     // ---------------------------------------------------------------------
-    // Canonical API — programmatic / data-driven callers
+    // Canonical API: programmatic / data-driven callers
     // ---------------------------------------------------------------------
 
     /**
@@ -320,8 +319,8 @@ public final class Scroll {
      * Applies a scroll positioning mode to the node at an explicit {@link ScrollAnchor}. This is the
      * canonical setter that every other method delegates to.
      * <p>
-     * For {@link ScrollPosition#STICKY} the anchor must only pin edges — {@link ScrollAnchor.Mode#CENTER}
-     * or {@link ScrollAnchor.Mode#STRETCH} axes are rejected — and {@code within} bounds the pin (the
+     * For {@link ScrollPosition#STICKY} the anchor must only pin edges ({@link ScrollAnchor.Mode#CENTER}
+     * or {@link ScrollAnchor.Mode#STRETCH} axes are rejected), and {@code within} bounds the pin (the
      * node rides up and releases at the container's bottom); {@code null} defaults to the node's parent.
      * For {@link ScrollPosition#FIXED} the anchor may use the full model and {@code within} is ignored
      * (fixed is viewport-anchored).
@@ -369,7 +368,7 @@ public final class Scroll {
         node.getProperties().put(POSITION_KEY, position);
         node.getProperties().put(ANCHOR_KEY, anchor);
 
-        // STICKY publishes its pin state through the node's StuckState (stuckProperty + :stuck); the
+        // STICKY publishes its pin state through the node's StuckState (stuckProperty + :stuck). The
         // active sticky impl drives it via this sink. FIXED is always pinned -> never transitions ->
         // no sink (and it never touches the stuck channels).
         final Consumer<Boolean> stuckSink =
@@ -398,7 +397,7 @@ public final class Scroll {
     }
 
     // ---------------------------------------------------------------------
-    // Observability — is a sticky node currently pinned ("stuck")?
+    // Observability: is a sticky node currently pinned ("stuck")?
     // ---------------------------------------------------------------------
 
     /**
@@ -410,7 +409,7 @@ public final class Scroll {
      * clear / re-apply, so a listener attached once survives mode swaps. A {@link ScrollPosition#STATIC}
      * or {@link ScrollPosition#FIXED} node reads {@code false} (a fixed node is always pinned, so its
      * stuck state never carries information). A sticky node with nothing to scroll against (desktop,
-     * no scroll ancestor) also stays {@code false} — matching CSS sticky in a non-scrolling page.
+     * no scroll ancestor) also stays {@code false}, matching CSS sticky in a non-scrolling page.
      * <p>
      * On the web compositor path the flip tracks the {@link com.jpro.webapi.WebAPI#browserViewport()}
      * sync cadence (the same fidelity picking already has), not per animation frame; see the module
@@ -447,7 +446,7 @@ public final class Scroll {
     /**
      * Looks up the node's {@link StuckState}, optionally creating (and caching) it. Created lazily on
      * first sticky application or first {@link #stuckProperty} call and kept for the node's life so the
-     * property instance — and thus listener identity — stays stable.
+     * property instance (and thus listener identity) stays stable.
      */
     private static StuckState stuckState(Node node, boolean create) {
         final Object value = node.getProperties().get(STUCK_STATE_KEY);
@@ -495,7 +494,7 @@ public final class Scroll {
     }
 
     /**
-     * Rejects a {@link ScrollAnchor} that centers or stretches either axis — STICKY pins edges only
+     * Rejects a {@link ScrollAnchor} that centers or stretches either axis; STICKY pins edges only
      * (CSS sticky neither centers nor stretches).
      */
     private static void rejectNonEdgeAnchor(ScrollAnchor anchor) {

@@ -11,10 +11,10 @@ import one.jpro.platform.sticky.ScrollAnchor.Mode;
 import java.util.function.Consumer;
 
 /**
- * The {@link ScrollPosition#STICKY} implementation for a node inside a JavaFX {@link ScrollPane} —
- * used on desktop, and also in the browser when the scroll is a server-driven FX {@code ScrollPane}
- * (so the pin stays in sync with the scroll by construction, STICKY_DESIGN.md §5/§8). Pure JavaFX:
- * no reparenting, no {@link com.jpro.webapi.WebAPI}, no core change.
+ * The {@link ScrollPosition#STICKY} implementation for a node inside a JavaFX {@link ScrollPane}.
+ * Used on desktop, and also in the browser when the scroll is a server-driven FX {@code ScrollPane}
+ * (so the pin stays in sync with the scroll by construction). Pure JavaFX: no reparenting, no
+ * {@link com.jpro.webapi.WebAPI}, no core change.
  * <p>
  * The node stays in its flow slot; a {@code translate} holds it at the pin line while scrolled past,
  * clamped so it never leaves its containing block (the {@code within} override, else the node's
@@ -28,9 +28,9 @@ import java.util.function.Consumer;
  *   appear = clamp(appear, containerStart, containerEnd - size)             // stay in the block
  *   translate = appear - natural
  * </pre>
- * resolved independently on both axes. Reading the natural position subtracts our own applied
- * translate (the reentrancy-safe trick), so re-syncs converge. While pinned the node gets a low
- * {@code viewOrder} so it paints above its scrolled siblings (picking follows {@code viewOrder} in FX).
+ * resolved independently on both axes. Reading the natural position subtracts the translate this
+ * impl applied last pass, so re-syncs converge. While pinned the node gets a low {@code viewOrder}
+ * so it paints above its scrolled siblings (picking follows {@code viewOrder} in FX).
  *
  * @author Tobias Horak
  */
@@ -96,7 +96,7 @@ final class FXStickyImpl implements ScrollImpl {
         final double nodeH = nodeBounds.getHeight();
 
         // The node's natural top-left in content coordinates, reentrancy-safe (subtract the translate
-        // we applied last pass). Both transforms fold in the scroll, which cancels, so this is stable.
+        // applied last pass). Both transforms fold in the scroll, which cancels, so this stays stable.
         final Point2D nodeContentTL = content.sceneToLocal(node.localToScene(0, 0));
         final double naturalX = nodeContentTL.getX() - node.getTranslateX();
         final double naturalY = nodeContentTL.getY() - node.getTranslateY();
@@ -104,7 +104,7 @@ final class FXStickyImpl implements ScrollImpl {
         // The containing block in content coordinates (defaults to the whole content if unresolved).
         final Bounds containerBounds = containerBoundsInContent();
 
-        // Scroll offset (content px) each axis is currently scrolled by.
+        // How far each axis is currently scrolled, in content px.
         final double scrollX = scrollOffset(scrollPane.getHvalue(), scrollPane.getHmin(), scrollPane.getHmax(),
                 content.getLayoutBounds().getWidth(), viewportW);
         final double scrollY = scrollOffset(scrollPane.getVvalue(), scrollPane.getVmin(), scrollPane.getVmax(),

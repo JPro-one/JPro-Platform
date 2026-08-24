@@ -11,10 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.util.function.Consumer;
 
 /**
- * Selects and installs the concrete {@link ScrollImpl} for a node once it enters a scene — the point
- * at which its parent chain (and thus any {@link ScrollPane} ancestor) is realised. The choice is the
- * implementation matrix of STICKY_DESIGN.md §5 and is invisible to callers: the positioning behaves
- * the same whichever path is picked.
+ * Selects and installs the concrete {@link ScrollImpl} for a node once it enters a scene, the point
+ * at which its parent chain (and thus any {@link ScrollPane} ancestor) is realised. The choice is
+ * invisible to callers: the positioning behaves the same whichever path is picked.
  *
  * <table>
  *   <caption>Selection</caption>
@@ -57,7 +56,7 @@ final class ScrollDispatcher implements ScrollImpl {
         if (node.getScene() != null) {
             choose();
         } else {
-            // The parent chain is only guaranteed realised once the node is in a scene; wait for it
+            // The parent chain is only guaranteed realised once the node is in a scene. Wait for it
             // so the ScrollPane-ancestor check (which decides FX vs web) sees the final tree.
             sceneWaiter = (obs, old, scene) -> {
                 if (scene != null) {
@@ -100,7 +99,7 @@ final class ScrollDispatcher implements ScrollImpl {
             // Natively scrolled browser document: the compositor override.
             return new ScrollOverride(node, position, anchor, within, stuckSink);
         }
-        // Desktop with no scroll ancestor: nothing scrolls, so a sticky element never moves — the
+        // Desktop with no scroll ancestor: nothing scrolls, so a sticky element never moves, the
         // same result CSS gives for a sticky element in a non-scrolling page.
         return null;
     }

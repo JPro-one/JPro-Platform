@@ -14,19 +14,19 @@ import java.util.concurrent.atomic.AtomicLong;
  * regardless of which mechanism mounts a node.
  * <p>
  * <strong>Where the overlay lands.</strong> At pin time the node is resolved to its
- * {@linkplain #hostFor host} — the nearest ancestor {@link Pane} previously stamped by
+ * {@linkplain #hostFor host}: the nearest ancestor {@link Pane} stamped by
  * {@link #registerHost} ({@code Scroll.registerOverlayHost}), or the scene root when none is
  * registered. Each host carries its own overlay {@link Group}, created lazily and removed again when
  * its last pin detaches. Mounting below a registered host (one that sits under the app's CSS scope
  * and its parent-chain context holders) keeps the reparented node a real {@code getParent()}
  * descendant of them, so route CSS, colour tokens and every parent-chain context resolve exactly as
- * they do in flow; with no host registered the node lands at the scene root (today's behaviour).
+ * they do in flow; with no host registered the node lands at the scene root.
  * <p>
- * Every mounted node is assigned a {@linkplain #nextStackOrder(ScrollPosition) stack order} — a type
+ * Every mounted node is assigned a {@linkplain #nextStackOrder(ScrollPosition) stack order}: a type
  * tier ({@link ScrollPosition#FIXED} above {@link ScrollPosition#STICKY}) above the order
- * {@code setScrollPosition} is called — and {@link #insertSorted} keeps the overlay's children ordered
+ * {@code setScrollPosition} is called, and {@link #insertSorted} keeps the overlay's children ordered
  * by it. So within a host overlay the default front-to-back order is fixed-over-sticky, add-order
- * within each tier (a later-declared node paints on top — CSS's source-order tiebreaker), rather than
+ * within each tier (a later-declared node paints on top, CSS's source-order tiebreaker), rather than
  * the async order in which installs happen to complete. {@code viewOrder} remains the explicit
  * per-node override (JPro/JavaFX sort by it first, and the web path never sets it), so a consumer can
  * still force any order. The add-order guarantee is per host: pins in different hosts stack by their
@@ -52,7 +52,7 @@ final class StickyOverlay {
      * {@code viewOrder} for the overlay {@link Group} itself, so it paints above the host's other
      * children (the routed page content) regardless of child-list order. This matters when the host is
      * a routing container that swaps its content: the new page is appended <em>after</em> the overlay,
-     * and in a {@link Pane} later children paint on top — without this the pinned node would be buried
+     * and in a {@link Pane} later children paint on top, so without this the pinned node would be buried
      * behind the new page after every navigation. Negative = in front (JPro/JavaFX sort by viewOrder
      * first). This is the overlay's own order among host siblings; the per-node viewOrder override
      * inside the overlay is untouched.
@@ -77,7 +77,7 @@ final class StickyOverlay {
      * within one host overlay, {@link ScrollPosition#FIXED} nodes sort after (paint in front of)
      * {@link ScrollPosition#STICKY} nodes regardless of the order they were applied, and within a tier
      * the later-applied node paints on top (source order). {@code viewOrder} remains the explicit
-     * per-node override — JPro/JavaFX sort children by it first, and the web path never sets it — so a
+     * per-node override (JPro/JavaFX sort children by it first, and the web path never sets it), so a
      * consumer can still force any order. Assign once per mounted node, at construction.
      *
      * @param position the mount's positioning mode; {@code FIXED} tiers above everything else

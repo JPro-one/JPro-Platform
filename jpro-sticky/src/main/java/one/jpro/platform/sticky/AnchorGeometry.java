@@ -9,12 +9,12 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * Resolves a {@link ScrollAnchor} plus an available (viewport/scene) size into the pinned geometry
  * of a node: its size ({@link #nodeW}/{@link #nodeH}) and the position of its top-left within the
- * available box ({@link #x}/{@link #y0}). The two axes are resolved independently (STICKY_DESIGN.md
- * §18): each of {@code NATURAL / PIN_START / PIN_END / CENTER / STRETCH} maps to a size and offset.
+ * available box ({@link #x}/{@link #y0}). The two axes are resolved independently: each of
+ * {@code NATURAL / PIN_START / PIN_END / CENTER / STRETCH} maps to a size and offset.
  * <p>
  * This is shared by the web ({@link ScrollOverride}, resolving against the browser viewport) and the
  * desktop ({@link FXFixedImpl}, resolving against the scene) so both compute <em>identical</em>
- * geometry from the same anchor — the mechanical guarantee that the desktop/web split is invisible.
+ * geometry from the same anchor. That is what keeps the desktop/web split invisible.
  *
  * @author Tobias Horak
  */
@@ -126,7 +126,7 @@ final class AnchorGeometry {
 
     /**
      * The node's natural height at {@code forWidth}. {@code prefHeight} alone ignores {@code minHeight},
-     * so a min-constrained node would reserve too little — take the max of both.
+     * so a min-constrained node would reserve too little; take the max of both.
      */
     static double naturalHeight(Node node, double forWidth) {
         if (node instanceof Region) {

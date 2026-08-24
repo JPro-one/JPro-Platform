@@ -28,19 +28,18 @@ import java.util.function.Consumer;
  * overrides the DOM visual with an {@code animation-timeline: scroll()} animation so scrolling
  * stays smooth without a JavaFX layout pass per scroll event.
  * <p>
- * This is the JavaFX/JPro port of the FX-scene-graph sticky mechanism proven in the core
- * {@code TestStickyScenegraph} demo (STICKY_DESIGN.md §16/§17). It needs no core change beyond
- * the M1 Viewport API ({@link WebAPI#browserViewport()} / {@link WebAPI#documentBounds()}).
+ * It builds only on the JPro Viewport API ({@link WebAPI#browserViewport()} /
+ * {@link WebAPI#documentBounds()}) and needs no core change.
  * <p>
  * When running as a desktop application the {@link WebAPI} consumer never fires, so installation
  * is a no-op and the node keeps its normal flow positioning.
  * <p>
  * <strong>Anchoring.</strong> The {@link ScrollAnchor} resolves the horizontal and vertical axes
- * independently (STICKY_DESIGN.md §18). The vertical axis drives the scroll-timeline keyframe (pin
- * line, ride, and — for bounded sticky — release); the horizontal axis is a constant baked into the
- * keyframe (the page does not scroll horizontally). {@link ScrollAnchor.Mode#STRETCH} resizes the
- * node to span the axis; {@link ScrollPosition#FIXED} is the degenerate pin (from scroll 0, no ride
- * and — being viewport-anchored — no containment release).
+ * independently. The vertical axis drives the scroll-timeline keyframe (pin line, ride, and, for
+ * bounded sticky, release); the horizontal axis is a constant baked into the keyframe (the page does
+ * not scroll horizontally). {@link ScrollAnchor.Mode#STRETCH} resizes the node to span the axis;
+ * {@link ScrollPosition#FIXED} is the degenerate pin (from scroll 0, no ride and, being
+ * viewport-anchored, no containment release).
  *
  * @author Tobias Horak
  */
@@ -120,7 +119,7 @@ final class ScrollOverride implements ScrollImpl {
         if (node.getScene() != null) {
             attach();
         } else {
-            // Deferred until attached: the node may be positioned before it enters a scene.
+            // The node may be positioned before it enters a scene. Attach once it does.
             sceneWaiter = (obs, old, scene) -> {
                 if (scene != null) {
                     node.sceneProperty().removeListener(sceneWaiter);
@@ -137,10 +136,9 @@ final class ScrollOverride implements ScrollImpl {
             return;
         }
         final Parent parent = node.getParent();
-        // Race guard: a superseded application (rapid re-apply / scene churn) may still have the node
-        // mounted in an overlay when this async attach fires — don't mistake that overlay for the flow
-        // parent (the old "parent is Group -> node stays in flow" bug). Wait until the node settles back
-        // into its real flow parent (that override's teardown restores it), then attach. One-shot.
+        // A superseded application (rapid re-apply or scene churn) may still have the node in an overlay
+        // when this async attach fires. Attaching now would treat that overlay as the flow slot, so wait
+        // until the node settles back into its real flow parent. One-shot.
         if (StickyOverlay.isOverlay(parent)) {
             if (settleWaiter == null) {
                 settleWaiter = (obs, old, p) -> {
@@ -177,31 +175,28 @@ final class ScrollOverride implements ScrollImpl {
         }
         this.root = node.getScene().getRoot();
 
-        // STICKY is bounded by its containing block (CSS-native): the explicit `within` override if
-        // given, else the node's original parent. FIXED is viewport-anchored and ignores containment.
+        // STICKY is bounded by its containing block: the explicit `within` if given, else the node's
+        // original parent. FIXED is viewport-anchored, so it ignores containment.
         this.container = (position == ScrollPosition.FIXED) ? null
                 : (within != null ? within : originalParent);
 
         placeholder = new Region();
         placeholder.setMaxWidth(Double.MAX_VALUE);
-        // Carry the node's immediate-parent constraints + horizontal footprint to the placeholder so
-        // the flow slot keeps its grow/margin/span/alignment and width (prefHeight is set in sync()).
+        // Mirror the node's layout constraints and width onto the placeholder so the flow slot doesn't
+        // shift. Its height comes later, in sync().
         Placeholders.mirror(node, placeholder);
 
-        // Swap node -> placeholder in the flow, and move the node into the overlay. Insert so the
-        // overlay stays sorted by stackOrder: the paint/stacking order then follows the order
-        // setScrollPosition was called (source order) instead of the async order installs complete.
-        // The library takes no stance on fixed-vs-sticky; a later-declared node paints on top, and
-        // viewOrder remains the explicit per-node override (JPro/JavaFX sort by viewOrder first).
+        // Swap node -> placeholder in flow, then mount the node into the overlay. insertSorted keeps it
+        // ordered by stackOrder, so paint order follows source order, not install order. StickyOverlay
+        // documents the full ordering contract.
         originalParent.getChildren().set(originalIndex, placeholder);
         node.setManaged(false);
         StickyOverlay.insertSorted(overlay, node, stackOrder);
         node.applyCss();
 
-        // Signals that require a re-sync: the placeholder's geometry (flow position/size), the
-        // browser viewport (the moving signal under native scroll, and the size for end/center/
-        // stretch anchors), the document extent (grow/shrink -> the unbounded pin range refreshes),
-        // and — for bounded sticky — the container's geometry (its bottom sets the release point).
+        // Re-sync on anything that moves the pin: the placeholder's geometry, the browser viewport
+        // (moves under native scroll, and sizes end/center/stretch anchors), the document extent
+        // (resizes the unbounded pin range), and for bounded sticky the container's bottom.
         placeholder.layoutBoundsProperty().addListener(relayout);
         placeholder.localToSceneTransformProperty().addListener(relayout);
         webapi.browserViewport().addListener(relayout);
@@ -211,11 +206,9 @@ final class ScrollOverride implements ScrollImpl {
             container.localToSceneTransformProperty().addListener(relayout);
         }
 
-        // Tear down when the placeholder leaves the scene — the reliable route-unmount signal. The
-        // placeholder rides the flow, so its scene goes null on unmount; the reparented node's does
-        // not (it lives in the persistent overlay), which is exactly why the old GC-only teardown
-        // leaked a duplicate across navigations. Guard against a same-pulse detach/reattach: only tear
-        // down if the placeholder is still out of a scene on the next pulse.
+        // The placeholder rides the flow, so it leaves the scene on route unmount. The reparented node
+        // lives in the persistent overlay and never does. Tear down when the placeholder's scene goes
+        // null, re-checking next pulse to skip a same-pulse detach/reattach.
         placeholderSceneWaiter = (obs, old, scene) -> {
             if (scene == null && !torndown) {
                 Platform.runLater(() -> {
@@ -235,7 +228,7 @@ final class ScrollOverride implements ScrollImpl {
 
     /**
      * Recomputes the node's pinned position and (re-)emits the compositor keyframes when the
-     * geometry signature changes — never per scroll event (that is the compositor's job).
+     * geometry signature changes, never per scroll event (that is the compositor's job).
      */
     private void sync() {
         if (torndown || placeholder == null) {
@@ -253,8 +246,8 @@ final class ScrollOverride implements ScrollImpl {
         final double viewportW = (vp == null) ? 0.0 : vp.getWidth();
         final double viewportH = (vp == null) ? 0.0 : vp.getHeight();
 
-        // End/center/stretch anchors need a real viewport size; skip until one is known (the
-        // browserViewport listener re-syncs once it arrives).
+        // End/center/stretch anchors need a real viewport size. Skip until one is known. The
+        // browserViewport listener re-syncs once it arrives.
         if (AnchorGeometry.needsAvailableSize(anchor) && (viewportW <= 0 || viewportH <= 0)) {
             LOGGER.debug("jpro-sticky[{}]: sync skipped, viewport size {}x{}", jsKey, viewportW, viewportH);
             return;
@@ -279,12 +272,12 @@ final class ScrollOverride implements ScrollImpl {
         // FIXED is out of flow: the placeholder reserves no vertical space. STICKY keeps its slot.
         placeholder.setPrefHeight(fixed ? 0 : nodeH);
 
-        // natTop drives the keyframe 'from'. STICKY rides the flow from its natural top; FIXED pins
-        // from the very top (natTop == y0 => the compositor's sPin becomes 0, no ride).
+        // natTop drives the keyframe 'from'. STICKY rides the flow from its natural top. FIXED pins
+        // from the very top (natTop == y0 makes the compositor's sPin 0, so no ride).
         final double natTop = fixed ? y0 : flowTop;
 
-        // STICKY release limit: the containing block's bottom minus the node height (the proven
-        // 'containerBottom - h'); -1 (unbounded) for FIXED or a page-spanning container.
+        // STICKY release limit: the containing block's bottom minus the node height
+        // (containerBottom - nodeH); -1 (unbounded) for FIXED or a page-spanning container.
         final double relLimitServer = releaseLimit(nodeH);
 
         // Server-side pin (also the no-compositor fallback, and what picking sees): clamp to the
@@ -304,7 +297,7 @@ final class ScrollOverride implements ScrollImpl {
         final double hostOffsetY = overlay.localToScene(0, 0).getY();
 
         // Publish the pin state (STICKY only): stuck iff the applied server pin differs from the
-        // natural flow top — the same rule FXStickyImpl uses (appear != natural), so both paths agree.
+        // natural flow top, the same rule FXStickyImpl uses (appear != natural), so both paths agree.
         // Fidelity is the browserViewport() sync cadence, not per-frame (the compositor drives motion).
         if (!fixed && stuckSink != null) {
             final boolean nowStuck = Math.abs(serverY - flowTop) > STUCK_EPS;
@@ -360,7 +353,7 @@ final class ScrollOverride implements ScrollImpl {
      * ({@code < 0} = unbounded, resolved browser-side to the document extent). All three are in
      * scene/document space; {@code hostOffsetY} is the overlay host's document-y origin, subtracted
      * from the transform endpoints only (they are relative to the overlay's own DOM box) while the
-     * scroll-range math stays in document space — so a non-scene-root host shifts nothing but the pin.
+     * scroll-range math stays in document space, so a non-scene-root host shifts nothing but the pin.
      * <p>
      * <strong>Robust against the JPro readiness race.</strong> Two things make first install
      * reliable on fresh loads. First, the {@code <style>} and keyframes are written unconditionally,
@@ -369,7 +362,7 @@ final class ScrollOverride implements ScrollImpl {
      * so it is resolved inside a {@code requestAnimationFrame} retry loop guarded by try/catch;
      * once resolved, its {@code jpro-id} is cached and the binding is emitted as a selector rule.
      * Because JPro re-emits {@code jpro-id} on every render of the node, that rule re-applies by
-     * itself after any DOM re-render or reconnect — nothing to re-push from the server.
+     * itself after any DOM re-render or reconnect, with nothing to re-push from the server.
      */
     private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
         final String d = webapi.getElement(node).getName();
@@ -463,8 +456,8 @@ final class ScrollOverride implements ScrollImpl {
         }
 
         // The animation lives entirely in the injected <style> (bound by a [jpro-id] rule, not by
-        // inline styles on the element), so dropping that sheet removes the pin. No need to touch
-        // the element ref here — which would reintroduce the readiness race in teardown.
+        // inline styles on the element), so dropping that sheet removes the pin without touching the
+        // element ref (which may be unresolved at teardown).
         if (webapi != null && installedCompositor) {
             removeCompositorStyle(webapi, jsKey);
         }
@@ -472,7 +465,7 @@ final class ScrollOverride implements ScrollImpl {
 
     private void registerCleanup() {
         // Runs if the node is GC'd while pinned, dropping the orphaned <style>. Captures only a
-        // weak WebAPI ref and the key string — never the node or this override (would pin them).
+        // weak WebAPI ref and the key string, never the node or this override (would pin them).
         final WeakReference<WebAPI> weakWebApi = new WeakReference<>(webapi);
         final String key = jsKey;
         CleanupDetector.onCleanup(node, () -> {

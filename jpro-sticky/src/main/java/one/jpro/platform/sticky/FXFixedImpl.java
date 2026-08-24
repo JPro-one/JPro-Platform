@@ -15,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The desktop {@link ScrollPosition#FIXED} implementation: mounts the node into the per-scene
- * {@link StickyOverlay} and anchors it to the scene, re-resolving on scene resize. Pure JavaFX — no
+ * {@link StickyOverlay} and anchors it to the scene, re-resolving on scene resize. Pure JavaFX, no
  * {@link com.jpro.webapi.WebAPI}, no core change. On a plain desktop window (nothing scrolls) fixed
- * is exactly a scene-anchored overlay (STICKY_DESIGN.md §8).
+ * is exactly a scene-anchored overlay.
  * <p>
- * The geometry is resolved by {@link AnchorGeometry} against the scene size — the same resolver the
- * web path uses against the browser viewport — so a fixed node lands in the identical place whether
+ * The geometry is resolved by {@link AnchorGeometry} against the scene size, the same resolver the
+ * web path uses against the browser viewport, so a fixed node lands in the identical place whether
  * the app runs on desktop or on the web.
  *
  * @author Tobias Horak
@@ -93,9 +93,9 @@ final class FXFixedImpl implements ScrollImpl {
         }
         this.originalX = node.localToScene(0, 0).getX();
 
-        // Swap the node for a zero-height placeholder (fixed is out of flow, reserves no space) and
-        // mount it into the shared overlay, kept sorted so stacking follows source order. Mirror the
-        // node's constraints + width onto the placeholder so the flow around the slot doesn't shift.
+        // Fixed is out of flow, so the placeholder is zero-height. Mirror the node's constraints and
+        // width onto it so the surrounding layout doesn't shift, then mount the node into the shared
+        // overlay (sorted by stackOrder).
         placeholder = new Region();
         placeholder.setMaxWidth(Double.MAX_VALUE);
         Placeholders.mirror(node, placeholder);
@@ -104,15 +104,14 @@ final class FXFixedImpl implements ScrollImpl {
         node.setManaged(false);
         StickyOverlay.insertSorted(overlay, node, stackOrder);
 
-        // End/center/stretch anchors depend on the scene size; the node's own size can change too.
+        // End/center/stretch anchors depend on the scene size, and the node's own size can change too.
         scene.widthProperty().addListener(relayout);
         scene.heightProperty().addListener(relayout);
         node.layoutBoundsProperty().addListener(relayout);
 
-        // Tear down when the placeholder leaves the scene (route unmount): the placeholder rides the
-        // flow, so its scene nulls on unmount, whereas the reparented node lives in the persistent
-        // overlay and its scene never does — the old teardown could leave the node parked there.
-        // Guard against a same-pulse detach/reattach by re-checking on the next pulse.
+        // The placeholder rides the flow, so it leaves the scene on route unmount. The reparented node
+        // lives in the persistent overlay and never does. Tear down when the placeholder's scene goes
+        // null, re-checking next pulse to skip a same-pulse detach/reattach.
         placeholderSceneWaiter = (obs, old, s) -> {
             if (s == null && !torndown) {
                 Platform.runLater(() -> {
