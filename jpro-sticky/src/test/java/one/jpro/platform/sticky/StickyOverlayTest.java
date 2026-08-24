@@ -13,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,46 +34,156 @@ class StickyOverlayTest {
     }
 
     // ---------------------------------------------------------------------
-    // forScene — creates once, caches, only hosts on a Pane/Group root
+    // overlayForNode — resolves to the nearest registered host (else the scene
+    // root), creates once, caches, and only hosts on a Pane/Group
     // ---------------------------------------------------------------------
 
     @Test
-    void forSceneCreatesOverlayUnderPaneRootAndCachesIt() {
+    void overlayForNodeFallsBackToSceneRootWhenNoHostRegistered() {
         FxTestSupport.onFx(() -> {
             StackPane root = new StackPane();
+            Region node = new Region();
+            root.getChildren().add(node);
             Scene scene = new Scene(root, 100, 100);
 
-            Group overlay = StickyOverlay.forScene(scene);
+            Group overlay = StickyOverlay.overlayForNode(node);
             assertNotNull(overlay);
             assertEquals("jpro-sticky-overlay", overlay.getId());
             assertTrue(root.getChildren().contains(overlay), "overlay must be a child of the scene root");
             assertFalse(overlay.isManaged(), "overlay must be unmanaged so it shares document coords");
+            assertTrue(overlay.getViewOrder() < 0,
+                    "overlay must paint above host content (survives a routing content swap)");
 
-            // Second call returns the very same instance (cached on the scene) — not a duplicate.
-            assertSame(overlay, StickyOverlay.forScene(scene));
+            // Second call returns the very same instance (cached on the host) — not a duplicate.
+            assertSame(overlay, StickyOverlay.overlayForNode(node));
             assertEquals(1, root.getChildren().stream().filter(n -> n == overlay).count());
         });
     }
 
     @Test
-    void forSceneReturnsNullWhenRootCannotHost() {
+    void overlayForNodeMountsIntoTheNearestRegisteredHost() {
         FxTestSupport.onFx(() -> {
-            // A Label is a Parent but neither a Pane nor a Group, so it cannot host the overlay.
-            Scene scene = new Scene(new Label("root"), 100, 100);
-            assertNull(StickyOverlay.forScene(scene));
+            StackPane root = new StackPane();
+            StackPane outer = new StackPane();
+            StackPane inner = new StackPane();
+            Region node = new Region();
+            inner.getChildren().add(node);
+            outer.getChildren().add(inner);
+            root.getChildren().add(outer);
+            Scene scene = new Scene(root, 100, 100);
+
+            // Both ancestors are hosts; the nearest one on the parent chain wins.
+            Scroll.registerOverlayHost(outer);
+            Scroll.registerOverlayHost(inner);
+
+            Group overlay = StickyOverlay.overlayForNode(node);
+            assertTrue(inner.getChildren().contains(overlay), "overlay must mount into the nearest host");
+            assertFalse(outer.getChildren().contains(overlay));
+            assertFalse(root.getChildren().contains(overlay));
+        });
+    }
+
+    @Test
+    void overlayForNodeReturnsNullWhenHostCannotHost() {
+        FxTestSupport.onFx(() -> {
+            // A Label is a Parent but neither a Pane nor a Group, so as scene root it cannot host the
+            // overlay; passing the root itself as the node exercises the no-host, non-hostable path.
+            Label root = new Label("root");
+            Scene scene = new Scene(root, 100, 100);
+            assertNull(StickyOverlay.overlayForNode(root));
+        });
+    }
+
+    @Test
+    void overlayForNodeReturnsNullOutsideAScene() {
+        FxTestSupport.onFx(() -> assertNull(StickyOverlay.overlayForNode(new Region())));
+    }
+
+    @Test
+    void isOverlayRecognisesOverlayGroupsOnly() {
+        FxTestSupport.onFx(() -> {
+            StackPane root = new StackPane();
+            Region node = new Region();
+            root.getChildren().add(node);
+            new Scene(root, 100, 100);
+
+            Group overlay = StickyOverlay.overlayForNode(node);
+            assertTrue(StickyOverlay.isOverlay(overlay), "a sticky overlay Group is an overlay");
+            assertFalse(StickyOverlay.isOverlay(root), "a Pane host is not an overlay");
+            assertFalse(StickyOverlay.isOverlay(new Group()), "an unrelated Group is not an overlay");
+            assertFalse(StickyOverlay.isOverlay(null), "null is not an overlay");
         });
     }
 
     // ---------------------------------------------------------------------
-    // nextStackOrder — strictly increasing
+    // remove — an emptied host overlay is detached and its cache stamp cleared
     // ---------------------------------------------------------------------
 
     @Test
-    void nextStackOrderIsMonotonic() {
-        long a = StickyOverlay.nextStackOrder();
-        long b = StickyOverlay.nextStackOrder();
-        long c = StickyOverlay.nextStackOrder();
-        assertTrue(a < b && b < c, "stack order must strictly increase: " + a + ", " + b + ", " + c);
+    void removeDetachesAnEmptiedHostOverlayAndClearsItsCache() {
+        FxTestSupport.onFx(() -> {
+            StackPane root = new StackPane();
+            StackPane host = new StackPane();
+            Region node = new Region();
+            host.getChildren().add(node);
+            root.getChildren().add(host);
+            Scene scene = new Scene(root, 100, 100);
+            Scroll.registerOverlayHost(host);
+
+            Group overlay = StickyOverlay.overlayForNode(node);
+            StickyOverlay.insertSorted(overlay, node, 1);
+            assertTrue(host.getChildren().contains(overlay));
+
+            StickyOverlay.remove(overlay, node);
+            assertFalse(host.getChildren().contains(overlay), "an emptied overlay must detach from its host");
+
+            // Cache stamp cleared: a fresh resolve builds a new overlay rather than reusing the stale one.
+            // (insertSorted moved the node into the overlay; put it back under the host, as teardown does.)
+            host.getChildren().add(node);
+            Group rebuilt = StickyOverlay.overlayForNode(node);
+            assertNotNull(rebuilt);
+            assertNotSame(overlay, rebuilt, "the emptied overlay's cache must have been cleared");
+        });
+    }
+
+    // ---------------------------------------------------------------------
+    // nextStackOrder — add-order within a tier, FIXED tiered above STICKY
+    // ---------------------------------------------------------------------
+
+    @Test
+    void nextStackOrderIsMonotonicWithinATier() {
+        long a = StickyOverlay.nextStackOrder(ScrollPosition.STICKY);
+        long b = StickyOverlay.nextStackOrder(ScrollPosition.STICKY);
+        long c = StickyOverlay.nextStackOrder(ScrollPosition.STICKY);
+        assertTrue(a < b && b < c, "within a tier the stack order must strictly increase: " + a + ", " + b + ", " + c);
+    }
+
+    @Test
+    void fixedTiersAboveStickyRegardlessOfApplyOrder() {
+        // Apply a FIXED first, then a STICKY: despite FIXED being earlier in add-order, its higher type
+        // tier keeps its key greater, so it sorts after (paints in front of) the later sticky node.
+        long fixedAppliedFirst = StickyOverlay.nextStackOrder(ScrollPosition.FIXED);
+        long stickyAppliedLater = StickyOverlay.nextStackOrder(ScrollPosition.STICKY);
+        assertTrue(stickyAppliedLater < fixedAppliedFirst,
+                "STICKY must sort below FIXED even when applied later");
+    }
+
+    @Test
+    void insertSortedPlacesFixedAboveStickyByTier() {
+        FxTestSupport.onFx(() -> {
+            Group overlay = new Group();
+            Label sticky = new Label("sticky");
+            Label fixed = new Label("fixed");
+
+            // Apply the fixed node FIRST (lower add-sequence) and the sticky node later.
+            long fixedKey = StickyOverlay.nextStackOrder(ScrollPosition.FIXED);
+            long stickyKey = StickyOverlay.nextStackOrder(ScrollPosition.STICKY);
+            StickyOverlay.insertSorted(overlay, fixed, fixedKey);
+            StickyOverlay.insertSorted(overlay, sticky, stickyKey);
+
+            // Sorted ascending: sticky (lower key) first, fixed last — so fixed paints on top.
+            assertEquals(List.of(sticky, fixed), overlay.getChildren());
+        });
     }
 
     // ---------------------------------------------------------------------

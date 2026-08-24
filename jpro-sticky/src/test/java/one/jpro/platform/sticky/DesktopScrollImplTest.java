@@ -71,10 +71,11 @@ class DesktopScrollImplTest {
 
                 Scroll.setFixedPosition(node, Side.TOP, 0);
 
-                // The node is lifted out of the VBox into the shared scene overlay; a placeholder holds
-                // its slot so the flow does not collapse.
-                Group overlay = StickyOverlay.forScene(scene);
-                assertSame(overlay, node.getParent(), "fixed node should be mounted in the overlay");
+                // The node is lifted out of the VBox into the shared (scene-root) overlay; a placeholder
+                // holds its slot so the flow does not collapse.
+                Group overlay = (Group) node.getParent();
+                assertEquals("jpro-sticky-overlay", overlay.getId(), "fixed node should be mounted in the overlay");
+                assertSame(root, overlay.getParent(), "with no host registered the overlay sits at the scene root");
                 assertFalse(parent.getChildren().contains(node), "node should have left its flow parent");
                 assertEquals(3, parent.getChildren().size(), "placeholder should keep the slot count");
                 assertFalse(node.isManaged(), "an overlay-mounted fixed node is unmanaged");
@@ -171,6 +172,78 @@ class DesktopScrollImplTest {
                         "header should release at the section bottom, not follow the scroll");
             }
         });
+    }
+
+    // ---------------------------------------------------------------------
+    // Placeholder-lifecycle teardown (P1-D): a pinned node is torn out of the overlay when its
+    // placeholder (and so the route subtree) leaves the scene, but not on a transient reparent.
+    // ---------------------------------------------------------------------
+
+    @Test
+    void fixedTearsDownWhenThePlaceholderLeavesTheScene() {
+        final Label[] nodeRef = new Label[1];
+        final VBox[] parentRef = new VBox[1];
+        final Group[] overlayRef = new Group[1];
+
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label node = new Label("fixed");
+                VBox parent = new VBox(node);
+                StackPane root = new StackPane(parent);
+                new Scene(root, 400, 600);
+                layout(root);
+
+                Scroll.setFixedPosition(node, Side.TOP, 0);
+                nodeRef[0] = node;
+                parentRef[0] = parent;
+                overlayRef[0] = (Group) node.getParent();
+                assertTrue(overlayRef[0].getChildren().contains(node), "node should be mounted in the overlay");
+
+                // Unmount the route: the parent (holding the placeholder) leaves the scene.
+                root.getChildren().remove(parent);
+            }
+        });
+
+        // The guarded teardown runs via Platform.runLater on the next pulse; this second onFx is
+        // enqueued after it, so by the time it runs the teardown has happened.
+        FxTestSupport.onFx(() -> {
+            assertFalse(overlayRef[0].getChildren().contains(nodeRef[0]),
+                    "placeholder scene->null must tear the node out of the overlay");
+            assertSame(parentRef[0], nodeRef[0].getParent(),
+                    "the node is restored to its (now-detached) flow parent");
+        });
+    }
+
+    @Test
+    void fixedDoesNotTearDownOnASamePulseDetachReattach() {
+        final Label[] nodeRef = new Label[1];
+        final Group[] overlayRef = new Group[1];
+
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label node = new Label("fixed");
+                VBox parent = new VBox(node);
+                StackPane root = new StackPane(parent);
+                new Scene(root, 400, 600);
+                layout(root);
+
+                Scroll.setFixedPosition(node, Side.TOP, 0);
+                nodeRef[0] = node;
+                overlayRef[0] = (Group) node.getParent();
+
+                // Same-pulse churn: detach then immediately reattach the route subtree. The placeholder
+                // is back in a scene before the guarded teardown runs, so it must be a no-op.
+                root.getChildren().remove(parent);
+                root.getChildren().add(parent);
+            }
+        });
+
+        FxTestSupport.onFx(() -> assertTrue(overlayRef[0].getChildren().contains(nodeRef[0]),
+                "a transient same-pulse detach/reattach must not tear the node out of the overlay"));
     }
 
     /** A VBox whose first child is {@code header} (40px) followed by 40 x 50px rows: 2040px tall. */
