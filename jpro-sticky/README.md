@@ -218,29 +218,25 @@ web, it is moved into an overlay, leaving a placeholder in its original layout s
 `node.getParent()` and scene-graph lookups see it relocated until you clear the position. A sticky
 node inside a `ScrollPane` is the exception: it stays in place.
 
-By default the overlay sits at the scene root, where the moved node no longer receives route- or
-ancestor-scoped CSS and parent-chain contexts. Register a pane below that scope as its host to keep
-them; the node then reparents into the nearest registered host on its parent chain instead:
+By default the overlay sits at the scene root. A node moved there loses any CSS or context scoped to
+its former ancestors, such as route styles or a popup container. To keep those, register an ancestor
+pane as an overlay host, and the node reparents into the nearest one above it instead:
 
 ```java
 Scroll.registerOverlayHost(popupContainer);
 ```
 
-**The stuck flip can lag on the web.** There, `:stuck` and `stuckProperty` track the browser-viewport
-sync cadence, so they can lag the visual transition by up to one sync interval. Inside a `ScrollPane`
-the flip is exact.
+**On the web, the stuck flip can trail the visuals.** `:stuck` and `stuckProperty` track the
+browser-viewport sync cadence, so they update up to one sync interval after the node pins. Inside a
+`ScrollPane` the flip is exact.
 
 ## Running the example
 
-`ScrollSample` demonstrates the full surface: a sticky page header, a bounded sticky section
-sub-header that releases at the section end, and fixed elements at every anchor kind (bottom bar,
-corner FAB, centered toast, full-viewport frame). Several of them are click-counter buttons so
-picking through the overlay is visible. It also includes a `ScrollPane` card whose sticky header
-pins inside the pane, which behaves the same on desktop and web. It also shows the two observability
-channels: both sticky headers take a drop-shadow from the `:stuck` pseudo-class while pinned (see
-`sticky-sample.css`), and the page header logs its `stuckProperty` transitions to the console.
+`ScrollSample` covers every mode: a sticky page header, a bounded sticky sub-header, fixed elements
+at every anchor kind, a `ScrollPane` card with its own sticky header, and both observability channels
+(a `:stuck` drop-shadow and `stuckProperty` logging).
 
-Run it on the web with the JPro Gradle plugin (the page-level elements need native scrolling):
+Run it on the web:
 
 ```shell
 ./gradlew jpro-sticky:example:jproRun
