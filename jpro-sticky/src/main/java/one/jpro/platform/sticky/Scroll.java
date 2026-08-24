@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.css.PseudoClass;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
 import one.jpro.platform.sticky.ScrollAnchor.Mode;
 import org.slf4j.Logger;
@@ -73,6 +74,45 @@ public final class Scroll {
 
     private Scroll() {
         // utility class
+    }
+
+    // ---------------------------------------------------------------------
+    // Overlay host registration — where pinned nodes are reparented to
+    // ---------------------------------------------------------------------
+
+    /**
+     * Registers {@code host} as an overlay host for sticky/fixed pins beneath it.
+     * <p>
+     * To pin a node without a JavaFX layout pass per scroll event, jpro-sticky reparents it into an
+     * overlay layered over the page. By default that overlay is the scene root, which moves a pinned
+     * node <em>out</em> of its route subtree — severing everything scoped below the scene root:
+     * route CSS and looked-up colour tokens (JavaFX resolves both up the real parent chain), and any
+     * parent-chain framework context (e.g. the routing popup container a dropdown needs). Registering
+     * a host that sits <em>below</em> those scopes makes the reparented node a real {@code getParent()}
+     * descendant of them again, so all of it resolves exactly as it does in flow — with no per-node
+     * styling workarounds.
+     * <p>
+     * At pin time each node is mounted into the overlay of its <strong>nearest registered host</strong>
+     * on the parent chain (else the scene root, the default). Registration is idempotent and is a
+     * setup-time call — the pinning calls ({@link #setStickyPosition}, {@link #setFixedPosition}, …)
+     * stay argument-free.
+     * <p>
+     * <strong>Styling is all-or-nothing.</strong> A host below the route's CSS scope → <em>all</em>
+     * route CSS applies to the pinned node exactly as in flow; no host (scene-root default) → <em>no</em>
+     * route CSS reaches it and the node must be styling-self-sufficient. There is no partial middle.
+     * <p>
+     * <strong>Constrain the host to identity/translation.</strong> The overlay shares the host's
+     * coordinate space; a scaled or rotated host would distort the pin. A routing app's popup container
+     * (an untransformed, non-clipping {@code StackPane} that already holds viewport-relative overlays)
+     * is the canonical host — registering it makes sticky pins and popups share one overlay layer.
+     *
+     * @param host the pane to register as an overlay host; must not be {@code null}
+     */
+    public static void registerOverlayHost(Pane host) {
+        if (host == null) {
+            throw new NullPointerException("host must not be null");
+        }
+        StickyOverlay.registerHost(host);
     }
 
     // ---------------------------------------------------------------------

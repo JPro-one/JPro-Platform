@@ -1,5 +1,6 @@
 package one.jpro.platform.sticky;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
@@ -30,7 +31,7 @@ final class FXFixedImpl implements ScrollImpl {
 
     private final Node node;
     private final ScrollAnchor anchor;
-    private final long stackOrder = StickyOverlay.nextStackOrder();
+    private final long stackOrder = StickyOverlay.nextStackOrder(ScrollPosition.FIXED);
 
     private Scene scene;
     private Group overlay;
@@ -42,6 +43,8 @@ final class FXFixedImpl implements ScrollImpl {
 
     private final InvalidationListener relayout = obs -> sync();
     private ChangeListener<Scene> sceneWaiter;
+    /** Fires teardown when the placeholder (and thus the route subtree) leaves the scene. */
+    private ChangeListener<Scene> placeholderSceneWaiter;
     private boolean torndown;
 
     FXFixedImpl(Node node, ScrollAnchor anchor) {
@@ -76,9 +79,10 @@ final class FXFixedImpl implements ScrollImpl {
                     parent == null ? "null" : parent.getClass().getSimpleName(), node);
             return;
         }
-        final Group ov = StickyOverlay.forScene(scene);
+        final Group ov = StickyOverlay.overlayForNode(node);
         if (ov == null) {
-            LOGGER.warn("jpro-sticky: scene root is not a Pane/Group; no overlay host for {}. Node stays in flow.", node);
+            LOGGER.warn("jpro-sticky: no overlay host for {} (outside a scene, or host not a Pane/Group)."
+                    + " Node stays in flow.", node);
             return;
         }
         this.overlay = ov;
@@ -90,9 +94,11 @@ final class FXFixedImpl implements ScrollImpl {
         this.originalX = node.localToScene(0, 0).getX();
 
         // Swap the node for a zero-height placeholder (fixed is out of flow, reserves no space) and
-        // mount it into the shared overlay, kept sorted so stacking follows source order.
+        // mount it into the shared overlay, kept sorted so stacking follows source order. Mirror the
+        // node's constraints + width onto the placeholder so the flow around the slot doesn't shift.
         placeholder = new Region();
         placeholder.setMaxWidth(Double.MAX_VALUE);
+        Placeholders.mirror(node, placeholder);
         placeholder.setPrefHeight(0);
         originalParent.getChildren().set(originalIndex, placeholder);
         node.setManaged(false);
@@ -102,6 +108,21 @@ final class FXFixedImpl implements ScrollImpl {
         scene.widthProperty().addListener(relayout);
         scene.heightProperty().addListener(relayout);
         node.layoutBoundsProperty().addListener(relayout);
+
+        // Tear down when the placeholder leaves the scene (route unmount): the placeholder rides the
+        // flow, so its scene nulls on unmount, whereas the reparented node lives in the persistent
+        // overlay and its scene never does — the old teardown could leave the node parked there.
+        // Guard against a same-pulse detach/reattach by re-checking on the next pulse.
+        placeholderSceneWaiter = (obs, old, s) -> {
+            if (s == null && !torndown) {
+                Platform.runLater(() -> {
+                    if (!torndown && placeholder != null && placeholder.getScene() == null) {
+                        uninstall();
+                    }
+                });
+            }
+        };
+        placeholder.sceneProperty().addListener(placeholderSceneWaiter);
 
         sync();
     }
@@ -137,6 +158,10 @@ final class FXFixedImpl implements ScrollImpl {
             scene.heightProperty().removeListener(relayout);
         }
         node.layoutBoundsProperty().removeListener(relayout);
+        if (placeholder != null && placeholderSceneWaiter != null) {
+            placeholder.sceneProperty().removeListener(placeholderSceneWaiter);
+            placeholderSceneWaiter = null;
+        }
 
         StickyOverlay.remove(overlay, node);
         if (originalParent != null && placeholder != null) {

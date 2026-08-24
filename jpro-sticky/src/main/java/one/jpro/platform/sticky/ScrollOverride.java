@@ -1,6 +1,7 @@
 package one.jpro.platform.sticky;
 
 import com.jpro.webapi.WebAPI;
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
@@ -64,11 +65,12 @@ final class ScrollOverride implements ScrollImpl {
     private boolean lastStuck;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
     /**
-     * Source-order stack value: the overlay is kept sorted by it (see {@link StickyOverlay}) so the
-     * stacking/paint order follows the order {@code setScrollPosition} was called, rather than the
-     * async order in which installs happen to complete.
+     * Stack key (type tier + source order): the overlay is kept sorted by it (see {@link StickyOverlay})
+     * so FIXED paints above STICKY and, within a tier, the stacking/paint order follows the order
+     * {@code setScrollPosition} was called rather than the async order installs complete. Assigned in
+     * the constructor, once {@link #position} is known.
      */
-    private final long stackOrder = StickyOverlay.nextStackOrder();
+    private final long stackOrder;
 
     // Resolved at install time.
     private WebAPI webapi;
@@ -83,6 +85,10 @@ final class ScrollOverride implements ScrollImpl {
     // Reactive plumbing. A single listener re-syncs geometry on any relevant change.
     private final InvalidationListener relayout = obs -> sync();
     private ChangeListener<Scene> sceneWaiter;
+    /** Fires teardown when the placeholder (and thus the route subtree) leaves the scene. */
+    private ChangeListener<Scene> placeholderSceneWaiter;
+    /** Defers attach while a superseded application still has the node mounted in an overlay. */
+    private ChangeListener<Parent> settleWaiter;
     private boolean installedCompositor = false;
     private String lastSig = "";
     private boolean torndown = false;
@@ -94,6 +100,7 @@ final class ScrollOverride implements ScrollImpl {
         this.anchor = anchor;
         this.within = within;
         this.stuckSink = stuckSink;
+        this.stackOrder = StickyOverlay.nextStackOrder(position);
     }
 
     /**
@@ -130,14 +137,35 @@ final class ScrollOverride implements ScrollImpl {
             return;
         }
         final Parent parent = node.getParent();
+        // Race guard: a superseded application (rapid re-apply / scene churn) may still have the node
+        // mounted in an overlay when this async attach fires — don't mistake that overlay for the flow
+        // parent (the old "parent is Group -> node stays in flow" bug). Wait until the node settles back
+        // into its real flow parent (that override's teardown restores it), then attach. One-shot.
+        if (StickyOverlay.isOverlay(parent)) {
+            if (settleWaiter == null) {
+                settleWaiter = (obs, old, p) -> {
+                    if (!torndown && p != null && !StickyOverlay.isOverlay(p)) {
+                        node.parentProperty().removeListener(settleWaiter);
+                        settleWaiter = null;
+                        attach();
+                    }
+                };
+                node.parentProperty().addListener(settleWaiter);
+                LOGGER.debug("jpro-sticky[{}]: node still in an overlay; deferring attach until it settles", jsKey);
+            }
+            return;
+        }
         if (!(parent instanceof Pane)) {
             LOGGER.warn("jpro-sticky: node's parent is {} (not a Pane); cannot pin {}. Node stays in flow.",
                     parent == null ? "null" : parent.getClass().getSimpleName(), node);
             return;
         }
-        final Group ov = StickyOverlay.forScene(node.getScene());
+        // Resolve the overlay from the node's nearest registered host (else the scene root) BEFORE
+        // reparenting, while the node's real parent chain still leads up to that host.
+        final Group ov = StickyOverlay.overlayForNode(node);
         if (ov == null) {
-            LOGGER.warn("jpro-sticky: scene root is not a Pane/Group; no overlay host for {}. Node stays in flow.", node);
+            LOGGER.warn("jpro-sticky: no overlay host for {} (outside a scene, or host not a Pane/Group)."
+                    + " Node stays in flow.", node);
             return;
         }
 
@@ -156,6 +184,9 @@ final class ScrollOverride implements ScrollImpl {
 
         placeholder = new Region();
         placeholder.setMaxWidth(Double.MAX_VALUE);
+        // Carry the node's immediate-parent constraints + horizontal footprint to the placeholder so
+        // the flow slot keeps its grow/margin/span/alignment and width (prefHeight is set in sync()).
+        Placeholders.mirror(node, placeholder);
 
         // Swap node -> placeholder in the flow, and move the node into the overlay. Insert so the
         // overlay stays sorted by stackOrder: the paint/stacking order then follows the order
@@ -179,6 +210,22 @@ final class ScrollOverride implements ScrollImpl {
             container.layoutBoundsProperty().addListener(relayout);
             container.localToSceneTransformProperty().addListener(relayout);
         }
+
+        // Tear down when the placeholder leaves the scene — the reliable route-unmount signal. The
+        // placeholder rides the flow, so its scene goes null on unmount; the reparented node's does
+        // not (it lives in the persistent overlay), which is exactly why the old GC-only teardown
+        // leaked a duplicate across navigations. Guard against a same-pulse detach/reattach: only tear
+        // down if the placeholder is still out of a scene on the next pulse.
+        placeholderSceneWaiter = (obs, old, scene) -> {
+            if (scene == null && !torndown) {
+                Platform.runLater(() -> {
+                    if (!torndown && placeholder != null && placeholder.getScene() == null) {
+                        uninstall();
+                    }
+                });
+            }
+        };
+        placeholder.sceneProperty().addListener(placeholderSceneWaiter);
 
         registerCleanup();
         LOGGER.debug("jpro-sticky[{}]: attached (overlay={}, parent={})", jsKey,
@@ -250,6 +297,12 @@ final class ScrollOverride implements ScrollImpl {
         node.setLayoutX(local.getX());
         node.setLayoutY(local.getY());
 
+        // The overlay may not sit at the scene/document origin: when it lives under a registered host
+        // (e.g. a popup container nested in the route) its top-left is offset down the document. The
+        // compositor transform is relative to the overlay's own DOM box, so its endpoints are baked in
+        // host-local space (scene-y minus this offset) while the scroll-range math stays document-space.
+        final double hostOffsetY = overlay.localToScene(0, 0).getY();
+
         // Publish the pin state (STICKY only): stuck iff the applied server pin differs from the
         // natural flow top — the same rule FXStickyImpl uses (appear != natural), so both paths agree.
         // Fidelity is the browserViewport() sync cadence, not per-frame (the compositor drives motion).
@@ -263,18 +316,19 @@ final class ScrollOverride implements ScrollImpl {
 
         final double docH = root.getLayoutBounds().getHeight();
         final String sig = natTop + "|" + y0 + "|" + local.getX() + "|" + relLimitServer + "|"
-                + nodeW + "|" + nodeH + "|" + docH;
+                + nodeW + "|" + nodeH + "|" + docH + "|" + hostOffsetY;
 
         if (!installedCompositor) {
             // Install inline on the first sync with a real width. The node's DOM peer may still be
             // unregistered at this instant, but the injected script resolves it via its own retry
             // loop (see installCompositor), so no server-side deferral (a runLater pulse) is needed.
-            installCompositor(local.getX(), natTop, y0, relLimitServer);
+            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY);
             installedCompositor = true;
             lastSig = sig;
-            LOGGER.debug("jpro-sticky[{}]: compositor installed (w={}, natTop={}, y0={})", jsKey, nodeW, natTop, y0);
+            LOGGER.debug("jpro-sticky[{}]: compositor installed (w={}, natTop={}, y0={}, hostOffsetY={})",
+                    jsKey, nodeW, natTop, y0, hostOffsetY);
         } else if (!sig.equals(lastSig)) {
-            installCompositor(local.getX(), natTop, y0, relLimitServer);
+            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY);
             lastSig = sig;
         }
     }
@@ -303,7 +357,10 @@ final class ScrollOverride implements ScrollImpl {
      * <p>
      * {@code natTop} is the keyframe 'from' (the flow top for sticky, the pin line for fixed);
      * {@code y0} is the viewport pin line; {@code relLimitServer} is the scene-y release point
-     * ({@code < 0} = unbounded, resolved browser-side to the document extent).
+     * ({@code < 0} = unbounded, resolved browser-side to the document extent). All three are in
+     * scene/document space; {@code hostOffsetY} is the overlay host's document-y origin, subtracted
+     * from the transform endpoints only (they are relative to the overlay's own DOM box) while the
+     * scroll-range math stays in document space — so a non-scene-root host shifts nothing but the pin.
      * <p>
      * <strong>Robust against the JPro readiness race.</strong> Two things make first install
      * reliable on fresh loads. First, the {@code <style>} and keyframes are written unconditionally,
@@ -314,7 +371,7 @@ final class ScrollOverride implements ScrollImpl {
      * Because JPro re-emits {@code jpro-id} on every render of the node, that rule re-applies by
      * itself after any DOM re-render or reconnect — nothing to re-push from the server.
      */
-    private void installCompositor(double x, double natTop, double y0, double relLimitServer) {
+    private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
         final String d = webapi.getElement(node).getName();
         final String js =
                 "(function(){\n" +
@@ -325,7 +382,7 @@ final class ScrollOverride implements ScrollImpl {
                 "  st.key = 'jpro-sticky-" + jsKey + "';\n" +
                 // Latest geometry, baked in server-side; render() reads these so a re-install (on a
                 // geometry-signature change) just updates them and rewrites the sheet.
-                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + ";\n" +
+                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
                 "  st.render = function(){\n" +
                 "    if(st.jid == null) return;\n" +
                 // Document extent (scrollHeight), NOT the scroll max (scrollHeight - clientHeight):
@@ -334,8 +391,12 @@ final class ScrollOverride implements ScrollImpl {
                 "    var relLimit = (st.relServer < 0) ? (docExtent + st.inset) : st.relServer;\n" +
                 "    var sPin = st.natTop - st.inset; if(sPin < 0) sPin = 0;\n" +
                 "    var sRel = relLimit - st.inset; if(sRel < sPin + 1) sRel = sPin + 1;\n" +
+                // Transform endpoints are relative to the overlay's own DOM box, so shift them into
+                // host-local space; sPin/sRel above stay in document/scroll space (host-independent).
+                "    var fromY = st.natTop - st.hostOffsetY;\n" +
+                "    var toY = relLimit - st.hostOffsetY;\n" +
                 "    st.style.textContent = '@keyframes ' + st.key +\n" +
-                "      '{from{transform:translate(' + st.x + 'px,' + st.natTop + 'px);}to{transform:translate(' + st.x + 'px,' + relLimit + 'px);}}' +\n" +
+                "      '{from{transform:translate(' + st.x + 'px,' + fromY + 'px);}to{transform:translate(' + st.x + 'px,' + toY + 'px);}}' +\n" +
                 "      '[jpro-id=\"' + st.jid + '\"]{' +\n" +
                 "      'animation-name:' + st.key + ';' +\n" +
                 "      'animation-timing-function:linear;animation-fill-mode:both;animation-duration:auto;' +\n" +
@@ -368,9 +429,17 @@ final class ScrollOverride implements ScrollImpl {
             node.sceneProperty().removeListener(sceneWaiter);
             sceneWaiter = null;
         }
+        if (settleWaiter != null) {
+            node.parentProperty().removeListener(settleWaiter);
+            settleWaiter = null;
+        }
         if (placeholder != null) {
             placeholder.layoutBoundsProperty().removeListener(relayout);
             placeholder.localToSceneTransformProperty().removeListener(relayout);
+            if (placeholderSceneWaiter != null) {
+                placeholder.sceneProperty().removeListener(placeholderSceneWaiter);
+                placeholderSceneWaiter = null;
+            }
         }
         if (webapi != null) {
             webapi.browserViewport().removeListener(relayout);
