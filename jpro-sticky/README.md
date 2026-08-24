@@ -200,9 +200,9 @@ a `ScrollPane` doesn't need this.)
 
 ### Stacking order
 
-When pinned nodes overlap, stacking follows the order you set them in: the node whose position you
-set last paints on top. To control it explicitly, set the JavaFX `viewOrder` property, which takes
-precedence over call order. A node with a lower `viewOrder` paints in front:
+When pinned nodes overlap, fixed paints above sticky. Within one mode, the node whose position you
+set last paints on top. Set the JavaFX `viewOrder` property to override both; a node with a lower
+`viewOrder` paints in front:
 
 ```java
 Scroll.setFixedPosition(dialog, Pos.CENTER);
@@ -214,9 +214,17 @@ scrim.setViewOrder(1);
 ### Under the hood
 
 **Pinned nodes are reparented.** While a node is fixed (web and desktop) or page-level sticky on the
-web, it is moved into a scene overlay, with a zero-size placeholder left in its original layout slot.
-So `node.getParent()` and scene-graph lookups see it relocated until you clear the position. A sticky
+web, it is moved into an overlay, leaving a placeholder in its original layout slot. So
+`node.getParent()` and scene-graph lookups see it relocated until you clear the position. A sticky
 node inside a `ScrollPane` is the exception: it stays in place.
+
+By default the overlay sits at the scene root, where the moved node no longer receives route- or
+ancestor-scoped CSS and parent-chain contexts. Register a pane below that scope as its host to keep
+them; the node then reparents into the nearest registered host on its parent chain instead:
+
+```java
+Scroll.registerOverlayHost(popupContainer);
+```
 
 **The stuck flip can lag on the web.** There, `:stuck` and `stuckProperty` track the browser-viewport
 sync cadence, so they can lag the visual transition by up to one sync interval. Inside a `ScrollPane`
