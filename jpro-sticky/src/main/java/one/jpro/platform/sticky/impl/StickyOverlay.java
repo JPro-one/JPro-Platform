@@ -163,7 +163,7 @@ public final class StickyOverlay {
      *
      * @param overlay    the overlay to mount into; must not be {@code null}
      * @param node       the node to mount; must not be {@code null}
-     * @param stackOrder the node's {@linkplain #nextStackOrder() stack order}
+     * @param stackOrder the node's {@linkplain #nextStackOrder(ScrollPosition) stack order}
      */
     static void insertSorted(Group overlay, Node node, long stackOrder) {
         node.getProperties().put(STACK_ORDER_KEY, stackOrder);

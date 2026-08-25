@@ -25,12 +25,10 @@ import java.util.function.Consumer;
  * round-trip to the JavaFX layout pass on every scroll event. When running as a desktop
  * application the mode is a no-op and the node keeps its normal flow positioning.
  * <p>
- * The API is layered. The canonical carrier is
- * {@link #setScrollPosition(Node, ScrollPosition, ScrollAnchor)}, taking a {@link ScrollAnchor}
- * that resolves the horizontal and vertical axes independently (corners, edge bars, centers,
- * full-viewport stretch). The {@code (Side, double)} and bare-position overloads are the
- * single-edge convenience over it, and the {@link #setStickyPosition} / {@link #setFixedPosition}
- * methods are thin delegators for everyday, hand-written call sites:
+ * The API is layered over {@link #setScrollPosition(Node, ScrollPosition, ScrollAnchor)}, which takes
+ * a {@link ScrollAnchor} that resolves the horizontal and vertical axes independently (corners, edge
+ * bars, centers, full-viewport stretch). The {@link #setStickyPosition} / {@link #setFixedPosition}
+ * methods are the single-edge and bare-position convenience over it, for everyday call sites:
  * <pre>{@code
  * Scroll.setStickyPosition(header);                          // sticky, pinned to the top
  * Scroll.setFixedPosition(fab, javafx.geometry.Pos.BOTTOM_RIGHT, 24);  // fixed bottom-right corner
@@ -125,7 +123,7 @@ public final class Scroll {
     /**
      * Pins the node with {@link ScrollPosition#STICKY sticky} positioning to the top edge,
      * bounded by its containing block (its parent). Convenience for
-     * {@code setScrollPosition(node, STICKY, Side.TOP, 0)}.
+     * {@code setStickyPosition(node, Side.TOP, 0)}.
      *
      * @param node the node to position; must not be {@code null}
      */
