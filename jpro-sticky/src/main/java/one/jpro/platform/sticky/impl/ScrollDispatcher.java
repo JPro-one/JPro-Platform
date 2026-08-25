@@ -96,6 +96,13 @@ public final class ScrollDispatcher implements ScrollImpl {
             delegate.uninstall();
             delegate = null;
         }
+        // The node left the scene, so it is no longer pinned: clear the stuck channel. The reparenting
+        // teardown does not run through Scroll.setScrollPosition's central reset, so without this a node
+        // that was stuck at navigate-away would keep reporting stuck. A re-pin (below, or on scene
+        // re-entry) re-asserts it if the returning node is stuck again.
+        if (stuckSink != null) {
+            stuckSink.accept(false);
+        }
         if (node.getScene() != null) {
             // Already back in a scene (a same-pulse return): re-pin now.
             choose();
