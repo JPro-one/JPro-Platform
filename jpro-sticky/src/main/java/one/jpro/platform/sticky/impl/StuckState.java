@@ -2,7 +2,6 @@ package one.jpro.platform.sticky.impl;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import one.jpro.platform.sticky.Scroll;
 import one.jpro.platform.sticky.ScrollPosition;
@@ -12,7 +11,7 @@ import one.jpro.platform.sticky.ScrollPosition;
  * publishing it through two synchronized channels from a single write point so they can never drift:
  * <ul>
  *   <li>a {@link ReadOnlyBooleanProperty} (the Java channel) for listeners, bindings and logic; and</li>
- *   <li>the {@link #STUCK} JavaFX pseudo-class (the CSS channel), toggled on the node so a designer can
+ *   <li>the {@link Scroll#STUCK_PSEUDO_CLASS} JavaFX pseudo-class (the CSS channel), toggled on the node so a designer can
  *       restyle a stuck node in JavaFX CSS ({@code .header:stuck { ... }}) with no Java.</li>
  * </ul>
  * One holder lives for the node's life (stashed on {@code node.getProperties()} by {@link Scroll}), so
@@ -23,14 +22,6 @@ import one.jpro.platform.sticky.ScrollPosition;
  * @author Tobias Horak
  */
 public final class StuckState {
-
-    /**
-     * The {@code :stuck} JavaFX pseudo-class, toggled on a sticky node while it is pinned. It is a
-     * JavaFX pseudo-class resolved by JavaFX's own CSS engine (server-side under JPro), not a DOM
-     * pseudo-class, so it behaves identically on desktop and web and is used exactly like
-     * {@code :hover} / {@code :focused}.
-     */
-    public static final PseudoClass STUCK = PseudoClass.getPseudoClass("stuck");
 
     private final Node node;
     private final ReadOnlyBooleanWrapper stuck;
@@ -61,6 +52,6 @@ public final class StuckState {
             return;
         }
         stuck.set(value);
-        node.pseudoClassStateChanged(STUCK, value);
+        node.pseudoClassStateChanged(Scroll.STUCK_PSEUDO_CLASS, value);
     }
 }

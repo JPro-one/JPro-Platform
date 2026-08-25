@@ -5,7 +5,7 @@
  */
 module one.jpro.platform.sticky {
     requires transitive javafx.graphics;
-    requires transitive one.jpro.platform.utils;
+    requires javafx.controls;
     requires jpro.webapi;
     requires one.jpro.jmemorybuddy;
     requires org.slf4j;

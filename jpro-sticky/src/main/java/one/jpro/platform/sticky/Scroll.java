@@ -72,9 +72,9 @@ public final class Scroll {
      * {@code :hover}), so it works identically on desktop and web:
      * <pre>{@code .site-header:stuck { -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4); } }</pre>
      * Equivalent to {@code PseudoClass.getPseudoClass("stuck")}, exposed for programmatic styling and
-     * testing.
+     * testing. The single definition of the pin pseudo-class; {@link StuckState} toggles this instance.
      */
-    public static final PseudoClass STUCK_PSEUDO_CLASS = StuckState.STUCK;
+    public static final PseudoClass STUCK_PSEUDO_CLASS = PseudoClass.getPseudoClass("stuck");
 
     private Scroll() {
         // utility class

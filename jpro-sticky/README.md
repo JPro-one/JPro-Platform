@@ -4,9 +4,10 @@
 content until it reaches an edge, then stays pinned) or **fixed** (always pinned to the viewport).
 It mirrors the CSS `position` property for nodes rendered by JPro.
 
-The same code runs on the web and the desktop, with no platform-specific branches. On the web the pin
-is a compositor effect, so scrolling stays smooth without a JavaFX layout pass per scroll event. Two
-setup caveats apply; see [Usage notes](#usage-notes).
+You write the same code for web and desktop: there are no platform-specific branches in your code, and
+the library picks the right mechanism underneath. On the web the pin is a compositor effect, so
+scrolling stays smooth without a JavaFX layout pass per scroll event. Two setup caveats apply; see
+[Usage notes](#usage-notes).
 
 ## Installation
 

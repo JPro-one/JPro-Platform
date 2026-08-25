@@ -28,12 +28,13 @@ final class Placeholders {
      * Property-key prefixes JavaFX's standard layout panes use to stash a child's per-parent
      * constraints (e.g. {@code hbox-hgrow}, {@code gridpane-column-span}, {@code borderpane-alignment}).
      * A node's constraints live in its {@code getProperties()} under a key with one of these prefixes;
-     * copying those entries carries the constraints to the placeholder. Custom panes with their own
-     * key scheme are not covered (documented in the module README).
+     * copying those entries carries the constraints to the placeholder. {@code AnchorPane} stashes its
+     * anchors under {@code pane-top-anchor} etc., so {@code "pane-"} already covers it. Custom panes with
+     * their own key scheme are not covered (documented in the module README).
      */
     private static final String[] CONSTRAINT_PREFIXES = {
             "hbox-", "vbox-", "gridpane-", "stackpane-", "borderpane-",
-            "anchorpane-", "flowpane-", "tilepane-", "pane-"
+            "flowpane-", "tilepane-", "pane-"
     };
 
     private Placeholders() {
