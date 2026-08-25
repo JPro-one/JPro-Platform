@@ -175,6 +175,54 @@ class DesktopScrollImplTest {
     }
 
     // ---------------------------------------------------------------------
+    // Content swap: the ScrollPane's content node is replaced (carrying the sticky node with it). The
+    // pin must rebind to the live content, not keep computing against the detached old subtree.
+    // ---------------------------------------------------------------------
+
+    @Test
+    void stickyRebindsWhenTheScrollPaneContentIsSwapped() {
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label header = new Label("HEADER");
+                header.setPrefHeight(40);
+                VBox firstContent = tallContent(header); // header rides in the first content (2040px)
+                ScrollPane sp = new ScrollPane(firstContent);
+                sp.setPrefViewportHeight(300);
+                sp.setPrefViewportWidth(320);
+                StackPane root = new StackPane(sp);
+                new Scene(root, 320, 300);
+                layout(root);
+
+                Scroll.setStickyPosition(header, Side.TOP, 0);
+
+                // Swap the content: move the header into a taller content node and install it. A stale
+                // binding would keep measuring the (now detached) first content and mis-pin.
+                firstContent.getChildren().remove(header);
+                VBox secondContent = new VBox(header);
+                for (int i = 0; i < 60; i++) { // 40 + 60*50 = 3040px, taller than the first
+                    Region row = new Region();
+                    row.setPrefHeight(50);
+                    secondContent.getChildren().add(row);
+                }
+                sp.setContent(secondContent);
+                layout(root);
+
+                sp.setVvalue(sp.getVmax());
+                layout(root);
+
+                // Pinned to the top edge of the live content: the header rides down by exactly the new
+                // content's scroll offset, proving the pin rebound off the swapped-in subtree.
+                double scrollOffset = secondContent.getLayoutBounds().getHeight() - sp.getViewportBounds().getHeight();
+                assertTrue(scrollOffset > 0, "test setup must actually scroll");
+                assertEquals(scrollOffset, header.getTranslateY(), EPS,
+                        "after a content swap the sticky pin should track the new content");
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------------
     // Placeholder-lifecycle teardown (P1-D): a pinned node is torn out of the overlay when its
     // placeholder (and so the route subtree) leaves the scene, but not on a transient reparent.
     // ---------------------------------------------------------------------

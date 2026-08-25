@@ -1,6 +1,7 @@
 package one.jpro.platform.sticky.impl;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -55,6 +56,8 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
     private boolean stuck;
 
     private final InvalidationListener relayout = obs -> sync();
+    /** Rebinds the flow-geometry listener when the ScrollPane's content node is swapped out. */
+    private final ChangeListener<Node> contentWaiter = (obs, oldContent, newContent) -> rebindContent(oldContent, newContent);
     private boolean torndown;
 
     public ScrollPaneStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane,
@@ -75,6 +78,7 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
         scrollPane.vvalueProperty().addListener(relayout);
         scrollPane.hvalueProperty().addListener(relayout);
         scrollPane.viewportBoundsProperty().addListener(relayout);
+        scrollPane.contentProperty().addListener(contentWaiter);
         if (content != null) {
             content.layoutBoundsProperty().addListener(relayout);
         }
@@ -131,6 +135,40 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
     }
 
     /**
+     * Moves the flow-geometry listeners from the old content subtree to the new one when the ScrollPane's
+     * content is swapped, so the pin keeps tracking the live content rather than a detached subtree, then
+     * re-syncs. The scroll/viewport listeners live on the {@link ScrollPane} itself and are unaffected.
+     * <p>
+     * A swap that carries the sticky node into the new content also changes its parent, so when the
+     * containing block defaults to that parent ({@code within == null}) it is re-resolved too; an explicit
+     * {@code within} is left as the caller set it.
+     */
+    private void rebindContent(Node oldContent, Node newContent) {
+        if (torndown) {
+            return;
+        }
+        if (oldContent != null) {
+            oldContent.layoutBoundsProperty().removeListener(relayout);
+        }
+        this.content = newContent;
+        if (newContent != null) {
+            newContent.layoutBoundsProperty().addListener(relayout);
+        }
+        if (within == null) {
+            if (container != null) {
+                container.layoutBoundsProperty().removeListener(relayout);
+                container.localToSceneTransformProperty().removeListener(relayout);
+            }
+            this.container = node.getParent();
+            if (container != null) {
+                container.layoutBoundsProperty().addListener(relayout);
+                container.localToSceneTransformProperty().addListener(relayout);
+            }
+        }
+        sync();
+    }
+
+    /**
      * The CSS sticky clamp for one axis, in content coordinates: hold the node at the pin line while
      * scrolled past, but never outside its containing block.
      *
@@ -173,6 +211,7 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
         scrollPane.vvalueProperty().removeListener(relayout);
         scrollPane.hvalueProperty().removeListener(relayout);
         scrollPane.viewportBoundsProperty().removeListener(relayout);
+        scrollPane.contentProperty().removeListener(contentWaiter);
         if (content != null) {
             content.layoutBoundsProperty().removeListener(relayout);
         }
