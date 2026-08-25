@@ -53,8 +53,7 @@ public final class DesktopFixedImpl implements ScrollImpl {
 
     @Override
     public void install() {
-        // The dispatcher only installs the delegate once the node is in a scene, so its parent chain
-        // is realised and attach() can resolve the overlay host and flow slot immediately.
+        // dispatcher only installs once the node is in a scene, so attach() can resolve the host now.
         attach();
     }
 
@@ -63,32 +62,31 @@ public final class DesktopFixedImpl implements ScrollImpl {
             return;
         }
         this.scene = node.getScene();
-        // Capture the flow x before mounting (the node is still in its slot), for a NATURAL horizontal axis.
+        // capture the flow x before mounting (node still in its slot), for a NATURAL horizontal axis.
         this.originalX = node.localToScene(0, 0).getX();
 
         final Region ph = mount.mount();
         if (ph == null) {
-            return; // could not mount; the node stays in flow
+            return; // could not mount, node stays in flow
         }
         this.placeholder = ph;
         this.overlay = mount.overlay();
-        // Fixed is out of flow, so its slot collapses to zero height.
+        // fixed is out of flow, so its slot collapses to zero height.
         placeholder.setPrefHeight(0);
 
-        // End/center/stretch anchors depend on the scene size, and the node's own size can change too.
+        // end/center/stretch anchors depend on the scene size, and the node's own size can change too.
         scene.widthProperty().addListener(relayout);
         scene.heightProperty().addListener(relayout);
         node.layoutBoundsProperty().addListener(relayout);
 
-        // The placeholder rides the flow, so it leaves the scene on route unmount. The reparented node
-        // lives in the persistent overlay and never does. Tear down when the placeholder's scene goes
-        // null, re-checking next pulse to skip a same-pulse detach/reattach.
+        // placeholder rides the flow, so it leaves the scene on route unmount (the node never does).
+        // re-check next pulse to ignore a transient same-pulse detach/reattach.
         placeholderSceneWaiter = (obs, old, s) -> {
             if (s == null && !torndown) {
                 Platform.runLater(() -> {
                     if (!torndown && placeholder != null && placeholder.getScene() == null) {
-                        // Hand back to the dispatcher: it uninstalls this delegate but stays alive to
-                        // re-pin if the route returns. Fall back to a direct uninstall if unwired.
+                        // hand back to the dispatcher: uninstall this delegate but stay alive to re-pin
+                        // if the route returns. fall back to a direct uninstall if unwired.
                         if (onDetach != null) {
                             onDetach.run();
                         } else {

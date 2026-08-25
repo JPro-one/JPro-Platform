@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  */
 public final class ScrollPaneStickyImpl implements ScrollImpl {
 
-    /** viewOrder applied while stuck; lower paints in front (JPro/JavaFX sort by it first). */
+    /** viewOrder applied while stuck, lower paints in front (JPro/JavaFX sort by it first). */
     private static final double STUCK_VIEW_ORDER = -1.0;
 
     private final Node node;
@@ -47,7 +47,7 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
     /** Containing block that bounds the pin; {@code null} falls back to the node's parent at attach. */
     private final Node within;
     private final ScrollPane scrollPane;
-    /** Pin/unpin transition sink (the node's stuck channels); {@code null} if unobserved. */
+    /** Pin/unpin transition sink (the node's stuck channels), {@code null} if unobserved. */
     private final Consumer<Boolean> stuckSink;
 
     private Node content;
@@ -101,16 +101,16 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
         final double nodeW = nodeBounds.getWidth();
         final double nodeH = nodeBounds.getHeight();
 
-        // The node's natural top-left in content coordinates, reentrancy-safe (subtract the translate
-        // applied last pass). Both transforms fold in the scroll, which cancels, so this stays stable.
+        // node's natural top-left in content coords, reentrancy-safe (subtract the translate applied last
+        // pass). both transforms fold in the scroll, which cancels, so this stays stable.
         final Point2D nodeContentTL = content.sceneToLocal(node.localToScene(0, 0));
         final double naturalX = nodeContentTL.getX() - node.getTranslateX();
         final double naturalY = nodeContentTL.getY() - node.getTranslateY();
 
-        // The containing block in content coordinates (defaults to the whole content if unresolved).
+        // containing block in content coords (defaults to the whole content if unresolved).
         final Bounds containerBounds = containerBoundsInContent();
 
-        // How far each axis is currently scrolled, in content px.
+        // how far each axis is currently scrolled, in content px.
         final double scrollX = scrollOffset(scrollPane.getHvalue(), scrollPane.getHmin(), scrollPane.getHmax(),
                 content.getLayoutBounds().getWidth(), viewportW);
         final double scrollY = scrollOffset(scrollPane.getVvalue(), scrollPane.getVmin(), scrollPane.getVmax(),
@@ -182,7 +182,7 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
         } else if (axis.mode == Mode.PIN_END) {
             appear = Math.min(appear, scroll + viewport - axis.end - size);
         }
-        // Stay within the containing block (its bottom/right pushes the node back out, the release).
+        // stay within the containing block (its bottom/right pushes the node back out, the release).
         final double maxStart = Math.max(containerStart, containerEnd - size);
         return Math.max(containerStart, Math.min(appear, maxStart));
     }
@@ -220,7 +220,7 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
             container.layoutBoundsProperty().removeListener(relayout);
             container.localToSceneTransformProperty().removeListener(relayout);
         }
-        // Restore the node to its natural flow position and paint order.
+        // restore the node to its natural flow position and paint order.
         node.setTranslateX(0);
         node.setTranslateY(0);
         if (stuck) {

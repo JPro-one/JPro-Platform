@@ -56,7 +56,7 @@ final class AnchorGeometry {
         final Axis hz = anchor.horizontal();
         final Axis vt = anchor.vertical();
 
-        // --- Horizontal axis: node width and the constant x. ---
+        // --- horizontal axis: node width and the constant x. ---
         final double nodeW;
         final double x;
         switch (hz.mode) {
@@ -76,12 +76,12 @@ final class AnchorGeometry {
                 nodeW = naturalW;
                 x = (availW - nodeW) / 2.0 + hz.start;
                 break;
-            default: // NATURAL: sticky keeps its full flow width; fixed is a natural-width chip.
+            default: // NATURAL: sticky keeps its full flow width, fixed is a natural-width chip.
                 nodeW = fixed ? naturalW : flowW;
                 x = flowX;
         }
 
-        // --- Vertical axis: node height and the pin line y0. ---
+        // --- vertical axis: node height and the pin line y0. ---
         final double nodeH;
         final double y0;
         switch (vt.mode) {

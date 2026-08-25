@@ -57,7 +57,7 @@ public final class WebScrollImpl implements ScrollImpl {
     private final Node node;
     private final ScrollPosition position;
     private final ScrollAnchor anchor;
-    /** Explicit containment override for STICKY; {@code null} defaults to the original parent. */
+    /** Explicit containment override for STICKY, {@code null} defaults to the original parent. */
     private final Node within;
     /** Pin/unpin transition sink (the node's stuck channels); {@code null} for FIXED or unobserved. */
     private final Consumer<Boolean> stuckSink;
@@ -66,18 +66,13 @@ public final class WebScrollImpl implements ScrollImpl {
     /** Last stuck value pushed to {@link #stuckSink}, so we only fire on change. */
     private boolean lastStuck;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
-    /**
-     * Stack key (type tier + source order): the overlay is kept sorted by it (see {@link StickyOverlay})
-     * so FIXED paints above STICKY and, within a tier, the stacking/paint order follows the order
-     * {@code setScrollPosition} was called rather than the async order installs complete. Assigned in
-     * the constructor, once {@link #position} is known.
-     */
+    /** Stack key ordering this node in the overlay; see {@link StickyOverlay#nextStackOrder}. */
     private final long stackOrder;
 
     /** The shared reparent-into-overlay mechanic (flow slot, placeholder, overlay). */
     private final OverlayMount mount;
 
-    // Resolved at install time.
+    // resolved at install time
     private WebAPI webapi;
     private Group overlay;
     private Region placeholder;
@@ -85,7 +80,7 @@ public final class WebScrollImpl implements ScrollImpl {
     /** The containing block that bounds a STICKY pin (null => document-long / unbounded). */
     private Node container;
 
-    // Reactive plumbing. A single listener re-syncs geometry on any relevant change.
+    // reactive plumbing: one listener re-syncs geometry on any relevant change
     private final InvalidationListener relayout = obs -> sync();
     private ChangeListener<Scene> sceneWaiter;
     /** Fires teardown when the placeholder (and thus the route subtree) leaves the scene. */
@@ -125,7 +120,7 @@ public final class WebScrollImpl implements ScrollImpl {
         if (node.getScene() != null) {
             attach();
         } else {
-            // The node may be positioned before it enters a scene. Attach once it does.
+            // node not in a scene yet, attach when it enters.
             sceneWaiter = (obs, old, scene) -> {
                 if (scene != null) {
                     node.sceneProperty().removeListener(sceneWaiter);
@@ -142,9 +137,8 @@ public final class WebScrollImpl implements ScrollImpl {
             return;
         }
         final Parent parent = node.getParent();
-        // A superseded application (rapid re-apply or scene churn) may still have the node in an overlay
-        // when this async attach fires. Attaching now would treat that overlay as the flow slot, so wait
-        // until the node settles back into its real flow parent. One-shot.
+        // a superseded app (rapid re-apply / scene churn) may still hold the node in an overlay when this
+        // async attach fires, which we'd mistake for the flow slot. wait (one-shot) until it settles back.
         if (StickyOverlay.isOverlay(parent)) {
             if (settleWaiter == null) {
                 settleWaiter = (obs, old, p) -> {
@@ -159,27 +153,24 @@ public final class WebScrollImpl implements ScrollImpl {
             }
             return;
         }
-        // Lift the node into the overlay, leaving a mirrored placeholder in its flow slot. Its height
-        // is left unset here (FIXED collapses it to 0, STICKY reserves the node height) and applied in
-        // sync().
+        // lift the node into the overlay, leaving a mirrored placeholder in its flow slot (height set in
+        // sync(): FIXED collapses to 0, STICKY reserves node height).
         final Region ph = mount.mount();
         if (ph == null) {
-            return; // could not mount (no Pane parent / overlay host); the node stays in flow
+            return; // could not mount (no Pane parent / overlay host), node stays in flow
         }
         this.placeholder = ph;
         this.overlay = mount.overlay();
         this.root = node.getScene().getRoot();
 
-        // STICKY is bounded by its containing block: the explicit `within` if given, else the node's
-        // original parent. FIXED is viewport-anchored, so it ignores containment.
+        // STICKY bounded by its containing block (explicit within, else original parent). FIXED is viewport-anchored.
         this.container = (position == ScrollPosition.FIXED) ? null
                 : (within != null ? within : mount.originalParent());
 
         node.applyCss();
 
-        // Re-sync on anything that moves the pin: the placeholder's geometry, the browser viewport
-        // (moves under native scroll, and sizes end/center/stretch anchors), the document extent
-        // (resizes the unbounded pin range), and for bounded sticky the container's bottom.
+        // re-sync on anything that moves the pin: placeholder geometry, browser viewport (native scroll +
+        // sizing end/center/stretch anchors), document extent (unbounded pin range), container bottom.
         placeholder.layoutBoundsProperty().addListener(relayout);
         placeholder.localToSceneTransformProperty().addListener(relayout);
         webapi.browserViewport().addListener(relayout);
@@ -189,15 +180,14 @@ public final class WebScrollImpl implements ScrollImpl {
             container.localToSceneTransformProperty().addListener(relayout);
         }
 
-        // The placeholder rides the flow, so it leaves the scene on route unmount. The reparented node
-        // lives in the persistent overlay and never does. Tear down when the placeholder's scene goes
-        // null, re-checking next pulse to skip a same-pulse detach/reattach.
+        // placeholder rides the flow, so it leaves the scene on route unmount (the node never does).
+        // re-check next pulse to ignore a transient same-pulse detach/reattach.
         placeholderSceneWaiter = (obs, old, scene) -> {
             if (scene == null && !torndown) {
                 Platform.runLater(() -> {
                     if (!torndown && placeholder != null && placeholder.getScene() == null) {
-                        // Hand back to the dispatcher: it uninstalls this delegate but stays alive to
-                        // re-pin if the route returns. Fall back to a direct uninstall if unwired.
+                        // hand back to the dispatcher: uninstall this delegate but stay alive to re-pin
+                        // if the route returns. fall back to a direct uninstall if unwired.
                         if (onDetach != null) {
                             onDetach.run();
                         } else {
@@ -235,20 +225,19 @@ public final class WebScrollImpl implements ScrollImpl {
         final double viewportW = (vp == null) ? 0.0 : vp.getWidth();
         final double viewportH = (vp == null) ? 0.0 : vp.getHeight();
 
-        // End/center/stretch anchors need a real viewport size. Skip until one is known. The
-        // browserViewport listener re-syncs once it arrives.
+        // end/center/stretch anchors need a real viewport size. skip until the browserViewport listener re-syncs.
         if (AnchorGeometry.needsAvailableSize(anchor) && (viewportW <= 0 || viewportH <= 0)) {
             LOGGER.debug("jpro-sticky[{}]: sync skipped, viewport size {}x{}", jsKey, viewportW, viewportH);
             return;
         }
 
-        // The node's flow anchor (scroll-independent: native scroll moves the browser, not the scene).
+        // node's flow anchor (scroll-independent: native scroll moves the browser, not the scene).
         final Point2D flowTopLeft = placeholder.localToScene(0, 0);
         final double flowX = flowTopLeft.getX();
         final double flowTop = flowTopLeft.getY();
 
-        // Resolve the anchor against the browser viewport (the same resolver the desktop path uses
-        // against the scene), so web and desktop pin identical geometry from the same anchor.
+        // resolve the anchor vs the browser viewport (same resolver the desktop path uses vs the scene),
+        // so web and desktop pin identical geometry from one anchor.
         final AnchorGeometry g = AnchorGeometry.resolve(anchor, viewportW, viewportH,
                 AnchorGeometry.naturalWidth(node), w -> AnchorGeometry.naturalHeight(node, w),
                 flowX, flowW, fixed);
@@ -258,19 +247,18 @@ public final class WebScrollImpl implements ScrollImpl {
         final double y0 = g.y0;
 
         node.resize(nodeW, nodeH);
-        // FIXED is out of flow: the placeholder reserves no vertical space. STICKY keeps its slot.
+        // FIXED is out of flow: placeholder reserves no height. STICKY keeps its slot.
         placeholder.setPrefHeight(fixed ? 0 : nodeH);
 
-        // natTop drives the keyframe 'from'. STICKY rides the flow from its natural top. FIXED pins
-        // from the very top (natTop == y0 makes the compositor's sPin 0, so no ride).
+        // natTop = keyframe 'from'. STICKY rides the flow from its natural top, FIXED pins from the very
+        // top (natTop == y0 makes sPin 0, so no ride).
         final double natTop = fixed ? y0 : flowTop;
 
-        // STICKY release limit: the containing block's bottom minus the node height
-        // (containerBottom - nodeH); -1 (unbounded) for FIXED or a page-spanning container.
+        // STICKY release limit = containerBottom - nodeH. -1 = unbounded (FIXED or page-spanning container).
         final double relLimitServer = releaseLimit(nodeH);
 
-        // Server-side pin (also the no-compositor fallback, and what picking sees): clamp to the
-        // viewport pin line while pinned, ride the flow before, and honour the release limit.
+        // server-side pin (also the no-compositor fallback + what picking sees): clamp to pin line while
+        // pinned, ride flow before, honour the release limit.
         double serverY = fixed ? (viewportTop + y0) : Math.max(flowTop, viewportTop + y0);
         if (!fixed && relLimitServer >= 0) {
             serverY = Math.min(serverY, relLimitServer);
@@ -279,15 +267,13 @@ public final class WebScrollImpl implements ScrollImpl {
         node.setLayoutX(local.getX());
         node.setLayoutY(local.getY());
 
-        // The overlay may not sit at the scene/document origin: when it lives under a registered host
-        // (e.g. a popup container nested in the route) its top-left is offset down the document. The
-        // compositor transform is relative to the overlay's own DOM box, so its endpoints are baked in
-        // host-local space (scene-y minus this offset) while the scroll-range math stays document-space.
+        // the overlay may sit offset down the document (under a registered host, e.g. a popup nested in
+        // the route). the compositor transform is relative to the overlay's own DOM box, so endpoints bake
+        // in host-local space (scene-y minus this offset) while the scroll-range math stays document-space.
         final double hostOffsetY = overlay.localToScene(0, 0).getY();
 
-        // Publish the pin state (STICKY only): stuck iff the applied server pin differs from the
-        // natural flow top, the same rule ScrollPaneStickyImpl uses (appear != natural), so both paths agree.
-        // Fidelity is the browserViewport() sync cadence, not per-frame (the compositor drives motion).
+        // publish pin state (STICKY only): stuck iff the server pin differs from the natural flow top (same
+        // rule as ScrollPaneStickyImpl, appear != natural). fidelity = browserViewport() cadence, not per-frame.
         if (!fixed && stuckSink != null) {
             final boolean nowStuck = Math.abs(serverY - flowTop) > STUCK_EPS;
             if (nowStuck != lastStuck) {
@@ -301,9 +287,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 + nodeW + "|" + nodeH + "|" + docH + "|" + hostOffsetY;
 
         if (!installedCompositor) {
-            // Install inline on the first sync with a real width. The node's DOM peer may still be
-            // unregistered at this instant, but the injected script resolves it via its own retry
-            // loop (see installCompositor), so no server-side deferral (a runLater pulse) is needed.
+            // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
+            // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
             installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY);
             installedCompositor = true;
             lastSig = sig;
@@ -362,19 +347,19 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  if(!st.style){ st.style = document.createElement('style');\n" +
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.key = 'jpro-sticky-" + jsKey + "';\n" +
-                // Latest geometry, baked in server-side; render() reads these so a re-install (on a
-                // geometry-signature change) just updates them and rewrites the sheet.
+                // latest geometry, baked in server-side. render() reads these so a re-install (on a
+                // geometry-sig change) just updates them and rewrites the sheet.
                 "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
                 "  st.render = function(){\n" +
                 "    if(st.jid == null) return;\n" +
-                // Document extent (scrollHeight), NOT the scroll max (scrollHeight - clientHeight):
-                // the latter folds in viewport height, leaving the unbounded range stale on resize.
+                // document extent (scrollHeight), NOT scroll max (scrollHeight - clientHeight): the
+                // latter folds in viewport height, leaving the unbounded range stale on resize.
                 "    var docExtent = document.documentElement.scrollHeight;\n" +
                 "    var relLimit = (st.relServer < 0) ? (docExtent + st.inset) : st.relServer;\n" +
                 "    var sPin = st.natTop - st.inset; if(sPin < 0) sPin = 0;\n" +
                 "    var sRel = relLimit - st.inset; if(sRel < sPin + 1) sRel = sPin + 1;\n" +
-                // Transform endpoints are relative to the overlay's own DOM box, so shift them into
-                // host-local space; sPin/sRel above stay in document/scroll space (host-independent).
+                // transform endpoints are relative to the overlay's own DOM box, so shift into host-local
+                // space. sPin/sRel above stay in document/scroll space (host-independent).
                 "    var fromY = st.natTop - st.hostOffsetY;\n" +
                 "    var toY = relLimit - st.hostOffsetY;\n" +
                 "    st.style.textContent = '@keyframes ' + st.key +\n" +
@@ -385,10 +370,10 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      'animation-timeline:scroll(root block);' +\n" +
                 "      'animation-range:' + sPin + 'px ' + sRel + 'px;}';\n" +
                 "  };\n" +
-                // Fast path for a re-install: the node's jpro-id is already known, so just re-render.
+                // fast path for a re-install: jpro-id already known, just re-render.
                 "  if(st.jid != null){ st.render(); return; }\n" +
-                // First install: the element ref throws until JPro registers the node's DOM peer, so
-                // retry (bounded to ~5s at 60fps) until it resolves, then cache jpro-id and render.
+                // first install: the element ref throws until JPro registers the node's DOM peer, so retry
+                // (bounded ~5s at 60fps) until it resolves, then cache jpro-id and render.
                 "  var tries = 0;\n" +
                 "  (function resolve(){\n" +
                 "    var el = null; try { el = " + d + "; } catch(e){ el = null; }\n" +
@@ -434,20 +419,19 @@ public final class WebScrollImpl implements ScrollImpl {
             container.localToSceneTransformProperty().removeListener(relayout);
         }
 
-        // Restore the node to its flow slot.
+        // restore the node to its flow slot.
         mount.unmount();
 
-        // The animation lives entirely in the injected <style> (bound by a [jpro-id] rule, not by
-        // inline styles on the element), so dropping that sheet removes the pin without touching the
-        // element ref (which may be unresolved at teardown).
+        // the animation lives entirely in the injected <style> (bound by a [jpro-id] rule, not inline styles),
+        // so dropping that sheet removes the pin without touching the element ref (may be unresolved at teardown).
         if (webapi != null && installedCompositor) {
             removeCompositorStyle(webapi, jsKey);
         }
     }
 
     private void registerCleanup() {
-        // Runs if the node is GC'd while pinned, dropping the orphaned <style>. Captures only a
-        // weak WebAPI ref and the key string, never the node or this override (would pin them).
+        // runs if the node is GC'd while pinned, dropping the orphaned <style>. captures only a weak
+        // WebAPI ref + the key string, never the node or this override (would pin them).
         final WeakReference<WebAPI> weakWebApi = new WeakReference<>(webapi);
         final String key = jsKey;
         CleanupDetector.onCleanup(node, () -> {

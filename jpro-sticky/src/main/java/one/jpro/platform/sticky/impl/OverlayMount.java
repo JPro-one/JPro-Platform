@@ -71,9 +71,8 @@ final class OverlayMount {
         this.originalIndex = index;
         this.overlay = ov;
 
-        // Mirror the node's layout constraints and width onto the placeholder so the flow slot does not
-        // shift, then swap node -> placeholder in flow and mount the node into the overlay. insertSorted
-        // keeps the overlay ordered by stackOrder so paint order follows source order, not install order.
+        // mirror the node's constraints/width onto the placeholder so the flow slot does not shift, swap
+        // node -> placeholder, and mount into the overlay (insertSorted keeps it stack-ordered).
         final Region ph = new Region();
         ph.setMaxWidth(Double.MAX_VALUE);
         Placeholders.mirror(node, ph);

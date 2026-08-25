@@ -46,17 +46,15 @@ public final class StickyOverlay {
     /** {@link Node} property key stashing a mounted node's stack order, read by sibling mounts. */
     private static final Object STACK_ORDER_KEY = new Object();
 
-    /** {@code id} stamped on every overlay {@link Group}; lets {@link #isOverlay} spot a mounted node. */
+    /** {@code id} stamped on every overlay {@link Group}, lets {@link #isOverlay} spot a mounted node. */
     private static final String OVERLAY_ID = "jpro-sticky-overlay";
 
     /**
-     * {@code viewOrder} for the overlay {@link Group} itself, so it paints above the host's other
-     * children (the routed page content) regardless of child-list order. This matters when the host is
-     * a routing container that swaps its content: the new page is appended <em>after</em> the overlay,
-     * and in a {@link Pane} later children paint on top, so without this the pinned node would be buried
-     * behind the new page after every navigation. Negative = in front (JPro/JavaFX sort by viewOrder
-     * first). This is the overlay's own order among host siblings; the per-node viewOrder override
-     * inside the overlay is untouched.
+     * {@code viewOrder} for the overlay {@link Group} itself (negative = in front), so it paints above the
+     * host's other children regardless of child-list order. Needed when the host is a routing container
+     * that swaps content: the new page is appended after the overlay and, in a {@link Pane}, later children
+     * paint on top, so without this the pinned node would be buried after every navigation. The per-node
+     * viewOrder override inside the overlay is untouched.
      */
     private static final double OVERLAY_VIEW_ORDER = -1.0;
 
@@ -74,12 +72,9 @@ public final class StickyOverlay {
     }
 
     /**
-     * Returns the next stack-order key for a mount, folding a type tier above the add-sequence so that,
-     * within one host overlay, {@link ScrollPosition#FIXED} nodes sort after (paint in front of)
-     * {@link ScrollPosition#STICKY} nodes regardless of the order they were applied, and within a tier
-     * the later-applied node paints on top (source order). {@code viewOrder} remains the explicit
-     * per-node override (JPro/JavaFX sort children by it first, and the web path never sets it), so a
-     * consumer can still force any order. Assign once per mounted node, at construction.
+     * Returns the next stack-order key for a mount: a type tier in the high bits ({@link ScrollPosition#FIXED}
+     * above {@link ScrollPosition#STICKY}) over a monotonic add-sequence in the low bits, so
+     * {@link #insertSorted} yields fixed-over-sticky, source-order-within-tier. Assign once per node.
      *
      * @param position the mount's positioning mode; {@code FIXED} tiers above everything else
      * @return the stack key ({@code tier} in the high bits, add-sequence in the low bits)

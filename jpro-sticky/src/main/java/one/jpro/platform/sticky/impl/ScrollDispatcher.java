@@ -58,8 +58,8 @@ public final class ScrollDispatcher implements ScrollImpl {
         if (node.getScene() != null) {
             choose();
         } else {
-            // The parent chain is only guaranteed realised once the node is in a scene. Wait for it
-            // so the ScrollPane-ancestor check (which decides FX vs web) sees the final tree.
+            // parent chain is only realised once the node is in a scene. wait for it so the
+            // ScrollPane-ancestor check (which decides FX vs web) sees the final tree.
             waitForScene();
         }
     }
@@ -80,13 +80,11 @@ public final class ScrollDispatcher implements ScrollImpl {
     }
 
     /**
-     * Invoked by a reparenting delegate ({@link WebScrollImpl} / {@link DesktopFixedImpl}) once its
-     * flow slot (the placeholder) has left the scene, e.g. on a route navigate-away. The delegate is
-     * uninstalled, which restores the node to its (now-detached) flow parent, but this dispatcher
-     * stays alive: because the node is back in flow it tracks that subtree's scene again, so if the
-     * route returns we re-select and re-install and the node re-pins. Without this the node would be
-     * left in plain flow while {@link one.jpro.platform.sticky.Scroll#getScrollPosition} still reported
-     * it as positioned.
+     * Invoked by a reparenting delegate ({@link WebScrollImpl} / {@link DesktopFixedImpl}) once its flow
+     * slot has left the scene (a route navigate-away). Uninstalling the delegate restores the node to its
+     * (now-detached) flow parent; this dispatcher stays alive so that when the subtree returns to a scene
+     * it re-selects and re-pins, rather than leaving the node in plain flow while
+     * {@link one.jpro.platform.sticky.Scroll#getScrollPosition} still reports it as positioned.
      */
     private void onDelegateDetached() {
         if (torndown) {
@@ -96,15 +94,13 @@ public final class ScrollDispatcher implements ScrollImpl {
             delegate.uninstall();
             delegate = null;
         }
-        // The node left the scene, so it is no longer pinned: clear the stuck channel. The reparenting
-        // teardown does not run through Scroll.setScrollPosition's central reset, so without this a node
-        // that was stuck at navigate-away would keep reporting stuck. A re-pin (below, or on scene
-        // re-entry) re-asserts it if the returning node is stuck again.
+        // node left the scene, so it's no longer pinned: clear the stuck channel. the detach path skips
+        // Scroll.setScrollPosition's central reset, so a node stuck at navigate-away would otherwise stay stuck.
         if (stuckSink != null) {
             stuckSink.accept(false);
         }
         if (node.getScene() != null) {
-            // Already back in a scene (a same-pulse return): re-pin now.
+            // already back in a scene (a same-pulse return): re-pin now.
             choose();
         } else if (sceneWaiter == null) {
             waitForScene();
@@ -125,26 +121,25 @@ public final class ScrollDispatcher implements ScrollImpl {
 
     private ScrollImpl select() {
         if (position == ScrollPosition.FIXED) {
-            // Fixed is viewport/scene-anchored regardless of any ScrollPane ancestry. It never
-            // transitions, so stuckSink is null here and no stuck state is published.
+            // fixed is viewport/scene-anchored regardless of any ScrollPane ancestry. it never transitions,
+            // so stuckSink is null here and no stuck state is published.
             return WebAPI.isBrowser()
                     ? new WebScrollImpl(node, position, anchor, within, stuckSink, this::onDelegateDetached)
                     : new DesktopFixedImpl(node, anchor, this::onDelegateDetached);
         }
-        // STICKY: an FX ScrollPane ancestor means the scroll is server-driven (both on desktop and in
-        // the browser), so the pure-FX pin stays in sync by construction.
+        // STICKY: an FX ScrollPane ancestor means server-driven scroll (desktop or browser), so the
+        // pure-FX pin stays in sync by construction.
         final ScrollPane scrollPane = nearestScrollPane(node);
         if (scrollPane != null) {
-            // Stays in flow (no reparenting), so it tracks the route subtree and survives a re-mount on
-            // its own; no detach callback needed.
+            // stays in flow (no reparenting), survives a re-mount on its own, no detach callback needed.
             return new ScrollPaneStickyImpl(node, anchor, within, scrollPane, stuckSink);
         }
         if (WebAPI.isBrowser()) {
-            // Natively scrolled browser document: the compositor override.
+            // natively scrolled browser document: the compositor override.
             return new WebScrollImpl(node, position, anchor, within, stuckSink, this::onDelegateDetached);
         }
-        // Desktop with no scroll ancestor: nothing scrolls, so a sticky element never moves, the
-        // same result CSS gives for a sticky element in a non-scrolling page.
+        // desktop with no scroll ancestor: nothing scrolls, so a sticky element never moves, the same
+        // result CSS gives for a sticky element in a non-scrolling page.
         return null;
     }
 

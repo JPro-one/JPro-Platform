@@ -58,9 +58,8 @@ final class Placeholders {
             }
         });
 
-        // Reserve the node's on-screen width so siblings don't reclaim the slot. prefWidth (a
-        // preference, not a floor) lets a fill slot still shrink with its container. An explicit
-        // minWidth the node itself enforced is carried through as a real floor.
+        // reserve the node's on-screen width so siblings don't reclaim the slot. prefWidth (a preference, not a
+        // floor) lets a fill slot shrink with its container. an explicit minWidth is carried through as a floor.
         final double width = node.getLayoutBounds().getWidth();
         if (width > 0) {
             placeholder.setPrefWidth(width);
