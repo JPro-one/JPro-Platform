@@ -3,7 +3,8 @@ package one.jpro.platform.sticky;
 /**
  * The positioning mode of a node relative to the scrolling viewport, mirroring the
  * CSS {@code position} property. The mode drives how the node behaves as the page
- * scrolls and is applied via {@link Scroll#setScrollPosition(javafx.scene.Node, ScrollPosition)}.
+ * scrolls and is applied via
+ * {@link Scroll#setScrollPosition(javafx.scene.Node, ScrollPosition, ScrollAnchor)}.
  *
  * @author Tobias Horak
  */
