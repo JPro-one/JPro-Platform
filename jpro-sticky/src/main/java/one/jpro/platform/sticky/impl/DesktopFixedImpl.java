@@ -65,14 +65,14 @@ public final class DesktopFixedImpl implements ScrollImpl {
         // capture the flow x before mounting (node still in its slot), for a NATURAL horizontal axis.
         this.originalX = node.localToScene(0, 0).getX();
 
-        final Region ph = mount.mount();
+        // fixed is out of flow: its slot collapses to zero (reserved at mount, before insertion, so the
+        // first layout honours it).
+        final Region ph = mount.mount(0);
         if (ph == null) {
             return; // could not mount, node stays in flow
         }
         this.placeholder = ph;
         this.overlay = mount.overlay();
-        // fixed is out of flow, so its slot collapses to zero height.
-        placeholder.setPrefHeight(0);
 
         // end/center/stretch anchors depend on the scene size, and the node's own size can change too.
         scene.widthProperty().addListener(relayout);

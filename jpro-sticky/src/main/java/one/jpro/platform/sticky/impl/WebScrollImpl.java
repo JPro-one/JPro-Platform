@@ -153,9 +153,12 @@ public final class WebScrollImpl implements ScrollImpl {
             }
             return;
         }
-        // lift the node into the overlay, leaving a mirrored placeholder in its flow slot (height set in
-        // sync(): FIXED collapses to 0, STICKY reserves node height).
-        final Region ph = mount.mount();
+        // lift the node into the overlay, leaving a placeholder that reserves the node's height in its
+        // flow slot (FIXED reserves nothing). naturalHeight, not current bounds: pinning often happens
+        // during scene construction, before layout, when bounds are still zero. sync() refines it later.
+        final double reservedHeight = (position == ScrollPosition.FIXED) ? 0
+                : AnchorGeometry.naturalHeight(node, AnchorGeometry.naturalWidth(node));
+        final Region ph = mount.mount(reservedHeight);
         if (ph == null) {
             return; // could not mount (no Pane parent / overlay host), node stays in flow
         }

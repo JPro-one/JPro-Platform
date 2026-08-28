@@ -138,6 +138,58 @@ class WebScrollImplTest {
     // cleared there too or stuckProperty / :stuck stay latched on an off-screen node.
     // ---------------------------------------------------------------------
 
+    // ---------------------------------------------------------------------
+    // A page-level sticky header is reparented into the overlay and must leave a placeholder that
+    // RESERVES its height in the flow slot (README: "leaving a placeholder in its original layout
+    // slot"), or the following content is laid out behind the header. Regression guard: the reservation
+    // must be set in a clean context, not only from the first sync (which runs during a layout pass,
+    // where its setPrefHeight is dropped).
+    // ---------------------------------------------------------------------
+
+    @Test
+    void webPageLevelStickyLeavesAHeightReservingPlaceholder() {
+        final double[] r = new double[3]; // [headerHeight, placeholderHeight, belowTop]
+
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                stubBrowser(web);
+
+                Label header = new Label("HEADER");
+                header.setMinHeight(48);
+                header.setMaxWidth(Double.MAX_VALUE);
+                Region below = new Region();
+                below.setPrefHeight(30);
+                VBox content = new VBox(header, below);
+                // A few rows, but the column stays SHORTER than the 600px scene: an over-full VBox shrinks
+                // every child to fit (a scrolling browser page never does), which would mask the reservation.
+                for (int i = 0; i < 3; i++) {
+                    Region row = new Region();
+                    row.setPrefHeight(50);
+                    content.getChildren().add(row);
+                }
+                StackPane root = new StackPane(content);
+                root.setAlignment(Pos.TOP_LEFT);
+                new Scene(root, 400, 600);
+
+                // Pin BEFORE the first layout, as an app does when it wires sticky during scene
+                // construction: the node's bounds are still zero here, so the reservation cannot read them.
+                Scroll.setStickyPosition(header, Side.TOP, 0);
+                // pump several passes, as a running app's pulses would, so any deferred re-sync settles.
+                for (int i = 0; i < 5; i++) layout(root);
+
+                final Region placeholder = (Region) content.getChildren().get(0);
+                r[0] = header.getLayoutBounds().getHeight(); // now laid out (in the overlay): its real height
+                r[1] = placeholder.getHeight();
+                r[2] = below.localToScene(0, 0).getY();
+            }
+        });
+
+        assertEquals(r[0], r[1], 0.5,
+                "page-level sticky must reserve the header height in its flow slot (else content hides behind it)");
+        assertTrue(r[2] >= r[0] - 0.5,
+                "content below a page-level sticky header must start at/after the header height, not behind it");
+    }
+
     @Test
     void webStickyStuckStateResetsWhenTheRouteLeavesTheScene() {
         final Label[] nodeRef = new Label[1];

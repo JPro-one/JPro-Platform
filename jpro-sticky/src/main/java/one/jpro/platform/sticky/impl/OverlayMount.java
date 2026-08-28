@@ -44,11 +44,14 @@ final class OverlayMount {
      * carries the node's constraints and width; its height is the caller's concern (see
      * {@link Placeholders}).
      *
+     * @param reservedHeight height the placeholder holds in the flow slot (the node's height for STICKY,
+     *                       {@code 0} for FIXED). Set before insertion so the first layout honours it; a
+     *                       {@code setPrefHeight} after insertion only requests a re-layout the pulse can drop.
      * @return the placeholder now holding the node's flow slot, or {@code null} if the node could not
      *         be mounted (its parent is not a {@link Pane}, no overlay host resolved, or the node is
      *         not in its parent's children); on {@code null} the node is left untouched in flow
      */
-    Region mount() {
+    Region mount(double reservedHeight) {
         final Parent parent = node.getParent();
         if (!(parent instanceof Pane)) {
             LOGGER.warn("jpro-sticky: node's parent is {} (not a Pane); cannot pin {}. Node stays in flow.",
@@ -75,6 +78,10 @@ final class OverlayMount {
         // node -> placeholder, and mount into the overlay (insertSorted keeps it stack-ordered).
         final Region ph = new Region();
         ph.setMaxWidth(Double.MAX_VALUE);
+        // a rigid floor, not just a preference: the slot stands in for an out-of-flow node, so a
+        // space-tight parent must not shrink it (a plain Region's min height is 0, the first to collapse).
+        ph.setMinHeight(reservedHeight);
+        ph.setPrefHeight(reservedHeight);
         Placeholders.mirror(node, ph);
         pane.getChildren().set(index, ph);
         node.setManaged(false);
