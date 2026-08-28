@@ -76,6 +76,7 @@ public class ScrollSample extends Application {
         // Sticky page header (a button, to prove clicks land on the pinned element): its parent is the
         // page-spanning root, so it stays pinned document-long.
         final var header = barButton("Sticky page header", Styles.ACCENT);
+        header.setId("sticky-header");
         header.setMinHeight(48);
         // Observability: the style class + sticky-sample.css give it a drop-shadow via the :stuck
         // pseudo-class while it is pinned (the CSS channel), and stuckProperty() feeds the Java channel.
@@ -88,6 +89,7 @@ public class ScrollSample extends Application {
         // A normal in-flow button just below the header: clicking it confirms clicks pass through the
         // mouse-transparent overlay to ordinary content, and that pinned elements do not swallow them.
         final var flowButton = countButton("Flow button (not pinned)");
+        flowButton.setId("flow-button");
         VBox.setMargin(flowButton, new Insets(12, 16, 4, 16));
         root.getChildren().add(flowButton);
 
@@ -106,6 +108,7 @@ public class ScrollSample extends Application {
         // section's bottom (its containing block). No explicit container needed; the parent bounds it.
         final var section = new VBox();
         final var sectionHeader = barButton("Section sub-header (pins, then releases)", Styles.SUCCESS);
+        sectionHeader.setId("section-header");
         sectionHeader.setMinHeight(40);
         // Pin 48px down so it stacks below the 48px-tall page header, not on top of it.
         Scroll.setStickyPosition(sectionHeader, Side.TOP, 48);
@@ -121,6 +124,7 @@ public class ScrollSample extends Application {
         // anchor (pin one edge, stretch the perpendicular axis), here with a 5px inset on all three.
         // AtlantaFX has no .button.warning accent, so the amber comes from the theme colour.
         final var bottomBar = barButton("Fixed bottom bar", null);
+        bottomBar.setId("bottom-bar");
         bottomBar.setStyle("-fx-background-radius: 8; -fx-background-color: -color-warning-emphasis; "
                 + "-fx-text-fill: -color-fg-emphasis;");
         bottomBar.setMinHeight(40);
@@ -130,6 +134,7 @@ public class ScrollSample extends Application {
         // Fixed bottom-right FAB (a button, corner-anchored), floated above the bottom bar. Rounded via
         // an explicit radius rather than Styles.BUTTON_CIRCLE, which is icon-only and hides the counter.
         final var fab = new Button("0");
+        fab.setId("fab");
         fab.getStyleClass().add(Styles.ACCENT);
         fab.setMinSize(56, 56);
         fab.setStyle("-fx-background-radius: 28; -fx-font-size: 18;");
@@ -141,6 +146,7 @@ public class ScrollSample extends Application {
         // Fixed top-centered toast, dropped below the page header. Themed colours (fg on bg) keep it
         // legible in either light or dark AtlantaFX theme.
         final var toast = new Label("Fixed toast (top center)");
+        toast.setId("toast");
         toast.setStyle("-fx-background-color: -color-fg-default; -fx-text-fill: -color-bg-default; "
                 + "-fx-padding: 8 16; -fx-background-radius: 16; -fx-font-size: 13;");
         Scroll.setFixedPosition(toast, Pos.TOP_CENTER, 64);
@@ -150,6 +156,7 @@ public class ScrollSample extends Application {
         // the viewport without blocking the other demos (and so clicks reach the content beneath it).
         // The label sits at viewport centre so it stays legible instead of landing on the sticky bars.
         final var overlay = new Label("full-viewport overlay (stretch both)");
+        overlay.setId("overlay");
         overlay.setAlignment(Pos.CENTER);
         overlay.setStyle("-fx-border-color: -color-danger-emphasis; -fx-border-width: 3; "
                 + "-fx-text-fill: -color-danger-emphasis; -fx-padding: 8; -fx-font-size: 12;");
@@ -180,6 +187,7 @@ public class ScrollSample extends Application {
         // The bounded sub-section: its sub-header pins at the viewport top, then releases at the bottom.
         final var sub = new VBox();
         final var subHeader = barButton("ScrollPane sticky header (pins, then releases)", Styles.ACCENT);
+        subHeader.setId("scrollpane-header");
         subHeader.setMinHeight(40);
         // Same :stuck restyle as the page header, but on the ScrollPaneStickyImpl path, so the CSS channel is
         // verifiable on the desktop too (the ScrollPane is the desktop scroll surface).
@@ -192,6 +200,7 @@ public class ScrollSample extends Application {
         content.getChildren().addAll(filler(25, 32));
 
         final var scrollPane = new ScrollPane(content);
+        scrollPane.setId("scrollpane");
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefViewportHeight(240);
         scrollPane.setMinHeight(240);

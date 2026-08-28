@@ -19,3 +19,9 @@ application {
     mainClass = 'one.jpro.platform.sticky.example.ScrollSample'
     mainModule = "one.jpro.platform.sticky.example"
 }
+
+jpro {
+    // Playwright tests pass -Pjpro.test.port; fall back to 8080 for manual `jproRun`.
+    port = project.hasProperty('jpro.test.port') ? project.property('jpro.test.port') as int : 8080
+    openURLOnStartup = false
+}
