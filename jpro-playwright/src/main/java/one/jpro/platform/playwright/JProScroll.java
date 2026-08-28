@@ -3,7 +3,6 @@ package one.jpro.platform.playwright;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.BoundingBox;
-import com.microsoft.playwright.options.ViewportSize;
 
 /**
  * Scrolling and viewport-geometry probes for JPro apps, the counterpart to {@link JProInput} for
@@ -37,14 +36,13 @@ public final class JProScroll {
     private static final double STABLE_INTERVAL_MS = 100;
 
     /**
-     * Scroll the page by {@code deltaY} px (positive = down) with the real mouse wheel, hovering the
-     * viewport centre so the wheel lands on the page rather than a nested {@code ScrollPane}, then
-     * settle. Use a negative delta to scroll back up.
+     * Scroll the page by {@code deltaY} px (positive = down), then settle. Drives the document
+     * scroller directly ({@code window.scrollBy}) rather than a wheel at a point: the page's native
+     * scroll is what the sticky compositor timeline ({@code scroll(root block)}) tracks, and this
+     * avoids the wheel accidentally landing on a nested {@code ScrollPane}. Negative delta scrolls up.
      */
     public static void scrollBy(Page page, double deltaY) {
-        ViewportSize size = page.viewportSize();
-        page.mouse().move(size.width / 2.0, size.height / 2.0);
-        page.mouse().wheel(0, deltaY);
+        page.evaluate("(dy) => window.scrollBy(0, dy)", deltaY);
         page.waitForTimeout(SETTLE_MS);
     }
 

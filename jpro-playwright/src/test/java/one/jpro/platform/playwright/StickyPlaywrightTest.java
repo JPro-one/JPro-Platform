@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -99,25 +98,20 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
     }
 
     @Test
-    @DisplayName("Mouse-transparent fullscreen overlay does not intercept clicks (they fall through)")
-    void mouseTransparentOverlayLetsClicksThrough() {
-        // The fixed full-viewport overlay (setFixedFullscreen + setMouseTransparent) covers the whole
-        // viewport. jpro-sticky must mirror that FX mouse-transparency to the DOM as pointer-events:none,
-        // or the reparented overlay div would swallow every click to content beneath it in the browser.
-        // Assert at a clear mid-page point (no header/toast/bar over it) that the overlay is transparent
-        // to hit-testing: it reports pointer-events:none and is not the element the browser would hit.
-        double midX = page.viewportSize().width / 2.0;
-        double midY = 350;
+    @DisplayName("A click reaches the in-flow button beneath the mouse-transparent fullscreen overlay")
+    void clickReachesButtonBeneathOverlay() {
+        // The in-flow "flow button" sits below the sticky header and under the fixed full-viewport
+        // overlay (setFixedFullscreen + setMouseTransparent). A plain click must land on it and
+        // round-trip to its counter. This exercises both halves at once: the header's placeholder
+        // reserves its slot so the button is not hidden behind the header, and the overlay is mirrored
+        // to pointer-events:none so it does not swallow the click on its way to the content beneath.
+        page.locator("#jpro-flow-button").click();
+        JProInput.awaitText(page, "#jpro-flow-button", "Flow button (not pinned)  (clicks: 1)");
 
+        // And the overlay really is the transparent layer in between (guards the pointer-events mapping).
         String overlayPe = (String) page.evaluate(
                 "() => getComputedStyle(document.getElementById('jpro-overlay')).pointerEvents");
         assertEquals("none", overlayPe, "fullscreen mouse-transparent overlay must be pointer-events:none");
-
-        Boolean overlayIsHit = (Boolean) page.evaluate(
-                "([x,y]) => { const el = document.elementFromPoint(x,y);\n" +
-                "  return el != null && el.closest('#jpro-overlay') != null; }",
-                java.util.List.of(midX, midY));
-        assertFalse(overlayIsHit, "a click at a clear point must reach content, not the mouse-transparent overlay");
     }
 
     @Test
