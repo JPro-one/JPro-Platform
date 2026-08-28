@@ -340,6 +340,9 @@ public final class WebScrollImpl implements ScrollImpl {
      */
     private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
         final String d = webapi.getElement(node).getName();
+        // mirror FX mouseTransparent to pointer-events:none: unlike desktop FX picking, the reparented
+        // node is a real div that would otherwise catch clicks meant for the content beneath it.
+        final boolean mouseTransparent = node.isMouseTransparent();
         final String js =
                 "(function(){\n" +
                 "  var reg = (window.__jproStickyC = window.__jproStickyC || {});\n" +
@@ -350,6 +353,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 // latest geometry, baked in server-side. render() reads these so a re-install (on a
                 // geometry-sig change) just updates them and rewrites the sheet.
                 "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
+                "  st.pe = " + mouseTransparent + ";\n" +
                 "  st.render = function(){\n" +
                 "    if(st.jid == null) return;\n" +
                 // document extent (scrollHeight), NOT scroll max (scrollHeight - clientHeight): the
@@ -368,7 +372,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      'animation-name:' + st.key + ';' +\n" +
                 "      'animation-timing-function:linear;animation-fill-mode:both;animation-duration:auto;' +\n" +
                 "      'animation-timeline:scroll(root block);' +\n" +
-                "      'animation-range:' + sPin + 'px ' + sRel + 'px;}';\n" +
+                "      'animation-range:' + sPin + 'px ' + sRel + 'px;' +\n" +
+                "      (st.pe ? 'pointer-events:none;' : '') + '}';\n" +
                 "  };\n" +
                 // fast path for a re-install: jpro-id already known, just re-render.
                 "  if(st.jid != null){ st.render(); return; }\n" +
