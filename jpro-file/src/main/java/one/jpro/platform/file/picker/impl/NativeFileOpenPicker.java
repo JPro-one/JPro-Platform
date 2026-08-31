@@ -102,12 +102,4 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         setNativeSelectedExtensionFilter(fileChooser, getSelectedExtensionFilter());
         return fileChooser;
     }
-
-    /**
-     * Creates and configures a new {@link DirectoryChooser} instance.
-     * <p>
-     * The directory chooser's title and initial directory are bound to the corresponding properties of this picker.
-     *
-     * @return a configured {@code DirectoryChooser} instance.
-     */
 }

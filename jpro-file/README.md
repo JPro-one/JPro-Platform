@@ -102,7 +102,8 @@ an `UnsupportedOperationException` in the browser, so guard it with `WebAPI.isBr
       ```
 
 #### Limitations
-* On the web, the `FileOpenPicker`, `FileSavePicker` and `FileDropper` can only handle files, not directories.
+* `FileOpenPicker`, `FileSavePicker` and `FileDropper` handle files only. Directories can be chosen with
+`DirectoryOpenPicker` on desktop; the web has no directory support.
 
 ## Installation
 

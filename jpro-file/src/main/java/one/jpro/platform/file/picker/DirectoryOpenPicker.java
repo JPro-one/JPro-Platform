@@ -33,23 +33,35 @@ public interface DirectoryOpenPicker {
         return new NativeDirectoryOpenPicker(node);
     }
 
+    /**
+     * The node that opens the chooser when clicked.
+     */
     Node getNode();
 
     String getTitle();
 
     void setTitle(String value);
 
+    /**
+     * The title of the directory chooser dialog.
+     */
     StringProperty titleProperty();
 
     File getInitialDirectory();
 
     void setInitialDirectory(File value);
 
+    /**
+     * The directory the chooser opens in.
+     */
     ObjectProperty<File> initialDirectoryProperty();
 
     Consumer<File> getOnDirectorySelected();
 
     void setOnDirectorySelected(Consumer<File> value);
 
+    /**
+     * Called with the chosen directory.
+     */
     ObjectProperty<Consumer<File>> onDirectorySelectedProperty();
 }

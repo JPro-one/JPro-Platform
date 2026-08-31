@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  *
  * @author Besmir Beqiri
  */
-public abstract class BaseFileOpenPicker extends BaseFilePicker implements FileOpenPicker {
+abstract class BaseFileOpenPicker extends BaseFilePicker implements FileOpenPicker {
 
     /**
      * {@inheritDoc}

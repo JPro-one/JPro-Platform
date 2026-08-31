@@ -22,7 +22,7 @@ import java.util.function.Function;
  * @author Besmir Beqiri
  * @author Indrit Beqiri
  */
-public abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePicker {
+abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePicker {
 
     /**
      * Constructs a new {@code BaseFileSavePicker} associated with the specified {@link Node}.
