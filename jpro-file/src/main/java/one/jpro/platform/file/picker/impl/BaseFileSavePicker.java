@@ -1,10 +1,11 @@
-package one.jpro.platform.file.picker;
+package one.jpro.platform.file.picker.impl;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import one.jpro.platform.file.util.NodeUtils;
+import one.jpro.platform.file.picker.FileSavePicker;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +22,7 @@ import java.util.function.Function;
  * @author Besmir Beqiri
  * @author Indrit Beqiri
  */
-abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePicker {
+public abstract class BaseFileSavePicker extends BaseFilePicker implements FileSavePicker {
 
     /**
      * Constructs a new {@code BaseFileSavePicker} associated with the specified {@link Node}.

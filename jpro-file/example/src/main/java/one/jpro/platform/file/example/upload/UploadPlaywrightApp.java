@@ -12,6 +12,7 @@ import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.FileUploadProgress;
 import one.jpro.platform.file.dropper.FileDropper;
+import one.jpro.platform.file.picker.DirectoryOpenPicker;
 import one.jpro.platform.file.picker.FileOpenPicker;
 
 import java.io.File;
@@ -68,7 +69,17 @@ public class UploadPlaywrightApp extends Application {
             uploads.cancelAll();
         });
 
-        VBox root = new VBox(10, anyZone, pngZone, upload, uploadCancel, selected, status, progress, sizes, future);
+        Label directoryPicker = new Label("");
+        directoryPicker.setId("directoryPicker");
+        try {
+            DirectoryOpenPicker.create(new Label());
+            directoryPicker.setText("created");
+        } catch (RuntimeException e) {
+            directoryPicker.setText(e.getClass().getSimpleName());
+        }
+
+        VBox root = new VBox(10, anyZone, pngZone, upload, uploadCancel, selected, status, progress, sizes, future,
+                directoryPicker);
         root.setAlignment(Pos.CENTER);
         stage.setScene(new Scene(root, 500, 500));
         stage.show();

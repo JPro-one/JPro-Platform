@@ -74,6 +74,11 @@ public class WebUploadPlaywrightTest extends JProPlaywrightTest {
     }
 
     @Test
+    void directoryPickerIsUnsupportedInTheBrowser() {
+        assertEquals("UnsupportedOperationException", text("#jpro-directoryPicker"));
+    }
+
+    @Test
     void pickerIgnoresOtherExtensions() {
         choose("#jpro-pngZone", "photo.jpg");
         page.waitForTimeout(2000);

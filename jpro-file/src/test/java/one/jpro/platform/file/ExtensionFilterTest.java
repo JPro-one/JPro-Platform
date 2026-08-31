@@ -33,11 +33,6 @@ public class ExtensionFilterTest {
         assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(List.of()));
         assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(
                 List.of(ExtensionFilter.of("Images", ".png"), ExtensionFilter.ANY)));
-        assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(List.of(ExtensionFilter.DIRECTORY)));
-        assertEquals(List.of(".png"), ExtensionFilter.toSupportedExtensions(
-                List.of(ExtensionFilter.of("Images", ".png"), ExtensionFilter.DIRECTORY)));
-        assertEquals(List.of(".png"), ExtensionFilter.toSupportedExtensions(
-                List.of(ExtensionFilter.of("Images", true, ".png"))));
     }
 
     @Test
@@ -50,6 +45,5 @@ public class ExtensionFilterTest {
 
         assertTrue(ExtensionFilter.ANY.accepts(file("anything.xyz")));
         assertFalse(ExtensionFilter.ANY.accepts(dir.toFile()));
-        assertTrue(ExtensionFilter.DIRECTORY.accepts(dir.toFile()));
     }
 }

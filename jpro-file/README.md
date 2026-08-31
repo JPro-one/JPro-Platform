@@ -91,9 +91,17 @@ transfer the file to the server; `progressProperty()` and `uploadStatusProperty(
       uploads.uploadAll();
       ```
 
+- `DirectoryOpenPicker`: Lets the user choose a directory. Desktop only — `DirectoryOpenPicker.create(node)` throws
+an `UnsupportedOperationException` in the browser, so guard it with `WebAPI.isBrowser()`.
+
+    * Usage Example
+
+      ```java
+      DirectoryOpenPicker directoryPicker = DirectoryOpenPicker.create(openDirectoryButton);
+      directoryPicker.setOnDirectorySelected(directory -> openDirectory(directory));
+      ```
+
 #### Limitations
-Some combination of features only work limited. These are the following:
-* The `FileOpenPicker` and `FileSavePicker` can only open directories or files, but never both at the same time.
 * On the web, the `FileOpenPicker`, `FileSavePicker` and `FileDropper` can only handle files, not directories.
 
 ## Installation

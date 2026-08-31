@@ -1,4 +1,4 @@
-package one.jpro.platform.file.picker;
+package one.jpro.platform.file.picker.impl;
 
 import com.jpro.webapi.WebAPI;
 import javafx.beans.property.ObjectProperty;
@@ -11,6 +11,7 @@ import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.util.NodeUtils;
+import one.jpro.platform.file.picker.FileOpenPicker;
 
 import java.util.ArrayList;
 import java.util.List;
