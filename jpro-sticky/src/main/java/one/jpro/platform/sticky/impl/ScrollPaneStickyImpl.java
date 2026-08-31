@@ -1,0 +1,231 @@
+package one.jpro.platform.sticky.impl;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.value.ChangeListener;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
+import one.jpro.platform.sticky.ScrollAnchor;
+import one.jpro.platform.sticky.ScrollAnchor.Axis;
+import one.jpro.platform.sticky.ScrollAnchor.Mode;
+import one.jpro.platform.sticky.ScrollPosition;
+
+import java.util.function.Consumer;
+
+/**
+ * The {@link ScrollPosition#STICKY} implementation for a node inside a JavaFX {@link ScrollPane},
+ * selected whenever the node has a {@code ScrollPane} ancestor (on desktop, or in the browser when
+ * the scroll is a server-driven FX {@code ScrollPane}). The pin stays in sync with the scroll by
+ * construction. Pure JavaFX: no reparenting, no {@link com.jpro.webapi.WebAPI}, no core change.
+ * <p>
+ * The node stays in its flow slot; a {@code translate} holds it at the pin line while scrolled past,
+ * clamped so it never leaves its containing block (the {@code within} override, else the node's
+ * parent). The maths is the CSS sticky rule expressed in the ScrollPane's <em>content</em>
+ * coordinates, where the node's natural position and the container bounds are constant and only the
+ * scroll offset moves:
+ * <pre>
+ *   appear = natural
+ *   if pinned-to-start: appear = max(appear, scrollOffset + startInset)     // can't pass the pin line
+ *   if pinned-to-end:   appear = min(appear, scrollOffset + viewport - endInset - size)
+ *   appear = clamp(appear, containerStart, containerEnd - size)             // stay in the block
+ *   translate = appear - natural
+ * </pre>
+ * resolved independently on both axes. Reading the natural position subtracts the translate this
+ * impl applied last pass, so re-syncs converge. While pinned the node gets a low {@code viewOrder}
+ * so it paints above its scrolled siblings (picking follows {@code viewOrder} in FX).
+ *
+ * @author Tobias Horak
+ */
+public final class ScrollPaneStickyImpl implements ScrollImpl {
+
+    /** viewOrder applied while stuck, lower paints in front (JPro/JavaFX sort by it first). */
+    private static final double STUCK_VIEW_ORDER = -1.0;
+
+    private final Node node;
+    private final ScrollAnchor anchor;
+    /** Containing block that bounds the pin; {@code null} falls back to the node's parent at attach. */
+    private final Node within;
+    private final ScrollPane scrollPane;
+    /** Pin/unpin transition sink (the node's stuck channels), {@code null} if unobserved. */
+    private final Consumer<Boolean> stuckSink;
+
+    private Node content;
+    private Node container;
+    private double restingViewOrder;
+    private boolean stuck;
+
+    private final InvalidationListener relayout = obs -> sync();
+    /** Rebinds the flow-geometry listener when the ScrollPane's content node is swapped out. */
+    private final ChangeListener<Node> contentWaiter = (obs, oldContent, newContent) -> rebindContent(oldContent, newContent);
+    private boolean torndown;
+
+    public ScrollPaneStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane,
+                                Consumer<Boolean> stuckSink) {
+        this.node = node;
+        this.anchor = anchor;
+        this.within = within;
+        this.scrollPane = scrollPane;
+        this.stuckSink = stuckSink;
+    }
+
+    @Override
+    public void install() {
+        this.content = scrollPane.getContent();
+        this.container = (within != null) ? within : node.getParent();
+        this.restingViewOrder = node.getViewOrder();
+
+        scrollPane.vvalueProperty().addListener(relayout);
+        scrollPane.hvalueProperty().addListener(relayout);
+        scrollPane.viewportBoundsProperty().addListener(relayout);
+        scrollPane.contentProperty().addListener(contentWaiter);
+        if (content != null) {
+            content.layoutBoundsProperty().addListener(relayout);
+        }
+        node.layoutBoundsProperty().addListener(relayout);
+        if (container != null) {
+            container.layoutBoundsProperty().addListener(relayout);
+            container.localToSceneTransformProperty().addListener(relayout);
+        }
+        sync();
+    }
+
+    private void sync() {
+        if (torndown || content == null) {
+            return;
+        }
+        final Bounds vp = scrollPane.getViewportBounds();
+        final double viewportW = vp.getWidth();
+        final double viewportH = vp.getHeight();
+        final Bounds nodeBounds = node.getLayoutBounds();
+        final double nodeW = nodeBounds.getWidth();
+        final double nodeH = nodeBounds.getHeight();
+
+        // node's natural top-left in content coords, reentrancy-safe (subtract the translate applied last
+        // pass). both transforms fold in the scroll, which cancels, so this stays stable.
+        final Point2D nodeContentTL = content.sceneToLocal(node.localToScene(0, 0));
+        final double naturalX = nodeContentTL.getX() - node.getTranslateX();
+        final double naturalY = nodeContentTL.getY() - node.getTranslateY();
+
+        // containing block in content coords (defaults to the whole content if unresolved).
+        final Bounds containerBounds = containerBoundsInContent();
+
+        // how far each axis is currently scrolled, in content px.
+        final double scrollX = scrollOffset(scrollPane.getHvalue(), scrollPane.getHmin(), scrollPane.getHmax(),
+                content.getLayoutBounds().getWidth(), viewportW);
+        final double scrollY = scrollOffset(scrollPane.getVvalue(), scrollPane.getVmin(), scrollPane.getVmax(),
+                content.getLayoutBounds().getHeight(), viewportH);
+
+        final double appearX = pin(anchor.horizontal(), naturalX, scrollX, viewportW, nodeW,
+                containerBounds.getMinX(), containerBounds.getMaxX());
+        final double appearY = pin(anchor.vertical(), naturalY, scrollY, viewportH, nodeH,
+                containerBounds.getMinY(), containerBounds.getMaxY());
+
+        node.setTranslateX(appearX - naturalX);
+        node.setTranslateY(appearY - naturalY);
+
+        final boolean nowStuck = (appearX != naturalX) || (appearY != naturalY);
+        if (nowStuck != stuck) {
+            stuck = nowStuck;
+            node.setViewOrder(nowStuck ? STUCK_VIEW_ORDER : restingViewOrder);
+            if (stuckSink != null) {
+                stuckSink.accept(nowStuck);
+            }
+        }
+    }
+
+    /**
+     * Moves the flow-geometry listeners from the old content subtree to the new one when the ScrollPane's
+     * content is swapped, so the pin keeps tracking the live content rather than a detached subtree, then
+     * re-syncs. The scroll/viewport listeners live on the {@link ScrollPane} itself and are unaffected.
+     * <p>
+     * A swap that carries the sticky node into the new content also changes its parent, so when the
+     * containing block defaults to that parent ({@code within == null}) it is re-resolved too; an explicit
+     * {@code within} is left as the caller set it.
+     */
+    private void rebindContent(Node oldContent, Node newContent) {
+        if (torndown) {
+            return;
+        }
+        if (oldContent != null) {
+            oldContent.layoutBoundsProperty().removeListener(relayout);
+        }
+        this.content = newContent;
+        if (newContent != null) {
+            newContent.layoutBoundsProperty().addListener(relayout);
+        }
+        if (within == null) {
+            if (container != null) {
+                container.layoutBoundsProperty().removeListener(relayout);
+                container.localToSceneTransformProperty().removeListener(relayout);
+            }
+            this.container = node.getParent();
+            if (container != null) {
+                container.layoutBoundsProperty().addListener(relayout);
+                container.localToSceneTransformProperty().addListener(relayout);
+            }
+        }
+        sync();
+    }
+
+    /**
+     * The CSS sticky clamp for one axis, in content coordinates: hold the node at the pin line while
+     * scrolled past, but never outside its containing block.
+     *
+     * @return the axis position at which the node should appear
+     */
+    private static double pin(Axis axis, double natural, double scroll, double viewport, double size,
+                              double containerStart, double containerEnd) {
+        double appear = natural;
+        if (axis.mode == Mode.PIN_START) {
+            appear = Math.max(appear, scroll + axis.start);
+        } else if (axis.mode == Mode.PIN_END) {
+            appear = Math.min(appear, scroll + viewport - axis.end - size);
+        }
+        // stay within the containing block (its bottom/right pushes the node back out, the release).
+        final double maxStart = Math.max(containerStart, containerEnd - size);
+        return Math.max(containerStart, Math.min(appear, maxStart));
+    }
+
+    /** The container's bounds mapped into the ScrollPane content's coordinate space. */
+    private Bounds containerBoundsInContent() {
+        if (container != null && container != content) {
+            return content.sceneToLocal(container.localToScene(container.getLayoutBounds()));
+        }
+        return content.getLayoutBounds();
+    }
+
+    /** The scroll offset in content px for a scrollbar value: fraction of the scrollable extent. */
+    private static double scrollOffset(double value, double min, double max,
+                                       double contentExtent, double viewportExtent) {
+        if (max <= min) {
+            return 0.0;
+        }
+        final double scrollable = Math.max(0.0, contentExtent - viewportExtent);
+        return (value - min) / (max - min) * scrollable;
+    }
+
+    @Override
+    public void uninstall() {
+        torndown = true;
+        scrollPane.vvalueProperty().removeListener(relayout);
+        scrollPane.hvalueProperty().removeListener(relayout);
+        scrollPane.viewportBoundsProperty().removeListener(relayout);
+        scrollPane.contentProperty().removeListener(contentWaiter);
+        if (content != null) {
+            content.layoutBoundsProperty().removeListener(relayout);
+        }
+        node.layoutBoundsProperty().removeListener(relayout);
+        if (container != null) {
+            container.layoutBoundsProperty().removeListener(relayout);
+            container.localToSceneTransformProperty().removeListener(relayout);
+        }
+        // restore the node to its natural flow position and paint order.
+        node.setTranslateX(0);
+        node.setTranslateY(0);
+        if (stuck) {
+            node.setViewOrder(restingViewOrder);
+            stuck = false;
+        }
+    }
+}

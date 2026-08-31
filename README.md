@@ -505,6 +505,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:run -Psample=popup
 ./gradlew jpro-routing:example:run -Psample=test
 ./gradlew jpro-flexbox:example:run
+./gradlew jpro-sticky:example:run
 ./gradlew jpro-utils:example:run -Psample=copy
 ./gradlew jpro-utils:example:run -Psample=user-platform
 ```
@@ -529,6 +530,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:jproRun -Psample=extensions
 ./gradlew jpro-webrtc:example:jproRun
 ./gradlew jpro-sipjs:example:jproRun
+./gradlew jpro-sticky:example:jproRun
 ./gradlew jpro-utils:example:jproRun -Psample=copy
 ./gradlew jpro-utils:example:jproRun -Psample=user-platform
 ```

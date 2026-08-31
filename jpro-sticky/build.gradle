@@ -1,0 +1,53 @@
+dependencies {
+  implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
+  implementation "one.jpro:jmemorybuddy:$JMEMORYBUDDY_VERSION"
+  implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+
+  // End-to-end tests (StickyPlaywrightTest) drive the :jpro-sticky:example app through the
+  // jpro-playwright helper library, which exposes Playwright and JUnit as api dependencies.
+  testImplementation project(":jpro-playwright")
+}
+
+test {
+  // The Playwright tests need a Chromium (installPlaywright provides it) and the example's port.
+  dependsOn 'installPlaywright'
+  if (System.getProperty('jpro.test.port') != null) {
+    systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
+  }
+  // installPlaywright already provisioned the browser — don't re-download during the run.
+  environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
+}
+
+// Installs the Chromium build the Playwright tests drive (with system deps, as CI needs them).
+tasks.register('installPlaywright', JavaExec) {
+  group = 'verification'
+  description = 'Install the Chromium browser used by the Playwright tests'
+  classpath = sourceSets.test.runtimeClasspath
+  mainClass = 'com.microsoft.playwright.CLI'
+  args = ['install', '--with-deps', 'chromium']
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      // Add README.md as an artifact named DOCUMENTATION.md
+      artifact(source: file('build/docs/DOCUMENTATION.md')) {
+        classifier 'DOCUMENTATION'
+        extension 'md'
+      }
+
+      pom {
+        name = 'JPro Sticky'
+        description = 'Scroll-aware positioning (sticky and fixed) for JavaFX nodes on the web'
+      }
+    }
+  }
+}
+
+tasks.register('renameReadme', Copy) {
+  from 'README.md'
+  into layout.buildDirectory.dir('docs')
+  rename 'README.md', 'DOCUMENTATION.md'
+}
+
+javadocJar.dependsOn renameReadme
