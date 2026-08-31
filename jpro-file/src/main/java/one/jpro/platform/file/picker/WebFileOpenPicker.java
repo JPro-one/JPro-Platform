@@ -13,9 +13,7 @@ import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.util.NodeUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -43,13 +41,8 @@ public class WebFileOpenPicker extends BaseFileOpenPicker {
                 WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnClick(true);
 
-        webExtensionFilterListChangeListener = change -> {
-            final List<String> supportedExtensionsList = change.getList().stream()
-                    .flatMap(ext -> ext.extensions().stream())
-                    .toList();
-            final Set<String> supportedExtensionsSet = new HashSet<>(supportedExtensionsList); // Remove duplicates
-            multiFileUploader.supportedExtensions().setAll(supportedExtensionsSet.stream().toList());
-        };
+        webExtensionFilterListChangeListener = change ->
+                multiFileUploader.supportedExtensions().setAll(ExtensionFilter.toSupportedExtensions(change.getList()));
 
         // Wrap the listener into a WeakListChangeListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.

@@ -1,8 +1,10 @@
 package one.jpro.platform.file;
 
 import com.jpro.webapi.WebAPI;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -53,13 +55,42 @@ public final class WebFileSource extends FileSource {
         return getPlatformFile().uploadedFileProperty();
     }
 
+    // uploadStatus property
+    private ReadOnlyObjectWrapper<UploadStatus> uploadStatus;
+
+    @Override
+    public UploadStatus getUploadStatus() {
+        return toUploadStatus(getPlatformFile().getUploadStatus());
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<UploadStatus> uploadStatusProperty() {
+        if (uploadStatus == null) {
+            uploadStatus = new ReadOnlyObjectWrapper<>(this, "uploadStatus");
+            uploadStatus.bind(Bindings.createObjectBinding(this::getUploadStatus,
+                    getPlatformFile().uploadStatusProperty()));
+        }
+        return uploadStatus.getReadOnlyProperty();
+    }
+
+    private static UploadStatus toUploadStatus(WebAPI.UploadStatus status) {
+        return status == null ? UploadStatus.NOT_STARTED : UploadStatus.valueOf(status.name());
+    }
+
     @Override
     public void uploadFile() {
         getPlatformFile().uploadFile();
     }
 
     @Override
+    public void cancelUpload() {
+        getPlatformFile().cancelUpload();
+    }
+
+    @Override
     public CompletableFuture<File> uploadFileAsync() {
-        return getPlatformFile().getUploadedFileFuture();
+        final WebAPI.JSFile jsFile = getPlatformFile();
+        jsFile.uploadFile();
+        return jsFile.getUploadedFileFuture();
     }
 }

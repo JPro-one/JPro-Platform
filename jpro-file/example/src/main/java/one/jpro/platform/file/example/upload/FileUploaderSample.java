@@ -5,9 +5,6 @@ import atlantafx.base.theme.CupertinoLight;
 import atlantafx.base.theme.Styles;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -16,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
+import one.jpro.platform.file.FileUploadProgress;
 import one.jpro.platform.file.picker.FileOpenPicker;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2AL;
@@ -40,8 +38,7 @@ import java.util.Optional;
 public final class FileUploaderSample extends Application {
 
     private FileTableView fileTableView = new FileTableView();
-    private final DoubleProperty overallUploadProgress =
-            new SimpleDoubleProperty(this, "overallUploadProgress", 0.0);
+    private final FileUploadProgress uploadProgress = new FileUploadProgress();
 
     @Override
     public void start(Stage stage) {
@@ -83,27 +80,27 @@ public final class FileUploaderSample extends Application {
 
         Button uploadButton = new Button("Upload All", new FontIcon(Material2AL.CLOUD_UPLOAD));
         uploadButton.disableProperty().bind(Bindings.isEmpty(fileTableView.getItems())
-                .or(overallUploadProgress.isEqualTo(1)));
-        uploadButton.setOnAction(event -> fileTableView.getItems().forEach(FileSource::uploadFileAsync));
+                .or(uploadProgress.progressProperty().isEqualTo(1)));
+        uploadButton.setOnAction(event -> uploadProgress.uploadAll());
+
+        Button cancelButton = new Button("Cancel All", new FontIcon(Material2AL.CANCEL));
+        cancelButton.disableProperty().bind(uploadProgress.uploadingProperty().not());
+        cancelButton.setOnAction(event -> uploadProgress.cancelAll());
 
         Button clearButton = new Button("Clear", new FontIcon(Material2AL.CLEAR));
         clearButton.getStyleClass().add(Styles.DANGER);
         clearButton.disableProperty().bind(Bindings.isEmpty(fileTableView.getItems()));
-        clearButton.setOnAction(event -> {
-            fileTableView.getItems().clear();
-            overallUploadProgress.unbind();
-            overallUploadProgress.set(0.0);
-        });
+        clearButton.setOnAction(event -> fileTableView.getItems().clear());
 
         Label selectionModeLabel = new Label("Selection Mode:");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox controlsBox = new HBox(selectionModeLabel, selectionModeComboBox, spacer, uploadButton, clearButton);
+        HBox controlsBox = new HBox(selectionModeLabel, selectionModeComboBox, spacer, uploadButton, cancelButton, clearButton);
         controlsBox.getStyleClass().add("controls-box");
         rootPane.setTop(controlsBox);
 
         RingProgressIndicator progressIndicator = new RingProgressIndicator();
-        progressIndicator.progressProperty().bind(overallUploadProgress);
+        progressIndicator.progressProperty().bind(uploadProgress.progressProperty());
         progressIndicator.setStringConverter(progressStringConverter);
         Label overallProgressLabel = new Label("Overall Upload Progress: ");
         HBox progressBox = new HBox(overallProgressLabel, progressIndicator);
@@ -114,21 +111,13 @@ public final class FileUploaderSample extends Application {
     }
 
     /**
-     * Adds all selected files to the file table view and binds the overall upload progress
-     * to the average progress of all files.
+     * Shows the selected files in the table; the overall progress tracks the same list.
      *
      * @param fileSources the list of selected file sources to add
      */
     private void addAllFiles(List<? extends FileSource> fileSources) {
-        fileTableView.getItems().setAll(fileSources);
-        // Bind the overall upload progress to the average progress of all files.
-        overallUploadProgress.bind(Bindings.createDoubleBinding(() ->
-                        fileSources.stream()
-                                .mapToDouble(FileSource::getProgress)
-                                .reduce(0.0, Double::sum) / fileSources.size(),
-                fileSources.stream()
-                        .map(FileSource::progressProperty)
-                        .toList().toArray(new ReadOnlyDoubleProperty[fileSources.size()])));
+        fileTableView.setItems(uploadProgress.getFiles());
+        uploadProgress.getFiles().setAll(fileSources);
     }
 
     /**

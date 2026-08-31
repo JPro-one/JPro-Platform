@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
+import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.event.DataTransfer;
@@ -40,6 +41,10 @@ public class WebFileDropper extends BaseFileDropper {
                 WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnDrop(true);
 
+        // A picker on the same node shares this uploader, so both write the same extension list.
+        extensionFilterProperty().addListener((obs, oldFilter, newFilter) -> applyExtensionFilter(newFilter));
+        applyExtensionFilter(getExtensionFilter());
+
         // Add file drag over listener
         fileDragOverListener = (observable) -> {
             if (multiFileUploader.getFileDragOver()) {
@@ -59,6 +64,11 @@ public class WebFileDropper extends BaseFileDropper {
         // Wrap the listener into a WeakInvalidationListener to avoid memory leaks,
         // that can occur if observers are not unregistered from observed objects after use.
         multiFileUploader.fileDragOverProperty().addListener(new WeakInvalidationListener(fileDragOverListener));
+    }
+
+    private void applyExtensionFilter(ExtensionFilter filter) {
+        multiFileUploader.supportedExtensions().setAll(
+                ExtensionFilter.toSupportedExtensions(filter == null ? List.of() : List.of(filter)));
     }
 
     @Override

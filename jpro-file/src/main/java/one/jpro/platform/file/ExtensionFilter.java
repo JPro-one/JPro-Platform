@@ -2,6 +2,9 @@ package one.jpro.platform.file;
 
 import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -72,6 +75,49 @@ public record ExtensionFilter(String description, boolean allowDirectory, List<S
      */
     public static ExtensionFilter of(String description, boolean allowDirectory, String... extensions) {
         return new ExtensionFilter(description, allowDirectory, List.of(extensions));
+    }
+
+    /**
+     * Whether this filter accepts every file, like {@link #ANY}.
+     *
+     * @return {@code true} if no extension restriction applies
+     */
+    public boolean acceptsAnyFile() {
+        return extensions.contains(".");
+    }
+
+    /**
+     * Whether the given file passes this filter. The extension comparison ignores case;
+     * directories are accepted only if {@link #allowDirectory()} is set.
+     *
+     * @param file the file to check
+     * @return {@code true} if the file is accepted
+     */
+    public boolean accepts(File file) {
+        if (file.isDirectory()) return allowDirectory;
+        if (acceptsAnyFile()) return true;
+        final String name = file.getName().toLowerCase();
+        return extensions.stream().anyMatch(ext -> name.endsWith(ext.toLowerCase()));
+    }
+
+    /**
+     * The extensions the given filters accept, in the form used by JPro's
+     * {@code supportedExtensions()}. Empty means "any file": when no filter is given,
+     * or when one of them accepts any file or allows directories.
+     *
+     * @param filters the extension filters
+     * @return the accepted extensions without duplicates, or an empty list for no restriction
+     */
+    public static List<String> toSupportedExtensions(Collection<? extends ExtensionFilter> filters) {
+        final List<String> result = new ArrayList<>();
+        for (ExtensionFilter filter : filters) {
+            if (filter == null) continue;
+            if (filter.acceptsAnyFile() || filter.allowDirectory()) return List.of();
+            for (String ext : filter.extensions()) {
+                if (!result.contains(ext)) result.add(ext);
+            }
+        }
+        return result;
     }
 
     /**

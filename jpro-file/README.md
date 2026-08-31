@@ -77,6 +77,20 @@ a specified callback handler is invoked for further processing.
       fileDropper.setOnFilesSelected(fileSources -> openFiles(fileSources));
       ```
 
+- `FileSource`: The files delivered by the pickers and droppers. On the web, `uploadFile()` / `uploadFileAsync()`
+transfer the file to the server; `progressProperty()` and `uploadStatusProperty()` follow the transfer, and
+`cancelUpload()` stops it. `FileUploadProgress` combines several uploads into one size-weighted progress.
+
+    * Usage Example
+
+      ```java
+      FileUploadProgress uploads = new FileUploadProgress(fileSources);
+      progressBar.progressProperty().bind(uploads.progressProperty());
+      cancelButton.disableProperty().bind(uploads.uploadingProperty().not());
+      cancelButton.setOnAction(event -> uploads.cancelAll());
+      uploads.uploadAll();
+      ```
+
 #### Limitations
 Some combination of features only work limited. These are the following:
 * The `FileOpenPicker` and `FileSavePicker` can only open directories or files, but never both at the same time.

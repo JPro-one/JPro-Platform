@@ -1,5 +1,19 @@
 # Changelog
 
+### 0.7.4 (TBD)
+
+Requires JPro 2026.3.2 or newer.
+
+#### Features
+* `jpro-file`: `FileSource` gained `cancelUpload()` and `uploadStatusProperty()` (`NOT_STARTED`, `UPLOADING`, `COMPLETED`, `FAILED`, `CANCELLED`); `uploadFileAsync()` now fails or is cancelled instead of never completing, and `uploadFile()` retries after a failed or cancelled upload.
+* `jpro-file`: New `FileUploadProgress` tracks the size-weighted progress of several uploads (`progressProperty()`, `uploadedSizeProperty()`, `totalSizeProperty()`, `uploadAll()`, `cancelAll()`).
+* `jpro-file`: `FileDropper.setExtensionFilter(...)` is now applied on the web too — files with another extension are no longer delivered.
+* `jpro-playwright`: `BrowserErrorCollector.ignoreMatching(...)` excludes expected browser errors from `assertNoErrors()`.
+
+#### Bugfixes
+* `jpro-file`: `ExtensionFilter.ANY` (and filters allowing directories) on the web rejected every upload; they now accept any file.
+* `jpro-file`: A `FileDropper` without an extension filter dropped every file on desktop; extension matching is now case-insensitive on desktop.
+
 ### 0.7.3 (August 7, 2026)
 Removed the old unmaintained JPMS dependencies. 
 

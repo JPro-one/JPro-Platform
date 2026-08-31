@@ -64,22 +64,14 @@ public class NativeFileDropper extends BaseFileDropper {
         NodeUtils.addEventHandler(node, DragEvent.DRAG_DROPPED, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
-                var allowDirectory = extensionFilter != null && extensionFilter.allowDirectory();
                 List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
-                        .filter(file -> extensionFilter != null && extensionFilter.extensions().stream()
-                                .anyMatch(extension -> {
-                                    if(file.isDirectory()) {
-                                        return allowDirectory;
-                                    } else {
-                                        return file.getName().toLowerCase().endsWith(extension);
-                                    }
-                                }))
+                        .filter(file -> extensionFilter == null || extensionFilter.accepts(file))
                         .map(NativeFileSource::new)
                         .toList();
 
                 // handle selected files
                 Consumer<List<? extends FileSource>> onFilesSelectedConsumer = getOnFilesSelected();
-                if (onFilesSelectedConsumer != null) {
+                if (onFilesSelectedConsumer != null && !nativeFileSources.isEmpty()) {
                     // if single selection mode, then only allow one file, the first one
                     if (getSelectionMode() == SelectionMode.SINGLE) {
                         nativeFileSources = List.of(nativeFileSources.get(0));
