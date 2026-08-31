@@ -65,7 +65,7 @@ public class NativeFileDropper extends BaseFileDropper {
             if (dragEvent.getDragboard().hasFiles()) {
                 final ExtensionFilter extensionFilter = getExtensionFilter();
                 List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
-                        .filter(file -> extensionFilter == null || extensionFilter.accepts(file))
+                        .filter(file -> !file.isDirectory() && (extensionFilter == null || extensionFilter.accepts(file)))
                         .map(NativeFileSource::new)
                         .toList();
 
