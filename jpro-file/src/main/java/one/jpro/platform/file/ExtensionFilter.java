@@ -103,7 +103,7 @@ public record ExtensionFilter(String description, boolean allowDirectory, List<S
     /**
      * The extensions the given filters accept, in the form used by JPro's
      * {@code supportedExtensions()}. Empty means "any file": when no filter is given,
-     * or when one of them accepts any file or allows directories.
+     * when one of them accepts any file, or when they only allow directories.
      *
      * @param filters the extension filters
      * @return the accepted extensions without duplicates, or an empty list for no restriction
@@ -112,7 +112,7 @@ public record ExtensionFilter(String description, boolean allowDirectory, List<S
         final List<String> result = new ArrayList<>();
         for (ExtensionFilter filter : filters) {
             if (filter == null) continue;
-            if (filter.acceptsAnyFile() || filter.allowDirectory()) return List.of();
+            if (filter.acceptsAnyFile()) return List.of();
             for (String ext : filter.extensions()) {
                 if (!result.contains(ext)) result.add(ext);
             }

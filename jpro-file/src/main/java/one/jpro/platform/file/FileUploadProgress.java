@@ -11,6 +11,7 @@ import java.util.Collection;
 /**
  * Tracks the combined upload progress of several {@link FileSource}s, weighted by file size:
  * {@code uploadedSize / totalSize}. Add and remove files through {@link #getFiles()}.
+ * Use it on the JavaFX application thread.
  *
  * <pre>{@code
  * FileUploadProgress uploads = new FileUploadProgress(fileSources);

@@ -11,7 +11,7 @@ Requires JPro 2026.3.2 or newer.
 * `jpro-playwright`: `BrowserErrorCollector.ignoreMatching(...)` excludes expected browser errors from `assertNoErrors()`.
 
 #### Bugfixes
-* `jpro-file`: `ExtensionFilter.ANY` (and filters allowing directories) on the web rejected every upload; they now accept any file.
+* `jpro-file`: `ExtensionFilter.ANY` on the web rejected every upload (since JPro 2026.1); it now accepts any file. `ExtensionFilter.DIRECTORY` no longer restricts the web picker either.
 * `jpro-file`: A `FileDropper` without an extension filter dropped every file on desktop; extension matching is now case-insensitive on desktop.
 
 ### 0.7.3 (August 7, 2026)

@@ -1,7 +1,6 @@
 package one.jpro.platform.file;
 
 import com.jpro.webapi.WebAPI;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -16,8 +15,12 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class WebFileSource extends FileSource {
 
+    private final ReadOnlyObjectWrapper<UploadStatus> uploadStatus;
+
     public WebFileSource(WebAPI.JSFile jsFile) {
         super(jsFile);
+        uploadStatus = new ReadOnlyObjectWrapper<>(this, "uploadStatus", toUploadStatus(jsFile.getUploadStatus()));
+        jsFile.uploadStatusProperty().addListener((o, ov, nv) -> uploadStatus.set(toUploadStatus(nv)));
     }
 
     @Override
@@ -55,21 +58,13 @@ public final class WebFileSource extends FileSource {
         return getPlatformFile().uploadedFileProperty();
     }
 
-    // uploadStatus property
-    private ReadOnlyObjectWrapper<UploadStatus> uploadStatus;
-
     @Override
     public UploadStatus getUploadStatus() {
-        return toUploadStatus(getPlatformFile().getUploadStatus());
+        return uploadStatus.get();
     }
 
     @Override
     public ReadOnlyObjectProperty<UploadStatus> uploadStatusProperty() {
-        if (uploadStatus == null) {
-            uploadStatus = new ReadOnlyObjectWrapper<>(this, "uploadStatus");
-            uploadStatus.bind(Bindings.createObjectBinding(this::getUploadStatus,
-                    getPlatformFile().uploadStatusProperty()));
-        }
         return uploadStatus.getReadOnlyProperty();
     }
 

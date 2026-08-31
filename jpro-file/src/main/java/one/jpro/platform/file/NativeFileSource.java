@@ -125,9 +125,16 @@ public final class NativeFileSource extends FileSource {
 
     @Override
     public CompletableFuture<File> uploadFileAsync() {
-        return CompletableFuture.supplyAsync(() -> {
+        final CompletableFuture<File> future = new CompletableFuture<>();
+        final Runnable runnable = () -> {
             uploadFile();
-            return getPlatformFile();
-        });
+            future.complete(getPlatformFile());
+        };
+        if (Platform.isFxApplicationThread()) {
+            runnable.run();
+        } else {
+            Platform.runLater(runnable);
+        }
+        return future;
     }
 }

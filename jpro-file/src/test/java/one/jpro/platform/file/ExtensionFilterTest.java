@@ -29,12 +29,15 @@ public class ExtensionFilterTest {
     }
 
     @Test
-    void anyOrDirectoryMeansNoRestriction() {
+    void anyMeansNoRestriction() {
         assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(List.of()));
         assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(
                 List.of(ExtensionFilter.of("Images", ".png"), ExtensionFilter.ANY)));
-        assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(
+        assertEquals(List.of(), ExtensionFilter.toSupportedExtensions(List.of(ExtensionFilter.DIRECTORY)));
+        assertEquals(List.of(".png"), ExtensionFilter.toSupportedExtensions(
                 List.of(ExtensionFilter.of("Images", ".png"), ExtensionFilter.DIRECTORY)));
+        assertEquals(List.of(".png"), ExtensionFilter.toSupportedExtensions(
+                List.of(ExtensionFilter.of("Images", true, ".png"))));
     }
 
     @Test

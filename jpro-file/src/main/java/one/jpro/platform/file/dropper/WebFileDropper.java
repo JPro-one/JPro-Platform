@@ -41,9 +41,11 @@ public class WebFileDropper extends BaseFileDropper {
                 WebAPI.makeMultiFileUploadNodeStatic(node));
         multiFileUploader.setSelectFileOnDrop(true);
 
-        // A picker on the same node shares this uploader, so both write the same extension list.
-        extensionFilterProperty().addListener((obs, oldFilter, newFilter) -> applyExtensionFilter(newFilter));
-        applyExtensionFilter(getExtensionFilter());
+        // A picker on the same node shares this uploader; only write when this dropper has a filter.
+        extensionFilterProperty().addListener((obs, oldFilter, newFilter) -> {
+            if (newFilter != null || oldFilter != null) applyExtensionFilter(newFilter);
+        });
+        if (getExtensionFilter() != null) applyExtensionFilter(getExtensionFilter());
 
         // Add file drag over listener
         fileDragOverListener = (observable) -> {

@@ -69,8 +69,10 @@ public class FileUploadProgressTest {
             assertEquals(0.0, uploads.getProgress(), 1e-9);
             assertEquals(100, uploads.getTotalSize());
 
-            // a is no longer observed: its changes must not leak into the tracker
-            uploads.getFiles().clear();
+            // a removed file is no longer observed
+            uploads.getFiles().remove(b);
+            b.uploadFile();
+            assertEquals(0, uploads.getUploadedSize());
             assertEquals(0, uploads.getTotalSize());
         });
     }

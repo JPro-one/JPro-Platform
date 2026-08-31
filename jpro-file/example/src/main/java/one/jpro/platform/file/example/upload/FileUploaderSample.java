@@ -61,6 +61,7 @@ public final class FileUploaderSample extends Application {
      */
     public Parent createRoot(Stage stage) {
         fileTableView = new FileTableView();
+        fileTableView.setItems(uploadProgress.getFiles());
         Label clickOnMeLabel = new Label("Click on me to open the file picker!");
         StackPane placeholderPane = new StackPane(clickOnMeLabel);
         placeholderPane.getStyleClass().add("placeholder-pane");
@@ -116,7 +117,6 @@ public final class FileUploaderSample extends Application {
      * @param fileSources the list of selected file sources to add
      */
     private void addAllFiles(List<? extends FileSource> fileSources) {
-        fileTableView.setItems(uploadProgress.getFiles());
         uploadProgress.getFiles().setAll(fileSources);
     }
 
