@@ -1,7 +1,11 @@
-package one.jpro.platform.playwright;
+package one.jpro.platform.sticky;
 
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.BoundingBox;
+import one.jpro.platform.playwright.BrowserErrorCollector;
+import one.jpro.platform.playwright.JProInput;
+import one.jpro.platform.playwright.JProPlaywrightTest;
+import one.jpro.platform.playwright.JProScroll;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,16 +21,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * End-to-end tests for {@code jpro-sticky} against the {@code :jpro-sticky:example} app
- * ({@code ScrollSample}) in a real browser. These cover the half of the feature the module's
- * headless unit tests cannot: the native compositor pin and picking as the page actually scrolls
- * (its {@code WebScrollImplTest} stubs the browser and states outright that "the compositor motion
- * itself is driven by injected CSS in the browser and cannot run headless").
+ * End-to-end tests for {@code jpro-sticky} against its {@code :jpro-sticky:example} app
+ * ({@code ScrollSample}) in a real browser, built on the {@code jpro-playwright} helper library.
+ * These cover the half of the feature the module's headless unit tests cannot: the native compositor
+ * pin and picking as the page actually scrolls (its {@code WebScrollImplTest} stubs the browser and
+ * states outright that "the compositor motion itself is driven by injected CSS in the browser and
+ * cannot run headless").
  *
  * <p>The assertion tool is viewport geometry: a pinned sticky/fixed element holds its
  * {@link JProScroll#top} across a scroll while in-flow content moves; picking is proved by clicking
  * a pinned button and watching its server-side click counter increment. Requires a Chromium
- * installed via {@code ./gradlew :jpro-playwright:installPlaywright}.
+ * installed via {@code ./gradlew :jpro-sticky:installPlaywright}.
  */
 public class StickyPlaywrightTest extends JProPlaywrightTest {
 
