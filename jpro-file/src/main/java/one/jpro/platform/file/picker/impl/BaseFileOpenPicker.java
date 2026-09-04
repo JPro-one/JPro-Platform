@@ -1,10 +1,11 @@
-package one.jpro.platform.file.picker;
+package one.jpro.platform.file.picker.impl;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import one.jpro.platform.file.FileSource;
+import one.jpro.platform.file.picker.FileOpenPicker;
 
 import java.util.List;
 import java.util.function.Consumer;

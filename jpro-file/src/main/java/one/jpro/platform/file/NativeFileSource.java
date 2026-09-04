@@ -83,11 +83,32 @@ public final class NativeFileSource extends FileSource {
         return uploadedFile;
     }
 
+    // uploadStatus property
+    private ReadOnlyObjectWrapper<UploadStatus> uploadStatus;
+
+    @Override
+    public UploadStatus getUploadStatus() {
+        return uploadStatus == null ? UploadStatus.NOT_STARTED : uploadStatus.get();
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<UploadStatus> uploadStatusProperty() {
+        return uploadStatusPropertyImpl().getReadOnlyProperty();
+    }
+
+    private ReadOnlyObjectWrapper<UploadStatus> uploadStatusPropertyImpl() {
+        if (uploadStatus == null) {
+            uploadStatus = new ReadOnlyObjectWrapper<>(this, "uploadStatus", UploadStatus.NOT_STARTED);
+        }
+        return uploadStatus;
+    }
+
     @Override
     public void uploadFile() {
         final Runnable runnable = () -> {
             setProgress(1.0);
             setUploadedFile(getPlatformFile());
+            uploadStatusPropertyImpl().set(UploadStatus.COMPLETED);
         };
 
         if (Platform.isFxApplicationThread()) {
@@ -97,11 +118,23 @@ public final class NativeFileSource extends FileSource {
         }
     }
 
+    /** A native file is available immediately, so there is never a running upload to cancel. */
+    @Override
+    public void cancelUpload() {
+    }
+
     @Override
     public CompletableFuture<File> uploadFileAsync() {
-        return CompletableFuture.supplyAsync(() -> {
+        final CompletableFuture<File> future = new CompletableFuture<>();
+        final Runnable runnable = () -> {
             uploadFile();
-            return getPlatformFile();
-        });
+            future.complete(getPlatformFile());
+        };
+        if (Platform.isFxApplicationThread()) {
+            runnable.run();
+        } else {
+            Platform.runLater(runnable);
+        }
+        return future;
     }
 }

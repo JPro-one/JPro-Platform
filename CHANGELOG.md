@@ -1,5 +1,24 @@
 # Changelog
 
+### 0.7.4 (TBD)
+
+Requires JPro 2026.3.2 or newer.
+
+#### Features
+* `jpro-file`: `FileSource` gained `cancelUpload()` and `uploadStatusProperty()` (`NOT_STARTED`, `UPLOADING`, `COMPLETED`, `FAILED`, `CANCELLED`); `uploadFileAsync()` now fails or is cancelled instead of never completing, and `uploadFile()` retries after a failed or cancelled upload.
+* `jpro-file`: New `FileUploadProgress` tracks the size-weighted progress of several uploads (`progressProperty()`, `uploadedSizeProperty()`, `totalSizeProperty()`, `uploadAll()`, `cancelAll()`).
+* `jpro-file`: `FileDropper.setExtensionFilter(...)` is now applied on the web too — files with another extension are no longer delivered.
+* `jpro-playwright`: `BrowserErrorCollector.ignoreMatching(...)` excludes expected browser errors from `assertNoErrors()`.
+* `jpro-file`: New `DirectoryOpenPicker` for choosing a directory on desktop (`create` throws `UnsupportedOperationException` in the browser). (#59)
+
+#### Bugfixes
+* `jpro-file`: `ExtensionFilter.ANY` on the web rejected every upload (since JPro 2026.1); it now accepts any file.
+* `jpro-file`: A `FileDropper` without an extension filter dropped every file on desktop; extension matching is now case-insensitive on desktop.
+
+#### Breaking
+* `jpro-file`: Directory support was removed from `ExtensionFilter` (`DIRECTORY`, `allowDirectory()`, `of(String, boolean, String...)` and the matching constructor); choose directories with `DirectoryOpenPicker` instead. `FileOpenPicker` and `FileDropper` handle files only — dropped folders are ignored.
+* `jpro-file`: The picker implementations (`NativeFileOpenPicker`, `WebFileOpenPicker`, `NativeFileSavePicker`, `WebFileSavePicker`) moved to `one.jpro.platform.file.picker.impl`. Use the `create(...)` factories of the interfaces.
+
 ### 0.7.3 (August 7, 2026)
 Removed the old unmaintained JPMS dependencies. 
 

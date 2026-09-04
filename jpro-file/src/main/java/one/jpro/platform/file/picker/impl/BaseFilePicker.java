@@ -1,4 +1,4 @@
-package one.jpro.platform.file.picker;
+package one.jpro.platform.file.picker.impl;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.stage.FileChooser;
 import one.jpro.platform.file.ExtensionFilter;
+import one.jpro.platform.file.picker.FilePicker;
 
 import java.io.File;
 import java.util.Objects;

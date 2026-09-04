@@ -21,7 +21,8 @@ javafx {
 
 def examples = [
         'text-editor' : 'one.jpro.platform.file.example.editor.TextEditorSample',
-        'file-uploader' : 'one.jpro.platform.file.example.upload.FileUploaderSample'
+        'file-uploader' : 'one.jpro.platform.file.example.upload.FileUploaderSample',
+        'upload-playwright' : 'one.jpro.platform.file.example.upload.UploadPlaywrightApp'
 ]
 
 
@@ -31,4 +32,10 @@ application {
     applicationDefaultJvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
     ]
+}
+
+jpro {
+    // Playwright tests pass -Pjpro.test.port; fall back to 8080 for manual `jproRun`.
+    port = project.hasProperty('jpro.test.port') ? project.property('jpro.test.port') as int : 8080
+    openURLOnStartup = !project.hasProperty('jpro.test.port')
 }

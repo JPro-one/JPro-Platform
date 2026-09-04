@@ -77,10 +77,33 @@ a specified callback handler is invoked for further processing.
       fileDropper.setOnFilesSelected(fileSources -> openFiles(fileSources));
       ```
 
+- `FileSource`: The files delivered by the pickers and droppers. On the web, `uploadFile()` / `uploadFileAsync()`
+transfer the file to the server; `progressProperty()` and `uploadStatusProperty()` follow the transfer, and
+`cancelUpload()` stops it. `FileUploadProgress` combines several uploads into one size-weighted progress.
+
+    * Usage Example
+
+      ```java
+      FileUploadProgress uploads = new FileUploadProgress(fileSources);
+      progressBar.progressProperty().bind(uploads.progressProperty());
+      cancelButton.disableProperty().bind(uploads.uploadingProperty().not());
+      cancelButton.setOnAction(event -> uploads.cancelAll());
+      uploads.uploadAll();
+      ```
+
+- `DirectoryOpenPicker`: Lets the user choose a directory. Desktop only — `DirectoryOpenPicker.create(node)` throws
+an `UnsupportedOperationException` in the browser, so guard it with `WebAPI.isBrowser()`.
+
+    * Usage Example
+
+      ```java
+      DirectoryOpenPicker directoryPicker = DirectoryOpenPicker.create(openDirectoryButton);
+      directoryPicker.setOnDirectorySelected(directory -> openDirectory(directory));
+      ```
+
 #### Limitations
-Some combination of features only work limited. These are the following:
-* The `FileOpenPicker` and `FileSavePicker` can only open directories or files, but never both at the same time.
-* On the web, the `FileOpenPicker`, `FileSavePicker` and `FileDropper` can only handle files, not directories.
+* `FileOpenPicker`, `FileSavePicker` and `FileDropper` handle files only. Directories can be chosen with
+`DirectoryOpenPicker` on desktop; the web has no directory support.
 
 ## Installation
 

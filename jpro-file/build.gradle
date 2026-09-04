@@ -2,6 +2,7 @@ dependencies {
     implementation "one.jpro:jpro-webapi:$JPRO_VERSION"
     implementation "org.jetbrains:annotations:$JETBRAINS_ANNOTATIONS_VERSION"
     implementation "org.slf4j:slf4j-api:$SLF4J_API_VERSION"
+    testImplementation project(":jpro-playwright")
 }
 
 compileJava {
@@ -12,6 +13,12 @@ test {
     jvmArgs = [
             "--add-exports", "javafx.base/com.sun.javafx.event=one.jpro.platform.file"
     ]
+    // The web upload tests drive :jpro-file:example in Chromium via jpro-playwright.
+    dependsOn ':jpro-playwright:installPlaywright'
+    if (System.getProperty('jpro.test.port') != null) {
+        systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
+    }
+    environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
 }
 
 javadoc {
