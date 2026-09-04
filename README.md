@@ -161,28 +161,6 @@ dependencies {
 }
 ```
 
-## JPro Mail
-This library provides a simple way to send emails in **JPro/JavaFX** applications. It allows you to send emails
-using SMTP and SMTPS protocols. It also provides a simple way to compose and send emails with attachments.
-
-#### Maven configuration
-```xml
-<dependencies>
-  <dependency>
-    <groupId>one.jpro.platform</groupId>
-    <artifactId>jpro-mail</artifactId>
-    <version>0.7.3</version>
-  </dependency>
-</dependencies>
-```
-
-#### Gradle configuration
-```groovy
-dependencies {
-    implementation("one.jpro.platform:jpro-mail:0.7.3")
-}
-```
-
 ## JPro Media
 This library is designed for audio and video playback and recording within JavaFX applications.
 It seamlessly operates on both desktop and mobile devices, as well as in web browsers via **JPro**, 
@@ -496,7 +474,6 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-auth:example:run -Psample=oauth
 ./gradlew jpro-file:example:run -Psample=text-editor
 ./gradlew jpro-file:example:run -Psample=file-uploader
-./gradlew jpro-mail:example:run -Psample=compose-mail
 ./gradlew jpro-media:example:run -Psample=media-player
 ./gradlew jpro-media:example:run -Psample=media-recorder
 ./gradlew jpro-media:example:run -Psample=media-recorder-and-player
@@ -519,7 +496,6 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-auth:example:jproRun -Psample=oauth
 ./gradlew jpro-file:example:jproRun -Psample=text-editor
 ./gradlew jpro-file:example:jproRun -Psample=file-uploader
-./gradlew jpro-mail:example:jproRun -Psample=compose-mail
 ./gradlew jpro-media:example:jproRun -Psample=media-player
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder
 ./gradlew jpro-media:example:jproRun -Psample=media-recorder-and-player

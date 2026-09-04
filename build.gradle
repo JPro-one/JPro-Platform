@@ -31,7 +31,6 @@ def subprojectsWithDocs = [
         "jpro-auth/routing",
         "jpro-dynamic-css",
         "jpro-file",
-        "jpro-mail",
         "jpro-mdfx",
         "jpro-flexbox",
         "jpro-media",
@@ -209,7 +208,7 @@ configure(subprojects.findAll { it.name != 'example' }) {
 }
 
 configure([project("jpro-auth:core"), project("jpro-auth:routing"), project("jpro-dynamic-css"),
-           project("jpro-file"), project("jpro-flexbox"), project("jpro-image-manager"), project("jpro-mail"),
+           project("jpro-file"), project("jpro-flexbox"), project("jpro-image-manager"),
            project("jpro-mdfx"),
            project("jpro-media"), project("jpro-scenegraph"), project("jpro-session"), project("jpro-sipjs"),
            project("jpro-utils"), project("jpro-playwright"), project("jpro-html-scrollpane"),
