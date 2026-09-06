@@ -441,6 +441,29 @@ dependencies {
 }
 ```
 
+## JPro CSS Grid
+A CSS Grid layout implementation for JavaFX. Brings the CSS Grid model to JavaFX with track lists (`fr`, `auto`,
+`minmax()`, `repeat(auto-fill, ...)`), named areas, line-based placement with spans, auto-placement (sparse/dense),
+and item/content alignment — all styleable via CSS.
+
+#### Maven configuration
+```xml
+<dependencies>
+  <dependency>
+    <groupId>one.jpro.platform</groupId>
+    <artifactId>jpro-css-grid</artifactId>
+    <version>0.7.3</version>
+  </dependency>
+</dependencies>
+```
+
+#### Gradle configuration
+```groovy
+dependencies {
+    implementation("one.jpro.platform:jpro-css-grid:0.7.3")
+}
+```
+
 ## JPro HTML Scrollpane
 Provides a skin implementation of a scrollpane for **JPro** applications only.
 
@@ -482,6 +505,7 @@ To run the examples, you can use the following commands:
 ./gradlew jpro-routing:example:run -Psample=popup
 ./gradlew jpro-routing:example:run -Psample=test
 ./gradlew jpro-flexbox:example:run
+./gradlew jpro-css-grid:example:run
 ./gradlew jpro-sticky:example:run
 ./gradlew jpro-utils:example:run -Psample=copy
 ./gradlew jpro-utils:example:run -Psample=user-platform
