@@ -166,13 +166,13 @@ public class GridItem extends StackPane {
     // ── Shorthands (CSS only) ─────────────────────────────────────────
 
     private final StyleableObjectProperty<String> gridArea = GridStyleSupport.CoercingProperty.createCssApplied(
-            this, "gridArea", GRID_AREA_META, GridStyleSupport::toText, this::applyGridArea);
+            this, "gridArea", GRID_AREA_META, GridStyleSupport::toText, this::applyShorthands);
 
     private final StyleableObjectProperty<String> gridColumn = GridStyleSupport.CoercingProperty.createCssApplied(
-            this, "gridColumn", GRID_COLUMN_META, GridStyleSupport::toText, this::applyGridColumn);
+            this, "gridColumn", GRID_COLUMN_META, GridStyleSupport::toText, this::applyShorthands);
 
     private final StyleableObjectProperty<String> gridRow = GridStyleSupport.CoercingProperty.createCssApplied(
-            this, "gridRow", GRID_ROW_META, GridStyleSupport::toText, this::applyGridRow);
+            this, "gridRow", GRID_ROW_META, GridStyleSupport::toText, this::applyShorthands);
 
     private StyleableObjectProperty<String> shorthand(String property) {
         switch (property) {
@@ -182,37 +182,42 @@ public class GridItem extends StackPane {
         }
     }
 
-    // Values each shorthand last propagated, so that a reset shorthand only reverts what it set itself
-    private GridLine[] gridColumnApplied, gridRowApplied, gridAreaApplied;
+    // Longhand values the shorthands last produced (rowStart, columnStart, rowEnd, columnEnd; null = not covered),
+    // so that a shorthand that stops matching only reverts what the shorthands set themselves
+    private GridLine[] shorthandApplied = new GridLine[4];
 
-    private void applyGridColumn() {
-        gridColumnApplied = applyShorthand(gridColumn, 2, gridColumnApplied, columnStart, columnEnd);
-    }
-
-    private void applyGridRow() {
-        gridRowApplied = applyShorthand(gridRow, 2, gridRowApplied, rowStart, rowEnd);
-    }
-
-    private void applyGridArea() {
-        gridAreaApplied = applyShorthand(gridArea, 4, gridAreaApplied, rowStart, columnStart, rowEnd, columnEnd);
-    }
-
-    @SafeVarargs
-    private static GridLine[] applyShorthand(StyleableObjectProperty<String> shorthand, int count, GridLine[] previous,
-                                             StyleableObjectProperty<GridLine>... targets) {
-        String text = shorthand.get();
-        StyleOrigin origin = shorthand.getStyleOrigin();
-        if (text == null) {
-            if (previous != null) {
-                for (int i = 0; i < count; i++) {
-                    if (previous[i].equals(targets[i].get())) propagate(targets[i], GridLine.AUTO, null);
-                }
-            }
-            return null;
+    /** Recomputes all four longhands from grid-area, then grid-column and grid-row, whenever any shorthand changes. */
+    private void applyShorthands() {
+        GridLine[] lines = new GridLine[4];
+        StyleOrigin[] origins = new StyleOrigin[4];
+        if (gridArea.get() != null) {
+            GridLine[] area = parseShorthand(gridArea.get(), 4);
+            for (int i = 0; i < 4; i++) { lines[i] = area[i]; origins[i] = gridArea.getStyleOrigin(); }
         }
-        GridLine[] lines = parseShorthand(text, count);
-        for (int i = 0; i < count; i++) propagate(targets[i], lines[i], origin);
-        return lines;
+        if (gridColumn.get() != null) {
+            GridLine[] column = parseShorthand(gridColumn.get(), 2);
+            lines[1] = column[0]; lines[3] = column[1];
+            origins[1] = origins[3] = gridColumn.getStyleOrigin();
+        }
+        if (gridRow.get() != null) {
+            GridLine[] row = parseShorthand(gridRow.get(), 2);
+            lines[0] = row[0]; lines[2] = row[1];
+            origins[0] = origins[2] = gridRow.getStyleOrigin();
+        }
+        StyleableObjectProperty<GridLine>[] targets = longhands();
+        for (int i = 0; i < 4; i++) {
+            if (lines[i] != null) {
+                propagate(targets[i], lines[i], origins[i]);
+            } else if (shorthandApplied[i] != null && shorthandApplied[i].equals(targets[i].get())) {
+                propagate(targets[i], GridLine.AUTO, null);
+            }
+        }
+        shorthandApplied = lines;
+    }
+
+    @SuppressWarnings("unchecked")
+    private StyleableObjectProperty<GridLine>[] longhands() {
+        return new StyleableObjectProperty[]{rowStart, columnStart, rowEnd, columnEnd};
     }
 
     /**

@@ -168,6 +168,7 @@ public class CssGrid extends Pane {
         CLASS_CSS_META_DATA = Collections.unmodifiableList(list);
     }
 
+    /** The CSS metadata of this class: the Pane properties plus the grid container properties. */
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return CLASS_CSS_META_DATA;
     }
@@ -204,8 +205,14 @@ public class CssGrid extends Pane {
 
     public final GridTemplateAreas getTemplateAreas() { return nonNull(templateAreas.get(), GridTemplateAreas.NONE); }
     public final void setTemplateAreas(GridTemplateAreas value) { templateAreas.set(value); }
-    /** Sets the named areas, one string per row, e.g. {@code setTemplateAreas("header header", "sidebar main")}. */
-    public final void setTemplateAreas(String... rows) { setTemplateAreas(GridTemplateAreas.of(rows)); }
+    /**
+     * Sets the named areas, one string per row, e.g. {@code setTemplateAreas("header header", "sidebar main")}.
+     * A single argument in CSS form ({@code "'header header' 'sidebar main'"}) is accepted as well.
+     */
+    public final void setTemplateAreas(String... rows) {
+        boolean cssForm = rows.length == 1 && (rows[0].indexOf('\'') >= 0 || rows[0].indexOf('"') >= 0);
+        setTemplateAreas(cssForm ? GridTemplateAreas.parse(rows[0]) : GridTemplateAreas.of(rows));
+    }
     public final ObjectProperty<GridTemplateAreas> templateAreasProperty() { return templateAreas; }
 
     private final StyleableObjectProperty<GridTrackList> autoColumns = GridStyleSupport.CoercingProperty.create(
@@ -317,16 +324,24 @@ public class CssGrid extends Pane {
 
     // ── Static child constraint methods ───────────────────────────────
 
+    /** {@code grid-column-start}: the child's start column line; null resets to auto. */
     public static void setColumnStart(Node child, GridLine line) { setConstraint(child, COLUMN_START_CONSTRAINT, line); }
+    /** The child's start column line, {@link GridLine#AUTO} if unset. */
     public static GridLine getColumnStart(Node child) { return getLine(child, COLUMN_START_CONSTRAINT); }
 
+    /** {@code grid-column-end}: the child's end column line; null resets to auto. */
     public static void setColumnEnd(Node child, GridLine line) { setConstraint(child, COLUMN_END_CONSTRAINT, line); }
+    /** The child's end column line, {@link GridLine#AUTO} if unset. */
     public static GridLine getColumnEnd(Node child) { return getLine(child, COLUMN_END_CONSTRAINT); }
 
+    /** {@code grid-row-start}: the child's start row line; null resets to auto. */
     public static void setRowStart(Node child, GridLine line) { setConstraint(child, ROW_START_CONSTRAINT, line); }
+    /** The child's start row line, {@link GridLine#AUTO} if unset. */
     public static GridLine getRowStart(Node child) { return getLine(child, ROW_START_CONSTRAINT); }
 
+    /** {@code grid-row-end}: the child's end row line; null resets to auto. */
     public static void setRowEnd(Node child, GridLine line) { setConstraint(child, ROW_END_CONSTRAINT, line); }
+    /** The child's end row line, {@link GridLine#AUTO} if unset. */
     public static GridLine getRowEnd(Node child) { return getLine(child, ROW_END_CONSTRAINT); }
 
     /** {@code grid-column: <start>}: places the child at the given 1-based column line, spanning one track. */
@@ -407,15 +422,19 @@ public class CssGrid extends Pane {
         return val instanceof GridItemAlignment ? (GridItemAlignment) val : null;
     }
 
+    /** {@code order}: children are placed in ascending order (stable), default 0. */
     public static void setOrder(Node child, int value) { setConstraint(child, ORDER_CONSTRAINT, value); }
 
+    /** The child's placement order, 0 if unset. */
     public static int getOrder(Node child) {
         Object val = child.getProperties().get(ORDER_CONSTRAINT);
         return val instanceof Number ? ((Number) val).intValue() : 0;
     }
 
+    /** Margin between the child and its grid area; null removes it. */
     public static void setMargin(Node child, Insets value) { setConstraint(child, MARGIN_CONSTRAINT, value); }
 
+    /** The child's margin, {@link Insets#EMPTY} if unset. */
     public static Insets getMargin(Node child) {
         Object val = child.getProperties().get(MARGIN_CONSTRAINT);
         return val instanceof Insets ? (Insets) val : Insets.EMPTY;
@@ -465,24 +484,34 @@ public class CssGrid extends Pane {
         double[] colPos = GridTrackSizing.positions(state.columns, contentWidth, getColumnGap(), getJustifyContent());
         double[] rowPos = GridTrackSizing.positions(state.rows, contentHeight, getRowGap(), getAlignContent());
 
-        List<GridPlacement.Item> items = state.placement.items;
-        for (int i = 0; i < items.size(); i++) {
-            GridPlacement.Item item = items.get(i);
+        // Track edges are snapped once so that adjacent items share pixel-exact boundaries
+        double[] colStart = new double[state.columns.size()], colEnd = new double[state.columns.size()];
+        for (int i = 0; i < state.columns.size(); i++) {
+            colStart[i] = snapPositionX(insetLeft + colPos[i]);
+            colEnd[i] = snapPositionX(insetLeft + colPos[i] + state.columns.get(i).base);
+        }
+        double[] rowStart = new double[state.rows.size()], rowEnd = new double[state.rows.size()];
+        for (int i = 0; i < state.rows.size(); i++) {
+            rowStart[i] = snapPositionY(insetTop + rowPos[i]);
+            rowEnd[i] = snapPositionY(insetTop + rowPos[i] + state.rows.get(i).base);
+        }
+
+        for (GridPlacement.Item item : state.placement.items) {
             Node node = item.node;
             Insets m = item.margin;
 
-            double areaX = colPos[item.columnStart];
-            double areaW = trackEnd(state.columns, colPos, item.columnEnd() - 1) - areaX;
-            double areaY = rowPos[item.rowStart];
-            double areaH = trackEnd(state.rows, rowPos, item.rowEnd() - 1) - areaY;
+            double areaX = colStart[item.columnStart];
+            double areaW = colEnd[item.columnEnd() - 1] - areaX;
+            double areaY = rowStart[item.rowStart];
+            double areaH = rowEnd[item.rowEnd() - 1] - areaY;
 
             double availW = areaW - m.getLeft() - m.getRight();
             double availH = areaH - m.getTop() - m.getBottom();
-            double w = state.itemWidths[i];
+            double w = resolveItemWidth(node, justifySelfOf(node), availW);
             double h = resolveItemHeight(node, alignSelfOf(node), availH, w);
 
-            double x = insetLeft + areaX + m.getLeft() + alignmentOffset(justifySelfOf(node), availW, w);
-            double y = insetTop + areaY + m.getTop() + alignmentOffset(alignSelfOf(node), availH, h);
+            double x = areaX + m.getLeft() + alignmentOffset(justifySelfOf(node), availW, w);
+            double y = areaY + m.getTop() + alignmentOffset(alignSelfOf(node), availH, h);
             node.resizeRelocate(snapPositionX(x), snapPositionY(y), snapSizeX(w), snapSizeY(h));
         }
     }

@@ -21,8 +21,11 @@ public final class GridTrack {
         PERCENT,
         /** Flexible size, a share of the remaining free space. */
         FLEX,
+        /** The items' preferred size, absorbing free space when there are no flexible tracks. */
         AUTO,
+        /** The items' minimum size. */
         MIN_CONTENT,
+        /** The items' preferred size. */
         MAX_CONTENT,
         /** {@code minmax(min, max)}. */
         MINMAX,
@@ -55,25 +58,31 @@ public final class GridTrack {
         this.repeated = repeated;
     }
 
+    /** A fixed track size in pixels. */
     public static GridTrack px(double pixels) {
         if (pixels < 0 || Double.isNaN(pixels)) throw new IllegalArgumentException("Track size must be >= 0: " + pixels);
         return new GridTrack(Kind.FIXED, pixels, null, null, 0, null, Collections.emptyList());
     }
 
+    /** A percentage of the container's content size, e.g. {@code percent(50)} for {@code 50%}. */
     public static GridTrack percent(double percent) {
         if (percent < 0 || Double.isNaN(percent)) throw new IllegalArgumentException("Percentage must be >= 0: " + percent);
         return new GridTrack(Kind.PERCENT, percent, null, null, 0, null, Collections.emptyList());
     }
 
+    /** A flexible track, {@code <factor>fr}; equivalent to {@code minmax(auto, <factor>fr)}. */
     public static GridTrack fr(double factor) {
         if (factor < 0 || Double.isNaN(factor)) throw new IllegalArgumentException("Flex factor must be >= 0: " + factor);
         return new GridTrack(Kind.FLEX, factor, null, null, 0, null, Collections.emptyList());
     }
 
+    /** The {@code auto} track size. */
     public static GridTrack auto() { return AUTO; }
 
+    /** The {@code min-content} track size. */
     public static GridTrack minContent() { return MIN_CONTENT; }
 
+    /** The {@code max-content} track size. */
     public static GridTrack maxContent() { return MAX_CONTENT; }
 
     /**

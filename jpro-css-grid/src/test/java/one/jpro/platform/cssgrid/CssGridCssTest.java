@@ -234,6 +234,30 @@ class CssGridCssTest extends CssGridTestBase {
     }
 
     @Test
+    void shorthandRemovedByPseudoClassRestoresOtherShorthand(@TempDir Path dir) throws IOException {
+        Path css = dir.resolve("hover.css");
+        Files.writeString(css, ".card { grid-area: header; }\n.card:hover { grid-column: \"2 / 4\"; }\n");
+
+        GridItem item = new GridItem();
+        item.getStyleClass().add("card");
+        Scene scene = new Scene(item);
+        scene.getStylesheets().add(css.toUri().toString());
+        item.applyCss();
+        assertEquals(GridLine.named("header"), item.getColumnStart());
+
+        item.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("hover"), true);
+        item.applyCss();
+        assertEquals(GridLine.at(2), item.getColumnStart());
+        assertEquals(GridLine.at(4), item.getColumnEnd());
+        assertEquals(GridLine.named("header"), item.getRowStart());
+
+        item.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("hover"), false);
+        item.applyCss();
+        assertEquals(GridLine.named("header"), item.getColumnStart());
+        assertEquals(GridLine.named("header"), item.getColumnEnd());
+    }
+
+    @Test
     void enumConverterAcceptsAliasesAndRejectsUnknown() {
         assertEquals(GridContentAlignment.START, CssGrid.CONTENT_ALIGNMENT_CONVERTER.convertString("flex-start"));
         assertEquals(GridContentAlignment.SPACE_EVENLY, CssGrid.CONTENT_ALIGNMENT_CONVERTER.convertString("Space-Evenly"));

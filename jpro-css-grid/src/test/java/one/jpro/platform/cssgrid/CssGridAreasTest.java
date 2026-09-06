@@ -46,6 +46,13 @@ class CssGridAreasTest extends CssGridTestBase {
     }
 
     @Test
+    void templateAreasAcceptsCssForm() {
+        CssGrid grid = new CssGrid();
+        grid.setTemplateAreas("'a a' 'b c'");
+        assertEquals(GridTemplateAreas.of("a a", "b c"), grid.getTemplateAreas());
+    }
+
+    @Test
     void namedLinesFromAreas() {
         Region a = createBox(10, 10);
         CssGrid.setColumnStart(a, GridLine.named("main-start"));

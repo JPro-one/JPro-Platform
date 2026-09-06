@@ -113,8 +113,12 @@ sized by `grid-auto-columns` / `grid-auto-rows`.
 ### CSS Example
 
 JavaFX's CSS parser does not understand `fr`, `%` sizes, `minmax()`, `repeat()`, `span`, `/` or two-word keywords
-such as `row dense`, so values containing them are written as quoted strings. Plain pixel numbers and single keywords
-(`auto`, `min-content`, `center`, `row-dense`, ...) can stay unquoted.
+such as `row dense`, so values containing them are written as quoted strings. Only a list of plain pixel numbers
+(`100 200`) or a single keyword (`auto`, `min-content`, `center`, `row-dense`, ...) can stay unquoted.
+
+Beware that the parser keeps just the first term of an unquoted multi-value declaration without any warning:
+`grid-template-areas: "header header" "sidebar main";` yields a single row and `grid-auto-flow: row dense;` yields
+`row`. Put such values into one quoted string as shown above.
 
 ```css
 .my-grid {

@@ -34,10 +34,12 @@ public final class GridTrackList {
         this.tracks = tracks;
     }
 
+    /** Creates a track list; at most one {@code auto-fill}/{@code auto-fit} repeat is allowed. */
     public static GridTrackList of(GridTrack... tracks) {
         return of(Arrays.asList(tracks));
     }
 
+    /** Creates a track list from a copy of the given tracks; at most one {@code auto-fill}/{@code auto-fit} repeat is allowed. */
     public static GridTrackList of(List<GridTrack> tracks) {
         Objects.requireNonNull(tracks, "tracks");
         if (tracks.isEmpty()) return NONE;
@@ -60,10 +62,13 @@ public final class GridTrackList {
         return of(new Parser(css).parseList());
     }
 
+    /** The unmodifiable list of entries; {@code repeat()} groups are not expanded. */
     public List<GridTrack> getTracks() { return tracks; }
 
+    /** True for {@code none}. */
     public boolean isEmpty() { return tracks.isEmpty(); }
 
+    /** True if the list contains an {@code auto-fill} or {@code auto-fit} repeat. */
     public boolean hasAutoRepeat() {
         for (GridTrack t : tracks) {
             if (t.getKind() == GridTrack.Kind.REPEAT && t.getRepeatMode() != GridTrack.RepeatMode.COUNT) return true;

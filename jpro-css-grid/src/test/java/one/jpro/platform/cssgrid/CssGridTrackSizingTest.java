@@ -221,6 +221,18 @@ class CssGridTrackSizingTest extends CssGridTestBase {
     }
 
     @Test
+    void adjacentTracksShareSnappedEdges() {
+        Region a = createBox(10, 10), b = createBox(10, 10), c = createBox(10, 10);
+        CssGrid grid = gridWithColumns("1fr 1fr 1fr", a, b, c);
+
+        layoutAt(grid, 301, 100);
+
+        assertEquals(a.getLayoutX() + width(a), b.getLayoutX(), 0.01);
+        assertEquals(b.getLayoutX() + width(b), c.getLayoutX(), 0.01);
+        assertEquals(301, c.getLayoutX() + width(c), 0.01);
+    }
+
+    @Test
     void repeatExpandsTracks() {
         Region a = createBox(10, 10), b = createBox(10, 10), c = createBox(10, 10), d = createBox(10, 10);
         CssGrid grid = gridWithColumns("repeat(2, 50 100)", a, b, c, d);
@@ -280,9 +292,9 @@ class CssGridTrackSizingTest extends CssGridTestBase {
 
         layoutAt(grid, 650, 100);
 
-        // 3 tracks, the empty third one still takes its share
-        assertEquals(650 / 3.0, width(a), 0.5);
-        assertEquals(650 / 3.0, width(b), 0.5);
+        // 3 tracks, the empty third one still takes its share (track edges are snapped to whole pixels)
+        assertEquals(650 / 3.0, width(a), 1);
+        assertEquals(650 / 3.0, width(b), 1);
     }
 
     @Test

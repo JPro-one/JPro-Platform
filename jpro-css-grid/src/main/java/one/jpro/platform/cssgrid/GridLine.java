@@ -35,11 +35,13 @@ public final class GridLine {
         return new GridLine(line, 0, null);
     }
 
+    /** A span of {@code tracks} tracks, counted from the opposite line. */
     public static GridLine span(int tracks) {
         if (tracks < 1) throw new IllegalArgumentException("span must be >= 1: " + tracks);
         return new GridLine(0, tracks, null);
     }
 
+    /** A reference to a named area line, e.g. {@code header}, {@code header-start} or {@code header-end}. */
     public static GridLine named(String name) {
         Objects.requireNonNull(name, "name");
         if (name.isEmpty()) throw new IllegalArgumentException("Line name must not be empty");
