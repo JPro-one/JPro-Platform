@@ -32,6 +32,11 @@ import java.util.function.Consumer;
  * It builds only on the JPro Viewport API ({@link WebAPI#browserViewport()} /
  * {@link WebAPI#documentBounds()}) and needs no core change.
  * <p>
+ * <strong>Engines without scroll-driven animations</strong> (Firefox, Safari &lt; 26) get no animation
+ * rule at all, and the server-side pin alone drives the node: correct, but refreshed at
+ * {@link WebAPI#browserViewport()} cadence rather than per compositor frame. The rule must be withheld
+ * rather than emitted and ignored -- see {@code render()} in {@link #installCompositor}.
+ * <p>
  * When running as a desktop application the {@link WebAPI} consumer never fires, so installation
  * is a no-op and the node keeps its normal flow positioning.
  * <p>
@@ -357,8 +362,19 @@ public final class WebScrollImpl implements ScrollImpl {
                 // geometry-sig change) just updates them and rewrites the sheet.
                 "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
                 "  st.pe = " + mouseTransparent + ";\n" +
+                // engines without scroll-driven animations must get NO animation rule at all (see render).
+                "  st.sda = CSS.supports('animation-timeline','scroll()');\n" +
                 "  st.render = function(){\n" +
                 "    if(st.jid == null) return;\n" +
+                // no scroll timeline (Firefox, Safari < 26): emit only the pointer-events half. Emitting the
+                // animation anyway is worse than useless -- the engine drops the unknown animation-timeline,
+                // 'animation-duration:auto' then resolves to 0s, and 'animation-fill-mode:both' snaps the node
+                // to the 'to' keyframe, parking it a document-height below the viewport (invisible). Without
+                // the rule the server-side pin from sync() drives the node: lower fidelity, but correct.
+                "    if(!st.sda){\n" +
+                "      st.style.textContent = st.pe ? ('[jpro-id=\"' + st.jid + '\"]{pointer-events:none;}') : '';\n" +
+                "      return;\n" +
+                "    }\n" +
                 // document extent (scrollHeight), NOT scroll max (scrollHeight - clientHeight): the
                 // latter folds in viewport height, leaving the unbounded range stale on resize.
                 "    var docExtent = document.documentElement.scrollHeight;\n" +

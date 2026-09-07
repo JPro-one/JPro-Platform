@@ -10,7 +10,7 @@ dependencies {
 
 test {
   // The Playwright tests need a Chromium (installPlaywright provides it) and the example's port.
-  dependsOn 'installPlaywright'
+  dependsOn 'installPlaywright', 'installPlaywrightFirefox'
   if (System.getProperty('jpro.test.port') != null) {
     systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
   }
@@ -25,6 +25,16 @@ tasks.register('installPlaywright', JavaExec) {
   classpath = sourceSets.test.runtimeClasspath
   mainClass = 'com.microsoft.playwright.CLI'
   args = ['install', '--with-deps', 'chromium']
+}
+
+// StickyNoScrollTimelineTest covers the engines that lack scroll-driven animations, and Firefox is
+// the one such engine Playwright ships.
+tasks.register('installPlaywrightFirefox', JavaExec) {
+  group = 'verification'
+  description = 'Install the Firefox browser used by StickyNoScrollTimelineTest'
+  classpath = sourceSets.test.runtimeClasspath
+  mainClass = 'com.microsoft.playwright.CLI'
+  args = ['install', '--with-deps', 'firefox']
 }
 
 publishing {
