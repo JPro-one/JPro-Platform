@@ -35,7 +35,7 @@ import java.util.function.Consumer;
  * <strong>Engines without scroll-driven animations</strong> (Firefox, Safari &lt; 26) get no animation
  * rule at all, and the server-side pin alone drives the node: correct, but refreshed at
  * {@link WebAPI#browserViewport()} cadence rather than per compositor frame. The rule must be withheld
- * rather than emitted and ignored -- see {@code render()} in {@link #installCompositor}.
+ * rather than emitted and ignored -- see {@code apply()} in {@link #installCompositor}.
  * <p>
  * When running as a desktop application the {@link WebAPI} consumer never fires, so installation
  * is a no-op and the node keeps its normal flow positioning.
@@ -323,12 +323,12 @@ public final class WebScrollImpl implements ScrollImpl {
     }
 
     /**
-     * (Re-)installs the scroll-timeline animation that pins the node. The animation is realised
-     * entirely inside an injected {@code <style>} sheet: the {@code @keyframes} plus a rule that
-     * binds them to the node via its stable {@code [jpro-id]} attribute selector. The renderer
-     * positions the node with inline {@code style.transform}, but a running CSS animation outranks
-     * inline styles in the cascade, so the animation overrides that pin with a compositor-driven
-     * pure function of scroll. Assumes an svg scale of 1 (true for native-scrolling pages).
+     * (Re-)installs the scroll-timeline animation that pins the node. The {@code @keyframes} live in
+     * an injected {@code <style>} sheet; the animation itself is bound <em>inline on the element</em>.
+     * The renderer positions the node with inline {@code style.transform}, but a running CSS animation
+     * outranks inline declarations in the cascade, so the animation overrides that pin with a
+     * compositor-driven pure function of scroll. Assumes an svg scale of 1 (true for native-scrolling
+     * pages).
      * <p>
      * {@code natTop} is the keyframe 'from' (the flow top for sticky, the pin line for fixed);
      * {@code y0} is the viewport pin line; {@code relLimitServer} is the scene-y release point
@@ -337,14 +337,18 @@ public final class WebScrollImpl implements ScrollImpl {
      * from the transform endpoints only (they are relative to the overlay's own DOM box) while the
      * scroll-range math stays in document space, so a non-scene-root host shifts nothing but the pin.
      * <p>
-     * <strong>Robust against the JPro readiness race.</strong> Two things make first install
-     * reliable on fresh loads. First, the {@code <style>} and keyframes are written unconditionally,
-     * with no dependency on the node's DOM peer existing yet. Second, the element reference
-     * ({@code jpro.getValue(n)}) <em>throws</em> until JPro's render pulse has registered the node,
-     * so it is resolved inside a {@code requestAnimationFrame} retry loop guarded by try/catch;
-     * once resolved, its {@code jpro-id} is cached and the binding is emitted as a selector rule.
-     * Because JPro re-emits {@code jpro-id} on every render of the node, that rule re-applies by
-     * itself after any DOM re-render or reconnect, with nothing to re-push from the server.
+     * <strong>Robust against the JPro readiness race.</strong> The element reference
+     * ({@code jpro.getValue(n)}) <em>throws</em> until JPro's render pulse has registered the node, so
+     * it is resolved inside a {@code requestAnimationFrame} retry loop guarded by try/catch.
+     * <p>
+     * <strong>Robust against reconnect.</strong> The binding deliberately holds the element itself and
+     * never its {@code jpro-id}: that id is a per-view transport index whose counter restarts when a
+     * reconnect builds a new view, so a cached id does not merely go stale, it silently retargets an
+     * unrelated node (measured: a fullscreen overlay's rule landed on the bottom bar and hauled it to
+     * the top of the viewport). An element reference cannot collide -- it only goes stale, which
+     * {@code isConnected} detects. A re-install can also win the race against the DOM rebuild and
+     * resolve the outgoing element while it is still connected, so a 500ms heartbeat rebinds once the
+     * old peer detaches.
      */
     private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
         final String d = webapi.getElement(node).getName();
@@ -355,26 +359,34 @@ public final class WebScrollImpl implements ScrollImpl {
                 "(function(){\n" +
                 "  var reg = (window.__jproStickyC = window.__jproStickyC || {});\n" +
                 "  var st = reg['" + jsKey + "'] = reg['" + jsKey + "'] || {};\n" +
+                "  st.dead = false;\n" +
+                // the sheet now carries only @keyframes; the binding is inline on the element itself.
                 "  if(!st.style){ st.style = document.createElement('style');\n" +
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.key = 'jpro-sticky-" + jsKey + "';\n" +
-                // latest geometry, baked in server-side. render() reads these so a re-install (on a
-                // geometry-sig change) just updates them and rewrites the sheet.
+                // latest geometry, baked in server-side. apply() reads these so a re-install (on a
+                // geometry-sig change) just updates them and rewrites the keyframes.
                 "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
                 "  st.pe = " + mouseTransparent + ";\n" +
-                // engines without scroll-driven animations must get NO animation rule at all (see render).
+                // engines without scroll-driven animations must get NO animation at all (see apply).
                 "  st.sda = CSS.supports('animation-timeline','scroll()');\n" +
-                "  st.render = function(){\n" +
-                "    if(st.jid == null) return;\n" +
-                // no scroll timeline (Firefox, Safari < 26): emit only the pointer-events half. Emitting the
-                // animation anyway is worse than useless -- the engine drops the unknown animation-timeline,
-                // 'animation-duration:auto' then resolves to 0s, and 'animation-fill-mode:both' snaps the node
-                // to the 'to' keyframe, parking it a document-height below the viewport (invisible). Without
-                // the rule the server-side pin from sync() drives the node: lower fidelity, but correct.
-                "    if(!st.sda){\n" +
-                "      st.style.textContent = st.pe ? ('[jpro-id=\"' + st.jid + '\"]{pointer-events:none;}') : '';\n" +
-                "      return;\n" +
-                "    }\n" +
+                // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
+                // on every install: after a reconnect the previous slot is gone and this one is fresh.
+                "  st.resolve = function(){ try { var e = " + d + "; return e && e.style ? e : null; } catch(e){ return null; } };\n" +
+                "  st.clear = function(el){ if(!el) return;\n" +
+                "    ['animation-name','animation-timing-function','animation-fill-mode','animation-duration',\n" +
+                "     'animation-timeline','animation-range','pointer-events'].forEach(function(p){\n" +
+                "      el.style.removeProperty(p); }); };\n" +
+                "  st.apply = function(){\n" +
+                "    var el = st.el; if(!el) return;\n" +
+                "    if(st.pe) el.style.setProperty('pointer-events','none');\n" +
+                "    else el.style.removeProperty('pointer-events');\n" +
+                // no scroll timeline (Firefox, Safari < 26): pointer-events only. Emitting the animation
+                // anyway is worse than useless -- the engine drops the unknown animation-timeline,
+                // 'animation-duration:auto' then resolves to 0s, and 'animation-fill-mode:both' snaps the
+                // node to the 'to' keyframe, parking it a document-height below the viewport (invisible).
+                // Without it the server-side pin from sync() drives the node: lower fidelity, but correct.
+                "    if(!st.sda){ st.style.textContent = ''; return; }\n" +
                 // document extent (scrollHeight), NOT scroll max (scrollHeight - clientHeight): the
                 // latter folds in viewport height, leaving the unbounded range stale on resize.
                 "    var docExtent = document.documentElement.scrollHeight;\n" +
@@ -386,24 +398,45 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var fromY = st.natTop - st.hostOffsetY;\n" +
                 "    var toY = relLimit - st.hostOffsetY;\n" +
                 "    st.style.textContent = '@keyframes ' + st.key +\n" +
-                "      '{from{transform:translate(' + st.x + 'px,' + fromY + 'px);}to{transform:translate(' + st.x + 'px,' + toY + 'px);}}' +\n" +
-                "      '[jpro-id=\"' + st.jid + '\"]{' +\n" +
-                "      'animation-name:' + st.key + ';' +\n" +
-                "      'animation-timing-function:linear;animation-fill-mode:both;animation-duration:auto;' +\n" +
-                "      'animation-timeline:scroll(root block);' +\n" +
-                "      'animation-range:' + sPin + 'px ' + sRel + 'px;' +\n" +
-                "      (st.pe ? 'pointer-events:none;' : '') + '}';\n" +
+                "      '{from{transform:translate(' + st.x + 'px,' + fromY + 'px);}' +\n" +
+                "      'to{transform:translate(' + st.x + 'px,' + toY + 'px);}}';\n" +
+                // a running animation outranks inline declarations in the cascade, so animating transform
+                // inline still overrides the renderer's own inline transform. The renderer writes styles
+                // one property at a time (style.setProperty), so these survive its re-renders.
+                "    el.style.setProperty('animation-name', st.key);\n" +
+                "    el.style.setProperty('animation-timing-function','linear');\n" +
+                "    el.style.setProperty('animation-fill-mode','both');\n" +
+                "    el.style.setProperty('animation-duration','auto');\n" +
+                "    el.style.setProperty('animation-timeline','scroll(root block)');\n" +
+                "    el.style.setProperty('animation-range', sPin + 'px ' + sRel + 'px');\n" +
                 "  };\n" +
-                // fast path for a re-install: jpro-id already known, just re-render.
-                "  if(st.jid != null){ st.render(); return; }\n" +
-                // first install: the element ref throws until JPro registers the node's DOM peer, so retry
-                // (bounded ~5s at 60fps) until it resolves, then cache jpro-id and render.
-                "  var tries = 0;\n" +
-                "  (function resolve(){\n" +
-                "    var el = null; try { el = " + d + "; } catch(e){ el = null; }\n" +
-                "    if(el && el.getAttribute){ st.jid = el.getAttribute('jpro-id'); st.render(); }\n" +
-                "    else if(tries++ < 300){ requestAnimationFrame(resolve); }\n" +
-                "  })();\n" +
+                // Bind to the element, never to its jpro-id. jpro-id is a per-view transport index whose
+                // counter restarts on reconnect, so a cached id silently retargets an unrelated node --
+                // measured: a fullscreen overlay's rule landed on the bottom bar and hauled it to the top
+                // of the viewport. An element reference cannot collide: it just goes stale, and a stale
+                // one is detectable (isConnected) and recoverable.
+                "  st.bind = function(){\n" +
+                "    if(st.dead || st.resolving) return;\n" +
+                "    st.resolving = true; var tries = 0;\n" +
+                "    (function step(){\n" +
+                "      if(st.dead){ st.resolving = false; return; }\n" +
+                "      var el = st.resolve();\n" +
+                "      if(el && el.isConnected){\n" +
+                "        if(el !== st.el){ st.clear(st.el); st.el = el; }\n" +
+                "        st.resolving = false; st.apply(); return;\n" +
+                "      }\n" +
+                // the element ref throws until JPro's render pulse has registered the node's DOM peer,
+                // so retry (bounded, ~5s at 60fps) rather than giving up on the first miss.
+                "      if(tries++ < 300){ requestAnimationFrame(step); } else { st.resolving = false; }\n" +
+                "    })();\n" +
+                "  };\n" +
+                // Self-healing heartbeat. A reconnect re-renders the scene into fresh DOM peers, and the
+                // re-install can win the race against that rebuild -- resolving the outgoing element while
+                // it is still connected. One boolean check per node per 500ms catches it once it detaches
+                // and rebinds to the live peer.
+                "  st.check = function(){ if(!st.dead && (!st.el || !st.el.isConnected)) st.bind(); };\n" +
+                "  if(!st.timer){ st.timer = setInterval(st.check, 500); }\n" +
+                "  if(st.el && st.el.isConnected){ st.apply(); } else { st.bind(); }\n" +
                 "})();";
         webapi.executeScript(js);
     }
@@ -446,8 +479,8 @@ public final class WebScrollImpl implements ScrollImpl {
         // restore the node to its flow slot.
         mount.unmount();
 
-        // the animation lives entirely in the injected <style> (bound by a [jpro-id] rule, not inline styles),
-        // so dropping that sheet removes the pin without touching the element ref (may be unresolved at teardown).
+        // the binding is inline on the element and there is a heartbeat running, so teardown has to stop
+        // the timer and strip those properties as well as drop the keyframes sheet.
         if (webapi != null && installedCompositor) {
             removeCompositorStyle(webapi, jsKey);
         }
@@ -471,6 +504,14 @@ public final class WebScrollImpl implements ScrollImpl {
                 "(function(){\n" +
                 "  var reg = window.__jproStickyC; if(!reg) return;\n" +
                 "  var st = reg['" + jsKey + "']; if(!st) return;\n" +
+                // stop the heartbeat and any in-flight resolve before dropping the entry, or they keep
+                // running against a torn-down pin (and the interval would outlive the page's use of it).
+                "  st.dead = true;\n" +
+                "  if(st.timer){ clearInterval(st.timer); st.timer = null; }\n" +
+                // the binding is inline on the element now, so it has to be stripped there too: the node
+                // survives teardown (it is restored to its flow slot) and would keep the animation.
+                "  if(st.clear) st.clear(st.el);\n" +
+                "  st.el = null;\n" +
                 "  if(st.style && st.style.parentNode) st.style.parentNode.removeChild(st.style);\n" +
                 "  delete reg['" + jsKey + "'];\n" +
                 "})();");
