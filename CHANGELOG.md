@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.7.4 (unreleased)
+
+#### Features
+* `jpro-css-grid`: New module with `CssGrid`, a CSS Grid layout for JavaFX: track lists (`fr`, `auto`, `minmax()`, `repeat(auto-fill/auto-fit, ...)`), named areas, line/span placement, sparse and dense auto-placement, and item/content alignment, all styleable via CSS. `GridItem` exposes the per-child placement as CSS properties.
+
 ### 0.7.3 (August 7, 2026)
 Removed the old unmaintained JPMS dependencies. 
 
