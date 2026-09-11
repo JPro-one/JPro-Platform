@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -304,6 +305,16 @@ public final class WebScrollImpl implements ScrollImpl {
         final String sig = natTop + "|" + y0 + "|" + local.getX() + "|" + relLimitServer + "|"
                 + nodeW + "|" + nodeH + "|" + docH + "|" + hostOffsetY;
 
+        // NaN/Infinity are valid JS literals, so a non-finite value here would install cleanly and then
+        // fail silently: every clamp escapes its guard and the emitted transform is rejected by the CSS
+        // parser, leaving a dead pin and nothing in any log. Refuse the install instead.
+        if (!allFinite(local.getX(), natTop, y0, relLimitServer, hostOffsetY)) {
+            LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry "
+                            + "(x={}, natTop={}, y0={}, relLimit={}, hostOffsetY={})",
+                    jsKey, local.getX(), natTop, y0, relLimitServer, hostOffsetY);
+            return;
+        }
+
         if (!installedCompositor) {
             // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
             // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
@@ -316,6 +327,15 @@ public final class WebScrollImpl implements ScrollImpl {
             installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY);
             lastSig = sig;
         }
+    }
+
+    private static boolean allFinite(double... values) {
+        for (double v : values) {
+            if (!Double.isFinite(v)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -333,17 +353,35 @@ public final class WebScrollImpl implements ScrollImpl {
     }
 
     /** Pin tier: {@code auto} picks the compositor where supported and rAF elsewhere.
-     *  {@code raf} forces the floor, for A/B measurement. */
+     *  {@code raf} forces the floor, for A/B measurement. There is deliberately no way to force the
+     *  compositor tier: on an engine that lacks it that would park the node off screen, which is the
+     *  failure the gate exists to prevent. */
     private static final String PIN_MODE = resolvePinMode();
 
+    /**
+     * Resolves the pin mode to one of exactly {@code auto} or {@code raf}. The result is interpolated
+     * into the injected script, so it is validated rather than passed through: a stray quote would
+     * break the whole script (and every pin on the page) with no server-side signal, and a stray
+     * newline would silently read as {@code auto}, quietly measuring the wrong tier.
+     */
     private static String resolvePinMode() {
-        final String p = System.getProperty("jpro.sticky.pin");
-        if (p != null && !p.isEmpty()) {
-            return p;
+        String v = System.getProperty("jpro.sticky.pin");
+        if (v == null || v.isEmpty()) {
+            // the JPro server is a forked JVM, so a -D on the build does not reach it.
+            v = System.getenv("JPRO_STICKY_PIN");
         }
-        // the JPro server is a forked JVM, so a -D on the build does not reach it.
-        final String e = System.getenv("JPRO_STICKY_PIN");
-        return (e == null || e.isEmpty()) ? "auto" : e;
+        if (v == null) {
+            return "auto";
+        }
+        v = v.trim().toLowerCase(Locale.ROOT);
+        if (v.isEmpty() || v.equals("auto")) {
+            return "auto";
+        }
+        if (v.equals("raf")) {
+            return "raf";
+        }
+        LOGGER.warn("jpro-sticky: ignoring unknown pin mode '{}', expected 'auto' or 'raf'", v);
+        return "auto";
     }
 
     /**
