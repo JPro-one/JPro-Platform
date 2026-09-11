@@ -38,7 +38,10 @@ import java.util.function.Consumer;
  * positioning mode. The <em>affix</em> tier says so outright: page-anchored below the pin line,
  * {@code position: fixed} at the inset between the lines, page-anchored again past the release line,
  * with JS running at the two crossings only. That is smooth in every engine, because between the
- * crossings the engine scrolls the node itself. It needs {@code position: fixed} to actually mean
+ * crossings the engine scrolls the node itself. A scroll event arms a frame loop that watches for
+ * the crossing and stops once the page stops moving; the loop only reads the scroll position, and
+ * writes at a crossing. Watching from a frame callback rather than the event itself matters on
+ * Firefox, where the compositor scrolls ahead of the main thread. It needs {@code position: fixed} to actually mean
  * the viewport, which fails if any ancestor is a containing block for it, so it is gated on a walk
  * up the DOM. Where that gate fails, {@code animation-timeline: scroll()} pins on the compositor
  * where supported, and a {@code requestAnimationFrame} loop evaluating the same clamp per frame is
@@ -451,7 +454,20 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.sda = CSS.supports('animation-timeline','scroll(root block)')\n" +
                 "         && CSS.supports('animation-duration','auto')\n" +
                 "         && CSS.supports('animation-range','0px 1px');\n" +
-                "  st.force = '" + PIN_MODE + "';\n" +
+                // the live override wins over the property so the A/B switch survives a re-install
+                // (a geometry change re-runs this whole script).
+                "  st.force = window.__jproStickyForce || '" + PIN_MODE + "';\n" +
+                // one page-wide hook to move every pin onto one tier, for side-by-side comparison.
+                "  if(!window.__jproStickySetMode){\n" +
+                "    window.__jproStickySetMode = function(m){\n" +
+                "      window.__jproStickyForce = m;\n" +
+                "      var r = window.__jproStickyC || {}, res = [];\n" +
+                "      Object.keys(r).forEach(function(k){ var e = r[k];\n" +
+                "        if(!e || e.dead || !e.el) return;\n" +
+                "        e.force = m; e.mode = null; e.clear(e.el); e.style.textContent = '';\n" +
+                "        e.apply(); res.push(k + ':' + e.mode); });\n" +
+                "      console.log('[jpro-sticky] asked for ' + m + ', got ' + res.join(' '));\n" +
+                "      return res.join(' '); }; }\n" +
                 // position:fixed is only viewport-anchored while no ancestor is a containing block for
                 // it. any transform / filter / perspective / will-change / paint containment on the way
                 // up captures it, and it then scrolls with the page instead of holding still.
@@ -533,12 +549,27 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    }\n" +
                 "    st.style.textContent = st.sel + '{' + decl + '}';\n" +
                 "  };\n" +
-                // a passive scroll listener does not block the compositor; it only flips the state, and
-                // only when the state actually changes, so an in-range scroll writes nothing at all.
+                // crossing detection. a scroll event alone is not prompt enough: Firefox scrolls on its
+                // compositor and delivers the event to the main thread late, so the node rides a few
+                // frames past the pin line before the switch lands, which reads as a small jump. So the
+                // event only *arms* a frame loop, and the loop reads window.scrollY (already updated
+                // from the compositor by the time a frame callback runs) to catch the crossing on the
+                // frame it happens. The loop reads and compares; it writes only at a crossing, and it
+                // stops itself once the page has stopped moving, so an idle page runs nothing.
+                "  st.pump = function(){\n" +
+                "    if(st.dead || st.mode !== 'fix'){ st.pumping = 0; return; }\n" +
+                "    st.affix();\n" +
+                "    var y = window.scrollY;\n" +
+                "    if(y !== st.lastPumpY){ st.lastPumpY = y; st.idle = 0; }\n" +
+                "    else if(++st.idle > 20){ st.pumping = 0; return; }\n" +
+                "    requestAnimationFrame(st.pump); };\n" +
+                // a passive listener does not block the compositor, and all it does is arm the loop.
                 "  st.listen = function(){\n" +
                 "    if(st.onscroll) return;\n" +
-                "    st.onscroll = function(){ st.affix(); };\n" +
+                "    st.onscroll = function(){ st.idle = 0;\n" +
+                "      if(!st.pumping){ st.pumping = 1; st.lastPumpY = -1; requestAnimationFrame(st.pump); } };\n" +
                 "    st.onresize = function(){ st.docX = null; st.state = null; st.measure(); st.affix(); };\n" +
+                "    st.pumping = 0; st.idle = 0;\n" +
                 "    window.addEventListener('scroll', st.onscroll, {passive:true});\n" +
                 "    window.addEventListener('resize', st.onresize, {passive:true}); };\n" +
                 "  st.unlisten = function(){\n" +
