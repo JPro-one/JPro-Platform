@@ -34,9 +34,9 @@ import java.util.function.Consumer;
  * <p>
  * <strong>Two pin tiers.</strong> Where {@code animation-timeline: scroll()} is supported the pin runs
  * on the compositor. Everywhere else (Firefox, Safari &lt; 26) it runs as a {@code requestAnimationFrame}
- * loop evaluating the same pin function per frame -- the universal floor. The compositor rule must be
- * <em>withheld</em> rather than emitted and ignored on engines that lack it, or the node is parked a
- * document-height off screen; see {@code apply()} in {@link #installCompositor}. The server-side pin
+ * loop evaluating the same pin function per frame. The compositor rule must be <em>withheld</em>
+ * rather than emitted and ignored on engines that lack it, or the node is parked a document-height
+ * off screen; see {@code apply()} in {@link #installCompositor}. The server-side pin
  * stays underneath both as what picking sees, and as the last resort if neither tier binds.
  * <p>
  * Set {@code -Djpro.sticky.pin=raf} (or {@code JPRO_STICKY_PIN=raf}) to force the floor on an engine
@@ -327,13 +327,28 @@ public final class WebScrollImpl implements ScrollImpl {
         return containerBottom - nodeH;
     }
 
+    /** Pin tier: {@code auto} picks the compositor where supported and rAF elsewhere.
+     *  {@code raf} forces the floor, for A/B measurement. */
+    private static final String PIN_MODE = resolvePinMode();
+
+    private static String resolvePinMode() {
+        final String p = System.getProperty("jpro.sticky.pin");
+        if (p != null && !p.isEmpty()) {
+            return p;
+        }
+        // the JPro server is a forked JVM, so a -D on the build does not reach it.
+        final String e = System.getenv("JPRO_STICKY_PIN");
+        return (e == null || e.isEmpty()) ? "auto" : e;
+    }
+
     /**
-     * (Re-)installs the scroll-timeline animation that pins the node. The {@code @keyframes} live in
-     * an injected {@code <style>} sheet; the animation itself is bound <em>inline on the element</em>.
-     * The renderer positions the node with inline {@code style.transform}, but a running CSS animation
-     * outranks inline declarations in the cascade, so the animation overrides that pin with a
-     * compositor-driven pure function of scroll. Assumes an svg scale of 1 (true for native-scrolling
-     * pages).
+     * (Re-)installs the pin. Two tiers share one geometry: where {@code animation-timeline: scroll()}
+     * exists the pin is a compositor-driven CSS animation, otherwise a {@code requestAnimationFrame}
+     * loop evaluating the same function per frame. The {@code @keyframes} live in an injected
+     * {@code <style>} sheet; both tiers bind inline on the element. The renderer positions the node
+     * with inline {@code style.transform}; a running animation outranks inline declarations in the
+     * cascade, and the rAF tier simply rewrites the property. Assumes an svg scale of 1 (true for
+     * native-scrolling pages).
      * <p>
      * {@code natTop} is the keyframe 'from' (the flow top for sticky, the pin line for fixed);
      * {@code y0} is the viewport pin line; {@code relLimitServer} is the scene-y release point
@@ -342,33 +357,16 @@ public final class WebScrollImpl implements ScrollImpl {
      * from the transform endpoints only (they are relative to the overlay's own DOM box) while the
      * scroll-range math stays in document space, so a non-scene-root host shifts nothing but the pin.
      * <p>
-     * <strong>Robust against the JPro readiness race.</strong> The element reference
-     * ({@code jpro.getValue(n)}) <em>throws</em> until JPro's render pulse has registered the node, so
-     * it is resolved inside a {@code requestAnimationFrame} retry loop guarded by try/catch.
+     * <strong>Readiness race.</strong> The element reference ({@code jpro.getValue(n)}) throws until
+     * JPro's render pulse has registered the node, so it resolves inside a {@code requestAnimationFrame}
+     * retry loop guarded by try/catch.
      * <p>
-     * <strong>Robust against reconnect.</strong> The binding deliberately holds the element itself and
-     * never its {@code jpro-id}: that id is a per-view transport index whose counter restarts when a
-     * reconnect builds a new view, so a cached id does not merely go stale, it silently retargets an
-     * unrelated node (measured: a fullscreen overlay's rule landed on the bottom bar and hauled it to
-     * the top of the viewport). An element reference cannot collide -- it only goes stale, which
-     * {@code isConnected} detects. A re-install can also win the race against the DOM rebuild and
-     * resolve the outgoing element while it is still connected, so a 500ms heartbeat rebinds once the
-     * old peer detaches.
+     * <strong>Reconnect.</strong> The binding holds the element, never its {@code jpro-id}. That id is
+     * a per-view transport index whose counter restarts when a reconnect builds a new view, so a cached
+     * id can retarget an unrelated node rather than just go stale. An element reference cannot collide;
+     * it only goes stale, which {@code isConnected} detects. A re-install can also resolve the outgoing
+     * element before the DOM rebuild replaces it, so a 500ms heartbeat rebinds once that peer detaches.
      */
-    /** Pin tier: {@code auto} (compositor where supported, rAF otherwise), or {@code raf}/{@code css}
-     *  forced, for A/B measurement. Set with {@code -Djpro.sticky.pin=raf}. */
-    private static final String PIN_MODE = resolvePinMode();
-
-    private static String resolvePinMode() {
-        final String p = System.getProperty("jpro.sticky.pin");
-        if (p != null && !p.isEmpty()) {
-            return p;
-        }
-        // env fallback: the JPro server is a forked JVM, so a -D on the build does not reach it.
-        final String e = System.getenv("JPRO_STICKY_PIN");
-        return (e == null || e.isEmpty()) ? "auto" : e;
-    }
-
     private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
         final String d = webapi.getElement(node).getName();
         // mirror FX mouseTransparent to pointer-events:none: unlike desktop FX picking, the reparented
@@ -402,7 +400,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 // the rAF tier owns transform while it runs; hand it back so the renderer's own pin shows.
                 "    if(st.wroteTransform){ el.style.removeProperty('transform'); st.wroteTransform = false; } };\n" +
 
-                // --- geometry, shared by both tiers -------------------------------------------------
+                // geometry, shared by both tiers.
                 // scrollHeight forces layout, so it is read on the heartbeat (and at install), never per frame.
                 "  st.measure = function(){ st.docExtent = document.documentElement.scrollHeight; };\n" +
                 "  st.range = function(){\n" +
@@ -416,10 +414,9 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    return { sPin: sPin, sRel: sRel,\n" +
                 "             fromY: st.natTop - st.hostOffsetY, toY: relLimit - st.hostOffsetY }; };\n" +
 
-                // --- rAF tier ----------------------------------------------------------------------
-                // Same pin function the keyframes describe, evaluated per frame instead of by the
-                // compositor. Reads only window.scrollY (no forced layout) and writes only when the
-                // value actually changes, so an idle page dirties nothing.
+                // the rAF tier: same pin function as the keyframes, per frame instead of on the
+                // compositor. reads only window.scrollY (no forced layout) and writes only on change,
+                // so an idle page dirties nothing.
                 "  st.tick = function(){\n" +
                 "    if(st.dead){ st.raf = null; return; }\n" +
                 "    st.raf = requestAnimationFrame(st.tick);\n" +
@@ -462,11 +459,9 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    el.style.setProperty('animation-timeline','scroll(root block)');\n" +
                 "    el.style.setProperty('animation-range', r.sPin + 'px ' + r.sRel + 'px');\n" +
                 "  };\n" +
-                // Bind to the element, never to its jpro-id. jpro-id is a per-view transport index whose
-                // counter restarts on reconnect, so a cached id silently retargets an unrelated node --
-                // measured: a fullscreen overlay's rule landed on the bottom bar and hauled it to the top
-                // of the viewport. An element reference cannot collide: it just goes stale, and a stale
-                // one is detectable (isConnected) and recoverable.
+                // bind to the element, never to its jpro-id: that id is a per-view transport index whose
+                // counter restarts on reconnect, so a cached id can retarget an unrelated node. an element
+                // reference only goes stale, which isConnected detects.
                 "  st.bind = function(){\n" +
                 "    if(st.dead || st.resolving) return;\n" +
                 "    st.resolving = true; var tries = 0;\n" +
@@ -482,9 +477,9 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      if(tries++ < 300){ requestAnimationFrame(step); } else { st.resolving = false; }\n" +
                 "    })();\n" +
                 "  };\n" +
-                // Self-healing heartbeat, and where the layout-forcing measurement lives. A reconnect
-                // re-renders the scene into fresh DOM peers, and the re-install can win the race against
-                // that rebuild -- resolving the outgoing element while it is still connected.
+                // heartbeat: rebinds after a reconnect rebuilds the DOM peer, and carries the
+                // layout-forcing measure(). the re-install can resolve the outgoing element before the
+                // rebuild replaces it, so liveness is re-checked here rather than trusted once.
                 "  st.check = function(){ if(st.dead) return; st.measure();\n" +
                 "    if(!st.el || !st.el.isConnected) st.bind(); };\n" +
                 "  st.measure();\n" +
