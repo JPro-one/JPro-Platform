@@ -34,15 +34,21 @@ import java.util.function.Consumer;
  * It builds only on the JPro Viewport API ({@link WebAPI#browserViewport()} /
  * {@link WebAPI#documentBounds()}) and needs no core change.
  * <p>
- * <strong>Two pin tiers.</strong> Where {@code animation-timeline: scroll()} is supported the pin runs
- * on the compositor. Everywhere else (Firefox, Safari &lt; 26) it runs as a {@code requestAnimationFrame}
- * loop evaluating the same pin function per frame. The compositor rule must be <em>withheld</em>
- * rather than emitted and ignored on engines that lack it, or the node is parked a document-height
- * off screen; see {@code apply()} in {@link #installCompositor}. The server-side pin
- * stays underneath both as what picking sees, and as the last resort if neither tier binds.
+ * <strong>Three pin tiers.</strong> The pin function is a clamp, so each branch of it is a static
+ * positioning mode. The <em>affix</em> tier says so outright: page-anchored below the pin line,
+ * {@code position: fixed} at the inset between the lines, page-anchored again past the release line,
+ * with JS running at the two crossings only. That is smooth in every engine, because between the
+ * crossings the engine scrolls the node itself. It needs {@code position: fixed} to actually mean
+ * the viewport, which fails if any ancestor is a containing block for it, so it is gated on a walk
+ * up the DOM. Where that gate fails, {@code animation-timeline: scroll()} pins on the compositor
+ * where supported, and a {@code requestAnimationFrame} loop evaluating the same clamp per frame is
+ * the floor. The compositor rule must be <em>withheld</em> rather than emitted and ignored on
+ * engines that lack it, or the node is parked a document-height off screen; see {@code apply()} in
+ * {@link #installCompositor}. The server-side pin stays underneath all three as what picking sees,
+ * and as the last resort if no tier binds.
  * <p>
- * Set {@code -Djpro.sticky.pin=raf} (or {@code JPRO_STICKY_PIN=raf}) to force the floor on an engine
- * that supports the compositor tier, for A/B measurement; {@code auto} is the default.
+ * Set {@code -Djpro.sticky.pin} (or {@code JPRO_STICKY_PIN}) to {@code fix}, {@code css} or
+ * {@code raf} to force one tier, for A/B measurement; {@code auto} is the default.
  * <p>
  * When running as a desktop application the {@link WebAPI} consumer never fires, so installation
  * is a no-op and the node keeps its normal flow positioning.
@@ -352,14 +358,16 @@ public final class WebScrollImpl implements ScrollImpl {
         return containerBottom - nodeH;
     }
 
-    /** Pin tier: {@code auto} picks the compositor where supported and rAF elsewhere.
-     *  {@code raf} forces the floor, for A/B measurement. There is deliberately no way to force the
-     *  compositor tier: on an engine that lacks it that would park the node off screen, which is the
-     *  failure the gate exists to prevent. */
+    /** Pin tier: {@code auto} picks affix where fixed positioning holds, the compositor where
+     *  scroll timelines are supported, and rAF as the floor. {@code fix}, {@code css} and
+     *  {@code raf} force one tier, for A/B measurement. Forcing {@code css} on an engine that lacks
+     *  scroll timelines does not park the node: {@code apply()} reads the computed style back and
+     *  falls through to the floor. */
     private static final String PIN_MODE = resolvePinMode();
 
     /**
-     * Resolves the pin mode to one of exactly {@code auto} or {@code raf}. The result is interpolated
+     * Resolves the pin mode to one of exactly {@code auto}, {@code fix}, {@code css} or {@code raf}.
+     * The result is interpolated
      * into the injected script, so it is validated rather than passed through: a stray quote would
      * break the whole script (and every pin on the page) with no server-side signal, and a stray
      * newline would silently read as {@code auto}, quietly measuring the wrong tier.
@@ -377,10 +385,16 @@ public final class WebScrollImpl implements ScrollImpl {
         if (v.isEmpty() || v.equals("auto")) {
             return "auto";
         }
+        if (v.equals("fix")) {
+            return "fix";
+        }
+        if (v.equals("css")) {
+            return "css";
+        }
         if (v.equals("raf")) {
             return "raf";
         }
-        LOGGER.warn("jpro-sticky: ignoring unknown pin mode '{}', expected 'auto' or 'raf'", v);
+        LOGGER.warn("jpro-sticky: ignoring unknown pin mode '{}', expected 'auto', 'fix', 'css' or 'raf'", v);
         return "auto";
     }
 
@@ -438,9 +452,28 @@ public final class WebScrollImpl implements ScrollImpl {
                 "         && CSS.supports('animation-duration','auto')\n" +
                 "         && CSS.supports('animation-range','0px 1px');\n" +
                 "  st.force = '" + PIN_MODE + "';\n" +
-                // rAF is the floor: it works on every engine, so an engine without scroll-driven
-                // animations gets a real per-frame pin instead of the server-cadence fallback.
-                "  st.mode = (st.force === 'raf' || !st.sda) ? 'raf' : 'css';\n" +
+                // position:fixed is only viewport-anchored while no ancestor is a containing block for
+                // it. any transform / filter / perspective / will-change / paint containment on the way
+                // up captures it, and it then scrolls with the page instead of holding still.
+                "  st.fixOk = function(el){\n" +
+                "    var p = el.parentElement, n = 0;\n" +
+                "    while(p && p !== document.documentElement && n++ < 64){\n" +
+                "      var cs = getComputedStyle(p);\n" +
+                "      if(cs.transform !== 'none' || cs.perspective !== 'none' || cs.filter !== 'none'\n" +
+                "         || (cs.backdropFilter && cs.backdropFilter !== 'none')\n" +
+                "         || /transform|perspective|filter/.test(cs.willChange || '')\n" +
+                "         || /paint|layout|strict|content/.test(cs.contain || '')) return false;\n" +
+                "      p = p.parentElement;\n" +
+                "    }\n" +
+                "    return true; };\n" +
+                // affix first: three static states cost nothing per frame and scroll on the compositor
+                // in every engine. compositor keyframes next, rAF as the floor. picked per element,
+                // because the gate depends on the DOM the node actually landed in.
+                "  st.pick = function(el){\n" +
+                "    if(st.force !== 'auto') return st.force;\n" +
+                "    if(st.fixOk(el)) return 'fix';\n" +
+                "    return st.sda ? 'css' : 'raf'; };\n" +
+                "  st.mode = null;\n" +
                 // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
                 // on every install: after a reconnect the previous slot is gone and this one is fresh.
                 "  st.resolve = function(){ try { var e = " + d + "; return e && e.style ? e : null; } catch(e){ return null; } };\n" +
@@ -449,7 +482,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "     'animation-timeline','animation-range','pointer-events'].forEach(function(p){\n" +
                 "      el.style.removeProperty(p); });\n" +
                 // the rAF tier owns transform while it runs; hand it back so the renderer's own pin shows.
-                "    if(st.wroteTransform){ el.style.removeProperty('transform'); st.wroteTransform = false; } };\n" +
+                "    if(st.wroteTransform){ el.style.removeProperty('transform'); st.wroteTransform = false; }\n" +
+                "    el.removeAttribute('data-jpro-sticky-el'); st.state = null; st.docX = null; };\n" +
 
                 // geometry, shared by both tiers.
                 // scrollHeight forces layout, so it is read on the heartbeat (and at install), never per frame.
@@ -464,6 +498,54 @@ public final class WebScrollImpl implements ScrollImpl {
                 // space. sPin/sRel stay in document/scroll space (host-independent).
                 "    return { sPin: sPin, sRel: sRel,\n" +
                 "             fromY: st.natTop - st.hostOffsetY, toY: relLimit - st.hostOffsetY }; };\n" +
+
+                // the affix tier. the pin function is a clamp, so every branch of it is a *static*
+                // positioning mode: below the pin line the node rides the page (absolute at its document
+                // Y), between the lines it holds still (fixed at the inset), past the release line it
+                // rides again (absolute at the release Y). JS runs at the two crossings only; in between
+                // the engine scrolls it on the compositor, which is why this is smooth where per-frame
+                // work is not.
+                //
+                // the placement goes in the sheet, not inline, and carries !important: the renderer
+                // writes the server pin to the same inline transform and an important author rule is the
+                // only declaration that outranks it. same reason the compositor tier uses an animation.
+                // double quotes on purpose: a backslash escape would have to survive the script's
+                // trip over the wire, and nothing else in here needs one.
+                "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
+                "  st.affix = function(){\n" +
+                "    if(st.dead) return;\n" +
+                "    var el = st.el; if(!el || !el.isConnected) return;\n" +
+                "    var r = st.range();\n" +
+                "    var y = window.scrollY;\n" +
+                "    var s = (y < r.sPin) ? 'before' : (y >= r.sRel ? 'after' : 'pinned');\n" +
+                "    if(s === st.state) return;\n" +
+                // measured while still page-anchored, so it is the node's document X. once the node is
+                // fixed its rect is viewport-relative and this would read the pinned value back.
+                "    if(st.docX == null){ st.docX = el.getBoundingClientRect().left + window.scrollX; }\n" +
+                "    st.state = s;\n" +
+                "    var decl;\n" +
+                "    if(s === 'pinned'){\n" +
+                "      decl = 'position:fixed !important;left:0 !important;top:0 !important;'\n" +
+                "           + 'transform:translate(' + (st.docX - window.scrollX) + 'px,' + st.inset + 'px) !important;';\n" +
+                "    } else {\n" +
+                "      decl = 'transform:translate(' + st.x + 'px,'\n" +
+                "           + ((s === 'before') ? r.fromY : r.toY) + 'px) !important;';\n" +
+                "    }\n" +
+                "    st.style.textContent = st.sel + '{' + decl + '}';\n" +
+                "  };\n" +
+                // a passive scroll listener does not block the compositor; it only flips the state, and
+                // only when the state actually changes, so an in-range scroll writes nothing at all.
+                "  st.listen = function(){\n" +
+                "    if(st.onscroll) return;\n" +
+                "    st.onscroll = function(){ st.affix(); };\n" +
+                "    st.onresize = function(){ st.docX = null; st.state = null; st.measure(); st.affix(); };\n" +
+                "    window.addEventListener('scroll', st.onscroll, {passive:true});\n" +
+                "    window.addEventListener('resize', st.onresize, {passive:true}); };\n" +
+                "  st.unlisten = function(){\n" +
+                "    if(!st.onscroll) return;\n" +
+                "    window.removeEventListener('scroll', st.onscroll);\n" +
+                "    window.removeEventListener('resize', st.onresize);\n" +
+                "    st.onscroll = null; st.onresize = null; };\n" +
 
                 // the rAF tier: same pin function as the keyframes, per frame instead of on the
                 // compositor. reads only window.scrollY (no forced layout) and writes only on change,
@@ -489,8 +571,19 @@ public final class WebScrollImpl implements ScrollImpl {
 
                 "  st.apply = function(){\n" +
                 "    var el = st.el; if(!el) return;\n" +
+                "    if(!st.mode) st.mode = st.pick(el);\n" +
                 "    if(st.pe) el.style.setProperty('pointer-events','none');\n" +
                 "    else el.style.removeProperty('pointer-events');\n" +
+                "    if(st.mode === 'fix'){\n" +
+                "      if(st.raf){ cancelAnimationFrame(st.raf); st.raf = null; }\n" +
+                "      ['animation-name','animation-timing-function','animation-fill-mode','animation-duration',\n" +
+                "       'animation-timeline','animation-range'].forEach(function(p){ el.style.removeProperty(p); });\n" +
+                "      if(st.wroteTransform){ el.style.removeProperty('transform'); st.wroteTransform = false; }\n" +
+                "      el.setAttribute('data-jpro-sticky-el','" + jsKey + "');\n" +
+                "      st.listen(); st.state = null; st.affix();\n" +
+                "      return;\n" +
+                "    }\n" +
+                "    st.unlisten(); el.removeAttribute('data-jpro-sticky-el'); st.state = null;\n" +
                 "    if(st.mode === 'raf'){\n" +
                 // drop any compositor rule from a previous tier/install, then start the loop.
                 "      st.style.textContent = '';\n" +
@@ -546,7 +639,12 @@ public final class WebScrollImpl implements ScrollImpl {
                 // heartbeat: rebinds after a reconnect rebuilds the DOM peer, and carries the
                 // layout-forcing measure(). the re-install can resolve the outgoing element before the
                 // rebuild replaces it, so liveness is re-checked here rather than trusted once.
-                "  st.check = function(){ if(st.dead) return; st.measure();\n" +
+                "  st.check = function(){ if(st.dead) return;\n" +
+                "    var prev = st.docExtent; st.measure();\n" +
+                // the affix boundaries are derived from the document extent, so a page that grew or
+                // shrank moves them. re-place from the heartbeat, not from scroll, since nothing
+                // scrolled.
+                "    if(st.mode === 'fix' && st.docExtent !== prev){ st.state = null; st.affix(); }\n" +
                 "    if(!st.el || !st.el.isConnected) st.bind(); };\n" +
                 "  st.measure();\n" +
                 "  if(!st.timer){ st.timer = setInterval(st.check, 500); }\n" +
@@ -626,6 +724,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.dead = true;\n" +
                 "  if(st.timer){ clearInterval(st.timer); st.timer = null; }\n" +
                 "  if(st.raf){ cancelAnimationFrame(st.raf); st.raf = null; }\n" +
+                "  if(st.unlisten) st.unlisten();\n" +
                 // the binding is inline on the element now, so it has to be stripped there too: the node
                 // survives teardown (it is restored to its flow slot) and would keep the animation.
                 "  if(st.clear) st.clear(st.el);\n" +
