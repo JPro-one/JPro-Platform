@@ -1,5 +1,6 @@
 package one.jpro.platform.sticky.impl;
 
+import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -84,6 +85,10 @@ public final class WebScrollImpl implements ScrollImpl {
 
     // resolved at install time
     private WebAPI webapi;
+    /** The current {@code jpro.var_N} handle for the node's element. Held for as long as the emitted
+     *  script may use it: JPro's JSVariable cleanup fires {@code jpro.var_N = undefined} once this is
+     *  unreachable, which would leave the resolver (and so the rebind heartbeat) permanently dead. */
+    private JSVariable elementVar;
     private Group overlay;
     private Region placeholder;
     private Parent root;
@@ -368,7 +373,10 @@ public final class WebScrollImpl implements ScrollImpl {
      * element before the DOM rebuild replaces it, so a 500ms heartbeat rebinds once that peer detaches.
      */
     private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
-        final String d = webapi.getElement(node).getName();
+        // a fresh slot per install: the defining command is one-shot per view, so a reconnect needs a
+        // new one. reassigning drops the previous handle, whose cleanup only nulls the slot we left.
+        elementVar = webapi.getElement(node);
+        final String d = elementVar.getName();
         // mirror FX mouseTransparent to pointer-events:none: unlike desktop FX picking, the reparented
         // node is a real div that would otherwise catch clicks meant for the content beneath it.
         final boolean mouseTransparent = node.isMouseTransparent();
@@ -385,7 +393,12 @@ public final class WebScrollImpl implements ScrollImpl {
                 // geometry-sig change) just updates them and re-renders.
                 "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
                 "  st.pe = " + mouseTransparent + ";\n" +
-                "  st.sda = CSS.supports('animation-timeline','scroll()');\n" +
+                // gate on every declaration the rule depends on, in the exact form emitted. testing only
+                // animation-timeline:scroll() would pass on an engine that then rejects duration:auto,
+                // which is what parks the node a document-height off screen.
+                "  st.sda = CSS.supports('animation-timeline','scroll(root block)')\n" +
+                "         && CSS.supports('animation-duration','auto')\n" +
+                "         && CSS.supports('animation-range','0px 1px');\n" +
                 "  st.force = '" + PIN_MODE + "';\n" +
                 // rAF is the floor: it works on every engine, so an engine without scroll-driven
                 // animations gets a real per-frame pin instead of the server-cadence fallback.
@@ -425,9 +438,14 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var p = (window.scrollY - r.sPin) / (r.sRel - r.sPin);\n" +
                 "    if(p < 0) p = 0; else if(p > 1) p = 1;\n" +
                 "    var ty = r.fromY + p * (r.toY - r.fromY);\n" +
-                "    if(ty !== st.lastY){\n" +
-                "      st.lastY = ty; st.wroteTransform = true;\n" +
+                // compare against the element, not just the last value computed: the renderer writes the
+                // same property from the server pin, and if only ty were checked an unchanged ty would
+                // never repair that overwrite. reading the inline declaration forces no layout, and
+                // lastWritten holds the engine's normalised serialisation so an idle page still writes
+                // nothing.
+                "    if(ty !== st.lastY || el.style.transform !== st.lastWritten){\n" +
                 "      el.style.setProperty('transform','translate(' + st.x + 'px,' + ty + 'px)');\n" +
+                "      st.lastY = ty; st.lastWritten = el.style.transform; st.wroteTransform = true;\n" +
                 "    }\n" +
                 "  };\n" +
 
@@ -440,13 +458,14 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      st.style.textContent = '';\n" +
                 "      ['animation-name','animation-timing-function','animation-fill-mode','animation-duration',\n" +
                 "       'animation-timeline','animation-range'].forEach(function(p){ el.style.removeProperty(p); });\n" +
-                "      st.lastY = null;\n" +
+                "      st.lastY = null; st.lastWritten = null;\n" +
                 "      if(!st.raf){ st.raf = requestAnimationFrame(st.tick); }\n" +
                 "      return;\n" +
                 "    }\n" +
                 // compositor tier: a running animation outranks inline declarations in the cascade, so
                 // animating transform still overrides the renderer's own inline transform. The renderer
                 // writes styles one property at a time (style.setProperty), so these survive its renders.
+                "    if(st.raf){ cancelAnimationFrame(st.raf); st.raf = null; }\n" +
                 "    if(st.wroteTransform){ el.style.removeProperty('transform'); st.wroteTransform = false; }\n" +
                 "    var r = st.range();\n" +
                 "    st.style.textContent = '@keyframes ' + st.key +\n" +
@@ -458,6 +477,15 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    el.style.setProperty('animation-duration','auto');\n" +
                 "    el.style.setProperty('animation-timeline','scroll(root block)');\n" +
                 "    el.style.setProperty('animation-range', r.sPin + 'px ' + r.sRel + 'px');\n" +
+                // read back what the engine kept. duration 0s means it dropped duration:auto, and with
+                // fill-mode:both that snaps the node to the 'to' keyframe, i.e. off screen. an unresolved
+                // timeline means the animation is not scroll-driven. either way fall through to the floor
+                // rather than leave a broken pin: this catches partial support we have not tested for.
+                "    var cs = getComputedStyle(el);\n" +
+                "    if(cs.animationDuration === '0s' || cs.animationTimeline === 'auto'\n" +
+                "       || cs.animationTimeline === 'none'){\n" +
+                "      st.mode = 'raf'; st.apply();\n" +
+                "    }\n" +
                 "  };\n" +
                 // bind to the element, never to its jpro-id: that id is a per-view transport index whose
                 // counter restarts on reconnect, so a cached id can retarget an unrelated node. an element
@@ -523,6 +551,9 @@ public final class WebScrollImpl implements ScrollImpl {
             container.layoutBoundsProperty().removeListener(relayout);
             container.localToSceneTransformProperty().removeListener(relayout);
         }
+
+        // release the element handle; its cleanup nulls the now-unused slot browser-side.
+        elementVar = null;
 
         // restore the node to its flow slot.
         mount.unmount();
