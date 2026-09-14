@@ -197,8 +197,8 @@ public class ScrollSample extends Application {
      */
     private static HBox pinModeTabs() {
         final var group = new ToggleGroup();
-        final var bar = new HBox(6, modeTab("Affix", "fix", group),
-                modeTab("CSS timeline", "css", group), modeTab("rAF", "raf", group));
+        final var bar = new HBox(6, modeTab("Auto", "auto", group),
+                modeTab("CSS timeline", "css", group), modeTab("Affix", "fix", group));
         bar.setId("pin-mode-tabs");
         bar.setPadding(new Insets(8, 16, 8, 16));
         bar.setStyle("-fx-background-color: -color-bg-default;");
@@ -212,7 +212,7 @@ public class ScrollSample extends Application {
     private static ToggleButton modeTab(String text, String mode, ToggleGroup group) {
         final var tab = new ToggleButton(text);
         tab.setToggleGroup(group);
-        tab.setSelected("fix".equals(mode));
+        tab.setSelected("auto".equals(mode));
         tab.setOnAction(e -> {
             tab.setSelected(true);
             if (!WebAPI.isBrowser() || tab.getScene() == null || tab.getScene().getWindow() == null) {
