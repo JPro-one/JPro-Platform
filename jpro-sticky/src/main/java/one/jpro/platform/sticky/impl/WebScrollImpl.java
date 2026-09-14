@@ -53,8 +53,11 @@ import java.util.function.Consumer;
  * <p>
  * With neither tier available the node stays on the server-side pin, which sits underneath both as
  * what picking sees. It is correct but only as current as the last viewport update, so it visibly
- * trails a fast scroll. Today that is Safari &lt; 26, where the renderer sets
- * {@code will-change: transform} on every div and so fails the affix gate.
+ * trails a fast scroll. Today that is Safari before scroll-timeline support: JPro's renderer sets
+ * {@code will-change: transform} on every div when it detects Safari, which makes every ancestor a
+ * containing block and so fails the affix gate on every Safari version. An app can turn that off
+ * with {@code will-change-value="auto"} on its {@code <jpro-app>} tag, which lets affix hold there
+ * too; whether that costs anything else on Safari is untested.
  * <p>
  * Set {@code -Djpro.sticky.pin} (or {@code JPRO_STICKY_PIN}) to {@code css} or {@code fix} to force
  * one tier, for A/B measurement; {@code auto} is the default.
@@ -478,26 +481,42 @@ public final class WebScrollImpl implements ScrollImpl {
                 // position:fixed is only viewport-anchored while no ancestor is a containing block for
                 // it. any transform / filter / perspective / will-change / paint containment on the way
                 // up captures it, and it then scrolls with the page instead of holding still.
-                "  st.fixOk = function(el){\n" +
+                // returns the offending declaration, or null when the chain is clear. naming it rather
+                // than returning a bool is the difference between a pin that silently does not hold and
+                // one that says why, which matters because the cause is usually an ancestor nobody was
+                // thinking about (on Safari the renderer sets will-change on every div).
+                "  st.fixBlocker = function(el){\n" +
                 "    var p = el.parentElement, n = 0;\n" +
                 "    while(p && p !== document.documentElement && n++ < 64){\n" +
-                "      var cs = getComputedStyle(p);\n" +
-                "      if(cs.transform !== 'none' || cs.perspective !== 'none' || cs.filter !== 'none'\n" +
-                "         || (cs.backdropFilter && cs.backdropFilter !== 'none')\n" +
-                "         || /transform|perspective|filter/.test(cs.willChange || '')\n" +
-                "         || /paint|layout|strict|content/.test(cs.contain || '')) return false;\n" +
+                "      var cs = getComputedStyle(p), hit = null;\n" +
+                "      if(cs.transform !== 'none') hit = 'transform: ' + cs.transform;\n" +
+                "      else if(cs.perspective !== 'none') hit = 'perspective: ' + cs.perspective;\n" +
+                "      else if(cs.filter !== 'none') hit = 'filter: ' + cs.filter;\n" +
+                "      else if(cs.backdropFilter && cs.backdropFilter !== 'none') hit = 'backdrop-filter';\n" +
+                "      else if(/transform|perspective|filter/.test(cs.willChange || '')) hit = 'will-change: ' + cs.willChange;\n" +
+                "      else if(/paint|layout|strict|content/.test(cs.contain || '')) hit = 'contain: ' + cs.contain;\n" +
+                "      if(hit) return '<' + p.tagName.toLowerCase() + (p.id ? '#' + p.id : '')\n" +
+                "                   + '> ' + n + ' up, ' + hit;\n" +
                 "      p = p.parentElement;\n" +
                 "    }\n" +
-                "    return true; };\n" +
+                "    return null; };\n" +
                 // compositor keyframes first: the engine evaluates the pin itself, so there is no
                 // crossing to catch and no main-thread step at all. affix next, which is as smooth
                 // between the crossings but flips state from a frame callback, so the pin lands a frame
                 // late. 'none' leaves the node on the server pin. picked per element, because the affix
                 // gate depends on the DOM the node actually landed in.
                 "  st.pick = function(el){\n" +
+                "    if(st.force === 'fix'){\n" +
+                // forced, so honour it, but say so: a captured fixed position looks like the pin is
+                // simply broken, with nothing anywhere to explain it.
+                "      var b = st.fixBlocker(el);\n" +
+                "      if(b) console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': affix forced, but '\n" +
+                "        + 'position:fixed is captured by ' + b + ' - this pin will not hold.');\n" +
+                "      return 'fix';\n" +
+                "    }\n" +
                 "    if(st.force !== 'auto') return st.force;\n" +
                 "    if(st.sda) return 'css';\n" +
-                "    return st.fixOk(el) ? 'fix' : 'none'; };\n" +
+                "    return st.fixBlocker(el) === null ? 'fix' : 'none'; };\n" +
                 "  st.mode = null;\n" +
                 // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
                 // on every install: after a reconnect the previous slot is gone and this one is fresh.
@@ -628,7 +647,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var cs = getComputedStyle(el);\n" +
                 "    if(cs.animationDuration === '0s' || cs.animationTimeline === 'auto'\n" +
                 "       || cs.animationTimeline === 'none'){\n" +
-                "      st.mode = st.fixOk(el) ? 'fix' : 'none'; st.apply();\n" +
+                "      st.mode = st.fixBlocker(el) === null ? 'fix' : 'none'; st.apply();\n" +
                 "    }\n" +
                 "  };\n" +
                 // bind to the element, never to its jpro-id: that id is a per-view transport index whose
