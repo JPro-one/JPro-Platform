@@ -34,13 +34,10 @@ import java.util.function.Consumer;
  * It builds only on the JPro Viewport API ({@link WebAPI#browserViewport()} /
  * {@link WebAPI#documentBounds()}) and needs no core change.
  * <p>
- * <strong>Two pin tiers.</strong> Where {@code animation-timeline: scroll()} is supported the pin is
- * a keyframe pair the engine evaluates itself, so no JS runs while scrolling at all. That is the
- * first choice, and the rule must be <em>withheld</em> rather than emitted and ignored on engines
- * that lack it, or the node is parked a document-height off screen; see {@code apply()} in
- * {@link #installCompositor}.
+ * <strong>Two pin tiers.</strong> They fail in different places, so the one that works in more of
+ * them goes first.
  * <p>
- * Elsewhere the <em>affix</em> tier takes over. The pin function is a clamp, so each branch of it is
+ * The <em>affix</em> tier is the default. The pin function is a clamp, so each branch of it is
  * a static positioning mode, and affix says so outright: page-anchored below the pin line,
  * {@code position: fixed} at the inset between the lines, page-anchored again past the release line,
  * with JS running at the two crossings only. Between the crossings the engine scrolls the node
@@ -49,15 +46,20 @@ import java.util.function.Consumer;
  * the loop only reads the scroll position and writes at a crossing. Watching from a frame callback
  * rather than from the event matters on Firefox, where the compositor scrolls ahead of the main
  * thread. Affix needs {@code position: fixed} to actually mean the viewport, which fails if any
- * ancestor is a containing block for it, so it is gated on a walk up the DOM.
+ * ancestor is a containing block for it, so it is gated on a walk up the DOM. Where the only thing
+ * in the way is a {@code will-change} hint it is cleared, which is what makes the tier usable on
+ * Safari; a real {@code transform} or {@code filter} is left alone and the pin falls through.
+ * <p>
+ * That fall-through is the <em>compositor</em> tier: where {@code animation-timeline: scroll()} is
+ * supported the pin becomes a keyframe pair the engine evaluates itself, and it is indifferent to
+ * transformed ancestors. Its rule must be <em>withheld</em> rather than emitted and ignored on
+ * engines that lack it, or the node is parked a document-height off screen; see {@code apply()} in
+ * {@link #installCompositor}.
  * <p>
  * With neither tier available the node stays on the server-side pin, which sits underneath both as
  * what picking sees. It is correct but only as current as the last viewport update, so it visibly
- * trails a fast scroll. Today that is Safari before scroll-timeline support: JPro's renderer sets
- * {@code will-change: transform} on every div when it detects Safari, which makes every ancestor a
- * containing block and so fails the affix gate on every Safari version. An app can turn that off
- * with {@code will-change-value="auto"} on its {@code <jpro-app>} tag, which lets affix hold there
- * too; whether that costs anything else on Safari is untested.
+ * trails a fast scroll. That needs a transformed ancestor (defeating affix) on an engine without
+ * scroll timelines (defeating the compositor tier) at the same time.
  * <p>
  * Set {@code -Djpro.sticky.pin} (or {@code JPRO_STICKY_PIN}) to {@code css} or {@code fix} to force
  * one tier, for A/B measurement; {@code auto} is the default.
@@ -500,11 +502,13 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      p = p.parentElement;\n" +
                 "    }\n" +
                 "    return null; };\n" +
-                // compositor keyframes first: the engine evaluates the pin itself, so there is no
-                // crossing to catch and no main-thread step at all. affix next, which is as smooth
-                // between the crossings but flips state from a frame callback, so the pin lands a frame
-                // late. 'none' leaves the node on the server pin. picked per element, because the affix
-                // gate depends on the DOM the node actually landed in.
+                // affix first. the two tiers fail in different places, and affix fails in the rarer one:
+                // it needs position:fixed to resolve to the viewport, which a transformed ancestor
+                // defeats, while the compositor tier is indifferent to that (measured: zero deviation
+                // either way). the compositor tier in turn needs scroll timelines, which Firefox lacks
+                // entirely and Safari paints wrong. so affix is the one that works in most places, and
+                // css covers the ancestor case it cannot. picked per element, because the affix gate
+                // depends on the DOM the node actually landed in.
                 // clears the one blocker we are allowed to clear. will-change is a hint, so dropping it
                 // costs a compositing layer and nothing else; transform / filter / contain are not, and
                 // clearing those would change what the page looks like, so an ancestor carrying one is
@@ -542,8 +546,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      return 'fix';\n" +
                 "    }\n" +
                 "    if(st.force !== 'auto') return st.force;\n" +
-                "    if(st.sda) return 'css';\n" +
-                "    return st.unblock(el) === null ? 'fix' : 'none'; };\n" +
+                "    if(st.unblock(el) === null) return 'fix';\n" +
+                "    return st.sda ? 'css' : 'none'; };\n" +
                 "  st.mode = null;\n" +
                 // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
                 // on every install: after a reconnect the previous slot is gone and this one is fresh.
