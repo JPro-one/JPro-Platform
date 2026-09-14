@@ -298,7 +298,9 @@ public final class WebScrollImpl implements ScrollImpl {
         // the overlay may sit offset down the document (under a registered host, e.g. a popup nested in
         // the route). the compositor transform is relative to the overlay's own DOM box, so endpoints bake
         // in host-local space (scene-y minus this offset) while the scroll-range math stays document-space.
-        final double hostOffsetY = overlay.localToScene(0, 0).getY();
+        final Point2D hostOrigin = overlay.localToScene(0, 0);
+        final double hostOffsetY = hostOrigin.getY();
+        final double hostOffsetX = hostOrigin.getX();
 
         // publish pin state (STICKY only): stuck iff the server pin differs from the natural flow top (same
         // rule as ScrollPaneStickyImpl, appear != natural). fidelity = browserViewport() cadence, not per-frame.
@@ -312,28 +314,28 @@ public final class WebScrollImpl implements ScrollImpl {
 
         final double docH = root.getLayoutBounds().getHeight();
         final String sig = natTop + "|" + y0 + "|" + local.getX() + "|" + relLimitServer + "|"
-                + nodeW + "|" + nodeH + "|" + docH + "|" + hostOffsetY;
+                + nodeW + "|" + nodeH + "|" + docH + "|" + hostOffsetY + "|" + hostOffsetX;
 
         // NaN/Infinity are valid JS literals, so a non-finite value here would install cleanly and then
         // fail silently: every clamp escapes its guard and the emitted transform is rejected by the CSS
         // parser, leaving a dead pin and nothing in any log. Refuse the install instead.
-        if (!allFinite(local.getX(), natTop, y0, relLimitServer, hostOffsetY)) {
+        if (!allFinite(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX)) {
             LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry "
-                            + "(x={}, natTop={}, y0={}, relLimit={}, hostOffsetY={})",
-                    jsKey, local.getX(), natTop, y0, relLimitServer, hostOffsetY);
+                            + "(x={}, natTop={}, y0={}, relLimit={}, hostOffsetY={}, hostOffsetX={})",
+                    jsKey, local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
             return;
         }
 
         if (!installedCompositor) {
             // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
             // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
-            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY);
+            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
             installedCompositor = true;
             lastSig = sig;
             LOGGER.debug("jpro-sticky[{}]: compositor installed (w={}, natTop={}, y0={}, hostOffsetY={})",
                     jsKey, nodeW, natTop, y0, hostOffsetY);
         } else if (!sig.equals(lastSig)) {
-            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY);
+            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
             lastSig = sig;
         }
     }
@@ -427,7 +429,8 @@ public final class WebScrollImpl implements ScrollImpl {
      * it only goes stale, which {@code isConnected} detects. A re-install can also resolve the outgoing
      * element before the DOM rebuild replaces it, so a 500ms heartbeat rebinds once that peer detaches.
      */
-    private void installCompositor(double x, double natTop, double y0, double relLimitServer, double hostOffsetY) {
+    private void installCompositor(double x, double natTop, double y0, double relLimitServer,
+                                   double hostOffsetY, double hostOffsetX) {
         // a fresh slot per install: the defining command is one-shot per view, so a reconnect needs a
         // new one. reassigning drops the previous handle, whose cleanup only nulls the slot we left.
         elementVar = webapi.getElement(node);
@@ -446,7 +449,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.key = 'jpro-sticky-" + jsKey + "';\n" +
                 // latest geometry, baked in server-side. apply() reads these so a re-install (on a
                 // geometry-sig change) just updates them and re-renders.
-                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + "; st.hostOffsetY = " + hostOffsetY + ";\n" +
+                "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + ";\n" +
+                "  st.hostOffsetY = " + hostOffsetY + "; st.hostOffsetX = " + hostOffsetX + ";\n" +
                 "  st.pe = " + mouseTransparent + ";\n" +
                 // gate on every declaration the rule depends on, in the exact form emitted. testing only
                 // animation-timeline:scroll() would pass on an engine that then rejects duration:auto,
@@ -499,7 +503,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      el.style.removeProperty(p); });\n" +
                 // the rAF tier owns transform while it runs; hand it back so the renderer's own pin shows.
                 "    if(st.wroteTransform){ el.style.removeProperty('transform'); st.wroteTransform = false; }\n" +
-                "    el.removeAttribute('data-jpro-sticky-el'); st.state = null; st.docX = null; };\n" +
+                "    el.removeAttribute('data-jpro-sticky-el'); st.state = null; };\n" +
 
                 // geometry, shared by both tiers.
                 // scrollHeight forces layout, so it is read on the heartbeat (and at install), never per frame.
@@ -535,14 +539,16 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var y = window.scrollY;\n" +
                 "    var s = (y < r.sPin) ? 'before' : (y >= r.sRel ? 'after' : 'pinned');\n" +
                 "    if(s === st.state) return;\n" +
-                // measured while still page-anchored, so it is the node's document X. once the node is
-                // fixed its rect is viewport-relative and this would read the pinned value back.
-                "    if(st.docX == null){ st.docX = el.getBoundingClientRect().left + window.scrollX; }\n" +
                 "    st.state = s;\n" +
                 "    var decl;\n" +
+                // fixed makes the containing block the viewport, so X shifts from overlay-local to
+                // document space; the other two states stay overlay-local. Both come from geometry the
+                // server baked in, never from reading the element back: the element's own transform is
+                // whatever the previously active tier left on it, which is not a position we can trust.
                 "    if(s === 'pinned'){\n" +
                 "      decl = 'position:fixed !important;left:0 !important;top:0 !important;'\n" +
-                "           + 'transform:translate(' + (st.docX - window.scrollX) + 'px,' + st.inset + 'px) !important;';\n" +
+                "           + 'transform:translate(' + (st.x + st.hostOffsetX - window.scrollX) + 'px,'\n" +
+                "           + st.inset + 'px) !important;';\n" +
                 "    } else {\n" +
                 "      decl = 'transform:translate(' + st.x + 'px,'\n" +
                 "           + ((s === 'before') ? r.fromY : r.toY) + 'px) !important;';\n" +
@@ -568,7 +574,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    if(st.onscroll) return;\n" +
                 "    st.onscroll = function(){ st.idle = 0;\n" +
                 "      if(!st.pumping){ st.pumping = 1; st.lastPumpY = -1; requestAnimationFrame(st.pump); } };\n" +
-                "    st.onresize = function(){ st.docX = null; st.state = null; st.measure(); st.affix(); };\n" +
+                "    st.onresize = function(){ st.state = null; st.measure(); st.affix(); };\n" +
                 "    st.pumping = 0; st.idle = 0;\n" +
                 "    window.addEventListener('scroll', st.onscroll, {passive:true});\n" +
                 "    window.addEventListener('resize', st.onresize, {passive:true}); };\n" +
