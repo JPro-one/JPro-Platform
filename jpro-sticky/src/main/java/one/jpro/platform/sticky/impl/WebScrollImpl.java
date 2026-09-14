@@ -505,18 +505,45 @@ public final class WebScrollImpl implements ScrollImpl {
                 // between the crossings but flips state from a frame callback, so the pin lands a frame
                 // late. 'none' leaves the node on the server pin. picked per element, because the affix
                 // gate depends on the DOM the node actually landed in.
+                // clears the one blocker we are allowed to clear. will-change is a hint, so dropping it
+                // costs a compositing layer and nothing else; transform / filter / contain are not, and
+                // clearing those would change what the page looks like, so an ancestor carrying one is
+                // left alone and the pin falls through to another tier.
+                //
+                // This undoes, for these ancestors only, JPro 412c150b (2020: "fixed rare safari
+                // rendering bug"), which promotes every node div to its own layer on Safari and in doing
+                // so makes each one a containing block for fixed positioning. The original artifact was
+                // never written down, so the risk here is that it comes back on this subtree. The
+                // ancestors reached are the pin's own overlay and whatever sits between it and the
+                // document, not the whole app.
+                "  st.unblock = function(el){\n" +
+                "    var undo = (window.__jproStickyWC = window.__jproStickyWC || []);\n" +
+                "    var p = el.parentElement, n = 0;\n" +
+                "    while(p && p !== document.documentElement && n++ < 64){\n" +
+                "      var cs = getComputedStyle(p);\n" +
+                "      if(/transform|perspective|filter/.test(cs.willChange || '')\n" +
+                "         && cs.transform === 'none' && cs.perspective === 'none' && cs.filter === 'none'){\n" +
+                "        if(!p.hasAttribute('data-jpro-sticky-wc')){\n" +
+                "          p.setAttribute('data-jpro-sticky-wc', p.style.willChange || '');\n" +
+                "          undo.push(p);\n" +
+                "        }\n" +
+                "        p.style.willChange = 'auto';\n" +
+                "      }\n" +
+                "      p = p.parentElement;\n" +
+                "    }\n" +
+                "    return st.fixBlocker(el); };\n" +
                 "  st.pick = function(el){\n" +
                 "    if(st.force === 'fix'){\n" +
                 // forced, so honour it, but say so: a captured fixed position looks like the pin is
                 // simply broken, with nothing anywhere to explain it.
-                "      var b = st.fixBlocker(el);\n" +
+                "      var b = st.unblock(el);\n" +
                 "      if(b) console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': affix forced, but '\n" +
                 "        + 'position:fixed is captured by ' + b + ' - this pin will not hold.');\n" +
                 "      return 'fix';\n" +
                 "    }\n" +
                 "    if(st.force !== 'auto') return st.force;\n" +
                 "    if(st.sda) return 'css';\n" +
-                "    return st.fixBlocker(el) === null ? 'fix' : 'none'; };\n" +
+                "    return st.unblock(el) === null ? 'fix' : 'none'; };\n" +
                 "  st.mode = null;\n" +
                 // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
                 // on every install: after a reconnect the previous slot is gone and this one is fresh.
@@ -657,7 +684,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var cs = getComputedStyle(el);\n" +
                 "    if(cs.animationDuration === '0s' || cs.animationTimeline === 'auto'\n" +
                 "       || cs.animationTimeline === 'none'){\n" +
-                "      st.mode = st.fixBlocker(el) === null ? 'fix' : 'none';\n" +
+                "      st.mode = st.unblock(el) === null ? 'fix' : 'none';\n" +
                 "      console.log('[jpro-sticky] ' + '" + jsKey + "' + ': the engine accepted the scroll'\n" +
                 "        + ' timeline rule but did not resolve it (duration ' + cs.animationDuration\n" +
                 "        + ', timeline ' + cs.animationTimeline + '), dropping to ' + st.mode);\n" +
@@ -776,6 +803,16 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.el = null;\n" +
                 "  if(st.style && st.style.parentNode) st.style.parentNode.removeChild(st.style);\n" +
                 "  delete reg['" + jsKey + "'];\n" +
+                // the cleared will-change is on shared ancestors, so it can only go back once the last
+                // pin is gone; until then another pin may still be relying on it.
+                "  if(Object.keys(reg).length === 0 && window.__jproStickyWC){\n" +
+                "    window.__jproStickyWC.forEach(function(p){\n" +
+                "      var was = p.getAttribute('data-jpro-sticky-wc');\n" +
+                "      if(was) p.style.willChange = was; else p.style.removeProperty('will-change');\n" +
+                "      p.removeAttribute('data-jpro-sticky-wc');\n" +
+                "    });\n" +
+                "    window.__jproStickyWC = null;\n" +
+                "  }\n" +
                 "})();");
     }
 }
