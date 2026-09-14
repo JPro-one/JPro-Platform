@@ -606,9 +606,19 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    window.removeEventListener('resize', st.onresize);\n" +
                 "    st.onscroll = null; st.onresize = null; };\n" +
 
+                // one line per tier change, carrying everything the choice was made from. the tier a
+                // given engine lands on is otherwise invisible, and guessing it from the source has
+                // been wrong before.
+                "  st.report = function(){\n" +
+                "    if(st.mode === st.reported) return;\n" +
+                "    st.reported = st.mode;\n" +
+                "    console.log('[jpro-sticky] ' + '" + jsKey + "' + ' tier=' + st.mode\n" +
+                "      + ' force=' + st.force + ' scrollTimeline=' + st.sda\n" +
+                "      + ' fixedBlockedBy=' + (st.fixBlocker(st.el) || 'nothing')); };\n" +
                 "  st.apply = function(){\n" +
                 "    var el = st.el; if(!el) return;\n" +
                 "    if(!st.mode) st.mode = st.pick(el);\n" +
+                "    st.report();\n" +
                 "    if(st.pe) el.style.setProperty('pointer-events','none');\n" +
                 "    else el.style.removeProperty('pointer-events');\n" +
                 "    if(st.mode === 'fix'){\n" +
@@ -647,7 +657,11 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var cs = getComputedStyle(el);\n" +
                 "    if(cs.animationDuration === '0s' || cs.animationTimeline === 'auto'\n" +
                 "       || cs.animationTimeline === 'none'){\n" +
-                "      st.mode = st.fixBlocker(el) === null ? 'fix' : 'none'; st.apply();\n" +
+                "      st.mode = st.fixBlocker(el) === null ? 'fix' : 'none';\n" +
+                "      console.log('[jpro-sticky] ' + '" + jsKey + "' + ': the engine accepted the scroll'\n" +
+                "        + ' timeline rule but did not resolve it (duration ' + cs.animationDuration\n" +
+                "        + ', timeline ' + cs.animationTimeline + '), dropping to ' + st.mode);\n" +
+                "      st.apply();\n" +
                 "    }\n" +
                 "  };\n" +
                 // bind to the element, never to its jpro-id: that id is a per-view transport index whose
