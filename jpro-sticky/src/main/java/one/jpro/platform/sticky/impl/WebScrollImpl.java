@@ -499,10 +499,10 @@ public final class WebScrollImpl implements ScrollImpl {
                 // clears the only blocker that is safe to clear: will-change is a hint, so dropping it
                 // costs a layer, while transform / filter / contain would change what the page looks like.
                 //
-                // This undoes JPro 412c150b (2020, "fixed rare safari rendering bug") for these ancestors
-                // only. Florian recalls that promotion was a performance measure, not a correctness fix,
-                // which is why this is scoped instead of asking core to drop the line: that would demote
-                // every node div. The walk starts at parentElement, so the pinned node keeps its own layer.
+                // this undoes JPro 412c150b (2020, "fixed rare safari rendering bug") for these ancestors
+                // only. florian recalls that promotion was for performance, not a correctness fix, which is
+                // why this is scoped instead of asking core to drop the line: that would demote every node
+                // div. the walk starts at parentElement, so the pinned node keeps its own layer.
                 "  st.unblock = function(el){\n" +
                 "    var undo = (window.__jproStickyWC = window.__jproStickyWC || []);\n" +
                 "    var p = el.parentElement, n = 0;\n" +
@@ -521,8 +521,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    return st.fixBlocker(el); };\n" +
                 "  st.pick = function(el){\n" +
                 "    if(st.force === 'fix'){\n" +
-                // forced, so honour it, but say so: a captured fixed position looks like the pin is
-                // simply broken, with nothing anywhere to explain it.
+                // forced, so honour it, but warn: a captured fixed position just looks like a dead pin.
                 "      var b = st.unblock(el);\n" +
                 "      if(b) console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': affix forced, but '\n" +
                 "        + 'position:fixed is captured by ' + b + ' - this pin will not hold.');\n" +
@@ -557,7 +556,7 @@ public final class WebScrollImpl implements ScrollImpl {
 
                 // double quotes on purpose: a backslash escape would have to survive the trip over the wire.
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
-                // three static states, JS at the crossings only; see the class doc. The placement goes in the
+                // three static states, JS at the crossings only; see the class doc. the placement goes in the
                 // sheet with !important because the renderer owns the same inline transform.
                 "  st.affix = function(){\n" +
                 "    if(st.dead) return;\n" +
@@ -568,8 +567,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    if(s === st.state) return;\n" +
                 "    st.state = s;\n" +
                 "    var decl;\n" +
-                // fixed makes the viewport the containing block, so X is document-space here and
-                // overlay-local in the other two states. Server geometry, never read back off the element.
+                // fixed makes the viewport the containing block, so X is document-space here and overlay-local
+                // in the other two states. always from the server geometry, never read back off the element.
                 "    if(s === 'pinned'){\n" +
                 "      decl = 'position:fixed !important;left:0 !important;top:0 !important;'\n" +
                 "           + 'transform:translate(' + (st.x + st.hostOffsetX - window.scrollX) + 'px,'\n" +
@@ -580,8 +579,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    }\n" +
                 "    st.style.textContent = st.sel + '{' + decl + '}';\n" +
                 "  };\n" +
-                // the scroll event arms this rather than doing the work: Firefox delivers it late enough
-                // to miss the crossing by a few frames. Reads only; writes at a crossing; stops when idle.
+                // the scroll event arms this rather than doing the work: Firefox delivers it late enough to
+                // miss the crossing by a few frames. it only reads, writes at a crossing, and stops when idle.
                 "  st.pump = function(){\n" +
                 "    if(st.dead || st.mode !== 'fix'){ st.pumping = 0; return; }\n" +
                 "    st.affix();\n" +
@@ -604,7 +603,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    window.removeEventListener('resize', st.onresize);\n" +
                 "    st.onscroll = null; st.onresize = null; };\n" +
 
-                // the resolved tier is otherwise invisible, and inferring it from the source has been wrong.
+                // the tier an engine lands on is otherwise invisible from the outside.
                 "  st.report = function(){\n" +
                 "    if(st.mode === st.reported) return;\n" +
                 "    st.reported = st.mode;\n" +
@@ -633,7 +632,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "       'animation-timeline','animation-range'].forEach(function(p){ el.style.removeProperty(p); });\n" +
                 "      return;\n" +
                 "    }\n" +
-                // a running animation outranks inline, so this beats the renderer's own transform. The
+                // a running animation outranks inline, so this beats the renderer's own transform. the
                 // renderer sets one property at a time, so these survive its renders.
                 "    var r = st.range();\n" +
                 "    st.style.textContent = '@keyframes ' + st.key +\n" +
@@ -646,7 +645,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    el.style.setProperty('animation-timeline','scroll(root block)');\n" +
                 "    el.style.setProperty('animation-range', r.sPin + 'px ' + r.sRel + 'px');\n" +
                 // duration 0s means duration:auto was dropped, which with fill-mode:both parks the node off
-                // screen; an unresolved timeline means it is not scroll-driven. Either way, next tier.
+                // screen. an unresolved timeline means it is not scroll-driven. either way, fall to the next tier.
                 "    var cs = getComputedStyle(el);\n" +
                 "    if(cs.animationDuration === '0s' || cs.animationTimeline === 'auto'\n" +
                 "       || cs.animationTimeline === 'none'){\n" +
@@ -658,7 +657,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    }\n" +
                 "  };\n" +
                 // bind to the element, never its jpro-id: that counter restarts on reconnect, so a cached id
-                // can retarget an unrelated node. An element reference only goes stale, which isConnected sees.
+                // can retarget an unrelated node. an element reference only goes stale, which isConnected sees.
                 "  st.bind = function(){\n" +
                 "    if(st.dead || st.resolving) return;\n" +
                 "    st.resolving = true; var tries = 0;\n" +
@@ -675,7 +674,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    })();\n" +
                 "  };\n" +
                 // heartbeat: rebinds after a reconnect rebuilds the peer, and carries the layout-forcing
-                // measure(). A re-install can resolve the outgoing element, so liveness is re-checked here.
+                // measure(). a re-install can resolve the outgoing element, so liveness is re-checked here.
                 "  st.check = function(){ if(st.dead) return;\n" +
                 "    var prev = st.docExtent; st.measure();\n" +
                 // the affix boundaries follow the document extent, and nothing scrolled, so re-place here.
