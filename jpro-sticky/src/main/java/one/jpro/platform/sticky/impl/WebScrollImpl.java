@@ -516,10 +516,13 @@ public final class WebScrollImpl implements ScrollImpl {
                 //
                 // This undoes, for these ancestors only, JPro 412c150b (2020: "fixed rare safari
                 // rendering bug"), which promotes every node div to its own layer on Safari and in doing
-                // so makes each one a containing block for fixed positioning. The original artifact was
-                // never written down, so the risk here is that it comes back on this subtree. The
-                // ancestors reached are the pin's own overlay and whatever sits between it and the
-                // document, not the whole app.
+                // so makes each one a containing block for fixed positioning. Florian's recollection is
+                // that the promotion was for performance rather than for a correctness artifact, which
+                // is why this is scoped rather than asking core to drop the line: dropping it demotes
+                // every node div, where this demotes the handful between one pin and the document.
+                //
+                // The walk starts at parentElement, so the pinned node keeps its own layer. Only
+                // containers are demoted, never the content that paints.
                 "  st.unblock = function(el){\n" +
                 "    var undo = (window.__jproStickyWC = window.__jproStickyWC || []);\n" +
                 "    var p = el.parentElement, n = 0;\n" +
