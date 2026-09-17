@@ -496,13 +496,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      p = p.parentElement;\n" +
                 "    }\n" +
                 "    return null; };\n" +
-                // clears the only blocker that is safe to clear: will-change is a hint, so dropping it
-                // costs a layer, while transform / filter / contain would change what the page looks like.
-                //
-                // this undoes JPro 412c150b (2020, "fixed rare safari rendering bug") for these ancestors
-                // only. florian recalls that promotion was for performance, not a correctness fix, which is
-                // why this is scoped instead of asking core to drop the line: that would demote every node
-                // div. the walk starts at parentElement, so the pinned node keeps its own layer.
+                // clears the only blocker that is safe to clear: will-change is a hint, transform / filter /
+                // contain are not. undoes JPro 412c150b on these ancestors; the pinned node keeps its layer.
                 "  st.unblock = function(el){\n" +
                 "    var undo = (window.__jproStickyWC = window.__jproStickyWC || []);\n" +
                 "    var p = el.parentElement, n = 0;\n" +
