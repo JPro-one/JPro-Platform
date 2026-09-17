@@ -447,8 +447,10 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      + ' in the document, so scene and document coordinates differ; pinning stays on the'\n" +
                 "      + ' server cadence.'); return 'none'; }\n" +
                 "    var b = st.unblock(el);\n" +
-                "    if(b) console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': position:fixed is captured by '\n" +
-                "      + b + ', so this pin falls back to the server cadence and will trail a fast scroll.');\n" +
+                "    if(b && b !== st.warned) console.warn('[jpro-sticky] ' + '" + jsKey + "'\n" +
+                "      + ': position:fixed is captured by ' + b\n" +
+                "      + ', so this pin falls back to the server cadence and will trail a fast scroll.');\n" +
+                "    st.warned = b;\n" +
                 "    return b === null ? 'fix' : 'none'; };\n" +
                 "  st.mode = null;\n" +
                 // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
@@ -566,6 +568,9 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var prev = st.docExtent; st.measure();\n" +
                 // the affix boundaries follow the document extent, and nothing scrolled, so re-place here.
                 "    if(st.mode === 'fix' && st.docExtent !== prev){ st.state = null; st.affix(); }\n" +
+                // a blocker can be transient (JPro filters the whole scene while reconnecting) and the tier is
+                // otherwise chosen once per install, so a bad moment would latch the server pin for the session.
+                "    if(st.mode === 'none' && st.el && st.el.isConnected){ st.mode = null; st.apply(); }\n" +
                 "    if(!st.el || !st.el.isConnected) st.bind(); };\n" +
                 "  st.measure();\n" +
                 "  if(!st.timer){ st.timer = setInterval(st.check, 500); }\n" +
