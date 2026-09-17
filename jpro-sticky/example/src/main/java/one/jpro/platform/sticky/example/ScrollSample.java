@@ -11,10 +11,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import com.jpro.webapi.WebAPI;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.geometry.Side;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -89,12 +85,6 @@ public class ScrollSample extends Application {
         Scroll.stuckProperty(header).addListener((obs, was, is) ->
                 System.out.println("[jpro-sticky] page header stuck=" + is));
         root.getChildren().add(header);
-
-        // Pin-tier A/B switch. Sticky at the header's height so it pins just under it and stays in
-        // view; it is itself one of the pins, so it demonstrates whichever tier is selected.
-        final var tabs = pinModeTabs();
-        Scroll.setStickyPosition(tabs, Side.TOP, 48);
-        root.getChildren().add(tabs);
 
         // A normal in-flow button just below the header: clicking it confirms clicks pass through the
         // mouse-transparent overlay to ordinary content, and that pinned elements do not swallow them.
@@ -188,44 +178,6 @@ public class ScrollSample extends Application {
      *
      * @return a titled card wrapping a ScrollPane with a bounded sticky sub-header over tall content
      */
-    /**
-     * The pin-tier switch: one toggle per web pin tier, applied to every pin on the page at once so
-     * they can be compared back to back on the same content. Web only; on desktop the toggles are
-     * disabled, since the tiers are a browser concern.
-     *
-     * @return the tab bar
-     */
-    private static HBox pinModeTabs() {
-        final var group = new ToggleGroup();
-        final var bar = new HBox(6, modeTab("Auto", "auto", group),
-                modeTab("CSS timeline", "css", group), modeTab("Affix", "fix", group));
-        bar.setId("pin-mode-tabs");
-        bar.setPadding(new Insets(8, 16, 8, 16));
-        bar.setStyle("-fx-background-color: -color-bg-default;");
-        bar.setMinHeight(44);
-        if (!WebAPI.isBrowser()) {
-            bar.setDisable(true);
-        }
-        return bar;
-    }
-
-    private static ToggleButton modeTab(String text, String mode, ToggleGroup group) {
-        final var tab = new ToggleButton(text);
-        tab.setToggleGroup(group);
-        tab.setSelected("auto".equals(mode));
-        tab.setOnAction(e -> {
-            tab.setSelected(true);
-            if (!WebAPI.isBrowser() || tab.getScene() == null || tab.getScene().getWindow() == null) {
-                return;
-            }
-            // the hook is installed by the pin script; it reports the tier each pin actually resolved
-            // to on the browser console, which is where a fallback shows up.
-            WebAPI.getWebAPI(tab.getScene().getWindow()).executeScript(
-                    "window.__jproStickySetMode && window.__jproStickySetMode('" + mode + "');");
-        });
-        return tab;
-    }
-
     private static VBox scrollPaneSection() {
         final var content = new VBox();
 

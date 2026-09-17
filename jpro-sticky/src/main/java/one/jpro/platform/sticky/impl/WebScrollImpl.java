@@ -19,58 +19,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
- * The scroll-aware pinning for a single {@link Node}, realised on the web side through a
- * compositor scroll-timeline override. One instance owns one node's override lifecycle: it
- * reparents the node into a per-scene overlay, leaves a layout-mirroring placeholder in the
- * node's flow slot, server-pins the node (for picking and as a no-compositor fallback), and
- * overrides the DOM visual with an {@code animation-timeline: scroll()} animation so scrolling
- * stays smooth without a JavaFX layout pass per scroll event.
+ * The scroll-aware pinning for a single {@link Node} on the web. One instance owns one node's
+ * override lifecycle: it reparents the node into a per-scene overlay, leaves a layout-mirroring
+ * placeholder in the node's flow slot, server-pins the node (which is what picking sees), and
+ * overrides the DOM position so scrolling stays smooth without a JavaFX layout pass per scroll
+ * event.
  * <p>
  * It builds only on the JPro Viewport API ({@link WebAPI#browserViewport()} /
  * {@link WebAPI#documentBounds()}) and needs no core change.
  * <p>
- * <strong>Two pin tiers.</strong> They fail in different places, so the one that works in more of
- * them goes first.
- * <p>
- * The <em>affix</em> tier is the default. The pin function is a clamp, so each branch of it is
- * a static positioning mode, and affix says so outright: page-anchored below the pin line,
- * {@code position: fixed} at the inset between the lines, page-anchored again past the release line,
- * with JS running at the two crossings only. Between the crossings the engine scrolls the node
- * itself, so it is as smooth as the compositor tier; the difference is the crossing, which costs a
- * frame. A scroll event arms a frame loop that watches for it and stops once the page stops moving;
- * the loop only reads the scroll position and writes at a crossing. Watching from a frame callback
+ * <strong>How the pin works.</strong> The pin function is a clamp, so each branch of it is a static
+ * positioning mode, and the pin is written as exactly that: page-anchored below the pin line,
+ * {@code position: fixed} at the inset between the lines, page-anchored again past the release line.
+ * JS runs at the two crossings only, so between them the engine scrolls the node itself. A scroll
+ * event arms a frame loop that watches for the crossing and stops once the page stops moving; the
+ * loop only reads the scroll position and writes at a crossing. Watching from a frame callback
  * rather than from the event matters on Firefox, where the compositor scrolls ahead of the main
- * thread. Affix needs {@code position: fixed} to actually mean the viewport, which fails if any
- * ancestor is a containing block for it, so it is gated on a walk up the DOM. Where the only thing
- * in the way is a {@code will-change} hint it is cleared, which is what makes the tier usable on
- * Safari; a real {@code transform} or {@code filter} is left alone and the pin falls through.
+ * thread.
  * <p>
- * That fall-through is the <em>compositor</em> tier: where {@code animation-timeline: scroll()} is
- * supported the pin becomes a keyframe pair the engine evaluates itself, and it is indifferent to
- * transformed ancestors. Its rule must be <em>withheld</em> rather than emitted and ignored on
- * engines that lack it, or the node is parked a document-height off screen; see {@code apply()} in
- * {@link #installCompositor}.
- * <p>
- * With neither tier available the node stays on the server-side pin, which sits underneath both as
- * what picking sees. It is correct but only as current as the last viewport update, so it visibly
- * trails a fast scroll. That needs a transformed ancestor (defeating affix) on an engine without
- * scroll timelines (defeating the compositor tier) at the same time.
- * <p>
- * Set {@code -Djpro.sticky.pin} (or {@code JPRO_STICKY_PIN}) to {@code css} or {@code fix} to force
- * one tier, for A/B measurement; {@code auto} is the default.
+ * <strong>What can stop it.</strong> It needs {@code position: fixed} to resolve to the viewport,
+ * which any ancestor with {@code transform}, {@code filter}, {@code perspective},
+ * {@code contain: paint} or a {@code will-change} naming one of those defeats, so it is gated on a
+ * walk up the DOM. A {@code will-change} hint is cleared (it costs a compositing layer and nothing
+ * else); the rest are left alone and the node stays on the server-side pin, which is what picking
+ * sees anyway. That is correct but only as current as the last viewport update, so it trails a fast
+ * scroll.
  * <p>
  * When running as a desktop application the {@link WebAPI} consumer never fires, so installation
  * is a no-op and the node keeps its normal flow positioning.
  * <p>
  * <strong>Anchoring.</strong> The {@link ScrollAnchor} resolves the horizontal and vertical axes
- * independently. The vertical axis drives the scroll-timeline keyframe (pin line, ride, and, for
- * bounded sticky, release); the horizontal axis is a constant baked into the keyframe (the page does
- * not scroll horizontally). {@link ScrollAnchor.Mode#STRETCH} resizes the node to span the axis;
+ * independently. The vertical axis drives the pin line, the ride and, for bounded sticky, the
+ * release; the horizontal axis is a constant the pin carries through all three states. {@link ScrollAnchor.Mode#STRETCH} resizes the node to span the axis;
  * {@link ScrollPosition#FIXED} is the degenerate pin (from scroll 0, no ride and, being
  * viewport-anchored, no containment release).
  *
@@ -374,51 +358,11 @@ public final class WebScrollImpl implements ScrollImpl {
         return containerBottom - nodeH;
     }
 
-    /** Pin tier: {@code auto} picks affix where fixed positioning holds, the compositor where
-     *  scroll timelines are supported and affix elsewhere. {@code css} and {@code fix} force one
-     *  tier, for A/B measurement. Forcing {@code css} on an engine that lacks scroll timelines does
-     *  not park the node: {@code apply()} reads the computed style back and drops to the next tier. */
-    private static final String PIN_MODE = resolvePinMode();
-
     /**
-     * Resolves the pin mode to one of exactly {@code auto}, {@code css} or {@code fix}.
-     * The result is interpolated
-     * into the injected script, so it is validated rather than passed through: a stray quote would
-     * break the whole script (and every pin on the page) with no server-side signal, and a stray
-     * newline would silently read as {@code auto}, quietly measuring the wrong tier.
-     */
-    private static String resolvePinMode() {
-        String v = System.getProperty("jpro.sticky.pin");
-        if (v == null || v.isEmpty()) {
-            // the JPro server is a forked JVM, so a -D on the build does not reach it.
-            v = System.getenv("JPRO_STICKY_PIN");
-        }
-        if (v == null) {
-            return "auto";
-        }
-        v = v.trim().toLowerCase(Locale.ROOT);
-        if (v.isEmpty() || v.equals("auto")) {
-            return "auto";
-        }
-        if (v.equals("fix")) {
-            return "fix";
-        }
-        if (v.equals("css")) {
-            return "css";
-        }
-        LOGGER.warn("jpro-sticky: ignoring unknown pin mode '{}', expected 'auto', 'css' or 'fix'", v);
-        return "auto";
-    }
-
-    /**
-     * (Re-)installs the pin. Both tiers share one geometry: where {@code animation-timeline: scroll()}
-     * exists the pin is a compositor-driven CSS animation, otherwise it is the affix state machine.
-     * Each writes into the same injected {@code <style>} sheet, the compositor tier as
-     * {@code @keyframes} and affix as one rule keyed by a {@code data-jpro-sticky-el} stamp. Both go
-     * through the sheet for the same reason: the renderer positions the node with inline
-     * {@code style.transform}, which a running animation outranks in the cascade and an important
-     * author rule is the only other thing that does. Assumes an svg scale of 1 (true for
-     * native-scrolling pages).
+     * (Re-)installs the pin. The placement is one {@code !important} rule in an injected
+     * {@code <style>} sheet, keyed by a {@code data-jpro-sticky-el} stamp: the renderer positions the
+     * node with inline {@code style.transform}, and an important author rule is the only declaration
+     * that outranks inline. Assumes an svg scale of 1 (true for native-scrolling pages).
      * <p>
      * {@code natTop} is the keyframe 'from' (the flow top for sticky, the pin line for fixed);
      * {@code y0} is the viewport pin line; {@code relLimitServer} is the scene-y release point
@@ -454,33 +398,11 @@ public final class WebScrollImpl implements ScrollImpl {
                 // the sheet carries only @keyframes (compositor tier); the binding is inline on the element.
                 "  if(!st.style){ st.style = document.createElement('style');\n" +
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
-                "  st.key = 'jpro-sticky-" + jsKey + "';\n" +
                 // latest geometry, baked in server-side. apply() reads these so a re-install (on a
                 // geometry-sig change) just updates them and re-renders.
                 "  st.x = " + x + "; st.natTop = " + natTop + "; st.inset = " + y0 + "; st.relServer = " + relLimitServer + ";\n" +
                 "  st.hostOffsetY = " + hostOffsetY + "; st.hostOffsetX = " + hostOffsetX + ";\n" +
                 "  st.pe = " + mouseTransparent + ";\n" +
-                // gate every declaration the rule needs, as emitted: an engine that takes the timeline and
-                // then rejects duration:auto parks the node a document-height off screen.
-                "  st.sda = CSS.supports('animation-timeline','scroll(root block)')\n" +
-                "         && CSS.supports('animation-duration','auto')\n" +
-                "         && CSS.supports('animation-range','0px 1px');\n" +
-                // the live override wins over the property so the A/B switch survives a re-install
-                // (a geometry change re-runs this whole script).
-                "  st.force = window.__jproStickyForce || '" + PIN_MODE + "';\n" +
-                // one page-wide hook to move every pin onto one tier, for side-by-side comparison.
-                "  if(!window.__jproStickySetMode){\n" +
-                "    window.__jproStickySetMode = function(m){\n" +
-                "      window.__jproStickyForce = m;\n" +
-                "      var r = window.__jproStickyC || {}, res = [];\n" +
-                "      Object.keys(r).forEach(function(k){ var e = r[k];\n" +
-                "        if(!e || e.dead || !e.el) return;\n" +
-                "        e.force = m; e.mode = null; e.clear(e.el); e.style.textContent = '';\n" +
-                "        e.apply(); res.push(k + ':' + e.mode); });\n" +
-                "      console.log('[jpro-sticky] asked for ' + m + ', got ' + res.join(' '));\n" +
-                "      return res.join(' '); }; }\n" +
-                // transform / filter / perspective / will-change / contain on an ancestor captures
-                // position:fixed. returns the declaration rather than a bool, so a dead pin can say why.
                 "  st.fixBlocker = function(el){\n" +
                 "    var p = el.parentElement, n = 0;\n" +
                 "    while(p && p !== document.documentElement && n++ < 64){\n" +
@@ -499,7 +421,6 @@ public final class WebScrollImpl implements ScrollImpl {
                 // clears the only blocker that is safe to clear: will-change is a hint, transform / filter /
                 // contain are not. undoes JPro 412c150b on these ancestors; the pinned node keeps its layer.
                 "  st.unblock = function(el){\n" +
-                "    var undo = (window.__jproStickyWC = window.__jproStickyWC || []);\n" +
                 "    var p = el.parentElement, n = 0;\n" +
                 "    while(p && p !== document.documentElement && n++ < 64){\n" +
                 "      var cs = getComputedStyle(p);\n" +
@@ -507,32 +428,34 @@ public final class WebScrollImpl implements ScrollImpl {
                 "         && cs.transform === 'none' && cs.perspective === 'none' && cs.filter === 'none'){\n" +
                 "        if(!p.hasAttribute('data-jpro-sticky-wc')){\n" +
                 "          p.setAttribute('data-jpro-sticky-wc', p.style.willChange || '');\n" +
-                "          undo.push(p);\n" +
                 "        }\n" +
                 "        p.style.willChange = 'auto';\n" +
                 "      }\n" +
                 "      p = p.parentElement;\n" +
                 "    }\n" +
                 "    return st.fixBlocker(el); };\n" +
+                // the geometry is scene coordinates but the pin compares them against document scroll, so the
+                // two have to coincide. they do for a full-page app and not for an embedded tag.
+                "  st.embedded = function(el){\n" +
+                "    var sc = el.closest && el.closest('.jpro-scene'); if(!sc) return null;\n" +
+                "    var r = sc.getBoundingClientRect();\n" +
+                "    var dx = r.left + window.scrollX, dy = r.top + window.scrollY;\n" +
+                "    return (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) ? null : (dx + ',' + dy); };\n" +
                 "  st.pick = function(el){\n" +
-                "    if(st.force === 'fix'){\n" +
-                // forced, so honour it, but warn: a captured fixed position just looks like a dead pin.
-                "      var b = st.unblock(el);\n" +
-                "      if(b) console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': affix forced, but '\n" +
-                "        + 'position:fixed is captured by ' + b + ' - this pin will not hold.');\n" +
-                "      return 'fix';\n" +
-                "    }\n" +
-                "    if(st.force !== 'auto') return st.force;\n" +
-                "    if(st.unblock(el) === null) return 'fix';\n" +
-                "    return st.sda ? 'css' : 'none'; };\n" +
+                "    var off = st.embedded(el);\n" +
+                "    if(off){ console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': the jpro tag is at ' + off\n" +
+                "      + ' in the document, so scene and document coordinates differ; pinning stays on the'\n" +
+                "      + ' server cadence.'); return 'none'; }\n" +
+                "    var b = st.unblock(el);\n" +
+                "    if(b) console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': position:fixed is captured by '\n" +
+                "      + b + ', so this pin falls back to the server cadence and will trail a fast scroll.');\n" +
+                "    return b === null ? 'fix' : 'none'; };\n" +
                 "  st.mode = null;\n" +
                 // the JS value slot is defined by a one-shot command per view, so re-bake the resolver
                 // on every install: after a reconnect the previous slot is gone and this one is fresh.
                 "  st.resolve = function(){ try { var e = " + d + "; return e && e.style ? e : null; } catch(e){ return null; } };\n" +
                 "  st.clear = function(el){ if(!el) return;\n" +
-                "    ['animation-name','animation-timing-function','animation-fill-mode','animation-duration',\n" +
-                "     'animation-timeline','animation-range','pointer-events'].forEach(function(p){\n" +
-                "      el.style.removeProperty(p); });\n" +
+                "    el.style.removeProperty('pointer-events');\n" +
                 "    el.removeAttribute('data-jpro-sticky-el'); st.state = null; };\n" +
 
                 // geometry, shared by both tiers.
@@ -557,16 +480,16 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    if(st.dead) return;\n" +
                 "    var el = st.el; if(!el || !el.isConnected) return;\n" +
                 "    var r = st.range();\n" +
-                "    var y = window.scrollY;\n" +
+                "    var y = window.scrollY, xs = window.scrollX;\n" +
                 "    var s = (y < r.sPin) ? 'before' : (y >= r.sRel ? 'after' : 'pinned');\n" +
-                "    if(s === st.state) return;\n" +
-                "    st.state = s;\n" +
+                "    if(s === st.state && !(s === 'pinned' && xs !== st.scrollX)) return;\n" +
+                "    st.state = s; st.scrollX = xs;\n" +
                 "    var decl;\n" +
                 // fixed makes the viewport the containing block, so X is document-space here and overlay-local
                 // in the other two states. always from the server geometry, never read back off the element.
                 "    if(s === 'pinned'){\n" +
                 "      decl = 'position:fixed !important;left:0 !important;top:0 !important;'\n" +
-                "           + 'transform:translate(' + (st.x + st.hostOffsetX - window.scrollX) + 'px,'\n" +
+                "           + 'transform:translate(' + (st.x + st.hostOffsetX - xs) + 'px,'\n" +
                 "           + st.inset + 'px) !important;';\n" +
                 "    } else {\n" +
                 "      decl = 'transform:translate(' + st.x + 'px,'\n" +
@@ -579,7 +502,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.pump = function(){\n" +
                 "    if(st.dead || st.mode !== 'fix'){ st.pumping = 0; return; }\n" +
                 "    st.affix();\n" +
-                "    var y = window.scrollY;\n" +
+                "    var y = window.scrollY + window.scrollX;\n" +
                 "    if(y !== st.lastPumpY){ st.lastPumpY = y; st.idle = 0; }\n" +
                 "    else if(++st.idle > 20){ st.pumping = 0; return; }\n" +
                 "    requestAnimationFrame(st.pump); };\n" +
@@ -603,7 +526,6 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    if(st.mode === st.reported) return;\n" +
                 "    st.reported = st.mode;\n" +
                 "    console.log('[jpro-sticky] ' + '" + jsKey + "' + ' tier=' + st.mode\n" +
-                "      + ' force=' + st.force + ' scrollTimeline=' + st.sda\n" +
                 "      + ' fixedBlockedBy=' + (st.fixBlocker(st.el) || 'nothing')); };\n" +
                 "  st.apply = function(){\n" +
                 "    var el = st.el; if(!el) return;\n" +
@@ -612,44 +534,14 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    if(st.pe) el.style.setProperty('pointer-events','none');\n" +
                 "    else el.style.removeProperty('pointer-events');\n" +
                 "    if(st.mode === 'fix'){\n" +
-                "      ['animation-name','animation-timing-function','animation-fill-mode','animation-duration',\n" +
-                "       'animation-timeline','animation-range'].forEach(function(p){ el.style.removeProperty(p); });\n" +
                 "      el.setAttribute('data-jpro-sticky-el','" + jsKey + "');\n" +
                 "      st.listen(); st.state = null; st.affix();\n" +
                 "      return;\n" +
                 "    }\n" +
-                "    st.unlisten(); el.removeAttribute('data-jpro-sticky-el'); st.state = null;\n" +
-                // no tier available: strip everything we may have installed and leave the node on the
-                // server pin, which is correct but only as current as the last viewport update.
-                "    if(st.mode === 'none'){\n" +
-                "      st.style.textContent = '';\n" +
-                "      ['animation-name','animation-timing-function','animation-fill-mode','animation-duration',\n" +
-                "       'animation-timeline','animation-range'].forEach(function(p){ el.style.removeProperty(p); });\n" +
-                "      return;\n" +
-                "    }\n" +
-                // a running animation outranks inline, so this beats the renderer's own transform. the
-                // renderer sets one property at a time, so these survive its renders.
-                "    var r = st.range();\n" +
-                "    st.style.textContent = '@keyframes ' + st.key +\n" +
-                "      '{from{transform:translate(' + st.x + 'px,' + r.fromY + 'px);}' +\n" +
-                "      'to{transform:translate(' + st.x + 'px,' + r.toY + 'px);}}';\n" +
-                "    el.style.setProperty('animation-name', st.key);\n" +
-                "    el.style.setProperty('animation-timing-function','linear');\n" +
-                "    el.style.setProperty('animation-fill-mode','both');\n" +
-                "    el.style.setProperty('animation-duration','auto');\n" +
-                "    el.style.setProperty('animation-timeline','scroll(root block)');\n" +
-                "    el.style.setProperty('animation-range', r.sPin + 'px ' + r.sRel + 'px');\n" +
-                // duration 0s means duration:auto was dropped, which with fill-mode:both parks the node off
-                // screen. an unresolved timeline means it is not scroll-driven. either way, fall to the next tier.
-                "    var cs = getComputedStyle(el);\n" +
-                "    if(cs.animationDuration === '0s' || cs.animationTimeline === 'auto'\n" +
-                "       || cs.animationTimeline === 'none'){\n" +
-                "      st.mode = st.unblock(el) === null ? 'fix' : 'none';\n" +
-                "      console.log('[jpro-sticky] ' + '" + jsKey + "' + ': the engine accepted the scroll'\n" +
-                "        + ' timeline rule but did not resolve it (duration ' + cs.animationDuration\n" +
-                "        + ', timeline ' + cs.animationTimeline + '), dropping to ' + st.mode);\n" +
-                "      st.apply();\n" +
-                "    }\n" +
+                // blocked: leave the node on the server pin, which is correct but only as current as the
+                // last viewport update.
+                "    st.unlisten(); el.removeAttribute('data-jpro-sticky-el');\n" +
+                "    st.state = null; st.style.textContent = '';\n" +
                 "  };\n" +
                 // bind to the element, never its jpro-id: that counter restarts on reconnect, so a cached id
                 // can retarget an unrelated node. an element reference only goes stale, which isConnected sees.
@@ -759,15 +651,14 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.el = null;\n" +
                 "  if(st.style && st.style.parentNode) st.style.parentNode.removeChild(st.style);\n" +
                 "  delete reg['" + jsKey + "'];\n" +
-                // the cleared will-change is on shared ancestors, so it can only go back once the last
-                // pin is gone; until then another pin may still be relying on it.
-                "  if(Object.keys(reg).length === 0 && window.__jproStickyWC){\n" +
-                "    window.__jproStickyWC.forEach(function(p){\n" +
+                // shared ancestors, so this can only go back once the last pin is gone. found by attribute
+                // rather than from a list, which would retain the ancestors of every route already left.
+                "  if(Object.keys(reg).length === 0){\n" +
+                "    document.querySelectorAll('[data-jpro-sticky-wc]').forEach(function(p){\n" +
                 "      var was = p.getAttribute('data-jpro-sticky-wc');\n" +
                 "      if(was) p.style.willChange = was; else p.style.removeProperty('will-change');\n" +
                 "      p.removeAttribute('data-jpro-sticky-wc');\n" +
                 "    });\n" +
-                "    window.__jproStickyWC = null;\n" +
                 "  }\n" +
                 "})();");
     }

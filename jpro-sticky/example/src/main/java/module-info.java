@@ -5,7 +5,6 @@
  */
 module one.jpro.platform.sticky.example {
     requires javafx.controls;
-    requires jpro.webapi;
     requires atlantafx.base;
     requires one.jpro.platform.sticky;
 
