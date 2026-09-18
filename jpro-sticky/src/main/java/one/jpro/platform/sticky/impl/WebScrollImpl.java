@@ -312,10 +312,10 @@ public final class WebScrollImpl implements ScrollImpl {
             LOGGER.debug("jpro-sticky[{}]: range natTop={} relServer={} relLimit={} rootH={} nodeH={} -> h={}",
                     jsKey, natTop, relLimitServer, relLimit, root.getLayoutBounds().getHeight(), nodeH,
                     range.getHeight());
-            // the node rides the span's own box, so it sits at its origin and the renderer emits no
-            // transform on it; everything the pin does is then the sticky rule in the injected sheet.
-            node.setLayoutX(0);
-            node.setLayoutY(0);
+            // picking is a scene pick on the server, so the node has to sit where it appears, exactly as
+            // it does without a span. the sticky rule drops the transform that produces on its element.
+            node.setLayoutX(local.getX() - span.getX());
+            node.setLayoutY(local.getY() - span.getY());
         }
 
         // the overlay may sit offset down the document (under a registered host, e.g. a popup nested in
@@ -465,7 +465,10 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    st.style.textContent = st.sel + '{position:sticky !important;'\n" +
                 "      + 'top:' + (st.inset - st.lastShift) + 'px !important;'\n" +
                 "      + 'width:" + nodeW + "px !important;height:" + nodeH + "px !important;'\n" +
-                "      + '" + (mouseTransparent ? "pointer-events:none !important;" : "") + "}'; };\n" +
+                "      + '" + (mouseTransparent ? "pointer-events:none !important;" : "") + "}'\n" +
+                // the server keeps the node at the pinned position so the scene pick lands on it, and the
+                // renderer writes that out below the pin. the rule places the box, so the offset has to go.
+                "      + st.sel + ',' + st.sel + ' > *{transform:none !important;}'; };\n" +
                 "  st.resolve = function(){ try { var e = " + d + "; return e && e.style ? e : null; } catch(e){ return null; } };\n" +
                 "  st.clear = function(el){ if(el) el.removeAttribute('data-jpro-sticky-el'); };\n" +
                 "  st.bind = function(){\n" +
