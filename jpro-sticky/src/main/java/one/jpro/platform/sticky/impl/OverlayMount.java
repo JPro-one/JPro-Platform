@@ -32,6 +32,7 @@ final class OverlayMount {
     private int originalIndex = -1;
     private Group overlay;
     private Region placeholder;
+    private Pane range;
     private boolean mounted;
 
     OverlayMount(Node node, long stackOrder) {
@@ -52,6 +53,19 @@ final class OverlayMount {
      *         not in its parent's children); on {@code null} the node is left untouched in flow
      */
     Region mount(double reservedHeight) {
+        return mount(reservedHeight, false);
+    }
+
+    /**
+     * As {@link #mount(double)}, but optionally puts the node inside a per-pin range pane rather than
+     * straight into the overlay.
+     *
+     * @param withRange when {@code true}, the node is mounted inside a {@link #range()} pane that the caller
+     *                  sizes to the pin's scroll span. The web sticky path needs it: {@code position: sticky}
+     *                  clamps to its containing block, so the span has to be a real box in the DOM, and it has
+     *                  to come from a node JPro renders itself rather than an element injected underneath it.
+     */
+    Region mount(double reservedHeight, boolean withRange) {
         final Parent parent = node.getParent();
         if (!(parent instanceof Pane)) {
             LOGGER.warn("jpro-sticky: node's parent is {} (not a Pane); cannot pin {}. Node stays in flow.",
@@ -85,7 +99,18 @@ final class OverlayMount {
         Placeholders.mirror(node, ph);
         pane.getChildren().set(index, ph);
         node.setManaged(false);
-        StickyOverlay.insertSorted(overlay, node, stackOrder);
+        if (withRange) {
+            final Pane r = new Pane();
+            r.setManaged(false);
+            // the span is a positioning box, never a hit target: picking stays with the node inside it.
+            r.setPickOnBounds(false);
+            r.getStyleClass().add("jpro-sticky-range");
+            r.getChildren().add(node);
+            StickyOverlay.insertSorted(overlay, r, stackOrder);
+            this.range = r;
+        } else {
+            StickyOverlay.insertSorted(overlay, node, stackOrder);
+        }
 
         this.placeholder = ph;
         this.mounted = true;
@@ -100,7 +125,13 @@ final class OverlayMount {
         if (!mounted) {
             return;
         }
-        StickyOverlay.remove(overlay, node);
+        if (range != null) {
+            range.getChildren().remove(node);
+            StickyOverlay.remove(overlay, range);
+            range = null;
+        } else {
+            StickyOverlay.remove(overlay, node);
+        }
         if (originalParent != null && placeholder != null) {
             final int idx = originalParent.getChildren().indexOf(placeholder);
             if (idx >= 0) {
@@ -119,6 +150,11 @@ final class OverlayMount {
     /** The placeholder holding the node's flow slot; {@code null} until a successful {@link #mount()}. */
     Region placeholder() {
         return placeholder;
+    }
+
+    /** The per-pin span the node sits in; {@code null} unless mounted with {@code withRange}. */
+    Pane range() {
+        return range;
     }
 
     /** The node's flow parent captured at {@link #mount()}; {@code null} until a successful mount. */

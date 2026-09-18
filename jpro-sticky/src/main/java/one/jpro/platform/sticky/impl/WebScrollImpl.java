@@ -11,6 +11,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.jmemorybuddy.CleanupDetector;
 import one.jpro.platform.sticky.ScrollAnchor;
@@ -69,6 +70,9 @@ public final class WebScrollImpl implements ScrollImpl {
 
     /** Slack (px) below which the server pin is treated as sitting at the natural flow position. */
     private static final double STUCK_EPS = 0.5;
+
+    /** FX id given to a pin's span; JPro renders it as a DOM id under its own {@code jpro-} prefix. */
+    private static final String RANGE_ID_PREFIX = "sticky-range-";
 
     private final Node node;
     private final ScrollPosition position;
@@ -178,12 +182,17 @@ public final class WebScrollImpl implements ScrollImpl {
         // during scene construction, before layout, when bounds are still zero. sync() refines it later.
         final double reservedHeight = (position == ScrollPosition.FIXED) ? 0
                 : AnchorGeometry.naturalHeight(node, AnchorGeometry.naturalWidth(node));
-        final Region ph = mount.mount(reservedHeight);
+        final Region ph = mount.mount(reservedHeight, position != ScrollPosition.FIXED);
         if (ph == null) {
             return; // could not mount (no Pane parent / overlay host), node stays in flow
         }
         this.placeholder = ph;
         this.overlay = mount.overlay();
+        // JPro nests the node below the span, and getElement() resolves to the inner element, so the
+        // sticky rule needs the span's own child. an id is how the script can tell which one that is.
+        if (mount.range() != null) {
+            mount.range().setId(RANGE_ID_PREFIX + jsKey);
+        }
         this.root = node.getScene().getRoot();
 
         // STICKY bounded by its containing block (explicit within, else original parent). FIXED is viewport-anchored.
@@ -287,8 +296,27 @@ public final class WebScrollImpl implements ScrollImpl {
             serverY = Math.min(serverY, relLimitServer);
         }
         final Point2D local = overlay.sceneToLocal(x, serverY);
-        node.setLayoutX(local.getX());
-        node.setLayoutY(local.getY());
+        final Pane range = mount.range();
+        if (range == null) {
+            node.setLayoutX(local.getX());
+            node.setLayoutY(local.getY());
+        } else {
+            // the span runs from the node's flow top to its release point, and position:sticky clamps to it,
+            // so the release needs no code. unbounded pins run to the end of the document.
+            final Point2D span = overlay.sceneToLocal(x, natTop);
+            final double relLimit = (relLimitServer >= 0) ? relLimitServer
+                    : Math.max(natTop, root.getLayoutBounds().getHeight() - nodeH);
+            range.setLayoutX(span.getX());
+            range.setLayoutY(span.getY());
+            range.resize(nodeW, Math.max(nodeH, (relLimit - natTop) + nodeH));
+            LOGGER.debug("jpro-sticky[{}]: range natTop={} relServer={} relLimit={} rootH={} nodeH={} -> h={}",
+                    jsKey, natTop, relLimitServer, relLimit, root.getLayoutBounds().getHeight(), nodeH,
+                    range.getHeight());
+            // the node rides the span's own box, so it sits at its origin and the renderer emits no
+            // transform on it; everything the pin does is then the sticky rule in the injected sheet.
+            node.setLayoutX(0);
+            node.setLayoutY(0);
+        }
 
         // the overlay may sit offset down the document (under a registered host, e.g. a popup nested in
         // the route). the compositor transform is relative to the overlay's own DOM box, so endpoints bake
@@ -324,13 +352,13 @@ public final class WebScrollImpl implements ScrollImpl {
         if (!installedCompositor) {
             // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
             // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
-            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
+            installPin(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX, nodeW, nodeH);
             installedCompositor = true;
             lastSig = sig;
             LOGGER.debug("jpro-sticky[{}]: compositor installed (w={}, natTop={}, y0={}, hostOffsetY={})",
                     jsKey, nodeW, natTop, y0, hostOffsetY);
         } else if (!sig.equals(lastSig)) {
-            installCompositor(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
+            installPin(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX, nodeW, nodeH);
             lastSig = sig;
         }
     }
@@ -381,6 +409,83 @@ public final class WebScrollImpl implements ScrollImpl {
      * it only goes stale, which {@code isConnected} detects. A re-install can also resolve the outgoing
      * element before the DOM rebuild replaces it, so a 500ms heartbeat rebinds once that peer detaches.
      */
+    /**
+     * A STICKY pin is a native {@code position: sticky} box inside its range pane, so the browser does the
+     * crossing on the compositor and nothing is measured or written per scroll. FIXED keeps the scripted
+     * path: it never crosses a threshold, but {@code position: fixed} is still captured by a transformed
+     * ancestor, which is what that script clears.
+     */
+    private void installPin(double x, double natTop, double y0, double relLimitServer,
+                            double hostOffsetY, double hostOffsetX, double nodeW, double nodeH) {
+        if (position == ScrollPosition.FIXED) {
+            installCompositor(x, natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
+        } else {
+            installSticky(y0, hostOffsetY, nodeW, nodeH);
+        }
+    }
+
+    private void installSticky(double y0, double hostOffsetY, double nodeW, double nodeH) {
+        elementVar = webapi.getElement(node);
+        final String d = elementVar.getName();
+        final boolean mouseTransparent = node.isMouseTransparent();
+        final String js =
+                "(function(){\n" +
+                "  var reg = (window.__jproStickyC = window.__jproStickyC || {});\n" +
+                "  var st = reg['" + jsKey + "'] = reg['" + jsKey + "'] || {};\n" +
+                "  st.dead = false; st.mode = 'sticky';\n" +
+                "  if(!st.style){ st.style = document.createElement('style');\n" +
+                "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
+                "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
+                "  st.inset = " + y0 + ";\n" +
+                "  st.rangeId = 'jpro-" + RANGE_ID_PREFIX + jsKey + "';\n" +
+                // sticky clamps to its own parent, so the rule has to land on the span's child, not on
+                // the inner element getElement() resolves to (that one is only as tall as the node).
+                "  st.target = function(el){\n" +
+                "    var c = el, p = el.parentElement, n = 0;\n" +
+                "    while(p && n++ < 64){\n" +
+                "      if(p.id === st.rangeId) return c;\n" +
+                "      c = p; p = p.parentElement;\n" +
+                "    }\n" +
+                "    return null; };\n" +
+                // sticky resolves in layout space, so only an ancestor transform displaces it. measured
+                // rather than baked: the fixed path rewrites those transforms to left / top as it runs.
+                "  st.shift = function(el){\n" +
+                "    var y = 0, p = el.parentElement, n = 0;\n" +
+                "    while(p && p !== document.documentElement && n++ < 64){\n" +
+                "      var m = /^matrix\\(1, 0, 0, 1, (-?[0-9.]+), (-?[0-9.]+)\\)$/\n" +
+                "        .exec(getComputedStyle(p).transform);\n" +
+                "      if(m) y += parseFloat(m[2]);\n" +
+                "      p = p.parentElement;\n" +
+                "    }\n" +
+                "    return y; };\n" +
+                // the range pane is the containing block, so the browser releases the pin at its bottom.
+                "  st.render = function(){\n" +
+                "    if(!st.el) return;\n" +
+                "    st.lastShift = st.shift(st.el);\n" +
+                "    st.style.textContent = st.sel + '{position:sticky !important;'\n" +
+                "      + 'top:' + (st.inset - st.lastShift) + 'px !important;'\n" +
+                "      + 'width:" + nodeW + "px !important;height:" + nodeH + "px !important;'\n" +
+                "      + '" + (mouseTransparent ? "pointer-events:none !important;" : "") + "}'; };\n" +
+                "  st.resolve = function(){ try { var e = " + d + "; return e && e.style ? e : null; } catch(e){ return null; } };\n" +
+                "  st.clear = function(el){ if(el) el.removeAttribute('data-jpro-sticky-el'); };\n" +
+                "  st.bind = function(){\n" +
+                "    var inner = st.resolve(); if(!inner) return false;\n" +
+                // the span is mounted with the node, so a missing one means the DOM is mid-rebuild.
+                "    var el = st.target(inner); if(!el) return false;\n" +
+                "    if(st.el && st.el !== el) st.clear(st.el);\n" +
+                "    el.setAttribute('data-jpro-sticky-el','" + jsKey + "');\n" +
+                "    st.el = el; st.render(); return true; };\n" +
+                "  st.bind();\n" +
+                // the peer can be replaced by a DOM rebuild, and only a re-bind retargets the rule.
+                "  if(!st.timer) st.timer = setInterval(function(){\n" +
+                "    if(st.dead) return;\n" +
+                "    if(!st.el || !st.el.isConnected){ st.bind(); return; }\n" +
+                // a fixed pin installing later rewrites the shared ancestors, which moves the pin line.
+                "    if(st.shift(st.el) !== st.lastShift) st.render(); }, 500);\n" +
+                "})();";
+        webapi.executeScript(js);
+    }
+
     private void installCompositor(double x, double natTop, double y0, double relLimitServer,
                                    double hostOffsetY, double hostOffsetX) {
         // a fresh slot per install: the defining command is one-shot per view, so a reconnect needs a
@@ -418,6 +523,37 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      p = p.parentElement;\n" +
                 "    }\n" +
                 "    return null; };\n" +
+                // a pure translate on an absolutely positioned box is the same geometry as left / top, and
+                // only the transform form captures position:fixed, so the pin survives the swap.
+                "  st.PURE = /^matrix\\(1, 0, 0, 1, (-?[0-9.]+), (-?[0-9.]+)\\)$/;\n" +
+                "  st.flatten = function(p){\n" +
+                "    var s = p.getAttribute('data-jpro-sticky-tf');\n" +
+                // the renderer drops a transform by writing null, which leaves the property empty, while our
+                // own write leaves the string none. empty on a flattened node means it is back at its base.
+                "    if(s !== null && p.style.transform === ''){\n" +
+                "      var b0 = s.split('|');\n" +
+                "      p.style.left = b0[3] + 'px'; p.style.top = b0[4] + 'px';\n" +
+                "      p.style.transform = 'none'; return;\n" +
+                "    }\n" +
+                "    var cs = getComputedStyle(p), m = st.PURE.exec(cs.transform);\n" +
+                "    if(!m || cs.position !== 'absolute' || cs.transformOrigin.indexOf('0px 0px') !== 0) return;\n" +
+                "    if(s === null){\n" +
+                "      s = [p.style.transform, p.style.left, p.style.top,\n" +
+                "           parseFloat(cs.left) || 0, parseFloat(cs.top) || 0].join('|');\n" +
+                "      p.setAttribute('data-jpro-sticky-tf', s);\n" +
+                "    }\n" +
+                // pins share ancestors, so every pin observes its own chain: one tearing down and
+                // disconnecting must not leave a node flattened with nobody watching it.
+                "    st.obs.observe(p, { attributes: true, attributeFilter: ['style'] });\n" +
+                // off the recorded base, never off the current left / top, so a re-apply cannot accumulate.
+                "    var b = s.split('|');\n" +
+                "    p.style.left = (parseFloat(b[3]) + parseFloat(m[1])) + 'px';\n" +
+                "    p.style.top = (parseFloat(b[4]) + parseFloat(m[2])) + 'px';\n" +
+                "    p.style.transform = 'none'; };\n" +
+                // updateTransformsF writes the transform back without reading it first, so every write to a
+                // flattened ancestor has to be swapped again. our own writes leave none and stop here.
+                "  st.obs = new MutationObserver(function(rs){\n" +
+                "    for(var i = 0; i < rs.length; i++) st.flatten(rs[i].target); });\n" +
                 // clears the only blocker that is safe to clear: will-change is a hint, transform / filter /
                 // contain are not. undoes JPro 412c150b on these ancestors; the pinned node keeps its layer.
                 "  st.unblock = function(el){\n" +
@@ -431,6 +567,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "        }\n" +
                 "        p.style.willChange = 'auto';\n" +
                 "      }\n" +
+                "      st.flatten(p);\n" +
                 "      p = p.parentElement;\n" +
                 "    }\n" +
                 "    return st.fixBlocker(el); };\n" +
@@ -658,11 +795,19 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  delete reg['" + jsKey + "'];\n" +
                 // shared ancestors, so this can only go back once the last pin is gone. found by attribute
                 // rather than from a list, which would retain the ancestors of every route already left.
+                "  if(st.obs) st.obs.disconnect();\n" +
                 "  if(Object.keys(reg).length === 0){\n" +
                 "    document.querySelectorAll('[data-jpro-sticky-wc]').forEach(function(p){\n" +
                 "      var was = p.getAttribute('data-jpro-sticky-wc');\n" +
                 "      if(was) p.style.willChange = was; else p.style.removeProperty('will-change');\n" +
                 "      p.removeAttribute('data-jpro-sticky-wc');\n" +
+                "    });\n" +
+                "    document.querySelectorAll('[data-jpro-sticky-tf]').forEach(function(p){\n" +
+                "      var b = p.getAttribute('data-jpro-sticky-tf').split('|');\n" +
+                "      if(b[0]) p.style.transform = b[0]; else p.style.removeProperty('transform');\n" +
+                "      if(b[1]) p.style.left = b[1]; else p.style.removeProperty('left');\n" +
+                "      if(b[2]) p.style.top = b[2]; else p.style.removeProperty('top');\n" +
+                "      p.removeAttribute('data-jpro-sticky-tf');\n" +
                 "    });\n" +
                 "  }\n" +
                 "})();");
