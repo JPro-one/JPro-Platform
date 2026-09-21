@@ -75,9 +75,6 @@ public final class WebScrollImpl implements ScrollImpl {
     /** Slack (px) below which the server pin is treated as sitting at the natural flow position. */
     private static final double STUCK_EPS = 0.5;
 
-    /** FX id given to a pin's span; JPro renders it as a DOM id under its own {@code jpro-} prefix. */
-    private static final String RANGE_ID_PREFIX = "sticky-range-";
-
     private final Node node;
     private final ScrollPosition position;
     private final ScrollAnchor anchor;
@@ -98,10 +95,11 @@ public final class WebScrollImpl implements ScrollImpl {
 
     // resolved at install time
     private WebAPI webapi;
-    /** The current {@code jpro.var_N} handle for the node's element. Held for as long as the emitted
-     *  script may use it: JPro's JSVariable cleanup fires {@code jpro.var_N = undefined} once this is
-     *  unreachable, which would leave the resolver (and so the rebind heartbeat) permanently dead. */
+    /** The current {@code jpro.var_N} handles for the node's and the span's elements. Held for as long
+     *  as the emitted script may use them: JPro's JSVariable cleanup fires {@code jpro.var_N = undefined}
+     *  once one is unreachable, which would leave the resolver (and so the rebind heartbeat) dead. */
     private JSVariable elementVar;
+    private JSVariable rangeVar;
     private Group overlay;
     private Region placeholder;
     private Parent root;
@@ -192,11 +190,6 @@ public final class WebScrollImpl implements ScrollImpl {
         }
         this.placeholder = ph;
         this.overlay = mount.overlay();
-        // JPro nests the node below the span, and getElement() resolves to the inner element, so the
-        // sticky rule needs the span's own child. an id is how the script can tell which one that is.
-        if (mount.range() != null) {
-            mount.range().setId(RANGE_ID_PREFIX + jsKey);
-        }
         this.root = node.getScene().getRoot();
 
         // STICKY bounded by its containing block (explicit within, else original parent). FIXED is viewport-anchored.
@@ -408,7 +401,9 @@ public final class WebScrollImpl implements ScrollImpl {
      */
     private void installSticky(double y0, double spanTop, double nodeW, double nodeH) {
         elementVar = webapi.getElement(node);
+        rangeVar = webapi.getElement(mount.range());
         final String d = elementVar.getName();
+        final String r = rangeVar.getName();
         final boolean mouseTransparent = node.isMouseTransparent();
         final String js =
                 "(function(){\n" +
@@ -419,7 +414,6 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
                 "  st.top = " + (y0 - spanTop) + ";\n" +
-                "  st.rangeId = 'jpro-" + RANGE_ID_PREFIX + jsKey + "';\n" +
                 // sticky holds against the nearest scroll container, and an element is one merely by
                 // having a non-visible overflow. report it rather than touch the host page's styles.
                 "  st.scrollport = function(el){\n" +
@@ -450,10 +444,10 @@ public final class WebScrollImpl implements ScrollImpl {
                 "           + ' the clip on <html> so <body> keeps handing its overflow to the viewport.')); };\n" +
                 // sticky clamps to its own parent, so the rule has to land on the span's child, not on
                 // the inner element getElement() resolves to (that one is only as tall as the node).
-                "  st.target = function(el){\n" +
+                "  st.target = function(el, range){\n" +
                 "    var c = el, p = el.parentElement, n = 0;\n" +
                 "    while(p && n++ < 64){\n" +
-                "      if(p.id === st.rangeId) return c;\n" +
+                "      if(p === range) return c;\n" +
                 "      c = p; p = p.parentElement;\n" +
                 "    }\n" +
                 "    return null; };\n" +
@@ -468,12 +462,13 @@ public final class WebScrollImpl implements ScrollImpl {
                 // the server keeps the node at the pinned position so the scene pick lands on it, and the
                 // renderer writes that out below the pin. the rule places the box, so the offset has to go.
                 "      + st.sel + ',' + st.sel + ' > *{transform:none !important;}'; };\n" +
-                "  st.resolve = function(){ try { var e = " + d + "; return e && e.style ? e : null; } catch(e){ return null; } };\n" +
+                "  st.resolve = function(){ try { var e = " + d + ", r = " + r + ";\n" +
+                "    return e && r && e.style && r.style ? {el: e, range: r} : null; } catch(x){ return null; } };\n" +
                 "  st.clear = function(el){ if(el) el.removeAttribute('data-jpro-sticky-el'); };\n" +
                 "  st.bind = function(){\n" +
-                "    var inner = st.resolve(); if(!inner) return false;\n" +
+                "    var h = st.resolve(); if(!h) return false;\n" +
                 // the span is mounted with the node, so a missing one means the DOM is mid-rebuild.
-                "    var el = st.target(inner); if(!el) return false;\n" +
+                "    var el = st.target(h.el, h.range); if(!el) return false;\n" +
                 "    if(st.el && st.el !== el) st.clear(st.el);\n" +
                 "    el.setAttribute('data-jpro-sticky-el','" + jsKey + "');\n" +
                 "    st.el = el; st.render(); return true; };\n" +
@@ -521,8 +516,9 @@ public final class WebScrollImpl implements ScrollImpl {
             container.localToSceneTransformProperty().removeListener(relayout);
         }
 
-        // release the element handle; its cleanup nulls the now-unused slot browser-side.
+        // release the element handles; their cleanup nulls the now-unused slots browser-side.
         elementVar = null;
+        rangeVar = null;
 
         // restore the node to its flow slot.
         mount.unmount();
