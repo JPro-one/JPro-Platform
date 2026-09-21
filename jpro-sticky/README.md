@@ -205,8 +205,10 @@ a `ScrollPane` doesn't need this.)
 container, whether or not it can actually scroll, and a sticky node pins against the nearest one. A
 `<body>` that clips therefore pins every node to a viewport that never moves. The trap is that
 setting one axis is enough: `overflow-x: hidden` alone makes `overflow-y` compute to `auto`. Put the
-horizontal clip on `<html>` instead, as above. The library detects and lifts such a clip at runtime,
-but it logs nothing and the page is better off without one.
+horizontal clip on `<html>` instead, as above: `<html>` is where the viewport's own scrolling comes
+from, so clipping it creates no inner scrollport. The library lifts such a clip off `<body>` at
+runtime so the pin still works, and warns on the browser console if that clip was holding back real
+horizontal overflow, since lifting it can surface a scrollbar.
 
 ### Stacking order
 
