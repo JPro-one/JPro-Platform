@@ -438,6 +438,22 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
                 "  st.inset = " + y0 + ";\n" +
                 "  st.rangeId = 'jpro-" + RANGE_ID_PREFIX + jsKey + "';\n" +
+                // sticky holds against the nearest scroll container, and an element that cannot scroll is
+                // still one, so the pin would hold against a viewport that never moves. body is often one.
+                "  st.unclip = function(el){\n" +
+                "    var p = el.parentElement, n = 0;\n" +
+                "    while(p && p !== document.documentElement && n++ < 64){\n" +
+                "      var cs = getComputedStyle(p);\n" +
+                "      if((/auto|scroll|hidden/.test(cs.overflowX) || /auto|scroll|hidden/.test(cs.overflowY))\n" +
+                "         && p.scrollHeight <= p.clientHeight + 1 && p.scrollWidth <= p.clientWidth + 1){\n" +
+                "        if(!p.hasAttribute('data-jpro-sticky-ov')){\n" +
+                "          p.setAttribute('data-jpro-sticky-ov', p.style.overflow || '');\n" +
+                "        }\n" +
+                // both axes together: visible on one computes back to auto while the other clips.
+                "        p.style.setProperty('overflow', 'visible', 'important');\n" +
+                "      }\n" +
+                "      p = p.parentElement;\n" +
+                "    } };\n" +
                 // sticky clamps to its own parent, so the rule has to land on the span's child, not on
                 // the inner element getElement() resolves to (that one is only as tall as the node).
                 "  st.target = function(el){\n" +
@@ -461,6 +477,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 // the range pane is the containing block, so the browser releases the pin at its bottom.
                 "  st.render = function(){\n" +
                 "    if(!st.el) return;\n" +
+                "    st.unclip(st.el);\n" +
                 "    st.lastShift = st.shift(st.el);\n" +
                 "    st.style.textContent = st.sel + '{position:sticky !important;'\n" +
                 "      + 'top:' + (st.inset - st.lastShift) + 'px !important;'\n" +
@@ -804,6 +821,11 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      var was = p.getAttribute('data-jpro-sticky-wc');\n" +
                 "      if(was) p.style.willChange = was; else p.style.removeProperty('will-change');\n" +
                 "      p.removeAttribute('data-jpro-sticky-wc');\n" +
+                "    });\n" +
+                "    document.querySelectorAll('[data-jpro-sticky-ov]').forEach(function(p){\n" +
+                "      var wasOv = p.getAttribute('data-jpro-sticky-ov');\n" +
+                "      if(wasOv) p.style.overflow = wasOv; else p.style.removeProperty('overflow');\n" +
+                "      p.removeAttribute('data-jpro-sticky-ov');\n" +
                 "    });\n" +
                 "    document.querySelectorAll('[data-jpro-sticky-tf]').forEach(function(p){\n" +
                 "      var b = p.getAttribute('data-jpro-sticky-tf').split('|');\n" +
