@@ -40,11 +40,15 @@ import java.util.function.Consumer;
  * the length of the document: a viewport-anchored node always fits the viewport, so that span's end
  * is out of reach and the pin never releases.
  * <p>
- * <strong>Two corrections the sheet carries.</strong> Sticky resolves in layout space, so an
- * ancestor {@code transform} displaces it; the script reads that shift off the DOM and subtracts it,
- * because the server cannot see what the renderer wrote. And sticky holds against the nearest scroll container, which an
- * ancestor becomes merely by having a non-visible {@code overflow} ({@code body} usually does), so
- * one that cannot scroll is cleared.
+ * <strong>The correction the sheet carries.</strong> Sticky resolves in layout space, so an ancestor
+ * {@code transform} displaces it; the script reads that shift off the DOM and subtracts it, because
+ * the server cannot see what the renderer wrote.
+ * <p>
+ * Sticky also holds against the nearest scroll container, which an ancestor becomes merely by having
+ * a non-visible {@code overflow}. That is the host page's business, not this class's, so a pin only
+ * reports the one it found on the console. {@code body} is the case worth knowing: it hands its
+ * overflow to the viewport while {@code html} is {@code visible}, and becomes a scroll container in
+ * its own right only once {@code html} clips too.
  * <p>
  * The server keeps the node at the position it appears at, because picking is a scene pick and a
  * node parked at the span's origin is not where the click lands. The renderer writes that offset out
@@ -295,6 +299,8 @@ public final class WebScrollImpl implements ScrollImpl {
         }
         final Point2D local = overlay.sceneToLocal(x, serverY);
         final Pane range = mount.range();
+        // FIXED spans the document from its top, STICKY from the node's flow top.
+        final double spanTop = fixed ? 0 : natTop;
         if (range == null) {
             node.setLayoutX(local.getX());
             node.setLayoutY(local.getY());
@@ -302,7 +308,6 @@ public final class WebScrollImpl implements ScrollImpl {
             // the span runs from the node's flow top to its release point. unbounded pins, FIXED
             // included, run to the end of the document.
             final double docH = root.getLayoutBounds().getHeight();
-            final double spanTop = fixed ? 0 : natTop;
             final double relLimit = fixed ? (docH - nodeH)
                     : (relLimitServer >= 0 ? relLimitServer : Math.max(natTop, docH - nodeH));
             // a fixed node taller than the viewport can reach its span's end, so it drifts there.
@@ -330,14 +335,15 @@ public final class WebScrollImpl implements ScrollImpl {
             }
         }
 
-        // only the values the sheet contains. the span and the node's position are server-side layout.
-        final String sig = y0 + "|" + nodeW + "|" + nodeH;
+        // what the sheet contains, plus the span's top: moving the span moves the very ancestor
+        // transform the script measures, so a stale offset outlives the change without it.
+        final String sig = y0 + "|" + nodeW + "|" + nodeH + "|" + spanTop;
 
         // NaN/Infinity are valid JS literals, so a non-finite value installs cleanly and then dies in
         // the CSS parser, leaving a dead pin and nothing in any log. refuse the install instead.
-        if (!allFinite(y0, nodeW, nodeH)) {
-            LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry (y0={}, w={}, h={})",
-                    jsKey, y0, nodeW, nodeH);
+        if (!allFinite(y0, nodeW, nodeH, spanTop)) {
+            LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry (y0={}, w={}, h={}, spanTop={})",
+                    jsKey, y0, nodeW, nodeH, spanTop);
             return;
         }
 
@@ -412,37 +418,34 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
                 "  st.inset = " + y0 + ";\n" +
                 "  st.rangeId = 'jpro-" + RANGE_ID_PREFIX + jsKey + "';\n" +
-                // sticky holds against the nearest scroll container, and an element that cannot scroll is
-                // still one, so the pin would hold against a viewport that never moves. body is often one.
-                "  st.unclip = function(el){\n" +
+                // sticky holds against the nearest scroll container, and an element is one merely by
+                // having a non-visible overflow. report it rather than touch the host page's styles.
+                "  st.scrollport = function(el){\n" +
+                "    var de = document.documentElement, dcs = getComputedStyle(de);\n" +
+                "    var rootVisible = dcs.overflowX === 'visible' && dcs.overflowY === 'visible';\n" +
                 "    var p = el.parentElement, n = 0;\n" +
-                "    while(p && p !== document.documentElement && n++ < 64){\n" +
+                "    while(p && p !== de && n++ < 64){\n" +
                 "      var cs = getComputedStyle(p);\n" +
                 "      if(/auto|scroll|hidden/.test(cs.overflowX) || /auto|scroll|hidden/.test(cs.overflowY)){\n" +
-                // only vertical scrollability decides: an embedded jpro tag can sit inside a real
-                // scroller, and that one owns the pin while the offset came from the browser viewport.
-                "        if(p.scrollHeight > p.clientHeight + 1){\n" +
-                "          if(!st.warnedScroller){ st.warnedScroller = true;\n" +
-                "            console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': an ancestor of this pin'\n" +
-                "              + ' scrolls, so the pin holds against it and not against the page. The'\n" +
-                "              + ' offset is measured from the browser viewport and may be off by the'\n" +
-                "              + \" scroller's own position.\"); }\n" +
-                "          return;\n" +
-                "        }\n" +
-                // a clip that was really holding back wider content, so lifting it can surface a
-                // horizontal scrollbar. the pin is worth more than the clip, but say so.
-                "        if(p.scrollWidth > p.clientWidth + 1 && !st.warnedClip){ st.warnedClip = true;\n" +
-                "          console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': lifting a horizontal clip'\n" +
-                "            + ' that made this element a scrollport the pin could not move in. Put the'\n" +
-                "            + ' clip on <html> instead of <body> to keep it.'); }\n" +
-                "        if(!p.hasAttribute('data-jpro-sticky-ov')){\n" +
-                "          p.setAttribute('data-jpro-sticky-ov', p.style.overflow || '');\n" +
-                "        }\n" +
-                // both axes together: visible on one computes back to auto while the other clips.
-                "        p.style.setProperty('overflow', 'visible', 'important');\n" +
+                // body hands its overflow to the viewport while html is visible, so it is not the
+                // scrollport then. only a clipping html stops that and makes body a real one.
+                "        if(p !== document.body || !rootVisible) return p;\n" +
                 "      }\n" +
                 "      p = p.parentElement;\n" +
-                "    } };\n" +
+                "    }\n" +
+                "    return null; };\n" +
+                "  st.checkPort = function(el){\n" +
+                "    if(st.warnedPort) return;\n" +
+                "    var p = st.scrollport(el); if(!p) return;\n" +
+                "    st.warnedPort = true;\n" +
+                "    var name = p.tagName.toLowerCase() + (p.id ? '#' + p.id : '');\n" +
+                "    console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': ' + name + ' is the nearest'\n" +
+                "      + ' scroll container, so it owns this pin. '\n" +
+                "      + (p.scrollHeight > p.clientHeight + 1\n" +
+                "         ? 'The offset is measured from the browser viewport, not from it, so the pin'\n" +
+                "           + ' line may be off by that element\\'s own position.'\n" +
+                "         : 'It cannot scroll, so the pin will not move. Give it overflow:visible, or put'\n" +
+                "           + ' the clip on <html> so <body> keeps handing its overflow to the viewport.')); };\n" +
                 // sticky clamps to its own parent, so the rule has to land on the span's child, not on
                 // the inner element getElement() resolves to (that one is only as tall as the node).
                 "  st.target = function(el){\n" +
@@ -466,7 +469,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 // the range pane is the containing block, so the browser releases the pin at its bottom.
                 "  st.render = function(){\n" +
                 "    if(!st.el) return;\n" +
-                "    st.unclip(st.el);\n" +
+                "    st.checkPort(st.el);\n" +
                 "    st.lastShift = st.shift(st.el);\n" +
                 "    st.style.textContent = st.sel + '{position:sticky !important;'\n" +
                 "      + 'top:' + (st.inset - st.lastShift) + 'px !important;'\n" +
@@ -571,15 +574,6 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.el = null;\n" +
                 "  if(st.style && st.style.parentNode) st.style.parentNode.removeChild(st.style);\n" +
                 "  delete reg['" + jsKey + "'];\n" +
-                // shared ancestors, so this can only go back once the last pin is gone. found by attribute
-                // rather than from a list, which would retain the ancestors of every route already left.
-                "  if(Object.keys(reg).length === 0){\n" +
-                "    document.querySelectorAll('[data-jpro-sticky-ov]').forEach(function(p){\n" +
-                "      var was = p.getAttribute('data-jpro-sticky-ov');\n" +
-                "      if(was) p.style.overflow = was; else p.style.removeProperty('overflow');\n" +
-                "      p.removeAttribute('data-jpro-sticky-ov');\n" +
-                "    });\n" +
-                "  }\n" +
                 "})();");
     }
 }

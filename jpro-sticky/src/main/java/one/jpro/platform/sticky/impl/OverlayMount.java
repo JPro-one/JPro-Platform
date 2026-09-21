@@ -103,7 +103,7 @@ final class OverlayMount {
             r.setManaged(false);
             // the span is a positioning box, never a hit target: picking stays with the node inside it.
             r.setPickOnBounds(false);
-            r.getStyleClass().add("jpro-sticky-range");
+            r.getStyleClass().add(StickyOverlay.RANGE_STYLE_CLASS);
             r.getChildren().add(node);
             StickyOverlay.insertSorted(overlay, r, stackOrder);
             this.range = r;

@@ -49,6 +49,9 @@ public final class StickyOverlay {
     /** {@code id} stamped on every overlay {@link Group}, lets {@link #isOverlay} spot a mounted node. */
     private static final String OVERLAY_ID = "jpro-sticky-overlay";
 
+    /** Style class of the per-pin span the web path mounts a node into (see {@link OverlayMount#mount}). */
+    static final String RANGE_STYLE_CLASS = "jpro-sticky-range";
+
     /**
      * {@code viewOrder} for the overlay {@link Group} itself (negative = in front), so it paints above the
      * host's other children regardless of child-list order. Needed when the host is a routing container
@@ -218,7 +221,8 @@ public final class StickyOverlay {
             return true;
         }
         // a web pin sits one level deeper, inside its own span (see OverlayMount#mount).
-        return parent != null && parent.getParent() instanceof Group
+        return parent != null && parent.getStyleClass().contains(RANGE_STYLE_CLASS)
+                && parent.getParent() instanceof Group
                 && OVERLAY_ID.equals(parent.getParent().getId());
     }
 
