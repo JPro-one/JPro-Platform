@@ -40,9 +40,10 @@ import java.util.function.Consumer;
  * the length of the document: a viewport-anchored node always fits the viewport, so that span's end
  * is out of reach and the pin never releases.
  * <p>
- * <strong>The correction the sheet carries.</strong> Sticky resolves in layout space, so an ancestor
- * {@code transform} displaces it; the script reads that shift off the DOM and subtracts it, because
- * the server cannot see what the renderer wrote.
+ * <strong>The correction the sheet carries.</strong> The renderer writes every node's layout as a
+ * CSS {@code transform}, and sticky resolves in layout space, before transforms, so the ancestors'
+ * translates displace it. Their sum is the span's scene y, which the server subtracts from the inset
+ * when it writes the rule.
  * <p>
  * Sticky also holds against the nearest scroll container, which an ancestor becomes merely by having
  * a non-visible {@code overflow}. That is the host page's business, not this class's, so a pin only
@@ -350,13 +351,13 @@ public final class WebScrollImpl implements ScrollImpl {
         if (!installedSticky) {
             // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
             // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
-            installSticky(y0, nodeW, nodeH);
+            installSticky(y0, spanTop, nodeW, nodeH);
             installedSticky = true;
             lastSig = sig;
             LOGGER.debug("jpro-sticky[{}]: sticky rule installed (w={}, h={}, y0={})",
                     jsKey, nodeW, nodeH, y0);
         } else if (!sig.equals(lastSig)) {
-            installSticky(y0, nodeW, nodeH);
+            installSticky(y0, spanTop, nodeW, nodeH);
             lastSig = sig;
         }
     }
@@ -390,7 +391,8 @@ public final class WebScrollImpl implements ScrollImpl {
      * node with inline {@code style.transform}, and an important author rule is the only declaration
      * that outranks inline. Assumes an svg scale of 1 (true for native-scrolling pages).
      * <p>
-     * {@code y0} is the viewport pin line, and {@code nodeW}/{@code nodeH} the resolved box. Nothing
+     * {@code y0} is the viewport pin line, {@code spanTop} the span's scene y (the sum of the ancestor
+     * layout transforms sticky ignores), and {@code nodeW}/{@code nodeH} the resolved box. Nothing
      * else is written into the sheet: the span's extent and the node's own offset are server-side
      * layout, and the browser derives the release from the span. The scroll position never enters it.
      * <p>
@@ -404,7 +406,7 @@ public final class WebScrollImpl implements ScrollImpl {
      * it only goes stale, which {@code isConnected} detects. A re-install can also resolve the outgoing
      * element before the DOM rebuild replaces it, so a 500ms heartbeat rebinds once that peer detaches.
      */
-    private void installSticky(double y0, double nodeW, double nodeH) {
+    private void installSticky(double y0, double spanTop, double nodeW, double nodeH) {
         elementVar = webapi.getElement(node);
         final String d = elementVar.getName();
         final boolean mouseTransparent = node.isMouseTransparent();
@@ -416,7 +418,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  if(!st.style){ st.style = document.createElement('style');\n" +
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
-                "  st.inset = " + y0 + ";\n" +
+                "  st.top = " + (y0 - spanTop) + ";\n" +
                 "  st.rangeId = 'jpro-" + RANGE_ID_PREFIX + jsKey + "';\n" +
                 // sticky holds against the nearest scroll container, and an element is one merely by
                 // having a non-visible overflow. report it rather than touch the host page's styles.
@@ -455,24 +457,12 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      c = p; p = p.parentElement;\n" +
                 "    }\n" +
                 "    return null; };\n" +
-                // sticky resolves in layout space, so only an ancestor transform displaces it. read on
-                // every render, since the renderer can write or clear a transform at any time.
-                "  st.shift = function(el){\n" +
-                "    var y = 0, p = el.parentElement, n = 0;\n" +
-                "    while(p && p !== document.documentElement && n++ < 64){\n" +
-                "      var m = /^matrix\\(1, 0, 0, 1, (-?[0-9.]+), (-?[0-9.]+)\\)$/\n" +
-                "        .exec(getComputedStyle(p).transform);\n" +
-                "      if(m) y += parseFloat(m[2]);\n" +
-                "      p = p.parentElement;\n" +
-                "    }\n" +
-                "    return y; };\n" +
                 // the range pane is the containing block, so the browser releases the pin at its bottom.
                 "  st.render = function(){\n" +
                 "    if(!st.el) return;\n" +
                 "    st.checkPort(st.el);\n" +
-                "    st.lastShift = st.shift(st.el);\n" +
                 "    st.style.textContent = st.sel + '{position:sticky !important;'\n" +
-                "      + 'top:' + (st.inset - st.lastShift) + 'px !important;'\n" +
+                "      + 'top:' + st.top + 'px !important;'\n" +
                 "      + 'width:" + nodeW + "px !important;height:" + nodeH + "px !important;'\n" +
                 "      + '" + (mouseTransparent ? "pointer-events:none !important;" : "") + "}'\n" +
                 // the server keeps the node at the pinned position so the scene pick lands on it, and the
@@ -491,9 +481,7 @@ public final class WebScrollImpl implements ScrollImpl {
                 // the peer can be replaced by a DOM rebuild, and only a re-bind retargets the rule.
                 "  if(!st.timer) st.timer = setInterval(function(){\n" +
                 "    if(st.dead) return;\n" +
-                "    if(!st.el || !st.el.isConnected){ st.bind(); return; }\n" +
-                // a fixed pin installing later rewrites the shared ancestors, which moves the pin line.
-                "    if(st.shift(st.el) !== st.lastShift) st.render(); }, 500);\n" +
+                "    if(!st.el || !st.el.isConnected) st.bind(); }, 500);\n" +
                 "})();";
         webapi.executeScript(js);
     }

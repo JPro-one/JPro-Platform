@@ -190,7 +190,7 @@ a `ScrollPane` doesn't need this.)
 <style>
   html {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
@@ -201,12 +201,13 @@ a `ScrollPane` doesn't need this.)
 <jpro-app href="/app/default" nativescrolling="true" fxHeight="true" nativeZooming="true"></jpro-app>
 ```
 
-**Put a horizontal clip on `<html>`, not on both.** Any element whose overflow is not `visible` is a
-scroll container, whether or not it can actually scroll, and a sticky node pins against the nearest
-one. `<body>` is a special case: it hands its overflow to the viewport as long as `<html>` is
-`visible`, so `body { overflow-x: hidden }` on its own is harmless. Clip `<html>` *as well* and that
-hand-off stops, `<body>` becomes a scroll container that never scrolls, and every pin holds against
-it instead of the page. One axis is enough to trigger it, since `overflow-x: hidden` makes
+**Clip with `overflow-x: clip`, or clip `<html>` only.** Any element whose overflow is `hidden`,
+`auto` or `scroll` is a scroll container, whether or not it can actually scroll, and a sticky node
+pins against the nearest one. `clip` clips without creating one, so it is safe on `<html>`, `<body>`
+or both. With `hidden` the placement matters: `<body>` hands its overflow to the viewport as long as
+`<html>` is `visible`, so `body { overflow-x: hidden }` on its own is harmless, but clip `<html>` as
+well and that hand-off stops, `<body>` becomes a scroll container that never scrolls, and every pin
+holds against it instead of the page. One axis is enough, since `overflow-x: hidden` makes
 `overflow-y` compute to `auto`. The library never edits your styles; it names the scroll container it
 found on the browser console.
 
