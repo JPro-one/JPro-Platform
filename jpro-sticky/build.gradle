@@ -14,7 +14,7 @@ test {
   if (System.getProperty('jpro.test.port') != null) {
     systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
   }
-  // installPlaywright already provisioned the browser — don't re-download during the run.
+  // installPlaywright already provisioned the browser, so skip the download during the run.
   environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
 }
 
@@ -27,11 +27,10 @@ tasks.register('installPlaywright', JavaExec) {
   args = ['install', '--with-deps', 'chromium']
 }
 
-// StickyNoScrollTimelineTest covers the engines that lack scroll-driven animations, and Firefox is
-// the one such engine Playwright ships.
+// StickyFirefoxTest drives the engine issue #127 was reported against.
 tasks.register('installPlaywrightFirefox', JavaExec) {
   group = 'verification'
-  description = 'Install the Firefox browser used by StickyNoScrollTimelineTest'
+  description = 'Install the Firefox browser used by StickyFirefoxTest'
   classpath = sourceSets.test.runtimeClasspath
   mainClass = 'com.microsoft.playwright.CLI'
   args = ['install', '--with-deps', 'firefox']

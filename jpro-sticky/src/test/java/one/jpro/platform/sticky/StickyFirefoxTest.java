@@ -16,18 +16,13 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Regression guard for issue #127 on engines <em>without</em> scroll-driven animations.
- *
- * <p>Firefox does not support {@code animation-timeline: scroll()} (nor does Safari &lt; 26), and the
- * rule {@code WebScrollImpl} emits is actively harmful there if it is emitted anyway: the engine drops
- * the unknown {@code animation-timeline}, {@code animation-duration: auto} resolves to {@code 0s}, and
- * {@code animation-fill-mode: both} snaps the node to the {@code to} keyframe — parking every pinned
- * element a document-height below the viewport, i.e. invisible. This test drives the real app in
- * Firefox and asserts pinned elements are on screen and pinned by the server-side fallback.
+ * Regression guard for issue #127, which was reported against Firefox: every pinned node sat a
+ * document height below the viewport, out of sight. This drives the real app in Firefox and asserts
+ * the pinned elements are on screen, with the sticky header at its pin.
  *
  * <p>Requires a Firefox installed via {@code ./gradlew :jpro-sticky:installPlaywrightFirefox}.
  */
-public class StickyNoScrollTimelineTest extends JProPlaywrightTest {
+public class StickyFirefoxTest extends JProPlaywrightTest {
 
     private static final File LOGS_DIR = new File(projectRoot(), "jpro-sticky/example/logs");
 
@@ -52,8 +47,8 @@ public class StickyNoScrollTimelineTest extends JProPlaywrightTest {
     }
 
     @Test
-    @DisplayName("#127: without scroll-timeline support, pinned nodes stay on screen (not parked off-page)")
-    void pinnedNodesStayOnScreenWithoutScrollTimelineSupport() {
+    @DisplayName("#127: pinned nodes stay on screen in Firefox (not parked off-page)")
+    void pinnedNodesStayOnScreenInFirefox() {
         Page page = firefox.newContext(
                 new Browser.NewContextOptions().setViewportSize(420, 860)).newPage();
         page.navigate(BASE_URL);
@@ -62,18 +57,10 @@ public class StickyNoScrollTimelineTest extends JProPlaywrightTest {
                 new Locator.WaitForOptions().setTimeout(180_000));
         page.waitForTimeout(3000);
 
-        // Precondition: this really is an engine without scroll-driven animations, so the guard is
-        // what is under test rather than the compositor path.
-        assertTrue(Boolean.FALSE.equals(page.evaluate(
-                        "() => CSS.supports('animation-timeline','scroll()')")),
-                "expected Firefox to lack scroll-driven animations; if it gained them, "
-                        + "this test no longer covers the unsupported path");
-
         page.evaluate("() => window.scrollBy(0, 400)");
         page.waitForTimeout(1500);
 
-        // The bug parked pinned nodes ~a document height down (~6300px). Assert they are pinned near
-        // the viewport top instead -- the server-side fallback's job.
+        // the bug parked pinned nodes about a document height down (~6300px).
         for (String id : new String[]{"#jpro-sticky-header", "#jpro-toast", "#jpro-bottom-bar",
                 "#jpro-fab", "#jpro-overlay"}) {
             double top = page.locator(id).boundingBox().y;

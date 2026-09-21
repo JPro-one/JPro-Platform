@@ -60,10 +60,9 @@ final class OverlayMount {
      * As {@link #mount(double)}, but optionally puts the node inside a per-pin range pane rather than
      * straight into the overlay.
      *
-     * @param withRange when {@code true}, the node is mounted inside a {@link #range()} pane that the caller
-     *                  sizes to the pin's scroll span. The web sticky path needs it: {@code position: sticky}
-     *                  clamps to its containing block, so the span has to be a real box in the DOM, and it has
-     *                  to come from a node JPro renders itself rather than an element injected underneath it.
+     * @param withRange when {@code true}, the node is mounted inside a {@link #range()} pane that the
+     *                  caller sizes to the pin's scroll span. {@code position: sticky} clamps to its
+     *                  containing block, so the web path needs that span as a real box in the DOM.
      */
     Region mount(double reservedHeight, boolean withRange) {
         final Parent parent = node.getParent();

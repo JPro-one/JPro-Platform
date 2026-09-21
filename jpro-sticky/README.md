@@ -203,12 +203,10 @@ a `ScrollPane` doesn't need this.)
 
 **Keep `<body>` overflow visible.** Any element whose overflow is not `visible` is a scroll
 container, whether or not it can actually scroll, and a sticky node pins against the nearest one. A
-`<body>` that clips therefore pins every node to a viewport that never moves. The trap is that
-setting one axis is enough: `overflow-x: hidden` alone makes `overflow-y` compute to `auto`. Put the
-horizontal clip on `<html>` instead, as above: `<html>` is where the viewport's own scrolling comes
-from, so clipping it creates no inner scrollport. The library lifts such a clip off `<body>` at
-runtime so the pin still works, and warns on the browser console if that clip was holding back real
-horizontal overflow, since lifting it can surface a scrollbar.
+`<body>` that clips therefore pins every node to a viewport that never moves, and one axis is enough
+to do it: `overflow-x: hidden` alone makes `overflow-y` compute to `auto`. Put the horizontal clip on
+`<html>` instead, as above; clipping the root creates no inner scrollport. The library lifts such a
+clip off `<body>` at runtime, and warns on the console when it was holding back real overflow.
 
 ### Stacking order
 
@@ -240,10 +238,10 @@ Scroll.registerOverlayHost(popupContainer);
 ```
 
 **On the web, the browser owns the pin.** The node is mounted inside a pane sized to the range it
-should travel, and an injected rule makes that pane's element `position: sticky` at the anchor's
-inset. Sticky clamps to its containing block, so the release point is the pane's own end and no code
-runs per scroll event. Fixed is the same pin over a pane as long as the document: a viewport-anchored
-node fits the viewport, so that end stays out of reach and the pin never releases.
+should travel, and an injected rule makes the node itself `position: sticky` at the anchor's inset.
+Sticky clamps to its containing block, which is that pane, so the release point is the pane's end and
+no code runs per scroll event. Fixed is the same pin over a pane as long as the document: a
+viewport-anchored node fits the viewport, so that end stays out of reach and the pin never releases.
 
 **On the web, the stuck flip can trail the visuals.** `:stuck` and `stuckProperty` track the
 browser-viewport sync cadence, so they update up to one sync interval after the node pins. Inside a

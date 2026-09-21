@@ -44,7 +44,7 @@ import java.util.function.Consumer;
  * ancestor {@code transform} displaces it; that shift is measured in the browser, not baked, and
  * subtracted from the offset. And sticky holds against the nearest scroll container, which an
  * ancestor becomes merely by having a non-visible {@code overflow} ({@code body} usually does), so
- * one that cannot scroll at all is cleared, where it changes nothing else.
+ * one that cannot scroll is cleared.
  * <p>
  * The server keeps the node at the position it appears at, because picking is a scene pick and a
  * node parked at the span's origin is not where the click lands. The renderer writes that offset out
@@ -299,16 +299,13 @@ public final class WebScrollImpl implements ScrollImpl {
             node.setLayoutX(local.getX());
             node.setLayoutY(local.getY());
         } else {
-            // the span runs from the node's flow top to its release point, and position:sticky clamps to it,
-            // so the release needs no code. unbounded pins run to the end of the document.
-            // FIXED spans the document from its very top: a viewport-anchored node always fits the
-            // viewport, so the span's end is out of reach and the pin never releases.
+            // the span runs from the node's flow top to its release point. unbounded pins, FIXED
+            // included, run to the end of the document.
             final double docH = root.getLayoutBounds().getHeight();
             final double spanTop = fixed ? 0 : natTop;
             final double relLimit = fixed ? (docH - nodeH)
                     : (relLimitServer >= 0 ? relLimitServer : Math.max(natTop, docH - nodeH));
-            // FIXED rides its span because a viewport-anchored node fits the viewport, so the span's end
-            // stays out of reach. A node taller than the viewport breaks that and drifts near the end.
+            // a fixed node taller than the viewport can reach its span's end, so it drifts there.
             if (fixed && viewportH > 0 && y0 + nodeH > viewportH + STUCK_EPS) {
                 LOGGER.warn("jpro-sticky[{}]: fixed node is taller than the viewport ({} + {} > {});"
                         + " the pin will drift near the end of the document.", jsKey, y0, nodeH, viewportH);
@@ -317,8 +314,8 @@ public final class WebScrollImpl implements ScrollImpl {
             range.setLayoutX(span.getX());
             range.setLayoutY(span.getY());
             range.resize(nodeW, Math.max(nodeH, (relLimit - spanTop) + nodeH));
-            // picking is a scene pick on the server, so the node has to sit where it appears, exactly as
-            // it does without a span. the sticky rule drops the transform that produces on its element.
+            // picking is a scene pick, so the node sits where it appears. the sheet drops the
+            // transform that produces.
             node.setLayoutX(local.getX() - span.getX());
             node.setLayoutY(local.getY() - span.getY());
         }
@@ -333,13 +330,11 @@ public final class WebScrollImpl implements ScrollImpl {
             }
         }
 
-        // only what the sheet bakes in: the span and the node's position are server-side layout,
-        // which re-runs on its own.
+        // only what the sheet bakes in. the span and the node's position are server-side layout.
         final String sig = y0 + "|" + nodeW + "|" + nodeH;
 
-        // NaN/Infinity are valid JS literals, so a non-finite value here would install cleanly and then
-        // fail silently: the emitted declaration is rejected by the CSS parser, leaving a dead pin and
-        // nothing in any log. Refuse the install instead.
+        // NaN/Infinity are valid JS literals, so a non-finite value installs cleanly and then dies in
+        // the CSS parser, leaving a dead pin and nothing in any log. refuse the install instead.
         if (!allFinite(y0, nodeW, nodeH)) {
             LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry (y0={}, w={}, h={})",
                     jsKey, y0, nodeW, nodeH);
