@@ -214,7 +214,12 @@ public final class StickyOverlay {
      * @return {@code true} if {@code parent} is a sticky overlay
      */
     static boolean isOverlay(Node parent) {
-        return parent instanceof Group && OVERLAY_ID.equals(parent.getId());
+        if (parent instanceof Group && OVERLAY_ID.equals(parent.getId())) {
+            return true;
+        }
+        // a web pin sits one level deeper, inside its own span (see OverlayMount#mount).
+        return parent != null && parent.getParent() instanceof Group
+                && OVERLAY_ID.equals(parent.getParent().getId());
     }
 
     /** The stack order stashed on a mounted node, or {@link Long#MIN_VALUE} if absent. */

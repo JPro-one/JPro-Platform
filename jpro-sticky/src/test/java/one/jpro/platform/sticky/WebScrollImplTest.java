@@ -75,8 +75,13 @@ class WebScrollImplTest {
     }
 
     private static boolean inOverlay(Node node) {
-        return node.getParent() instanceof Group
-                && "jpro-sticky-overlay".equals(((Group) node.getParent()).getId());
+        // a web pin is mounted inside its own span, which is the overlay's child.
+        for (Node p = node.getParent(); p != null; p = p.getParent()) {
+            if (p instanceof Group && "jpro-sticky-overlay".equals(p.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------------
