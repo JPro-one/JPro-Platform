@@ -55,7 +55,6 @@ public final class Scroll {
     /** Property key under which the {@link ScrollPosition} is stored on a node. */
     private static final Object POSITION_KEY = new Object();
 
-
     /** Property key under which the active {@link ScrollImpl} is stashed on a node. */
     private static final Object IMPL_KEY = new Object();
 

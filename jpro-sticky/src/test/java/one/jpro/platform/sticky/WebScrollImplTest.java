@@ -137,13 +137,6 @@ class WebScrollImplTest {
     }
 
     // ---------------------------------------------------------------------
-    // Stuck-state lifecycle: a web sticky node that is pinned (stuck) when its route leaves the scene
-    // must not keep reporting stuck. The reparenting teardown runs off the dispatcher's detach path,
-    // which does not go through Scroll.setScrollPosition's central reset, so the stuck channel has to be
-    // cleared there too or stuckProperty / :stuck stay latched on an off-screen node.
-    // ---------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------
     // A page-level sticky header is reparented into the overlay and must leave a placeholder that
     // RESERVES its height in the flow slot (README: "leaving a placeholder in its original layout
     // slot"), or the following content is laid out behind the header. Regression guard: the reservation

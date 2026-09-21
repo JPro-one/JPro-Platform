@@ -152,12 +152,12 @@ final class OverlayMount {
         mounted = false;
     }
 
-    /** The overlay the node is mounted into; {@code null} until a successful {@link #mount()}. */
+    /** The overlay the node is mounted into; {@code null} until a successful {@link #mount}. */
     Group overlay() {
         return overlay;
     }
 
-    /** The placeholder holding the node's flow slot; {@code null} until a successful {@link #mount()}. */
+    /** The placeholder holding the node's flow slot; {@code null} until a successful {@link #mount}. */
     Region placeholder() {
         return placeholder;
     }
@@ -167,7 +167,7 @@ final class OverlayMount {
         return range;
     }
 
-    /** The node's flow parent captured at {@link #mount()}; {@code null} until a successful mount. */
+    /** The node's flow parent captured at {@link #mount}; {@code null} until a successful mount. */
     Pane originalParent() {
         return originalParent;
     }
