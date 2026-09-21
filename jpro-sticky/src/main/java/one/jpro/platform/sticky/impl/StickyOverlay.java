@@ -46,7 +46,7 @@ public final class StickyOverlay {
     /** {@link Node} property key stashing a mounted node's stack order, read by sibling mounts. */
     private static final Object STACK_ORDER_KEY = new Object();
 
-    /** {@code id} stamped on every overlay {@link Group}, lets {@link #isOverlay} spot a mounted node. */
+    /** {@code id} stamped on every overlay {@link Group}. */
     private static final String OVERLAY_ID = "jpro-sticky-overlay";
 
     /** Style class of the per-pin span the web path mounts a node into (see {@link OverlayMount#mount}). */
@@ -206,24 +206,6 @@ public final class StickyOverlay {
             }
         }
         node.getProperties().remove(STACK_ORDER_KEY);
-    }
-
-    /**
-     * Whether {@code parent} is one of jpro-sticky's overlay {@link Group}s. Used by the async web
-     * attach to tell a still-mounted node (a superseded application racing this one) apart from a real
-     * flow parent, so it never mistakes the overlay for the flow slot.
-     *
-     * @param parent the node's current parent, or {@code null}
-     * @return {@code true} if {@code parent} is a sticky overlay
-     */
-    static boolean isOverlay(Node parent) {
-        if (parent instanceof Group && OVERLAY_ID.equals(parent.getId())) {
-            return true;
-        }
-        // a web pin sits one level deeper, inside its own span (see OverlayMount#mount).
-        return parent != null && parent.getStyleClass().contains(RANGE_STYLE_CLASS)
-                && parent.getParent() instanceof Group
-                && OVERLAY_ID.equals(parent.getParent().getId());
     }
 
     /** The stack order stashed on a mounted node, or {@link Long#MIN_VALUE} if absent. */

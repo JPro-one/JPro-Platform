@@ -1,6 +1,9 @@
 package one.jpro.platform.sticky.impl;
 
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
@@ -29,10 +32,11 @@ final class OverlayMount {
     private final long stackOrder;
 
     private Pane originalParent;
-    private int originalIndex = -1;
     private Group overlay;
     private Region placeholder;
     private Pane range;
+    /** Fires {@code onDetach} once the placeholder, and so the flow subtree, has left the scene. */
+    private ChangeListener<Scene> detachWaiter;
     private boolean mounted;
 
     OverlayMount(Node node, long stackOrder) {
@@ -48,23 +52,16 @@ final class OverlayMount {
      * @param reservedHeight height the placeholder holds in the flow slot (the node's height for STICKY,
      *                       {@code 0} for FIXED). Set before insertion so the first layout honours it; a
      *                       {@code setPrefHeight} after insertion only requests a re-layout the pulse can drop.
+     * @param withRange when {@code true}, the node is mounted inside a {@link #range()} pane that the
+     *                  caller sizes to the pin's scroll span. {@code position: sticky} clamps to its
+     *                  containing block, so the web path needs that span as a real box in the DOM.
+     * @param onDetach called once the placeholder has left the scene (a route navigate-away), so the
+     *                 owner can unmount and re-pin when the subtree returns
      * @return the placeholder now holding the node's flow slot, or {@code null} if the node could not
      *         be mounted (its parent is not a {@link Pane}, no overlay host resolved, or the node is
      *         not in its parent's children); on {@code null} the node is left untouched in flow
      */
-    Region mount(double reservedHeight) {
-        return mount(reservedHeight, false);
-    }
-
-    /**
-     * As {@link #mount(double)}, but optionally puts the node inside a per-pin range pane rather than
-     * straight into the overlay.
-     *
-     * @param withRange when {@code true}, the node is mounted inside a {@link #range()} pane that the
-     *                  caller sizes to the pin's scroll span. {@code position: sticky} clamps to its
-     *                  containing block, so the web path needs that span as a real box in the DOM.
-     */
-    Region mount(double reservedHeight, boolean withRange) {
+    Region mount(double reservedHeight, boolean withRange, Runnable onDetach) {
         final Parent parent = node.getParent();
         if (!(parent instanceof Pane)) {
             LOGGER.warn("jpro-sticky: node's parent is {} (not a Pane); cannot pin {}. Node stays in flow.",
@@ -84,7 +81,6 @@ final class OverlayMount {
         }
 
         this.originalParent = pane;
-        this.originalIndex = index;
         this.overlay = ov;
 
         // mirror the node's constraints/width onto the placeholder so the flow slot does not shift, swap
@@ -111,19 +107,34 @@ final class OverlayMount {
             StickyOverlay.insertSorted(overlay, node, stackOrder);
         }
 
+        // the placeholder rides the flow, so it leaves the scene on route unmount (the node never does).
+        // re-check next pulse to ignore a transient same-pulse detach/reattach.
+        detachWaiter = (obs, old, scene) -> {
+            if (scene == null && mounted) {
+                Platform.runLater(() -> {
+                    if (mounted && ph.getScene() == null) {
+                        onDetach.run();
+                    }
+                });
+            }
+        };
+        ph.sceneProperty().addListener(detachWaiter);
+
         this.placeholder = ph;
         this.mounted = true;
         return ph;
     }
 
     /**
-     * Reverses {@link #mount()}: pulls the node out of the overlay and back into its original flow slot,
+     * Reverses {@link #mount}: pulls the node out of the overlay and back into its original flow slot,
      * restoring its managed state. A no-op if the node is not currently mounted.
      */
     void unmount() {
         if (!mounted) {
             return;
         }
+        placeholder.sceneProperty().removeListener(detachWaiter);
+        detachWaiter = null;
         if (range != null) {
             range.getChildren().remove(node);
             StickyOverlay.remove(overlay, range);

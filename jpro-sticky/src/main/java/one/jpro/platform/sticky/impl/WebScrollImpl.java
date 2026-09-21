@@ -2,15 +2,12 @@ package one.jpro.platform.sticky.impl;
 
 import com.jpro.webapi.JSVariable;
 import com.jpro.webapi.WebAPI;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import one.jpro.jmemorybuddy.CleanupDetector;
@@ -84,8 +81,6 @@ public final class WebScrollImpl implements ScrollImpl {
     private final Consumer<Boolean> stuckSink;
     /** Called when the flow slot leaves the scene, so the dispatcher can re-pin on re-entry. */
     private final Runnable onDetach;
-    /** Last stuck value pushed to {@link #stuckSink}, so we only fire on change. */
-    private boolean lastStuck;
     private final String jsKey = "n" + KEY_SEQ.incrementAndGet();
     /** Stack key ordering this node in the overlay; see {@link StickyOverlay#nextStackOrder}. */
     private final long stackOrder;
@@ -108,13 +103,8 @@ public final class WebScrollImpl implements ScrollImpl {
 
     // reactive plumbing: one listener re-syncs geometry on any relevant change
     private final InvalidationListener relayout = obs -> sync();
-    private ChangeListener<Scene> sceneWaiter;
-    /** Fires teardown when the placeholder (and thus the route subtree) leaves the scene. */
-    private ChangeListener<Scene> placeholderSceneWaiter;
-    /** Defers attach while a superseded application still has the node mounted in an overlay. */
-    private ChangeListener<Parent> settleWaiter;
-    private boolean installedSticky = false;
-    private String lastSig = "";
+    /** Signature of the last emitted rule; {@code null} until the first install. */
+    private String lastSig;
     private boolean torndown = false;
 
     public WebScrollImpl(Node node, ScrollPosition position, ScrollAnchor anchor, Node within,
@@ -130,8 +120,9 @@ public final class WebScrollImpl implements ScrollImpl {
     }
 
     /**
-     * Installs the override. Only meaningful under JPro: on desktop the {@link WebAPI} consumer
-     * never fires and the node keeps its normal flow positioning.
+     * Installs the override. Only meaningful under JPro: the {@link WebAPI} consumer fires once JPro
+     * has rendered the node in a scene with a window, and on desktop it never fires, so the node keeps
+     * its normal flow positioning.
      */
     @Override
     public void install() {
@@ -143,48 +134,16 @@ public final class WebScrollImpl implements ScrollImpl {
             return;
         }
         this.webapi = webapi;
-        if (node.getScene() != null) {
-            attach();
-        } else {
-            // node not in a scene yet, attach when it enters.
-            sceneWaiter = (obs, old, scene) -> {
-                if (scene != null) {
-                    node.sceneProperty().removeListener(sceneWaiter);
-                    sceneWaiter = null;
-                    attach();
-                }
-            };
-            node.sceneProperty().addListener(sceneWaiter);
-        }
+        attach();
     }
 
     private void attach() {
-        if (torndown) {
-            return;
-        }
-        final Parent parent = node.getParent();
-        // a superseded app (rapid re-apply / scene churn) may still hold the node in an overlay when this
-        // async attach fires, which we'd mistake for the flow slot. wait (one-shot) until it settles back.
-        if (StickyOverlay.isOverlay(parent)) {
-            if (settleWaiter == null) {
-                settleWaiter = (obs, old, p) -> {
-                    if (!torndown && p != null && !StickyOverlay.isOverlay(p)) {
-                        node.parentProperty().removeListener(settleWaiter);
-                        settleWaiter = null;
-                        attach();
-                    }
-                };
-                node.parentProperty().addListener(settleWaiter);
-                LOGGER.debug("jpro-sticky[{}]: node still in an overlay; deferring attach until it settles", jsKey);
-            }
-            return;
-        }
         // lift the node into the overlay, leaving a placeholder that reserves the node's height in its
         // flow slot (FIXED reserves nothing). naturalHeight, not current bounds: pinning often happens
         // during scene construction, before layout, when bounds are still zero. sync() refines it later.
         final double reservedHeight = (position == ScrollPosition.FIXED) ? 0
                 : AnchorGeometry.naturalHeight(node, AnchorGeometry.naturalWidth(node));
-        final Region ph = mount.mount(reservedHeight, true);
+        final Region ph = mount.mount(reservedHeight, true, onDetach);
         if (ph == null) {
             return; // could not mount (no Pane parent / overlay host), node stays in flow
         }
@@ -208,25 +167,6 @@ public final class WebScrollImpl implements ScrollImpl {
             container.layoutBoundsProperty().addListener(relayout);
             container.localToSceneTransformProperty().addListener(relayout);
         }
-
-        // placeholder rides the flow, so it leaves the scene on route unmount (the node never does).
-        // re-check next pulse to ignore a transient same-pulse detach/reattach.
-        placeholderSceneWaiter = (obs, old, scene) -> {
-            if (scene == null && !torndown) {
-                Platform.runLater(() -> {
-                    if (!torndown && placeholder != null && placeholder.getScene() == null) {
-                        // hand back to the dispatcher: uninstall this delegate but stay alive to re-pin
-                        // if the route returns. fall back to a direct uninstall if unwired.
-                        if (onDetach != null) {
-                            onDetach.run();
-                        } else {
-                            uninstall();
-                        }
-                    }
-                });
-            }
-        };
-        placeholder.sceneProperty().addListener(placeholderSceneWaiter);
 
         registerCleanup();
         LOGGER.debug("jpro-sticky[{}]: attached (overlay={}, parent={})", jsKey,
@@ -317,11 +257,7 @@ public final class WebScrollImpl implements ScrollImpl {
         // publish pin state (STICKY only): stuck iff the server pin differs from the natural flow top (same
         // rule as ScrollPaneStickyImpl, appear != natural). fidelity = browserViewport() cadence, not per-frame.
         if (!fixed && stuckSink != null) {
-            final boolean nowStuck = Math.abs(serverY - flowTop) > STUCK_EPS;
-            if (nowStuck != lastStuck) {
-                lastStuck = nowStuck;
-                stuckSink.accept(nowStuck);
-            }
+            stuckSink.accept(Math.abs(serverY - flowTop) > STUCK_EPS);
         }
 
         // what the sheet contains, plus the span's top: moving the span moves the very ancestor
@@ -336,16 +272,12 @@ public final class WebScrollImpl implements ScrollImpl {
             return;
         }
 
-        if (!installedSticky) {
-            // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
-            // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
+        if (!sig.equals(lastSig)) {
+            // the node's DOM peer may still be unregistered on the first install; the injected script
+            // resolves it via its own retry, so no server-side deferral is needed.
             installSticky(y0, spanTop, nodeW, nodeH);
-            installedSticky = true;
-            lastSig = sig;
-            LOGGER.debug("jpro-sticky[{}]: sticky rule installed (w={}, h={}, y0={})",
-                    jsKey, nodeW, nodeH, y0);
-        } else if (!sig.equals(lastSig)) {
-            installSticky(y0, spanTop, nodeW, nodeH);
+            LOGGER.debug("jpro-sticky[{}]: sticky rule {} (w={}, h={}, y0={}, spanTop={})",
+                    jsKey, lastSig == null ? "installed" : "updated", nodeW, nodeH, y0, spanTop);
             lastSig = sig;
         }
     }
@@ -404,7 +336,6 @@ public final class WebScrollImpl implements ScrollImpl {
                 "(function(){\n" +
                 "  var reg = (window.__jproStickyC = window.__jproStickyC || {});\n" +
                 "  var st = reg['" + jsKey + "'] = reg['" + jsKey + "'] || {};\n" +
-                "  st.dead = false; st.mode = 'sticky';\n" +
                 "  if(!st.style){ st.style = document.createElement('style');\n" +
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
@@ -471,7 +402,6 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  if(!st.bind() && st.el) st.render();\n" +
                 // the peer can be replaced by a DOM rebuild, and only a re-bind retargets the rule.
                 "  if(!st.timer) st.timer = setInterval(function(){\n" +
-                "    if(st.dead) return;\n" +
                 "    if(!st.el || !st.el.isConnected) st.bind(); }, 500);\n" +
                 "})();";
         webapi.executeScript(js);
@@ -485,21 +415,9 @@ public final class WebScrollImpl implements ScrollImpl {
     public void uninstall() {
         torndown = true;
 
-        if (sceneWaiter != null) {
-            node.sceneProperty().removeListener(sceneWaiter);
-            sceneWaiter = null;
-        }
-        if (settleWaiter != null) {
-            node.parentProperty().removeListener(settleWaiter);
-            settleWaiter = null;
-        }
         if (placeholder != null) {
             placeholder.layoutBoundsProperty().removeListener(relayout);
             placeholder.localToSceneTransformProperty().removeListener(relayout);
-            if (placeholderSceneWaiter != null) {
-                placeholder.sceneProperty().removeListener(placeholderSceneWaiter);
-                placeholderSceneWaiter = null;
-            }
         }
         if (webapi != null) {
             webapi.browserViewport().removeListener(relayout);
@@ -521,7 +439,7 @@ public final class WebScrollImpl implements ScrollImpl {
 
         // the rule stamps the element and the heartbeat is still running, so teardown has to stop it,
         // strip the stamp, and drop the sheet.
-        if (webapi != null && installedSticky) {
+        if (webapi != null && lastSig != null) {
             removeStickyStyle(webapi, jsKey);
         }
     }
@@ -544,13 +462,11 @@ public final class WebScrollImpl implements ScrollImpl {
                 "(function(){\n" +
                 "  var reg = window.__jproStickyC; if(!reg) return;\n" +
                 "  var st = reg['" + jsKey + "']; if(!st) return;\n" +
-                // stop the heartbeat and any in-flight resolve before dropping the entry, or they keep
-                // running against a torn-down pin (and the interval would outlive the page's use of it).
-                "  st.dead = true;\n" +
+                // stop the heartbeat before dropping the entry, or the interval outlives the pin.
                 "  if(st.timer){ clearInterval(st.timer); st.timer = null; }\n" +
                 // the binding is an attribute on the element, and the node survives teardown (it goes
                 // back to its flow slot), so it has to be stripped there too.
-                "  if(st.clear) st.clear(st.el);\n" +
+                "  st.clear(st.el);\n" +
                 "  st.el = null;\n" +
                 "  if(st.style && st.style.parentNode) st.style.parentNode.removeChild(st.style);\n" +
                 "  delete reg['" + jsKey + "'];\n" +

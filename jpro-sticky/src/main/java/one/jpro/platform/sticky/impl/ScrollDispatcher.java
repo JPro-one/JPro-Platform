@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  * <table>
  *   <caption>Selection</caption>
  *   <tr><th>Case</th><th>Implementation</th></tr>
- *   <tr><td>FIXED, browser</td><td>{@link WebScrollImpl} (compositor, viewport-anchored)</td></tr>
+ *   <tr><td>FIXED, browser</td><td>{@link WebScrollImpl} (browser-native pin, viewport-anchored)</td></tr>
  *   <tr><td>FIXED, desktop</td><td>{@link DesktopFixedImpl} (scene-anchored overlay)</td></tr>
  *   <tr><td>STICKY, {@code ScrollPane} ancestor (desktop or browser)</td><td>{@link ScrollPaneStickyImpl}</td></tr>
  *   <tr><td>STICKY, browser, natively scrolled document</td><td>{@link WebScrollImpl}</td></tr>
@@ -55,20 +55,19 @@ public final class ScrollDispatcher implements ScrollImpl {
 
     @Override
     public void install() {
-        if (node.getScene() != null) {
-            choose();
-        } else {
-            // parent chain is only realised once the node is in a scene. wait for it so the
-            // ScrollPane-ancestor check (which decides FX vs web) sees the final tree.
-            waitForScene();
-        }
+        pinWhenInScene();
     }
 
     /**
-     * Arms the one-shot scene listener that (re-)selects and installs the delegate the moment the
-     * node enters a scene. Used both for the initial pre-scene wait and to re-pin after a detach.
+     * Selects and installs the delegate now if the node is in a scene, else the moment it enters one:
+     * the parent chain, and so the ScrollPane-ancestor check that decides FX vs web, is only realised
+     * then. Used for the initial install and to re-pin after a detach.
      */
-    private void waitForScene() {
+    private void pinWhenInScene() {
+        if (node.getScene() != null) {
+            choose();
+            return;
+        }
         sceneWaiter = (obs, old, scene) -> {
             if (scene != null) {
                 node.sceneProperty().removeListener(sceneWaiter);
@@ -94,17 +93,11 @@ public final class ScrollDispatcher implements ScrollImpl {
             delegate.uninstall();
             delegate = null;
         }
-        // node left the scene, so it's no longer pinned: clear the stuck channel. the detach path skips
-        // Scroll.setScrollPosition's central reset, so a node stuck at navigate-away would otherwise stay stuck.
+        // node left the scene, so it's no longer pinned: clear the stuck channel.
         if (stuckSink != null) {
             stuckSink.accept(false);
         }
-        if (node.getScene() != null) {
-            // already back in a scene (a same-pulse return): re-pin now.
-            choose();
-        } else if (sceneWaiter == null) {
-            waitForScene();
-        }
+        pinWhenInScene();
     }
 
     private void choose() {
@@ -135,7 +128,7 @@ public final class ScrollDispatcher implements ScrollImpl {
             return new ScrollPaneStickyImpl(node, anchor, within, scrollPane, stuckSink);
         }
         if (WebAPI.isBrowser()) {
-            // natively scrolled browser document: the compositor override.
+            // natively scrolled browser document: the browser-native pin.
             return new WebScrollImpl(node, position, anchor, within, stuckSink, this::onDelegateDetached);
         }
         // desktop with no scroll ancestor: nothing scrolls, so a sticky element never moves, the same
@@ -153,6 +146,11 @@ public final class ScrollDispatcher implements ScrollImpl {
         if (delegate != null) {
             delegate.uninstall();
             delegate = null;
+        }
+        // a prior pin's stuck state is meaningless once its impl is gone; clearing it here also drops
+        // the :stuck pseudo-class when switching sticky -> fixed/static.
+        if (stuckSink != null) {
+            stuckSink.accept(false);
         }
     }
 
