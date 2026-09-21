@@ -43,13 +43,12 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
         BrowserErrorCollector browserErrors = new BrowserErrorCollector(page);
         page.navigate(BASE_URL);
         waitForRunning(page);
-
-        assertEquals(0, page.locator("#jpro-sticky-header").count(),
-                "the sample's ids must be absent, or this test runs with the flag on");
-
         page.locator("[data-jpro-sticky-el]").first().waitFor(
                 new Locator.WaitForOptions().setTimeout(30_000));
         page.waitForTimeout(1000);
+
+        assertEquals(0, page.locator("#jpro-sticky-header").count(),
+                "the sample's ids must be absent, or this test runs with the flag on");
 
         int sheets = page.locator("style[data-jpro-sticky]").count();
         int bound = page.locator("[data-jpro-sticky-el]").count();
@@ -65,6 +64,7 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
         page.evaluate("() => window.scrollBy(0, 400)");
         page.waitForTimeout(1000);
         List<Number> after = (List<Number>) page.evaluate(tops);
+        assertEquals(before.size(), after.size(), "the bound set changed during the scroll");
 
         boolean held = false;
         for (int i = 0; i < before.size(); i++) {
@@ -73,6 +73,14 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
             }
         }
         assertTrue(held, "a pin at the viewport top should hold across the scroll: " + before + " -> " + after);
+
+        // the section header sits deep in the page and pins under the 48px page header, so its rule
+        // carries a non-zero span offset. a wrong offset would put it anywhere but there.
+        page.evaluate("() => window.scrollTo(0, 2400)");
+        page.waitForTimeout(1000);
+        List<Number> deep = (List<Number>) page.evaluate(tops);
+        boolean sectionPinned = deep.stream().anyMatch(t -> Math.abs(t.doubleValue() - 48) < 1);
+        assertTrue(sectionPinned, "the section header should pin at 48px: " + deep);
 
         page.context().close();
         browserErrors.assertNoErrors();

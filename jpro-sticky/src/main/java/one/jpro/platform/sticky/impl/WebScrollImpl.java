@@ -295,29 +295,24 @@ public final class WebScrollImpl implements ScrollImpl {
         final Pane range = mount.range();
         // FIXED spans the document from its top, STICKY from the node's flow top.
         final double spanTop = fixed ? 0 : natTop;
-        if (range == null) {
-            node.setLayoutX(local.getX());
-            node.setLayoutY(local.getY());
-        } else {
-            // the span runs from the node's flow top to its release point. unbounded pins, FIXED
-            // included, run to the end of the document.
-            final double docH = root.getLayoutBounds().getHeight();
-            final double relLimit = fixed ? (docH - nodeH)
-                    : (relLimitServer >= 0 ? relLimitServer : Math.max(natTop, docH - nodeH));
-            // a fixed node taller than the viewport can reach its span's end, so it drifts there.
-            if (fixed && viewportH > 0 && y0 + nodeH > viewportH + STUCK_EPS) {
-                LOGGER.warn("jpro-sticky[{}]: fixed node is taller than the viewport ({} + {} > {});"
-                        + " the pin will drift near the end of the document.", jsKey, y0, nodeH, viewportH);
-            }
-            final Point2D span = overlay.sceneToLocal(x, spanTop);
-            range.setLayoutX(span.getX());
-            range.setLayoutY(span.getY());
-            range.resize(nodeW, Math.max(nodeH, (relLimit - spanTop) + nodeH));
-            // picking is a scene pick, so the node sits where it appears. the sheet drops the
-            // transform that produces.
-            node.setLayoutX(local.getX() - span.getX());
-            node.setLayoutY(local.getY() - span.getY());
+        // the span runs from the node's flow top to its release point. unbounded pins, FIXED
+        // included, run to the end of the document.
+        final double docH = root.getLayoutBounds().getHeight();
+        final double relLimit = fixed ? (docH - nodeH)
+                : (relLimitServer >= 0 ? relLimitServer : Math.max(natTop, docH - nodeH));
+        // a fixed node taller than the viewport can reach its span's end, so it drifts there.
+        if (fixed && viewportH > 0 && y0 + nodeH > viewportH + STUCK_EPS) {
+            LOGGER.warn("jpro-sticky[{}]: fixed node is taller than the viewport ({} + {} > {});"
+                    + " the pin will drift near the end of the document.", jsKey, y0, nodeH, viewportH);
         }
+        final Point2D span = overlay.sceneToLocal(x, spanTop);
+        range.setLayoutX(span.getX());
+        range.setLayoutY(span.getY());
+        range.resize(nodeW, Math.max(nodeH, (relLimit - spanTop) + nodeH));
+        // picking is a scene pick, so the node sits where it appears. the sheet drops the
+        // transform that produces.
+        node.setLayoutX(local.getX() - span.getX());
+        node.setLayoutY(local.getY() - span.getY());
 
         // publish pin state (STICKY only): stuck iff the server pin differs from the natural flow top (same
         // rule as ScrollPaneStickyImpl, appear != natural). fidelity = browserViewport() cadence, not per-frame.
@@ -472,7 +467,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    if(st.el && st.el !== el) st.clear(st.el);\n" +
                 "    el.setAttribute('data-jpro-sticky-el','" + jsKey + "');\n" +
                 "    st.el = el; st.render(); return true; };\n" +
-                "  st.bind();\n" +
+                // a re-install whose bind fails still has to reach the element bound last time.
+                "  if(!st.bind() && st.el) st.render();\n" +
                 // the peer can be replaced by a DOM rebuild, and only a re-bind retargets the rule.
                 "  if(!st.timer) st.timer = setInterval(function(){\n" +
                 "    if(st.dead) return;\n" +
