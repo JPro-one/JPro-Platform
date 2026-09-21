@@ -423,8 +423,17 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    var p = el.parentElement, n = 0;\n" +
                 "    while(p && p !== document.documentElement && n++ < 64){\n" +
                 "      var cs = getComputedStyle(p);\n" +
-                "      if((/auto|scroll|hidden/.test(cs.overflowX) || /auto|scroll|hidden/.test(cs.overflowY))\n" +
-                "         && p.scrollHeight <= p.clientHeight + 1 && p.scrollWidth <= p.clientWidth + 1){\n" +
+                "      if(/auto|scroll|hidden/.test(cs.overflowX) || /auto|scroll|hidden/.test(cs.overflowY)){\n" +
+                "        if(p.scrollHeight > p.clientHeight + 1 || p.scrollWidth > p.clientWidth + 1){\n" +
+                // an embedded jpro tag can sit inside a real scroller. that one owns the pin, but the
+                // offset was resolved against the browser viewport, so the two disagree.
+                "          if(!st.warnedScroller){ st.warnedScroller = true;\n" +
+                "            console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': an ancestor of this pin'\n" +
+                "              + ' scrolls, so the pin holds against it and not against the page. The'\n" +
+                "              + ' offset is measured from the browser viewport and may be off by the'\n" +
+                "              + \" scroller's own position.\"); }\n" +
+                "          return;\n" +
+                "        }\n" +
                 "        if(!p.hasAttribute('data-jpro-sticky-ov')){\n" +
                 "          p.setAttribute('data-jpro-sticky-ov', p.style.overflow || '');\n" +
                 "        }\n" +
