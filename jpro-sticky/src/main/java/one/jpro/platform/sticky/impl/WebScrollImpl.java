@@ -41,8 +41,8 @@ import java.util.function.Consumer;
  * is out of reach and the pin never releases.
  * <p>
  * <strong>Two corrections the sheet carries.</strong> Sticky resolves in layout space, so an
- * ancestor {@code transform} displaces it; that shift is measured in the browser, not baked, and
- * subtracted from the offset. And sticky holds against the nearest scroll container, which an
+ * ancestor {@code transform} displaces it; the script reads that shift off the DOM and subtracts it,
+ * because the server cannot see what the renderer wrote. And sticky holds against the nearest scroll container, which an
  * ancestor becomes merely by having a non-visible {@code overflow} ({@code body} usually does), so
  * one that cannot scroll is cleared.
  * <p>
@@ -330,7 +330,7 @@ public final class WebScrollImpl implements ScrollImpl {
             }
         }
 
-        // only what the sheet bakes in. the span and the node's position are server-side layout.
+        // only the values the sheet contains. the span and the node's position are server-side layout.
         final String sig = y0 + "|" + nodeW + "|" + nodeH;
 
         // NaN/Infinity are valid JS literals, so a non-finite value installs cleanly and then dies in
@@ -385,8 +385,8 @@ public final class WebScrollImpl implements ScrollImpl {
      * that outranks inline. Assumes an svg scale of 1 (true for native-scrolling pages).
      * <p>
      * {@code y0} is the viewport pin line, and {@code nodeW}/{@code nodeH} the resolved box. Nothing
-     * else is baked: the span's extent and the node's own offset are server-side layout, and the
-     * browser derives the release from the span. The scroll position never enters the sheet.
+     * else is written into the sheet: the span's extent and the node's own offset are server-side
+     * layout, and the browser derives the release from the span. The scroll position never enters it.
      * <p>
      * <strong>Readiness race.</strong> The element reference ({@code jpro.getValue(n)}) throws until
      * JPro's render pulse has registered the node, so it resolves inside a retry loop guarded by
@@ -452,8 +452,8 @@ public final class WebScrollImpl implements ScrollImpl {
                 "      c = p; p = p.parentElement;\n" +
                 "    }\n" +
                 "    return null; };\n" +
-                // sticky resolves in layout space, so only an ancestor transform displaces it. measured
-                // rather than baked: the fixed path rewrites those transforms to left / top as it runs.
+                // sticky resolves in layout space, so only an ancestor transform displaces it. read on
+                // every render, since the renderer can write or clear a transform at any time.
                 "  st.shift = function(el){\n" +
                 "    var y = 0, p = el.parentElement, n = 0;\n" +
                 "    while(p && p !== document.documentElement && n++ < 64){\n" +
