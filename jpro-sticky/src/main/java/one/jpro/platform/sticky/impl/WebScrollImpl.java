@@ -110,7 +110,7 @@ public final class WebScrollImpl implements ScrollImpl {
     private ChangeListener<Scene> placeholderSceneWaiter;
     /** Defers attach while a superseded application still has the node mounted in an overlay. */
     private ChangeListener<Parent> settleWaiter;
-    private boolean installedCompositor = false;
+    private boolean installedSticky = false;
     private String lastSig = "";
     private boolean torndown = false;
 
@@ -237,8 +237,8 @@ public final class WebScrollImpl implements ScrollImpl {
     }
 
     /**
-     * Recomputes the node's pinned position and (re-)emits the compositor keyframes when the
-     * geometry signature changes, never per scroll event (that is the compositor's job).
+     * Recomputes the node's pinned position and (re-)emits the sticky rule when the geometry
+     * signature changes, never per scroll event (that is the browser's job).
      */
     private void sync() {
         if (torndown || placeholder == null) {
@@ -281,14 +281,13 @@ public final class WebScrollImpl implements ScrollImpl {
         // FIXED is out of flow: placeholder reserves no height. STICKY keeps its slot.
         placeholder.setPrefHeight(fixed ? 0 : nodeH);
 
-        // natTop = keyframe 'from'. STICKY rides the flow from its natural top, FIXED pins from the very
-        // top (natTop == y0 makes sPin 0, so no ride).
+        // natTop = the span's top. STICKY rides the flow from its natural top, FIXED from the page top.
         final double natTop = fixed ? y0 : flowTop;
 
         // STICKY release limit = containerBottom - nodeH. -1 = unbounded (FIXED or page-spanning container).
         final double relLimitServer = releaseLimit(nodeH);
 
-        // server-side pin (also the no-compositor fallback + what picking sees): clamp to pin line while
+        // server-side pin (also the no-script fallback + what picking sees): clamp to pin line while
         // pinned, ride flow before, honour the release limit.
         double serverY = fixed ? (viewportTop + y0) : Math.max(flowTop, viewportTop + y0);
         if (!fixed && relLimitServer >= 0) {
@@ -324,13 +323,6 @@ public final class WebScrollImpl implements ScrollImpl {
             node.setLayoutY(local.getY() - span.getY());
         }
 
-        // the overlay may sit offset down the document (under a registered host, e.g. a popup nested in
-        // the route). the compositor transform is relative to the overlay's own DOM box, so endpoints bake
-        // in host-local space (scene-y minus this offset) while the scroll-range math stays document-space.
-        final Point2D hostOrigin = overlay.localToScene(0, 0);
-        final double hostOffsetY = hostOrigin.getY();
-        final double hostOffsetX = hostOrigin.getX();
-
         // publish pin state (STICKY only): stuck iff the server pin differs from the natural flow top (same
         // rule as ScrollPaneStickyImpl, appear != natural). fidelity = browserViewport() cadence, not per-frame.
         if (!fixed && stuckSink != null) {
@@ -341,28 +333,27 @@ public final class WebScrollImpl implements ScrollImpl {
             }
         }
 
-        final double docH = root.getLayoutBounds().getHeight();
-        final String sig = natTop + "|" + y0 + "|" + local.getX() + "|" + relLimitServer + "|"
-                + nodeW + "|" + nodeH + "|" + docH + "|" + hostOffsetY + "|" + hostOffsetX;
+        // only what the sheet bakes in: the span and the node's position are server-side layout,
+        // which re-runs on its own.
+        final String sig = y0 + "|" + nodeW + "|" + nodeH;
 
         // NaN/Infinity are valid JS literals, so a non-finite value here would install cleanly and then
-        // fail silently: every clamp escapes its guard and the emitted transform is rejected by the CSS
-        // parser, leaving a dead pin and nothing in any log. Refuse the install instead.
-        if (!allFinite(local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX)) {
-            LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry "
-                            + "(x={}, natTop={}, y0={}, relLimit={}, hostOffsetY={}, hostOffsetX={})",
-                    jsKey, local.getX(), natTop, y0, relLimitServer, hostOffsetY, hostOffsetX);
+        // fail silently: the emitted declaration is rejected by the CSS parser, leaving a dead pin and
+        // nothing in any log. Refuse the install instead.
+        if (!allFinite(y0, nodeW, nodeH)) {
+            LOGGER.warn("jpro-sticky[{}]: skipping install, non-finite geometry (y0={}, w={}, h={})",
+                    jsKey, y0, nodeW, nodeH);
             return;
         }
 
-        if (!installedCompositor) {
+        if (!installedSticky) {
             // install inline on the first sync with a real width. the node's DOM peer may still be unregistered,
             // but the injected script resolves it via its own retry loop, so no server-side deferral needed.
             installSticky(y0, nodeW, nodeH);
-            installedCompositor = true;
+            installedSticky = true;
             lastSig = sig;
-            LOGGER.debug("jpro-sticky[{}]: compositor installed (w={}, natTop={}, y0={}, hostOffsetY={})",
-                    jsKey, nodeW, natTop, y0, hostOffsetY);
+            LOGGER.debug("jpro-sticky[{}]: sticky rule installed (w={}, h={}, y0={})",
+                    jsKey, nodeW, nodeH, y0);
         } else if (!sig.equals(lastSig)) {
             installSticky(y0, nodeW, nodeH);
             lastSig = sig;
@@ -398,16 +389,13 @@ public final class WebScrollImpl implements ScrollImpl {
      * node with inline {@code style.transform}, and an important author rule is the only declaration
      * that outranks inline. Assumes an svg scale of 1 (true for native-scrolling pages).
      * <p>
-     * {@code natTop} is the keyframe 'from' (the flow top for sticky, the pin line for fixed);
-     * {@code y0} is the viewport pin line; {@code relLimitServer} is the scene-y release point
-     * ({@code < 0} = unbounded, resolved browser-side to the document extent). All three are in
-     * scene/document space; {@code hostOffsetY} is the overlay host's document-y origin, subtracted
-     * from the transform endpoints only (they are relative to the overlay's own DOM box) while the
-     * scroll-range math stays in document space, so a non-scene-root host shifts nothing but the pin.
+     * {@code y0} is the viewport pin line, and {@code nodeW}/{@code nodeH} the resolved box. Nothing
+     * else is baked: the span's extent and the node's own offset are server-side layout, and the
+     * browser derives the release from the span. The scroll position never enters the sheet.
      * <p>
      * <strong>Readiness race.</strong> The element reference ({@code jpro.getValue(n)}) throws until
-     * JPro's render pulse has registered the node, so it resolves inside a {@code requestAnimationFrame}
-     * retry loop guarded by try/catch.
+     * JPro's render pulse has registered the node, so it resolves inside a retry loop guarded by
+     * try/catch.
      * <p>
      * <strong>Reconnect.</strong> The binding holds the element, never its {@code jpro-id}. That id is
      * a per-view transport index whose counter restarts when a reconnect builds a new view, so a cached
@@ -499,7 +487,7 @@ public final class WebScrollImpl implements ScrollImpl {
 
     /**
      * Reverses everything this override installed: deregisters listeners, restores the node to
-     * its flow slot, and clears the compositor animation and its {@code <style>} element.
+     * its flow slot, and drops the sticky rule and its {@code <style>} element.
      */
     @Override
     public void uninstall() {
@@ -538,10 +526,10 @@ public final class WebScrollImpl implements ScrollImpl {
         // restore the node to its flow slot.
         mount.unmount();
 
-        // the compositor tier binds inline on the element and the heartbeat is still running, so teardown
-        // has to stop it, strip those properties, and drop the sheet.
-        if (webapi != null && installedCompositor) {
-            removeCompositorStyle(webapi, jsKey);
+        // the rule stamps the element and the heartbeat is still running, so teardown has to stop it,
+        // strip the stamp, and drop the sheet.
+        if (webapi != null && installedSticky) {
+            removeStickyStyle(webapi, jsKey);
         }
     }
 
@@ -553,12 +541,12 @@ public final class WebScrollImpl implements ScrollImpl {
         CleanupDetector.onCleanup(node, () -> {
             final WebAPI w = weakWebApi.get();
             if (w != null) {
-                removeCompositorStyle(w, key);
+                removeStickyStyle(w, key);
             }
         });
     }
 
-    private static void removeCompositorStyle(WebAPI webapi, String jsKey) {
+    private static void removeStickyStyle(WebAPI webapi, String jsKey) {
         webapi.executeScript(
                 "(function(){\n" +
                 "  var reg = window.__jproStickyC; if(!reg) return;\n" +
