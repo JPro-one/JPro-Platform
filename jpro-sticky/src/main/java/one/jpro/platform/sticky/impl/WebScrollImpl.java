@@ -316,11 +316,12 @@ public final class WebScrollImpl implements ScrollImpl {
      * the node's own offset are server-side layout, and the browser derives the release from the
      * span. The scroll position never enters it.
      * <p>
-     * {@code spanTop} stands in for the ancestor transforms sticky resolves past. The two are equal
-     * while nothing above the {@code <jpro-app>} is transformed, which is why the tag's own place in
-     * the document does not matter (that offset is flow, and flow moves the pin and its reference
-     * alike). A host page that translates an ancestor breaks the equality, and every pin then rests
-     * off by that translation.
+     * {@code spanTop} stands in for the ancestor transforms sticky resolves past, and covers those
+     * below the scene root. The tag's own place in the document does not enter it: that offset is
+     * flow, and flow moves the pin and its reference alike, so it cancels. A host page that
+     * <em>transforms</em> an ancestor does not cancel, so the script measures that part from the
+     * scene root upwards and subtracts it as well. Only a translation folds into an offset; a scaled
+     * or rotated ancestor is reported on the console and leaves the pin off its inset.
      * <p>
      * <strong>Readiness race.</strong> The element reference ({@code jpro.getValue(n)}) throws until
      * JPro's render pulse has registered the node, so it resolves inside a retry loop guarded by
@@ -346,6 +347,30 @@ public final class WebScrollImpl implements ScrollImpl {
                 "    st.style.setAttribute('data-jpro-sticky','" + jsKey + "'); document.head.appendChild(st.style); }\n" +
                 "  st.sel = '[data-jpro-sticky-el=\"" + jsKey + "\"]';\n" +
                 "  st.top = " + (y0 - spanTop) + ";\n" +
+                "  st.matOf = function(t){\n" +
+                "    var v = t.slice(t.indexOf('(') + 1, -1).split(',').map(parseFloat);\n" +
+                "    if(v.length === 6) return {sx:v[0], sy:v[3], ty:v[5]};\n" +
+                "    if(v.length === 16) return {sx:v[0], sy:v[5], ty:v[13]};\n" +
+                "    return null; };\n" +
+                // spanTop covers the transforms below the scene root. a host page can place the tag
+                // with one too, and sticky resolves past that as well, so it is measured and cancelled.
+                "  st.hostShift = function(el){\n" +
+                "    var sc = el.closest && el.closest('.jpro-scene'); if(!sc) return 0;\n" +
+                "    var y = 0, p = sc, n = 0;\n" +
+                "    while(p && p !== document.documentElement && n++ < 64){\n" +
+                "      var t = getComputedStyle(p).transform;\n" +
+                "      if(t && t !== 'none'){\n" +
+                "        var m = st.matOf(t);\n" +
+                // a translation folds into the offset. anything else cannot, so say so once.
+                "        if(m && m.sx === 1 && m.sy === 1){ y += m.ty; }\n" +
+                "        else if(!st.warnedScale){ st.warnedScale = true;\n" +
+                "          console.warn('[jpro-sticky] ' + '" + jsKey + "' + ': an ancestor of the app'\n" +
+                "            + ' is scaled or rotated (' + t + '). Only a translation can be folded into'\n" +
+                "            + ' the pin offset, so this pin will rest off its inset.'); }\n" +
+                "      }\n" +
+                "      p = p.parentElement;\n" +
+                "    }\n" +
+                "    return y; };\n" +
                 // sticky holds against the nearest scroll container, and an element is one merely by
                 // having a non-visible overflow. report it rather than touch the host page's styles.
                 "  st.scrollport = function(el){\n" +
@@ -387,8 +412,9 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  st.render = function(){\n" +
                 "    if(!st.el) return;\n" +
                 "    st.checkPort(st.el);\n" +
+                "    st.lastHost = st.hostShift(st.el);\n" +
                 "    st.style.textContent = st.sel + '{position:sticky !important;'\n" +
-                "      + 'top:' + st.top + 'px !important;'\n" +
+                "      + 'top:' + (st.top - st.lastHost) + 'px !important;'\n" +
                 "      + 'width:" + nodeW + "px !important;height:" + nodeH + "px !important;'\n" +
                 "      + '" + (mouseTransparent ? "pointer-events:none !important;" : "") + "}'\n" +
                 // the server keeps the node at the pinned position so the scene pick lands on it, and the
@@ -408,7 +434,9 @@ public final class WebScrollImpl implements ScrollImpl {
                 "  if(!st.bind() && st.el) st.render();\n" +
                 // the peer can be replaced by a DOM rebuild, and only a re-bind retargets the rule.
                 "  if(!st.timer) st.timer = setInterval(function(){\n" +
-                "    if(!st.el || !st.el.isConnected) st.bind(); }, 500);\n" +
+                "    if(!st.el || !st.el.isConnected){ st.bind(); return; }\n" +
+                // the host page owns that transform, so nothing server-side sees it change.
+                "    if(st.hostShift(st.el) !== st.lastHost) st.render(); }, 500);\n" +
                 "})();";
         webapi.executeScript(js);
     }
