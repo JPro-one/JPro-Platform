@@ -10,11 +10,11 @@ dependencies {
 
 test {
   // The Playwright tests need a Chromium (installPlaywright provides it) and the example's port.
-  dependsOn 'installPlaywright'
+  dependsOn 'installPlaywright', 'installPlaywrightFirefox'
   if (System.getProperty('jpro.test.port') != null) {
     systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
   }
-  // installPlaywright already provisioned the browser — don't re-download during the run.
+  // installPlaywright already provisioned the browser, so skip the download during the run.
   environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
 }
 
@@ -25,6 +25,15 @@ tasks.register('installPlaywright', JavaExec) {
   classpath = sourceSets.test.runtimeClasspath
   mainClass = 'com.microsoft.playwright.CLI'
   args = ['install', '--with-deps', 'chromium']
+}
+
+// StickyFirefoxTest drives the engine issue #127 was reported against.
+tasks.register('installPlaywrightFirefox', JavaExec) {
+  group = 'verification'
+  description = 'Install the Firefox browser used by StickyFirefoxTest'
+  classpath = sourceSets.test.runtimeClasspath
+  mainClass = 'com.microsoft.playwright.CLI'
+  args = ['install', '--with-deps', 'firefox']
 }
 
 publishing {

@@ -8,7 +8,7 @@ import one.jpro.platform.sticky.Scroll;
  * {@link Scroll} selects one implementation per node at install time and stashes it on the node so
  * a later {@code setScrollPosition} (or {@code clearScrollPosition}) can tear it down cleanly:
  * <ul>
- *   <li>{@link WebScrollImpl}, the web path: a compositor scroll-timeline override, used for
+ *   <li>{@link WebScrollImpl}, the web path: a native {@code position: sticky} pin, used for
  *       natively scrolled browser documents;</li>
  *   <li>{@link ScrollPaneStickyImpl}, the sticky path for a node inside an FX {@code ScrollPane}
  *       (desktop or browser): pure JavaFX, pinning by {@code translate} within the scrolled content;</li>

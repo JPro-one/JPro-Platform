@@ -1,8 +1,6 @@
 package one.jpro.platform.sticky.impl;
 
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -40,8 +38,6 @@ public final class DesktopFixedImpl implements ScrollImpl {
     private double originalX;
 
     private final InvalidationListener relayout = obs -> sync();
-    /** Fires teardown when the placeholder (and thus the route subtree) leaves the scene. */
-    private ChangeListener<Scene> placeholderSceneWaiter;
     private boolean torndown;
 
     public DesktopFixedImpl(Node node, ScrollAnchor anchor, Runnable onDetach) {
@@ -67,7 +63,7 @@ public final class DesktopFixedImpl implements ScrollImpl {
 
         // fixed is out of flow: its slot collapses to zero (reserved at mount, before insertion, so the
         // first layout honours it).
-        final Region ph = mount.mount(0);
+        final Region ph = mount.mount(0, false, onDetach);
         if (ph == null) {
             return; // could not mount, node stays in flow
         }
@@ -78,25 +74,6 @@ public final class DesktopFixedImpl implements ScrollImpl {
         scene.widthProperty().addListener(relayout);
         scene.heightProperty().addListener(relayout);
         node.layoutBoundsProperty().addListener(relayout);
-
-        // placeholder rides the flow, so it leaves the scene on route unmount (the node never does).
-        // re-check next pulse to ignore a transient same-pulse detach/reattach.
-        placeholderSceneWaiter = (obs, old, s) -> {
-            if (s == null && !torndown) {
-                Platform.runLater(() -> {
-                    if (!torndown && placeholder != null && placeholder.getScene() == null) {
-                        // hand back to the dispatcher: uninstall this delegate but stay alive to re-pin
-                        // if the route returns. fall back to a direct uninstall if unwired.
-                        if (onDetach != null) {
-                            onDetach.run();
-                        } else {
-                            uninstall();
-                        }
-                    }
-                });
-            }
-        };
-        placeholder.sceneProperty().addListener(placeholderSceneWaiter);
 
         sync();
     }
@@ -128,10 +105,6 @@ public final class DesktopFixedImpl implements ScrollImpl {
             scene.heightProperty().removeListener(relayout);
         }
         node.layoutBoundsProperty().removeListener(relayout);
-        if (placeholder != null && placeholderSceneWaiter != null) {
-            placeholder.sceneProperty().removeListener(placeholderSceneWaiter);
-            placeholderSceneWaiter = null;
-        }
         mount.unmount();
     }
 }
