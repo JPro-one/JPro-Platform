@@ -311,10 +311,16 @@ public final class WebScrollImpl implements ScrollImpl {
      * node with inline {@code style.transform}, and an important author rule is the only declaration
      * that outranks inline. Assumes an svg scale of 1 (true for native-scrolling pages).
      * <p>
-     * {@code y0} is the viewport pin line, {@code spanTop} the span's scene y (the sum of the ancestor
-     * layout transforms sticky ignores), and {@code nodeW}/{@code nodeH} the resolved box. Nothing
-     * else is written into the sheet: the span's extent and the node's own offset are server-side
-     * layout, and the browser derives the release from the span. The scroll position never enters it.
+     * {@code y0} is the viewport pin line, {@code spanTop} the span's scene y, and {@code nodeW}/
+     * {@code nodeH} the resolved box. Nothing else is written into the sheet: the span's extent and
+     * the node's own offset are server-side layout, and the browser derives the release from the
+     * span. The scroll position never enters it.
+     * <p>
+     * {@code spanTop} stands in for the ancestor transforms sticky resolves past. The two are equal
+     * while nothing above the {@code <jpro-app>} is transformed, which is why the tag's own place in
+     * the document does not matter (that offset is flow, and flow moves the pin and its reference
+     * alike). A host page that translates an ancestor breaks the equality, and every pin then rests
+     * off by that translation.
      * <p>
      * <strong>Readiness race.</strong> The element reference ({@code jpro.getValue(n)}) throws until
      * JPro's render pulse has registered the node, so it resolves inside a retry loop guarded by
