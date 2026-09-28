@@ -21,8 +21,8 @@ import java.util.function.Consumer;
  * and {@link ScrollPosition#FIXED fixed}) to JavaFX nodes rendered by JPro.
  * <p>
  * The positioning mode is attached to a node and, when running inside JPro, is realised
- * on the web side through a compositor override so that the node is pinned without a
- * round-trip to the JavaFX layout pass on every scroll event. When running as a desktop
+ * on the web side through the browser's own {@code position: sticky} so that the node is pinned
+ * without a round-trip to the JavaFX layout pass on every scroll event. When running as a desktop
  * application the mode is a no-op and the node keeps its normal flow positioning.
  * <p>
  * The API is layered over {@link #setScrollPosition(Node, ScrollPosition, ScrollAnchor)}, which takes
@@ -54,9 +54,6 @@ public final class Scroll {
 
     /** Property key under which the {@link ScrollPosition} is stored on a node. */
     private static final Object POSITION_KEY = new Object();
-
-    /** Property key under which the resolved {@link ScrollAnchor} is stored on a node. */
-    private static final Object ANCHOR_KEY = new Object();
 
     /** Property key under which the active {@link ScrollImpl} is stashed on a node. */
     private static final Object IMPL_KEY = new Object();
@@ -293,16 +290,8 @@ public final class Scroll {
         // switching sticky <-> fixed (or clearing) never leaks the previous impl/listeners.
         teardown(node);
 
-        // A prior pin's stuck state is meaningless once its impl is gone: clear it up front (which
-        // removes the :stuck pseudo-class) so switching sticky -> fixed/static never leaves it set.
-        final StuckState existing = stuckState(node, false);
-        if (existing != null) {
-            existing.set(false);
-        }
-
         if (position == ScrollPosition.STATIC) {
             node.getProperties().remove(POSITION_KEY);
-            node.getProperties().remove(ANCHOR_KEY);
             LOGGER.debug("Scroll position cleared for node {}", node);
             return;
         }
@@ -312,7 +301,6 @@ public final class Scroll {
         }
 
         node.getProperties().put(POSITION_KEY, position);
-        node.getProperties().put(ANCHOR_KEY, anchor);
 
         // STICKY publishes its pin state through the node's StuckState (stuckProperty + :stuck). The
         // active sticky impl drives it via this sink. FIXED is always pinned -> never transitions ->
@@ -320,7 +308,7 @@ public final class Scroll {
         final Consumer<Boolean> stuckSink =
                 (position == ScrollPosition.STICKY) ? stuckState(node, true)::set : null;
 
-        // Select the implementation (desktop FX vs web compositor) once the node is in a scene, and
+        // Select the implementation (desktop FX vs browser) once the node is in a scene, and
         // stash it so teardown(node) can reverse it. The choice is invisible to the caller.
         final ScrollImpl impl = new ScrollDispatcher(node, position, anchor, within, stuckSink);
         node.getProperties().put(IMPL_KEY, impl);
@@ -357,7 +345,7 @@ public final class Scroll {
      * stuck state never carries information). A sticky node with nothing to scroll against (desktop,
      * no scroll ancestor) also stays {@code false}, matching CSS sticky in a non-scrolling page.
      * <p>
-     * On the web compositor path the flip tracks the {@link com.jpro.webapi.WebAPI#browserViewport()}
+     * On the web page path the flip tracks the {@link com.jpro.webapi.WebAPI#browserViewport()}
      * sync cadence (the same fidelity picking already has), not per animation frame; see the module
      * README's observability note.
      *
@@ -456,8 +444,8 @@ public final class Scroll {
     }
 
     /**
-     * Reverses any positioning currently installed on the node: uninstalls the compositor
-     * override, deregisters listeners, and drops the teardown handle. A no-op when the node
+     * Reverses any positioning currently installed on the node: uninstalls the active
+     * implementation, deregisters listeners, and drops the teardown handle. A no-op when the node
      * is in normal flow.
      */
     private static void teardown(Node node) {

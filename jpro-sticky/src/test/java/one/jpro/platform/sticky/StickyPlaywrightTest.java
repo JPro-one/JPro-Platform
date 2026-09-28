@@ -165,6 +165,29 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
     }
 
     @Test
+    @DisplayName("A transformed ancestor above the app leaves the pin on its inset")
+    void pinHoldsUnderATransformedHostAncestor() {
+        // A host page can place an embedded <jpro-app> with a transform. Sticky resolves in layout
+        // space, so that translation is painted on top of the pin and would carry it off its inset
+        // unless the rule measures and cancels it. Flow placement needs no such thing: it moves the
+        // pin and its reference alike.
+        JProScroll.scrollBy(page, 300);
+        double pinned = JProScroll.awaitTop(page, "#jpro-sticky-header");
+
+        page.evaluate("() => { document.querySelector('jpro-app').style.transform"
+                + " = 'translateY(40px)'; }");
+        // the host owns that transform, so only the rebind heartbeat sees it change.
+        page.waitForTimeout(900);
+
+        double after = JProScroll.awaitTop(page, "#jpro-sticky-header");
+        assertTrue(Math.abs(after - pinned) <= PIN_TOLERANCE_PX + 1,
+                "pin should hold its inset under a translated ancestor: " + pinned + " -> " + after
+                        + " (uncompensated would land near " + (pinned + 40) + ")");
+
+        page.evaluate("() => { document.querySelector('jpro-app').style.removeProperty('transform'); }");
+    }
+
+    @Test
     @DisplayName("Screenshots capture the pinned state (full page and header element)")
     void screenshots() throws Exception {
         JProScroll.scrollBy(page, 250);

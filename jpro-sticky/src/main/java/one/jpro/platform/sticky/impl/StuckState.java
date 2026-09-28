@@ -16,8 +16,8 @@ import one.jpro.platform.sticky.ScrollPosition;
  * </ul>
  * One holder lives for the node's life (stashed on {@code node.getProperties()} by {@link Scroll}), so
  * listener identity is stable across clear / re-apply. The active STICKY implementation feeds it through
- * {@link #set(boolean)} at each pin/unpin transition; {@link Scroll} resets it to {@code false} on
- * teardown (which removes the pseudo-class).
+ * {@link #set(boolean)} at each pin/unpin transition; {@link ScrollDispatcher} resets it to
+ * {@code false} on uninstall and detach (which removes the pseudo-class).
  *
  * @author Tobias Horak
  */

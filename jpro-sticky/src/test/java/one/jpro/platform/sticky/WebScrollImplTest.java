@@ -75,8 +75,13 @@ class WebScrollImplTest {
     }
 
     private static boolean inOverlay(Node node) {
-        return node.getParent() instanceof Group
-                && "jpro-sticky-overlay".equals(((Group) node.getParent()).getId());
+        // a web pin is mounted inside its own span, which is the overlay's child.
+        for (Node p = node.getParent(); p != null; p = p.getParent()) {
+            if (p instanceof Group && "jpro-sticky-overlay".equals(p.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------------
@@ -130,13 +135,6 @@ class WebScrollImplTest {
                     "returning to the scene must re-pin the web node into the overlay, not leave it in plain flow");
         });
     }
-
-    // ---------------------------------------------------------------------
-    // Stuck-state lifecycle: a web sticky node that is pinned (stuck) when its route leaves the scene
-    // must not keep reporting stuck. The reparenting teardown runs off the dispatcher's detach path,
-    // which does not go through Scroll.setScrollPosition's central reset, so the stuck channel has to be
-    // cleared there too or stuckProperty / :stuck stay latched on an off-screen node.
-    // ---------------------------------------------------------------------
 
     // ---------------------------------------------------------------------
     // A page-level sticky header is reparented into the overlay and must leave a placeholder that

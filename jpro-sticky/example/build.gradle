@@ -24,4 +24,8 @@ jpro {
     // Playwright tests pass -Pjpro.test.port; fall back to 8080 for manual `jproRun`.
     port = project.hasProperty('jpro.test.port') ? project.property('jpro.test.port') as int : 8080
     openURLOnStartup = false
+    // StickyDefaultConfigTest runs the app with JPro's default (no mirrored DOM ids).
+    if (project.hasProperty('jpro.test.mirrorCSSToDOM')) {
+        JVMArgs = ["-Djpro.mirrorCSSToDOM=" + project.property('jpro.test.mirrorCSSToDOM')]
+    }
 }
