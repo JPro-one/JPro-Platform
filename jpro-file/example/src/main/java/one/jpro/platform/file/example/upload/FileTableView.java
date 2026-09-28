@@ -3,8 +3,7 @@ package one.jpro.platform.file.example.upload;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import one.jpro.platform.file.FileSource;
-
-import java.io.File;
+import one.jpro.platform.file.UploadStatus;
 
 /**
  * FileTableView extends TableView to display information about {@link FileSource} objects.
@@ -40,7 +39,7 @@ public class FileTableView extends TableView<FileSource> {
      *   <li>File Name: Displays the name of the file.</li>
      *   <li>File Size: Displays the size of the file.</li>
      *   <li>Upload progress: Displays the upload progress of the file.</li>
-     *   <li>Start upload: Provides an action button to start the upload.</li>
+     *   <li>Upload: Provides an action button to start, cancel or retry the upload.</li>
      * </ul>
      */
     @SuppressWarnings("unchecked")
@@ -61,8 +60,8 @@ public class FileTableView extends TableView<FileSource> {
         uploadProgressColumn.setCellFactory(col -> new UploadIndicatorTableCell<>());
         uploadProgressColumn.setMaxWidth(120.0);
 
-        TableColumn<FileSource, File> uploadButtonColumn = new TableColumn<>("Start upload");
-        uploadButtonColumn.setCellValueFactory(data -> data.getValue().uploadedFileProperty());
+        TableColumn<FileSource, UploadStatus> uploadButtonColumn = new TableColumn<>("Upload");
+        uploadButtonColumn.setCellValueFactory(data -> data.getValue().uploadStatusProperty());
         uploadButtonColumn.setCellFactory(col -> new UploadButtonTableCell<>());
         uploadButtonColumn.setMaxWidth(120.0);
 

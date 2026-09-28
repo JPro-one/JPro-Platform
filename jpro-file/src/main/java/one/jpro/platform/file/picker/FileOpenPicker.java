@@ -1,6 +1,8 @@
 package one.jpro.platform.file.picker;
 
 import com.jpro.webapi.WebAPI;
+import one.jpro.platform.file.picker.impl.NativeFileOpenPicker;
+import one.jpro.platform.file.picker.impl.WebFileOpenPicker;
 import javafx.scene.Node;
 import one.jpro.platform.file.MultipleFileSelector;
 

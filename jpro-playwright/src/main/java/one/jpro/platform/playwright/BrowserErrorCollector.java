@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Collects browser-side errors observed on a Playwright {@link Page} across three channels:
@@ -27,6 +28,7 @@ import java.util.List;
 public final class BrowserErrorCollector {
 
     private final List<String> errors = Collections.synchronizedList(new ArrayList<>());
+    private volatile Predicate<String> ignoreFilter = s -> false;
 
     public BrowserErrorCollector(Page page) {
         page.onConsoleMessage(msg -> {
@@ -38,11 +40,21 @@ public final class BrowserErrorCollector {
         page.onRequestFailed(req -> errors.add("[network-failed] " + req.url() + " — " + req.failure()));
     }
 
-    /** Fails with an AssertionError listing every collected error. */
+    /**
+     * Ignores errors matching the predicate (in addition to earlier ones) when asserting,
+     * e.g. an expected {@code net::ERR_ABORTED} after cancelling a request.
+     */
+    public BrowserErrorCollector ignoreMatching(Predicate<String> predicate) {
+        this.ignoreFilter = this.ignoreFilter.or(predicate);
+        return this;
+    }
+
+    /** Fails with an AssertionError listing every collected error (after ignoreMatching filters). */
     public void assertNoErrors() {
         synchronized (errors) {
-            if (!errors.isEmpty()) {
-                throw new AssertionError("Browser errors:\n" + String.join("\n", errors));
+            List<String> remaining = errors.stream().filter(e -> !ignoreFilter.test(e)).toList();
+            if (!remaining.isEmpty()) {
+                throw new AssertionError("Browser errors:\n" + String.join("\n", remaining));
             }
         }
     }

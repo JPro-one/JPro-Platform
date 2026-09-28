@@ -1,4 +1,4 @@
-package one.jpro.platform.file.picker;
+package one.jpro.platform.file.picker.impl;
 
 import javafx.scene.control.Label;
 import org.junit.jupiter.api.Test;

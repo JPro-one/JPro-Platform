@@ -5,53 +5,52 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import one.jpro.platform.file.FileSource;
-
-import java.io.File;
+import one.jpro.platform.file.UploadStatus;
 
 /**
- * TableCell implementation that displays an "Upload" button for each cell.
- * Clicking the button triggers the uploadFile() method on the corresponding item.
+ * TableCell with a button that starts, cancels or retries the upload of the row's file,
+ * depending on its {@link UploadStatus}.
  *
  * @param <S> The type of the TableView items.
  * @author Besmir Beqiri
  */
-public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, File> {
+public class UploadButtonTableCell<S extends FileSource> extends TableCell<S, UploadStatus> {
 
-    private final Button startUploadButton;
+    private final Button button;
 
-    /**
-     * Constructs a custom table cell containing an upload button, that when is clicked,
-     * the selected item's uploadFileAsync() method is called to asynchronously to upload a file.
-     * Once the upload is completed, the button's text is updated to "Completed" and it is disabled.
-     */
     public UploadButtonTableCell() {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setAlignment(Pos.CENTER);
 
-        startUploadButton = new Button();
-        startUploadButton.setOnAction(event -> {
-            final var selectedItem = getTableView().getItems().get(getIndex());
-            if (selectedItem != null) {
-                // start the upload asynchronously
-                selectedItem.uploadFileAsync();
+        button = new Button();
+        button.setOnAction(event -> {
+            final var item = getTableView().getItems().get(getIndex());
+            if (item == null) return;
+            if (item.getUploadStatus() == UploadStatus.UPLOADING) {
+                item.cancelUpload();
+            } else {
+                item.uploadFileAsync();
             }
         });
     }
 
     @Override
-    protected void updateItem(File file, boolean empty) {
-        super.updateItem(file, empty);
+    protected void updateItem(UploadStatus status, boolean empty) {
+        super.updateItem(status, empty);
 
-        if (empty) {
+        if (empty || status == null) {
             setGraphic(null);
-        } else {
-            setGraphic(startUploadButton);
-            if (file == null) {
-                startUploadButton.setText("Start upload");
-                startUploadButton.setDisable(false);
-            } else {
-                startUploadButton.setText("Completed");
-                startUploadButton.setDisable(true);
+            return;
+        }
+        setGraphic(button);
+        button.setDisable(false);
+        switch (status) {
+            case NOT_STARTED -> button.setText("Start upload");
+            case UPLOADING -> button.setText("Cancel");
+            case FAILED, CANCELLED -> button.setText("Retry");
+            case COMPLETED -> {
+                button.setText("Completed");
+                button.setDisable(true);
             }
         }
     }
