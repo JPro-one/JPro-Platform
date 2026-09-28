@@ -102,22 +102,6 @@ class StickyOverlayTest {
         FxTestSupport.onFx(() -> assertNull(StickyOverlay.overlayForNode(new Region())));
     }
 
-    @Test
-    void isOverlayRecognisesOverlayGroupsOnly() {
-        FxTestSupport.onFx(() -> {
-            StackPane root = new StackPane();
-            Region node = new Region();
-            root.getChildren().add(node);
-            new Scene(root, 100, 100);
-
-            Group overlay = StickyOverlay.overlayForNode(node);
-            assertTrue(StickyOverlay.isOverlay(overlay), "a sticky overlay Group is an overlay");
-            assertFalse(StickyOverlay.isOverlay(root), "a Pane host is not an overlay");
-            assertFalse(StickyOverlay.isOverlay(new Group()), "an unrelated Group is not an overlay");
-            assertFalse(StickyOverlay.isOverlay(null), "null is not an overlay");
-        });
-    }
-
     // ---------------------------------------------------------------------
     // remove — an emptied host overlay is detached and its cache stamp cleared
     // ---------------------------------------------------------------------

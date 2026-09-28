@@ -5,9 +5,9 @@ content until it reaches an edge, then stays pinned) or **fixed** (always pinned
 It mirrors the CSS `position` property for nodes rendered by JPro.
 
 You write the same code for web and desktop: there are no platform-specific branches in your code, and
-the library picks the right mechanism underneath. On the web the pin is a compositor effect, so
-scrolling stays smooth without a JavaFX layout pass per scroll event. Two setup caveats apply; see
-[Usage notes](#usage-notes).
+the library picks the right mechanism underneath. On the web the pin is the browser's own
+`position: sticky`, so it runs on the compositor and costs no JavaFX layout pass per scroll event.
+Three setup caveats apply; see [Usage notes](#usage-notes).
 
 ## Installation
 
@@ -174,7 +174,7 @@ back to `false` and removes `:stuck`.
 
 ## Usage notes
 
-The same `Scroll` calls work on the web and the desktop. Two things to know:
+The same `Scroll` calls work on the web and the desktop. Three things to know:
 
 **Sticky needs something to scroll.** A sticky node pins against its scrolling container: the page on
 the web, or an enclosing `ScrollPane` on either target. A sticky node on the desktop with no
@@ -188,15 +188,28 @@ a `ScrollPane` doesn't need this.)
 
 ```html
 <style>
-  html, body {
+  html {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  body {
     margin: 0;
   }
 </style>
 
 <jpro-app href="/app/default" nativescrolling="true" fxHeight="true" nativeZooming="true"></jpro-app>
 ```
+
+**Clip with `overflow-x: clip`, or clip `<html>` only.** Any element whose overflow is `hidden`,
+`auto` or `scroll` is a scroll container, whether or not it can actually scroll, and a sticky node
+pins against the nearest one. `clip` clips without creating one, so it is safe on `<html>`, `<body>`
+or both. With `hidden` the placement matters: `<body>` hands its overflow to the viewport as long as
+`<html>` is `visible`, so `body { overflow-x: hidden }` on its own is harmless, but clip `<html>` as
+well and that hand-off stops, `<body>` becomes a scroll container that never scrolls, and every pin
+holds against it instead of the page. One axis is enough, since `overflow-x: hidden` makes
+`overflow-y` compute to `auto`. The library never edits your styles; it names the scroll container it
+found on the browser console.
 
 ### Stacking order
 
@@ -215,8 +228,9 @@ scrim.setViewOrder(1);
 
 **Pinned nodes are reparented.** While a node is fixed (web and desktop) or page-level sticky on the
 web, it is moved into an overlay, leaving a placeholder in its original layout slot. So
-`node.getParent()` and scene-graph lookups see it relocated until you clear the position. A sticky
-node inside a `ScrollPane` is the exception: it stays in place.
+`node.getParent()` and scene-graph lookups see it relocated until you clear the position. On the web
+it lands one level deeper still, inside a pane of its own (see below). A sticky node inside a
+`ScrollPane` is the exception: it stays in place.
 
 By default the overlay sits at the scene root. A node moved there loses any CSS or context scoped to
 its former ancestors, such as route styles or a popup container. To keep those, register an ancestor
@@ -225,6 +239,18 @@ pane as an overlay host, and the node reparents into the nearest one above it in
 ```java
 Scroll.registerOverlayHost(popupContainer);
 ```
+
+**On the web, the browser owns the pin.** The node is mounted inside a pane sized to the range it
+should travel, and an injected rule makes the node itself `position: sticky` at the anchor's inset.
+Sticky clamps to its containing block, which is that pane, so the release point is the pane's end and
+no code runs per scroll event. Fixed is the same pin over a pane as long as the document: a
+viewport-anchored node fits the viewport, so that end stays out of reach and the pin never releases.
+
+**On the web, a pinned node's own transforms are dropped.** JPro fuses a node's layout position with
+its `scaleX`/`rotate`/`translateX` into one CSS `transform`, and the pin has to clear that transform
+to place the box itself. So those properties have no visual effect on a web-pinned node, while the
+same node still honours them on the desktop. Anchors are unaffected; only the JavaFX transform
+properties are.
 
 **On the web, the stuck flip can trail the visuals.** `:stuck` and `stuckProperty` track the
 browser-viewport sync cadence, so they update up to one sync interval after the node pins. Inside a

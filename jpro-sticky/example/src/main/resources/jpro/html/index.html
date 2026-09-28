@@ -9,12 +9,17 @@
     <link rel="stylesheet" type="text/css" href="/jpro/css/jpro.css">
     <script src="/jpro/js/jpro.js" type="text/javascript"></script>
 
-    <!-- jpro-sticky needs the page to scroll natively so the compositor scroll-timeline
-         override has a scroll to track. Enable it on the app tag below and let the body scroll. -->
+    <!-- jpro-sticky pins against the page's own scroll, so enable native scrolling on the app tag
+         below. overflow-x: clip clips without creating a scroll container. With hidden instead, keep
+         it off <body> while <html> clips too: the body would become a scroll container that never
+         scrolls, and every pin would hold against that instead of the page. -->
     <style>
-      html, body {
+      html {
         max-width: 100%;
-        overflow-x: hidden;
+        overflow-x: clip;
+      }
+
+      body {
         margin: 0px;
       }
     </style>

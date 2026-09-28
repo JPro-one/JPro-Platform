@@ -1,10 +1,11 @@
 # Changelog
 
-### 0.7.4 (TBD)
+### 0.7.4 (unreleased)
 
 Requires JPro 2026.3.2 or newer.
 
 #### Features
+* `jpro-css-grid`: New module with `CssGrid`, a CSS Grid layout for JavaFX: track lists (`fr`, `auto`, `minmax()`, `repeat(auto-fill/auto-fit, ...)`), named areas, line/span placement, sparse and dense auto-placement, and item/content alignment, all styleable via CSS. `GridItem` exposes the per-child placement as CSS properties.
 * `jpro-file`: `FileSource` gained `cancelUpload()` and `uploadStatusProperty()` (`NOT_STARTED`, `UPLOADING`, `COMPLETED`, `FAILED`, `CANCELLED`); `uploadFileAsync()` now fails or is cancelled instead of never completing, and `uploadFile()` retries after a failed or cancelled upload.
 * `jpro-file`: New `FileUploadProgress` tracks the size-weighted progress of several uploads (`progressProperty()`, `uploadedSizeProperty()`, `totalSizeProperty()`, `uploadAll()`, `cancelAll()`).
 * `jpro-file`: `FileDropper.setExtensionFilter(...)` is now applied on the web too — files with another extension are no longer delivered.
