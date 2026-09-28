@@ -139,18 +139,43 @@ public sealed abstract class FileSource permits NativeFileSource, WebFileSource 
     public abstract ReadOnlyObjectProperty<File> uploadedFileProperty();
 
     /**
+     * Gets the current upload status.
+     *
+     * @return the current upload status
+     */
+    public abstract UploadStatus getUploadStatus();
+
+    /**
+     * Returns a read-only object property representing the upload status.
+     * The progress is reset to 0.0 when the upload fails or is cancelled.
+     *
+     * @return the ReadOnlyObjectProperty for the upload status
+     */
+    public abstract ReadOnlyObjectProperty<UploadStatus> uploadStatusProperty();
+
+    /**
      * Initiates the file upload process synchronously.
      * <p>
      * This method will start the upload operation and should be called to begin the upload.
+     * After a failed or cancelled upload, calling it again starts a new attempt.
      * </p>
      */
     public abstract void uploadFile();
 
     /**
+     * Stops a running upload. The status becomes {@link UploadStatus#CANCELLED}, the future returned by
+     * {@link #uploadFileAsync()} is cancelled and nothing is kept on the server.
+     * Does nothing unless the status is {@link UploadStatus#UPLOADING}.
+     */
+    public abstract void cancelUpload();
+
+    /**
      * Initiates the file upload process asynchronously.
+     * After a failed or cancelled upload, calling it again starts a new attempt.
      *
      * @return a CompletableFuture representing the result of the asynchronous upload operation,
-     * which will complete with the uploaded File object
+     * which will complete with the uploaded File object, complete exceptionally when the upload fails
+     * and is cancelled by {@link #cancelUpload()}
      */
     public abstract CompletableFuture<File> uploadFileAsync();
 }

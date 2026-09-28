@@ -160,13 +160,6 @@ abstract class BaseFileDropper implements FileDropper {
 
     boolean hasSupportedExtension(List<File> files) {
         final ExtensionFilter extensionFilter = getExtensionFilter();
-        return extensionFilter == null || files.stream()
-                .anyMatch(file -> {
-                    if(extensionFilter.allowDirectory() && file.isDirectory()) {
-                        return true;
-                    }
-                    return extensionFilter.extensions().stream()
-                            .anyMatch(extension -> file.getName().toLowerCase().endsWith(extension));
-                });
+        return files.stream().anyMatch(file -> !file.isDirectory() && (extensionFilter == null || extensionFilter.accepts(file)));
     }
 }
