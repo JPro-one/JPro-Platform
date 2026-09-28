@@ -195,6 +195,8 @@ object LinkUtil {
         webapi.executeScript(
           s"""
              |${aElem.getName}.style.pointerEvents = 'auto';
+             |${aElem.getName}.tabIndex = -1;
+             |${aElem.getName}.style.outline = 'none';
              |${aElem.getName}.appendChild(${divBox.getName});
              |${divBox.getName}.style.display = 'block';
              |${divBox.getName}.style.position = 'absolute';
