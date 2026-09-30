@@ -7,7 +7,7 @@ applications, on both desktop and in the browser.
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-routing-popup:0.7.3")
+    implementation("one.jpro.platform:jpro-routing-popup:0.8.0")
 }
 ```
 

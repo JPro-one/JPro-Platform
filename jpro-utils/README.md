@@ -7,7 +7,7 @@ both on the desktop and in the browser.
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-utils:0.7.3")
+    implementation("one.jpro.platform:jpro-utils:0.8.0")
 }
 ```
 

@@ -2,7 +2,7 @@
 
 ## 0.8.x
 
-### 0.8.0 (unreleased)
+### 0.8.0 (September 30, 2026)
 
 Requires JPro 2026.4.0 or newer.
 

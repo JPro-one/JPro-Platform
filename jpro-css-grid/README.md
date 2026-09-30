@@ -8,7 +8,7 @@ A CSS Grid layout implementation for JavaFX. All properties are styleable via CS
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-css-grid:0.7.3")
+    implementation("one.jpro.platform:jpro-css-grid:0.8.0")
 }
 ```
 
@@ -18,7 +18,7 @@ dependencies {
 <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-css-grid</artifactId>
-    <version>0.7.3</version>
+    <version>0.8.0</version>
 </dependency>
 ```
 

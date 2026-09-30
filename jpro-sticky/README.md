@@ -15,7 +15,7 @@ Three setup caveats apply; see [Usage notes](#usage-notes).
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-sticky:0.7.2")
+    implementation("one.jpro.platform:jpro-sticky:0.8.0")
 }
 ```
 
@@ -25,7 +25,7 @@ dependencies {
 <dependency>
     <groupId>one.jpro.platform</groupId>
     <artifactId>jpro-sticky</artifactId>
-    <version>0.7.2</version>
+    <version>0.8.0</version>
 </dependency>
 ```
 

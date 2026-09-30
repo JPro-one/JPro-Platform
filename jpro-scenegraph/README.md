@@ -8,7 +8,7 @@ to an LLM.
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-scenegraph:0.7.3")
+    implementation("one.jpro.platform:jpro-scenegraph:0.8.0")
 }
 ```
 

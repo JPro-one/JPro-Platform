@@ -4,7 +4,7 @@ Add Google, OAuth2 or username/password login to a JavaFX/JPro `RouteApp` in a f
 one central, swappable configuration: **`RoutingAuth`**.
 
 ```groovy
-implementation("one.jpro.platform:jpro-auth-routing:0.7.3")
+implementation("one.jpro.platform:jpro-auth-routing:0.8.0")
 ```
 
 ## All you need
