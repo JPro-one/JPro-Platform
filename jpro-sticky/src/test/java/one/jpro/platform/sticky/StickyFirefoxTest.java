@@ -53,7 +53,7 @@ public class StickyFirefoxTest extends JProPlaywrightTest {
                 new Browser.NewContextOptions().setViewportSize(420, 860)).newPage();
         page.navigate(BASE_URL);
         // Firefox boots the app slower than the shared waitForRunning budget allows; wait plainly.
-        page.locator("#jpro-sticky-header").waitFor(
+        page.locator(".jpro-id-sticky-header").waitFor(
                 new Locator.WaitForOptions().setTimeout(180_000));
         page.waitForTimeout(3000);
 
@@ -61,14 +61,14 @@ public class StickyFirefoxTest extends JProPlaywrightTest {
         page.waitForTimeout(1500);
 
         // the bug parked pinned nodes about a document height down (~6300px).
-        for (String id : new String[]{"#jpro-sticky-header", "#jpro-toast", "#jpro-bottom-bar",
-                "#jpro-fab", "#jpro-overlay"}) {
+        for (String id : new String[]{".jpro-id-sticky-header", ".jpro-id-toast", ".jpro-id-bottom-bar",
+                ".jpro-id-fab", ".jpro-id-overlay"}) {
             double top = page.locator(id).boundingBox().y;
             assertTrue(top < page.viewportSize().height,
                     id + " is parked off-screen at top=" + top + " (issue #127)");
         }
 
-        double headerTop = page.locator("#jpro-sticky-header").boundingBox().y;
+        double headerTop = page.locator(".jpro-id-sticky-header").boundingBox().y;
         assertTrue(headerTop < PINNED_MAX_TOP_PX,
                 "sticky header should be pinned near the viewport top, was at " + headerTop);
 

@@ -17,7 +17,7 @@ import com.microsoft.playwright.Page;
  *
  * <p>Each input is an asynchronous round-trip to the JVM and back, so read results with
  * {@link #awaitText} rather than a single read. Selecting a field needs
- * {@code jpro.mirrorCSSToDOM = true}; a node with {@code setId("foo")} is then {@code "#jpro-foo"}.
+ * {@code jpro.mirrorCSSToDOM = true}; a node with {@code setId("foo")} is then {@code ".jpro-id-foo"}.
  */
 public final class JProInput {
 

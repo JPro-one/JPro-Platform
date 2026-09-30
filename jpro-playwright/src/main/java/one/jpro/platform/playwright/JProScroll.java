@@ -21,7 +21,7 @@ import com.microsoft.playwright.options.BoundingBox;
  * </ul>
  *
  * <p>Selecting a node needs {@code jpro.mirrorCSSToDOM = true}; a node with {@code setId("foo")} is
- * then reachable as {@code "#jpro-foo"}. Positions are viewport-relative (a pinned sticky/fixed
+ * then reachable as {@code ".jpro-id-foo"}. Positions are viewport-relative (a pinned sticky/fixed
  * element holds its {@link #top} across a scroll; an in-flow element's {@code top} decreases).
  */
 public final class JProScroll {

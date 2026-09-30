@@ -31,7 +31,7 @@ public final class PlaywrightTimeouts {
      * <p>Example:
      * <pre>{@code
      * withTimeout(15, TimeUnit.SECONDS, "popup marker visible", t ->
-     *     popup.locator("#jpro-popup-marker").waitFor(
+     *     popup.locator(".jpro-id-popup-marker").waitFor(
      *         new Locator.WaitForOptions().setState(ATTACHED).setTimeout(t)));
      * }</pre>
      *

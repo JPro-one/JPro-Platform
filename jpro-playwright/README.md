@@ -64,8 +64,8 @@ public class MyAppTest extends JProPlaywrightTest {
 
     @Test
     void typing() {
-        JProInput.typeInto(page, "#jpro-textfield", "hello");
-        JProInput.awaitText(page, "#jpro-echo", "hello");
+        JProInput.typeInto(page, ".jpro-id-textfield", "hello");
+        JProInput.awaitText(page, ".jpro-id-echo", "hello");
     }
 }
 ```
@@ -77,7 +77,7 @@ This module's own tests in `jpro-playwright/src/test` run against the `jpro-play
 A JavaFX `id`/`styleClass` is selectable only with DOM mirroring on, and always carries a `jpro-` prefix.
 
 1. **Enable mirroring.** Add `jpro.mirrorCSSToDOM = true` to the app's `jpro.conf` (on the classpath). It is **off by default** — without it, `id`/`styleClass` are never sent to the browser and selectors match nothing.
-2. **Use the `jpro-` prefix.** `setId("textfield")` → `"#jpro-textfield"`; style class `foo` → `".jpro-foo"`.
+2. **Use the `jpro-` prefix.** `setId("textfield")` → `".jpro-id-textfield"`; style class `foo` → `".jpro-foo"`. Since JPro 2026.4.0 the id is a CSS class, not a DOM id, because JavaFX ids need not be unique.
 
 If a selector matches nothing, check these two first.
 
@@ -86,8 +86,8 @@ If a selector matches nothing, check these two first.
 Use `JProInput` — it applies the sequence that works against a JPro control.
 
 ```java
-JProInput.typeInto(page, "#jpro-field", "hello");   // focus (click), settle, then type
-JProInput.awaitText(page, "#jpro-echo", "hello");   // poll for the round-trip result
+JProInput.typeInto(page, ".jpro-id-field", "hello");   // focus (click), settle, then type
+JProInput.awaitText(page, ".jpro-id-echo", "hello");   // poll for the round-trip result
 ```
 
 The rules behind it, all observed against the example app:
@@ -99,9 +99,9 @@ The rules behind it, all observed against the example app:
 **Commit (Enter):** JavaFX `onAction` handlers and `TextFormatter` converters fire on Enter, not per keystroke:
 
 ```java
-JProInput.typeInto(page, "#jpro-field", "world");
+JProInput.typeInto(page, ".jpro-id-field", "world");
 JProInput.commit(page);                              // Enter
-JProInput.awaitText(page, "#jpro-result", "WORLD");
+JProInput.awaitText(page, ".jpro-id-result", "WORLD");
 ```
 
 **Special keys:** `JProInput.focus(page, selector)` then `JProInput.press(page, "Backspace" | "ArrowLeft" | "Control+A" | ...)`.
@@ -156,7 +156,7 @@ Tests run headless, so a screenshot is often the only way to see the app. `JProP
 
 ```java
 screenshot(page, "after-typing");                       // full app
-screenshot(page.locator("#jpro-textfield"), "field");   // one element, by id
+screenshot(page.locator(".jpro-id-textfield"), "field");   // one element, by id
 ```
 
 Files go to `build/playwright-screenshots/` (override with `-Djpro.test.screenshotDir=...`); both return the path. Most useful in a `catch`/teardown to snapshot a failure.
@@ -188,7 +188,7 @@ Mistakes that compile fine and then fail without pointing at the cause — scan 
 - **Typing right after clicking** → dropped/missing characters. `typeInto` focuses and waits first.
 - **Asserting right after acting** → reads the stale value. Poll with `awaitText(...)`.
 - **No `jpro.mirrorCSSToDOM = true`** → every selector matches nothing (it's off by default). Add it to `jpro.conf`.
-- **Missing the `jpro-` prefix** → `#textfield` matches nothing; use `#jpro-textfield`.
+- **Selecting by `#textfield` or `#jpro-textfield`** → matches nothing. Use `.jpro-id-textfield`.
 - **No `jpro/html/defaultpage`** → routes return a static-file 404 ("Couldn't get resource for: 'jpro/html/…'") and the app never boots. Add `src/main/resources/jpro/html/defaultpage` with a `<jpro-app href="/app/default" .../>` (see the `example` module).
 - **Expecting `onAction`/`TextFormatter` per keystroke** → they fire on Enter (JavaFX commit). Call `JProInput.commit(page)` first.
 - **Interacting before `waitForRunning(page)`** → events land on a half-loaded app and are lost.

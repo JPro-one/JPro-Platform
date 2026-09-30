@@ -57,51 +57,51 @@ public class TextInputPlaywrightTest extends JProPlaywrightTest {
     @Test
     @DisplayName("Typing into a JPro TextField round-trips to the bound label")
     void typingRoundTripsToBoundLabel() {
-        JProInput.typeInto(page, "#jpro-textfield", "hello");
-        JProInput.awaitText(page, "#jpro-echo", "hello");
+        JProInput.typeInto(page, ".jpro-id-textfield", "hello");
+        JProInput.awaitText(page, ".jpro-id-echo", "hello");
     }
 
     @Test
     @DisplayName("onAction label updates only after Enter is pressed to commit")
     void commitOnEnter() {
-        JProInput.typeInto(page, "#jpro-committed", "world");
+        JProInput.typeInto(page, ".jpro-id-committed", "world");
 
         // Asserting "still empty" can't be a single read right after typing — that races the
         // round-trip. Establish happens-before with an ordered probe: the WebSocket is FIFO, so
         // once the click->counter round-trip lands we know the earlier typing was processed too,
         // and the onAction echo legitimately stayed empty (commit hasn't happened). The click
         // blurs the field — fine, onAction commits on Enter, not focus-loss.
-        page.locator("#jpro-button").click();
-        JProInput.awaitText(page, "#jpro-count", "1");
-        assertEquals("", JProInput.getText(page, "#jpro-committed-echo"));
+        page.locator(".jpro-id-button").click();
+        JProInput.awaitText(page, ".jpro-id-count", "1");
+        assertEquals("", JProInput.getText(page, ".jpro-id-committed-echo"));
 
         // Re-focus the field (the typed text is still there) and press Enter to commit.
-        JProInput.focus(page, "#jpro-committed");
+        JProInput.focus(page, ".jpro-id-committed");
         JProInput.commit(page);
-        JProInput.awaitText(page, "#jpro-committed-echo", "world");
+        JProInput.awaitText(page, ".jpro-id-committed-echo", "world");
     }
 
     @Test
     @DisplayName("Clicking a button round-trips to the counter label")
     void clickRoundTrip() {
-        page.locator("#jpro-button").click();
-        JProInput.awaitText(page, "#jpro-count", "1");
+        page.locator(".jpro-id-button").click();
+        JProInput.awaitText(page, ".jpro-id-count", "1");
     }
 
     @Test
     @DisplayName("Pressing Backspace edits the focused field")
     void backspaceEdits() {
-        JProInput.typeInto(page, "#jpro-textfield", "helo");
-        JProInput.awaitText(page, "#jpro-echo", "helo");
+        JProInput.typeInto(page, ".jpro-id-textfield", "helo");
+        JProInput.awaitText(page, ".jpro-id-echo", "helo");
         JProInput.press(page, "Backspace");
-        JProInput.awaitText(page, "#jpro-echo", "hel");
+        JProInput.awaitText(page, ".jpro-id-echo", "hel");
     }
 
     @Test
     @DisplayName("Screenshots write a full-page and an element PNG")
     void screenshots() throws Exception {
         Path full = screenshot(page, "test-app");
-        Path element = screenshot(page.locator("#jpro-textfield"), "test-field");
+        Path element = screenshot(page.locator(".jpro-id-textfield"), "test-field");
         assertTrue(Files.size(full) > 0, "full-page screenshot should be non-empty");
         assertTrue(Files.size(element) > 0, "element screenshot should be non-empty");
     }
