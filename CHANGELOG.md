@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.7.x
+## 0.8.x
 
-### 0.7.4 (unreleased)
+### 0.8.0 (unreleased)
 
 Requires JPro 2026.4.0 or newer.
 
@@ -43,6 +43,8 @@ Requires JPro 2026.4.0 or newer.
   FileOpenPicker and FileDropper take files only and ignore dropped folders.
 * **jpro-file:** the picker implementations moved to `one.jpro.platform.file.picker.impl`. Create
   pickers with the `create(...)` methods of FileOpenPicker, FileSavePicker and DirectoryOpenPicker.
+
+## 0.7.x
 
 ### 0.7.3 (August 7, 2026)
 Removed the old unmaintained JPMS dependencies. 
