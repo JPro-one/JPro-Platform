@@ -1,24 +1,50 @@
 # Changelog
 
-### 0.7.4 (unreleased)
+## 0.8.x
 
-Requires JPro 2026.3.2 or newer.
+### 0.8.0 (unreleased)
+
+Requires JPro 2026.4.0 or newer.
+
+#### New modules
+* **jpro-sticky:** sticky and fixed positioning for JavaFX nodes, like CSS `position: sticky` and
+  `position: fixed`. The same code works on the web and on the desktop. On the web the browser
+  pins the node natively, so scrolling costs no JavaFX layout. A pinned node gets the `:stuck`
+  pseudo-class.
+* **jpro-css-grid:** `CssGrid` brings CSS Grid layout to JavaFX: `fr`, `minmax()` and `repeat()`
+  tracks, named areas, line and span placement, dense auto-placement and alignment. All of it can
+  be set in CSS, and `GridItem` places each child.
 
 #### Features
-* `jpro-css-grid`: New module with `CssGrid`, a CSS Grid layout for JavaFX: track lists (`fr`, `auto`, `minmax()`, `repeat(auto-fill/auto-fit, ...)`), named areas, line/span placement, sparse and dense auto-placement, and item/content alignment, all styleable via CSS. `GridItem` exposes the per-child placement as CSS properties.
-* `jpro-file`: `FileSource` gained `cancelUpload()` and `uploadStatusProperty()` (`NOT_STARTED`, `UPLOADING`, `COMPLETED`, `FAILED`, `CANCELLED`); `uploadFileAsync()` now fails or is cancelled instead of never completing, and `uploadFile()` retries after a failed or cancelled upload.
-* `jpro-file`: New `FileUploadProgress` tracks the size-weighted progress of several uploads (`progressProperty()`, `uploadedSizeProperty()`, `totalSizeProperty()`, `uploadAll()`, `cancelAll()`).
-* `jpro-file`: `FileDropper.setExtensionFilter(...)` is now applied on the web too — files with another extension are no longer delivered.
-* `jpro-playwright`: `BrowserErrorCollector.ignoreMatching(...)` excludes expected browser errors from `assertNoErrors()`.
-* `jpro-file`: New `DirectoryOpenPicker` for choosing a directory on desktop (`create` throws `UnsupportedOperationException` in the browser). (#59)
+* **jpro-file:** `cancelUpload()` stops an upload, `uploadStatusProperty()` reports its state, and
+  failed or cancelled uploads can be restarted.
+* **jpro-file:** the new FileUploadProgress tracks the combined progress of several uploads.
+* **jpro-file:** the new DirectoryOpenPicker chooses a directory on the desktop. (#59)
+* **jpro-file:** `FileDropper.setExtensionFilter(...)` now also applies on the web.
+* **jpro-playwright:** `BrowserErrorCollector.ignoreMatching(...)` skips expected browser errors,
+  and the new JProScroll scrolls a JPro page or ScrollPane with the mouse wheel to test sticky and
+  fixed nodes.
 
 #### Bugfixes
-* `jpro-file`: `ExtensionFilter.ANY` on the web rejected every upload (since JPro 2026.1); it now accepts any file.
-* `jpro-file`: A `FileDropper` without an extension filter dropped every file on desktop; extension matching is now case-insensitive on desktop.
+* On the web, `ExtensionFilter.ANY` accepts any file again. Since JPro 2026.1 it rejected every
+  upload.
+* A failed upload now fails its `uploadFileAsync()` future instead of never completing.
+* On the desktop, a FileDropper without an extension filter no longer drops every file, and
+  extensions are matched ignoring case.
+* Links set with `LinkUtil.setLink` are no longer an extra Tab stop and show no browser focus
+  outline.
 
 #### Breaking
-* `jpro-file`: Directory support was removed from `ExtensionFilter` (`DIRECTORY`, `allowDirectory()`, `of(String, boolean, String...)` and the matching constructor); choose directories with `DirectoryOpenPicker` instead. `FileOpenPicker` and `FileDropper` handle files only — dropped folders are ignored.
-* `jpro-file`: The picker implementations (`NativeFileOpenPicker`, `WebFileOpenPicker`, `NativeFileSavePicker`, `WebFileSavePicker`) moved to `one.jpro.platform.file.picker.impl`. Use the `create(...)` factories of the interfaces.
+* **jpro-playwright:** select nodes by `.jpro-id-<id>` instead of `#jpro-<id>`, as JPro 2026.4.0
+  mirrors a JavaFX id as a CSS class.
+* **jpro-mail:** removed, as it was hardly used. The last version is 0.7.3.
+* **jpro-file:** ExtensionFilter no longer handles directories (`DIRECTORY`, `allowDirectory()`
+  and the `of(...)` overload with a boolean are gone). Use DirectoryOpenPicker instead.
+  FileOpenPicker and FileDropper take files only and ignore dropped folders.
+* **jpro-file:** the picker implementations moved to `one.jpro.platform.file.picker.impl`. Create
+  pickers with the `create(...)` methods of FileOpenPicker, FileSavePicker and DirectoryOpenPicker.
+
+## 0.7.x
 
 ### 0.7.3 (August 7, 2026)
 Removed the old unmaintained JPMS dependencies. 
@@ -57,6 +83,8 @@ Removed the old unmaintained JPMS dependencies.
 #### Breaking
 * `jpro-routing`: Renamed `View` to `Page`. Affects `Response.page(...)` (was `Response.view`), `SessionManager.getPage()` (was `getView`), `Page.fromNode(...)`, `subPage()`, and `NodePage`.
 * `jpro-routing`: Renamed the `Filter` type (`Route => Route`) to `Transformer`. `Route.filter`/`filterWhen`/`filterWhenFuture` are now `transform`/`transformWhen`/`transformWhenFuture`; the `Filters` object is `Transformers` (with `Transformers.fullscreen` replacing `FullscreenFilter`); the built-in implementations are renamed (`ContainerTransformer`, `DevTransformer`, `StatisticsTransformer`, `StyleClassTransformer`, `StylesheetsTransformer`, `LinkHeaderTransformer`, `StatefulTransformer`, `RouteUtils.transition`/`sideTransition`). Authentication classes keep the `Filter` name (`AuthBasicFilter`, `AuthBasicOAuth2Filter`, `AuthRestrictionFilter`). The package `one.jpro.platform.routing.filter.container` is now `one.jpro.platform.routing.container`.
+
+## 0.6.x
 
 ### 0.6.3 (May 25, 2026)
 
