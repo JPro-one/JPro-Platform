@@ -4,7 +4,7 @@
 
 ### 0.7.4 (unreleased)
 
-Requires JPro 2026.3.2 or newer.
+Requires JPro 2026.4.0 or newer.
 
 #### New modules
 * **jpro-sticky:** sticky and fixed positioning for JavaFX nodes, like CSS `position: sticky` and
@@ -35,6 +35,8 @@ Requires JPro 2026.3.2 or newer.
   outline.
 
 #### Breaking
+* **jpro-playwright:** select nodes by `.jpro-id-<id>` instead of `#jpro-<id>`, as JPro 2026.4.0
+  mirrors a JavaFX id as a CSS class.
 * **jpro-mail:** removed, as it was hardly used. The last version is 0.7.3.
 * **jpro-file:** ExtensionFilter no longer handles directories (`DIRECTORY`, `allowDirectory()`
   and the `of(...)` overload with a boolean are gone). Use DirectoryOpenPicker instead.
