@@ -17,7 +17,7 @@ import static one.jpro.platform.routing.Route.redirect;
 /**
  * Minimal JPro app used as the target for this module's own Playwright tests, and as a worked
  * example of an app that is testable from Playwright. Every interactive node has an id, and
- * {@code jpro.conf} sets {@code mirrorCSSToDOM = true}, so each is reachable as {@code "#jpro-<id>"}.
+ * {@code jpro.conf} sets {@code mirrorCSSToDOM = true}, so each is reachable as {@code ".jpro-id-<id>"}.
  */
 public class Main extends RouteApp {
 

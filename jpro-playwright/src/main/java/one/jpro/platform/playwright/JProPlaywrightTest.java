@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>For typing and reading text back, see {@link JProInput}. Selecting nodes requires
  * {@code jpro.mirrorCSSToDOM = true} in the app's {@code jpro.conf} — then a node with
- * {@code setId("foo")} is reachable as {@code "#jpro-foo"}.
+ * {@code setId("foo")} is reachable as {@code ".jpro-id-foo"}.
  */
 public abstract class JProPlaywrightTest {
 
@@ -89,7 +89,7 @@ public abstract class JProPlaywrightTest {
     }
 
     /**
-     * Capture a PNG of a single element (e.g. {@code screenshot(page.locator("#jpro-textfield"),
+     * Capture a PNG of a single element (e.g. {@code screenshot(page.locator(".jpro-id-textfield"),
      * "field")}) and return its absolute path. Same output directory as {@link #screenshot(Page, String)}.
      */
     protected static Path screenshot(Locator locator, String name) {

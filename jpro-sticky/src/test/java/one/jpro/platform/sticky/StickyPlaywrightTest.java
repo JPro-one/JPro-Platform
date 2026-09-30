@@ -76,16 +76,16 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
     @Test
     @DisplayName("Sticky page header stays pinned to the top while content scrolls under it")
     void stickyHeaderStaysPinnedWhileContentScrolls() {
-        double headerBefore = JProScroll.awaitTop(page, "#jpro-sticky-header");
-        double witnessBefore = JProScroll.awaitTop(page, "#jpro-scrollpane");
+        double headerBefore = JProScroll.awaitTop(page, ".jpro-id-sticky-header");
+        double witnessBefore = JProScroll.awaitTop(page, ".jpro-id-scrollpane");
 
         JProScroll.scrollBy(page, 150);
 
-        double headerAfter = JProScroll.awaitTop(page, "#jpro-sticky-header");
-        double witnessAfter = JProScroll.awaitTop(page, "#jpro-scrollpane");
+        double headerAfter = JProScroll.awaitTop(page, ".jpro-id-sticky-header");
+        double witnessAfter = JProScroll.awaitTop(page, ".jpro-id-scrollpane");
 
         assertTrue(witnessBefore - witnessAfter >= SCROLLED_MIN_PX,
-                "page should have scrolled: in-flow #jpro-scrollpane moved from " + witnessBefore
+                "page should have scrolled: in-flow .jpro-id-scrollpane moved from " + witnessBefore
                         + " to " + witnessAfter);
         assertTrue(Math.abs(headerAfter - headerBefore) <= PIN_TOLERANCE_PX,
                 "sticky header should stay pinned: top moved from " + headerBefore
@@ -98,8 +98,8 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
         JProScroll.scrollBy(page, 200);
 
         // The header is pinned at the top; a click must reach the reparented, server-pinned button.
-        page.locator("#jpro-sticky-header").click();
-        JProInput.awaitText(page, "#jpro-sticky-header", "Sticky page header  (clicks: 1)");
+        page.locator(".jpro-id-sticky-header").click();
+        JProInput.awaitText(page, ".jpro-id-sticky-header", "Sticky page header  (clicks: 1)");
     }
 
     @Test
@@ -110,23 +110,23 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
         // round-trip to its counter. This exercises both halves at once: the header's placeholder
         // reserves its slot so the button is not hidden behind the header, and the overlay is mirrored
         // to pointer-events:none so it does not swallow the click on its way to the content beneath.
-        page.locator("#jpro-flow-button").click();
-        JProInput.awaitText(page, "#jpro-flow-button", "Flow button (not pinned)  (clicks: 1)");
+        page.locator(".jpro-id-flow-button").click();
+        JProInput.awaitText(page, ".jpro-id-flow-button", "Flow button (not pinned)  (clicks: 1)");
 
         // And the overlay really is the transparent layer in between (guards the pointer-events mapping).
         String overlayPe = (String) page.evaluate(
-                "() => getComputedStyle(document.getElementById('jpro-overlay')).pointerEvents");
+                "() => getComputedStyle(document.querySelector('.jpro-id-overlay')).pointerEvents");
         assertEquals("none", overlayPe, "fullscreen mouse-transparent overlay must be pointer-events:none");
     }
 
     @Test
     @DisplayName("Fixed toast holds its viewport position across a large scroll")
     void fixedToastStaysPinned() {
-        double before = JProScroll.awaitTop(page, "#jpro-toast");
+        double before = JProScroll.awaitTop(page, ".jpro-id-toast");
 
         JProScroll.scrollBy(page, 400);
 
-        double after = JProScroll.awaitTop(page, "#jpro-toast");
+        double after = JProScroll.awaitTop(page, ".jpro-id-toast");
         assertTrue(Math.abs(after - before) <= PIN_TOLERANCE_PX,
                 "fixed toast should not move: top went from " + before + " to " + after);
     }
@@ -135,7 +135,7 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
     @DisplayName("Bounded section sub-header pins at its offset, then releases at the section end")
     void boundedSectionHeaderPinsThenReleases() {
         // Scroll down until the section sub-header reaches its 48px pin and holds there.
-        double pinned = scrollUntilPinnedNear(page, "#jpro-section-header", 48);
+        double pinned = scrollUntilPinnedNear(page, ".jpro-id-section-header", 48);
         assertTrue(Math.abs(pinned - 48) <= PIN_TOLERANCE_PX + 2,
                 "section sub-header should pin near 48px, was " + pinned);
 
@@ -143,7 +143,7 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
         // with its content, or scroll off the top entirely (no box).
         for (int i = 0; i < 12; i++) JProScroll.scrollBy(page, 300);
 
-        Double released = tryTop(page, "#jpro-section-header");
+        Double released = tryTop(page, ".jpro-id-section-header");
         assertTrue(released == null || released < 48 - PIN_TOLERANCE_PX,
                 "section sub-header should have released, but is still pinned at " + released);
     }
@@ -152,12 +152,12 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
     @DisplayName("ScrollPane sub-header stays pinned to the pane top while the pane scrolls (desktop-shared path)")
     void scrollPaneStickyHeaderPinsWhileScrollingWithin() {
         // Scroll inside the ScrollPane until its sub-header pins to the pane's viewport top.
-        JProScroll.scrollWithin(page, "#jpro-scrollpane", 250);
-        double pinned = JProScroll.awaitTop(page, "#jpro-scrollpane-header");
+        JProScroll.scrollWithin(page, ".jpro-id-scrollpane", 250);
+        double pinned = JProScroll.awaitTop(page, ".jpro-id-scrollpane-header");
 
         // Keep scrolling the pane; a sticky sub-header holds its position rather than scrolling away.
-        JProScroll.scrollWithin(page, "#jpro-scrollpane", 200);
-        double stillPinned = JProScroll.awaitTop(page, "#jpro-scrollpane-header");
+        JProScroll.scrollWithin(page, ".jpro-id-scrollpane", 200);
+        double stillPinned = JProScroll.awaitTop(page, ".jpro-id-scrollpane-header");
 
         assertTrue(Math.abs(stillPinned - pinned) <= PIN_TOLERANCE_PX,
                 "ScrollPane sub-header should stay pinned within the pane: moved from " + pinned
@@ -172,14 +172,14 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
         // unless the rule measures and cancels it. Flow placement needs no such thing: it moves the
         // pin and its reference alike.
         JProScroll.scrollBy(page, 300);
-        double pinned = JProScroll.awaitTop(page, "#jpro-sticky-header");
+        double pinned = JProScroll.awaitTop(page, ".jpro-id-sticky-header");
 
         page.evaluate("() => { document.querySelector('jpro-app').style.transform"
                 + " = 'translateY(40px)'; }");
         // the host owns that transform, so only the rebind heartbeat sees it change.
         page.waitForTimeout(900);
 
-        double after = JProScroll.awaitTop(page, "#jpro-sticky-header");
+        double after = JProScroll.awaitTop(page, ".jpro-id-sticky-header");
         assertTrue(Math.abs(after - pinned) <= PIN_TOLERANCE_PX + 1,
                 "pin should hold its inset under a translated ancestor: " + pinned + " -> " + after
                         + " (uncompensated would land near " + (pinned + 40) + ")");
@@ -192,7 +192,7 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
     void screenshots() throws Exception {
         JProScroll.scrollBy(page, 250);
         Path full = screenshot(page, "sticky-app");
-        Path element = screenshot(page.locator("#jpro-sticky-header"), "sticky-header");
+        Path element = screenshot(page.locator(".jpro-id-sticky-header"), "sticky-header");
         assertTrue(Files.size(full) > 0, "full-page screenshot should be non-empty");
         assertTrue(Files.size(element) > 0, "element screenshot should be non-empty");
     }

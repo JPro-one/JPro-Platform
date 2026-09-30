@@ -47,7 +47,7 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
                 new Locator.WaitForOptions().setTimeout(30_000));
         page.waitForTimeout(1000);
 
-        assertEquals(0, page.locator("#jpro-sticky-header").count(),
+        assertEquals(0, page.locator(".jpro-id-sticky-header").count(),
                 "the sample's ids must be absent, or this test runs with the flag on");
 
         int sheets = page.locator("style[data-jpro-sticky]").count();
