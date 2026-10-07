@@ -7,10 +7,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Shared plumbing for the headless JavaFX unit tests of the desktop-parity implementations (the
- * {@code one.jpro.platform.sticky.impl} classes). No TestFX, no window: the toolkit is bootstrapped
- * once with {@link Platform#startup} and work runs on the JavaFX thread, with layout forced
- * synchronously via {@code root.applyCss()} + {@code root.layout()}.
+ * Shared plumbing for the JavaFX unit tests of the desktop-parity implementations (the
+ * {@code one.jpro.platform.sticky.impl} classes). No TestFX: the toolkit is bootstrapped once with
+ * {@link Platform#startup} and work runs on the JavaFX thread, with layout forced synchronously via
+ * {@code root.applyCss()} + {@code root.layout()}. Tests that need render pulses show a stage
+ * (Xvfb on CI).
  *
  * @author Tobias Horak
  */
@@ -29,6 +30,8 @@ public final class FxTestSupport {
         } catch (IllegalStateException alreadyStarted) {
             // Toolkit already initialized by an earlier test class.
         }
+        // closing a test's stage must not stop the toolkit for later tests.
+        Platform.setImplicitExit(false);
     }
 
     /**

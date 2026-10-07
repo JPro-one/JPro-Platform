@@ -10,6 +10,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import one.jpro.jmemorybuddy.JMemoryBuddy;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -21,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Headless JavaFX tests of the desktop implementations selected by
+ * JavaFX tests of the desktop implementations selected by
  * {@link one.jpro.platform.sticky.impl.ScrollDispatcher} when {@link WebAPI#isBrowser()} is false:
  * {@link one.jpro.platform.sticky.impl.DesktopFixedImpl} (a scene-root overlay) and
  * {@link one.jpro.platform.sticky.impl.ScrollPaneStickyImpl} (a {@code translate} pin inside a
@@ -349,6 +351,132 @@ class DesktopScrollImplTest {
 
         FxTestSupport.onFx(() -> assertTrue(overlayRef[0].getChildren().contains(nodeRef[0]),
                 "a transient same-pulse detach/reattach must not tear the node out of the overlay"));
+    }
+
+    // ---------------------------------------------------------------------
+    // STICKY in a ScrollPane that outlives the page: released when navigating away from the page,
+    // pinned again when navigating back
+    // ---------------------------------------------------------------------
+
+    @Test
+    void stickyReleasesItsPageWhenThePageLeavesALongLivedScrollPane() {
+        // a shown stage: JavaFX keeps removed children until the next pulse, and only shown windows
+        // get pulses.
+        final Stage[] stageRef = new Stage[1];
+        try {
+            JMemoryBuddy.memoryTest(checker -> {
+                final ScrollPane[] spRef = new ScrollPane[1];
+                final StackPane[] holderRef = new StackPane[1];
+                final VBox[] pageRef = new VBox[1];
+
+                FxTestSupport.onFx(() -> {
+                    try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                        web.when(WebAPI::isBrowser).thenReturn(false);
+
+                        Label header = new Label("HEADER");
+                        header.setPrefHeight(40);
+                        VBox page = tallContent(header);
+                        // like a routing app: the ScrollPane stays, the page inside changes.
+                        StackPane holder = new StackPane(page);
+                        ScrollPane sp = new ScrollPane(holder);
+                        sp.setPrefViewportHeight(300);
+                        sp.setPrefViewportWidth(320);
+                        StackPane root = new StackPane(sp);
+                        Stage stage = new Stage();
+                        stage.setScene(new Scene(root, 320, 300));
+                        stage.show();
+                        stageRef[0] = stage;
+                        layout(root);
+
+                        Scroll.setStickyPosition(header, Side.TOP, 0);
+                        spRef[0] = sp;
+                        holderRef[0] = holder;
+                        pageRef[0] = page;
+                    }
+                });
+
+                // Navigate away from the page: the route shows a new page in its place.
+                FxTestSupport.onFx(() -> holderRef[0].getChildren().setAll(new VBox()));
+                // Let the deferred detach check run.
+                FxTestSupport.onFx(() -> { });
+
+                checker.setAsReferenced(spRef[0]);
+                checker.assertCollectable(pageRef[0]);
+                pageRef[0] = null;
+            });
+        } finally {
+            // close it even on failure, so no window stays open.
+            if (stageRef[0] != null) {
+                FxTestSupport.onFx(() -> stageRef[0].close());
+            }
+        }
+    }
+
+    @Test
+    void stickyRePinsWhenThePageReturnsToTheScrollPane() {
+        final Label[] headerRef = new Label[1];
+        final VBox[] pageRef = new VBox[1];
+        final StackPane[] holderRef = new StackPane[1];
+        final ScrollPane[] spRef = new ScrollPane[1];
+        final StackPane[] rootRef = new StackPane[1];
+
+        // Pin and scroll until the header is stuck.
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+
+                Label header = new Label("HEADER");
+                header.setPrefHeight(40);
+                header.setViewOrder(3.0);
+                VBox page = tallContent(header);
+                StackPane holder = new StackPane(page);
+                ScrollPane sp = new ScrollPane(holder);
+                sp.setPrefViewportHeight(300);
+                sp.setPrefViewportWidth(320);
+                StackPane root = new StackPane(sp);
+                new Scene(root, 320, 300);
+                layout(root);
+
+                Scroll.setStickyPosition(header, Side.TOP, 0);
+                sp.setVvalue(0.5);
+                layout(root);
+                assertTrue(Scroll.isStuck(header), "test setup must pin the header");
+                assertTrue(header.getTranslateY() > 0, "test setup must pin the header");
+
+                headerRef[0] = header;
+                pageRef[0] = page;
+                holderRef[0] = holder;
+                spRef[0] = sp;
+                rootRef[0] = root;
+
+                holder.getChildren().setAll(new VBox()); // navigate away from the page
+            }
+        });
+
+        // After the deferred detach: back at rest, with its own viewOrder.
+        FxTestSupport.onFx(() -> {
+            assertFalse(Scroll.isStuck(headerRef[0]), "a page that left the scene is no longer stuck");
+            assertEquals(0, headerRef[0].getTranslateY(), EPS, "leaving the scene restores the flow position");
+            assertEquals(3.0, headerRef[0].getViewOrder(), EPS, "leaving the scene restores the viewOrder");
+        });
+
+        // Navigate back to the page and scroll: the node pins again.
+        FxTestSupport.onFx(() -> {
+            try (MockedStatic<WebAPI> web = Mockito.mockStatic(WebAPI.class)) {
+                web.when(WebAPI::isBrowser).thenReturn(false);
+                holderRef[0].getChildren().setAll(pageRef[0]);
+                layout(rootRef[0]);
+                spRef[0].setVvalue(0);
+                layout(rootRef[0]);
+                spRef[0].setVvalue(0.5);
+                layout(rootRef[0]);
+            }
+        });
+        FxTestSupport.onFx(() -> {
+            assertTrue(Scroll.isStuck(headerRef[0]), "returning to the scene must pin the node again");
+            assertTrue(headerRef[0].getTranslateY() > 0, "returning to the scene must pin the node again");
+            assertEquals(-1.0, headerRef[0].getViewOrder(), EPS, "a re-pinned node paints above its siblings");
+        });
     }
 
     /** A VBox whose first child is {@code header} (40px) followed by 40 x 50px rows: 2040px tall. */
