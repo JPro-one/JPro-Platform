@@ -329,6 +329,47 @@ public class FlexBox extends Pane {
         double mainGap = isRow ? getColumnGap() : getRowGap();
         double crossGap = isRow ? getRowGap() : getColumnGap();
 
+        // 1-5. Items in order, broken into lines, grown/shrunk, cross sizes measured at the resolved main sizes
+        List<FlexLine> lines = resolveLines(managed, mainSize, mainGap, isRow, doWrap);
+
+        // 6. Distribute lines along cross axis (align-content)
+        distributeCrossLines(lines, crossSize, crossGap, wrapMode);
+
+        // 7. Position items on main axis (justify-content) and cross axis (align-items/align-self)
+        FlexAlignItems defaultAlign = getAlignItems();
+
+        for (FlexLine line : lines) {
+            positionMainAxis(line, mainSize, mainGap, isReverse);
+            positionCrossAxis(line, defaultAlign, isRow);
+        }
+
+        // 8. Place children
+        for (FlexLine line : lines) {
+            for (FlexItem item : line.items) {
+                double x, y, w, h;
+                if (isRow) {
+                    x = insetLeft + item.mainPos;
+                    y = insetTop + item.crossPos + line.crossPos;
+                    w = item.mainSize;
+                    h = item.crossSize;
+                } else {
+                    x = insetLeft + item.crossPos + line.crossPos;
+                    y = insetTop + item.mainPos;
+                    w = item.crossSize;
+                    h = item.mainSize;
+                }
+                item.node.resizeRelocate(snapPositionX(x), snapPositionY(y),
+                        snapSizeX(w), snapSizeY(h));
+            }
+        }
+    }
+
+    /**
+     * Steps 1-5 of the layout, shared with the size computations so both agree: items sorted by order, margins split
+     * into main/cross parts, basis resolved, lines broken, grow/shrink applied, and each line's cross size measured with
+     * every item at its resolved main size (an item whose height depends on its width is measured at the width it gets).
+     */
+    private List<FlexLine> resolveLines(List<Node> managed, double mainSize, double mainGap, boolean isRow, boolean doWrap) {
         // 1. Build sorted item list (stable sort by order)
         List<FlexItem> items = new ArrayList<>(managed.size());
         for (int i = 0; i < managed.size(); i++) {
@@ -380,36 +421,7 @@ public class FlexBox extends Pane {
             line.crossSize = maxCross;
         }
 
-        // 6. Distribute lines along cross axis (align-content)
-        distributeCrossLines(lines, crossSize, crossGap, wrapMode);
-
-        // 7. Position items on main axis (justify-content) and cross axis (align-items/align-self)
-        FlexAlignItems defaultAlign = getAlignItems();
-
-        for (FlexLine line : lines) {
-            positionMainAxis(line, mainSize, mainGap, isReverse);
-            positionCrossAxis(line, defaultAlign, isRow);
-        }
-
-        // 8. Place children
-        for (FlexLine line : lines) {
-            for (FlexItem item : line.items) {
-                double x, y, w, h;
-                if (isRow) {
-                    x = insetLeft + item.mainPos;
-                    y = insetTop + item.crossPos + line.crossPos;
-                    w = item.mainSize;
-                    h = item.crossSize;
-                } else {
-                    x = insetLeft + item.crossPos + line.crossPos;
-                    y = insetTop + item.mainPos;
-                    w = item.crossSize;
-                    h = item.mainSize;
-                }
-                item.node.resizeRelocate(snapPositionX(x), snapPositionY(y),
-                        snapSizeX(w), snapSizeY(h));
-            }
-        }
+        return lines;
     }
 
     private List<FlexLine> buildLines(List<FlexItem> items, double mainSize, double gapVal, boolean doWrap) {
@@ -887,43 +899,10 @@ public class FlexBox extends Pane {
      */
     private double computeWrappedCrossSize(List<Node> children, double mainSize,
                                            double mainGap, double crossGap, boolean isRow) {
-        double totalCross = 0;
-        int lineCount = 0;
-        double usedMain = 0;
-        double lineCrossMax = 0;
-
-        for (int i = 0; i < children.size(); i++) {
-            Node child = children.get(i);
-            Insets m = getMargin(child);
-            double basis = getBasis(child);
-            double itemMain = (basis >= 0 ? basis
-                    : (isRow ? child.prefWidth(-1) : child.prefHeight(-1)))
-                    + (isRow ? m.getLeft() + m.getRight() : m.getTop() + m.getBottom());
-            double itemCross = (isRow ? child.prefHeight(-1) : child.prefWidth(-1))
-                    + (isRow ? m.getTop() + m.getBottom() : m.getLeft() + m.getRight());
-
-            double neededGap = (usedMain > 0) ? mainGap : 0;
-
-            if (usedMain > 0 && usedMain + neededGap + itemMain > mainSize) {
-                // Wrap: finish current line, start new one
-                totalCross += lineCrossMax;
-                lineCount++;
-                usedMain = itemMain;
-                lineCrossMax = itemCross;
-            } else {
-                usedMain += neededGap + itemMain;
-                lineCrossMax = Math.max(lineCrossMax, itemCross);
-            }
-        }
-        // Add the last line
-        if (children.size() > 0) {
-            totalCross += lineCrossMax;
-            lineCount++;
-        }
-        // Add cross gaps between lines
-        if (lineCount > 1) {
-            totalCross += crossGap * (lineCount - 1);
-        }
-        return totalCross;
+        if (children.isEmpty()) return 0;
+        List<FlexLine> lines = resolveLines(children, mainSize, mainGap, isRow, true);
+        double total = 0;
+        for (FlexLine line : lines) total += line.crossSize;
+        return total + crossGap * (lines.size() - 1);
     }
 }
