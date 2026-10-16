@@ -61,10 +61,15 @@ public class KeycloakLoginPlaywrightTest extends JProPlaywrightTest {
         JProWait.waitUntil(60_000, () -> isUp(realmUrl + "/.well-known/openid-configuration"),
                 () -> "Keycloak at " + realmUrl + " not ready");
 
+        // The example also creates the Google and Microsoft providers; they need some client, but aren't used here.
         startServer(LOGS_DIR, Map.of(
                         "KEYCLOAK_TEST_SITE", "http://localhost:" + keycloakPort + "/realms/{realm}",
                         "KEYCLOAK_TEST_CLIENT_ID", "jpro-example",
-                        "KEYCLOAK_TEST_CLIENT_SECRET", "jpro-example-secret"),
+                        "KEYCLOAK_TEST_CLIENT_SECRET", "jpro-example-secret",
+                        "GOOGLE_TEST_CLIENT_ID", "unused",
+                        "GOOGLE_TEST_CLIENT_SECRET", "unused",
+                        "AZURE_TEST_CLIENT_ID", "unused",
+                        "AZURE_TEST_CLIENT_SECRET", "unused"),
                 gradleCommand(":jpro-auth:example:jproStart", "-Psample=oauth"));
     }
 
