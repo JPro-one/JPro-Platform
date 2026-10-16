@@ -28,12 +28,15 @@ public class LoginPage extends Page {
 
         final var googleProviderButton = loginApp.createAuthProviderButton("Google");
         googleProviderButton.setOnAction(event -> gotoPage(googleProviderButton, GOOGLE_PROVIDER_PATH));
+        googleProviderButton.setDisable(!loginApp.isProviderConfigured("google"));
 
         final var microsoftProviderButton = loginApp.createAuthProviderButton("Microsoft");
         microsoftProviderButton.setOnAction(event -> gotoPage(microsoftProviderButton, MICROSOFT_PROVIDER_PATH));
+        microsoftProviderButton.setDisable(!loginApp.isProviderConfigured("microsoft"));
 
         final var keycloakProviderButton = loginApp.createAuthProviderButton("Keycloak");
         keycloakProviderButton.setOnAction(event -> gotoPage(keycloakProviderButton, KEYCLOAK_PROVIDER_PATH));
+        keycloakProviderButton.setDisable(!loginApp.isProviderConfigured("keycloak"));
 
         final var tilePane = new TilePane(googleProviderButton, microsoftProviderButton, keycloakProviderButton);
         tilePane.getStyleClass().add("tile-pane");

@@ -17,6 +17,7 @@ import one.jpro.platform.auth.core.oauth2.provider.OpenIDAuthenticationProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -681,7 +682,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         final JSONObject authJSON = new JSONObject(json.toString());
 
         // Attempt to verify or decode the access token
-        if (json.has("access_token")) {
+        // Many providers (e.g. Google) issue opaque access tokens; only a JWT can be verified
+        if (json.has("access_token") && json.getString("access_token").split("\\.", -1).length == 3) {
             // attempt to verify the token
             final String token = json.getString("access_token");
             try {
@@ -700,7 +702,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
                 authJSON.put("claimToken", "accessToken");
             } catch (JwtException | IllegalStateException ex) {
-                logger.error("Cannot decode/verify access token:", ex);
+                logger.warn("Cannot verify the access token, the user is identified by the ID token: {}", ex.getMessage());
             }
         }
 
@@ -720,8 +722,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 } else if (payload.has("email")) {
                     userJSON.put(Authentication.KEY_NAME, payload.getString("email"));
                 }
-            } catch (JwtException | IllegalStateException ex) {
-                logger.error("Cannot decode/verify id token:", ex);
+            } catch (JwtException | IllegalStateException | JSONException ex) {
+                // the ID token is what identifies the user, so an invalid one must not log in
+                throw new IllegalStateException("Invalid ID token: " + ex.getMessage(), ex);
             }
         }
 
@@ -762,8 +765,10 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         .parse(webKeys).getKeys().stream()
                         .collect(toMap(Identifiable::getId, Jwk::toKey));
 
+                final JWTOptions parserOptions = options.getJWTOptions();
                 final JwtParser jwtParser = Jwts.parser()
                         .keyLocator(header -> keyMap.get(header.getOrDefault("kid", "").toString()))
+                        .clockSkewSeconds(parserOptions == null ? 0 : parserOptions.getLeeway())
                         .build();
 
                 final Jws<Claims> jws = jwtParser.parseSignedClaims(token);
@@ -801,32 +806,33 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         final JWTOptions jwtOptions = options.getJWTOptions();
         final JSONObject payload = json.getJSONObject("payload");
 
-        // Validate audience
+        // Validate audience (a single string or an array)
+        final List<String> audList = audience(payload);
         if (payload.has(Claims.AUDIENCE)) {
-            final JSONArray audience = payload.getJSONArray(Claims.AUDIENCE);
-            if (audience.isEmpty()) {
+            if (audList.isEmpty()) {
                 throw new IllegalStateException("User audience is null or empty");
             }
             // If we have known audiences in JWTOptions, ensure they're covered
             if (!idToken && jwtOptions.getAudience() != null) {
-                final List<String> audList = audience.toList().stream()
-                        .map(Object::toString)
-                        .toList();
                 for (String aud : jwtOptions.getAudience()) {
                     if (!audList.contains(aud)) {
                         throw new IllegalStateException("Invalid JWT audience, expected: " + aud +
-                                ", actual: " + audience);
+                                ", actual: " + audList);
                     }
                 }
             }
         }
 
         // Validate issuer
-        if (jwtOptions.getIssuer() != null) {
-            if (!jwtOptions.getIssuer().equals(payload.getString(Claims.ISSUER))) {
-                throw new IllegalStateException("Invalid JWT issuer, expected: " + jwtOptions.getIssuer() +
-                        ", actual: " + payload.getString(Claims.ISSUER));
-            }
+        if (jwtOptions.getIssuer() != null && !isExpectedIssuer(jwtOptions.getIssuer(), payload)) {
+            throw new IllegalStateException("Invalid JWT issuer, expected: " + jwtOptions.getIssuer() +
+                    ", actual: " + payload.optString(Claims.ISSUER, null));
+        }
+
+        // OIDC: an ID token must be issued to this client
+        if (idToken && (options.getClientId() == null || !audList.contains(options.getClientId()))) {
+            throw new IllegalStateException("Invalid ID token audience, expected: " + options.getClientId() +
+                    ", actual: " + audList);
         }
 
         // Validate authorized party (azp) if this is an ID token
@@ -837,11 +843,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                             ", actual: " + payload.getString("azp"));
                 }
                 // If multiple audiences exist, ensure azp is present among them
-                final JSONArray audience = payload.optJSONArray(Claims.AUDIENCE);
-                if (audience != null && audience.length() > 1) {
-                    final List<String> audList = audience.toList().stream()
-                            .map(Object::toString)
-                            .toList();
+                if (audList.size() > 1) {
                     if (!audList.contains(payload.getString("azp"))) {
                         throw new IllegalStateException("ID token with multiple audiences does not contain 'azp' claim value");
                     }
@@ -850,6 +852,25 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         }
 
         return json;
+    }
+
+    private static boolean isExpectedIssuer(@NotNull final String expected, @NotNull final JSONObject payload) {
+        final String actual = payload.optString(Claims.ISSUER, null);
+        if (actual == null) return false;
+        // Microsoft's multi-tenant discovery documents the issuer with a placeholder for the user's tenant
+        final String resolved = expected.contains("{tenantid}") && payload.has("tid")
+                ? expected.replace("{tenantid}", payload.getString("tid")) : expected;
+        if (resolved.equals(actual)) return true;
+        // Google documents both forms of its issuer
+        return resolved.equals("https://accounts.google.com") && actual.equals("accounts.google.com");
+    }
+
+    private static List<String> audience(@NotNull final JSONObject payload) {
+        final Object audience = payload.opt(Claims.AUDIENCE);
+        if (audience instanceof JSONArray array) {
+            return array.toList().stream().map(Object::toString).toList();
+        }
+        return audience == null ? List.of() : List.of(audience.toString());
     }
 
     /**
