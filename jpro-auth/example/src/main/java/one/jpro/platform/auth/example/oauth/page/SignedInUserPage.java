@@ -143,12 +143,22 @@ public class SignedInUserPage extends Page {
                     .filter(userInfopath -> !userInfopath.isBlank())
                     .ifPresent(refreshToken -> userInfoBox.setDisable(false));
 
+            // Providers without a logout endpoint (e.g. Google) only sign out of this app
+            final boolean providerLogout = Optional.ofNullable(authProvider.getOptions().getLogoutPath())
+                    .filter(logoutPath -> !logoutPath.isBlank())
+                    .isPresent();
             final var logoutBox = loginApp.createButtonWithDescription(
-                    "Sign out from the provider.", "Sign Out",
+                    providerLogout ? "Sign out from the provider." : "Sign out of this app (the provider has no logout).",
+                    "Sign Out",
                     event -> {
                         if (user == null) {
                             loginApp.setError(new IllegalStateException("User is not signed in."));
                             gotoPage(headerLabel, AUTH_ERROR_PATH);
+                            return;
+                        }
+                        if (!providerLogout) {
+                            loginApp.getUserSession().setUser(null);
+                            gotoPage(headerLabel, "/user/logout");
                             return;
                         }
 
@@ -165,13 +175,6 @@ public class SignedInUserPage extends Page {
                                     return null;
                                 });
                     });
-            logoutBox.setDisable(true);
-
-            Optional.ofNullable(loginApp.getAuthProvider())
-                    .map(OAuth2AuthenticationProvider::getOptions)
-                    .map(OAuth2Options::getLogoutPath)
-                    .filter(logoutPath -> !logoutPath.isBlank())
-                    .ifPresent(logoutPath -> logoutBox.setDisable(false));
 
             final var pane = new VBox(headerLabel, authInfoBox, introspectTokenBox, refreshTokenBox,
                     revokeTokenBox, userInfoBox, logoutBox);
