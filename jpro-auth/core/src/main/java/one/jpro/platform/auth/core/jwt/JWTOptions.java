@@ -15,9 +15,9 @@ import java.util.Optional;
 public class JWTOptions implements Options {
 
     /**
-     * Default leeway for JWT expiration time validation in seconds.
+     * Default leeway for JWT time validation ({@code exp}, {@code nbf}) in seconds, for clock skew.
      */
-    private static final long DEFAULT_LEEWAY = 0;
+    private static final long DEFAULT_LEEWAY = 60;
 
     /**
      * Default cache size for storing generated JWTs or validation data.

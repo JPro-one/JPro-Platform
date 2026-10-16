@@ -4,6 +4,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.jwt.JWTOptions;
+import one.jpro.platform.auth.core.jwt.TokenExpiredException;
 import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -97,7 +99,35 @@ public class OAuth2IdTokenValidationTests {
 
     @Test
     void idTokenSignedWithAnotherKeyFails() {
-        failure(t -> t, OTHER_KEY);
+        Throwable cause = failure(t -> t, OTHER_KEY);
+
+        assertTrue(cause.getMessage().startsWith("Invalid ID token"), cause.getMessage());
+    }
+
+    @Test
+    void idTokenWithoutIssuerFails() {
+        Throwable cause = failure(t -> t.issuer(null), IDP_KEY);
+
+        assertTrue(cause.getMessage().contains("issuer"), cause.getMessage());
+    }
+
+    @Test
+    void microsoftTenantPlaceholderInIssuerIsResolvedFromTid() throws Exception {
+        provider.getOptions().getJWTOptions().setIssuer("http://idp.invalid/{tenantid}/v2.0");
+
+        User user = login(t -> t.issuer("http://idp.invalid/tenant-1/v2.0").claim("tid", "tenant-1"), IDP_KEY)
+                .get(10, TimeUnit.SECONDS);
+        assertEquals("test@example.com", user.getName());
+
+        Throwable cause = failure(t -> t.issuer("http://idp.invalid/tenant-2/v2.0").claim("tid", "tenant-1"), IDP_KEY);
+        assertTrue(cause.getMessage().contains("issuer"), cause.getMessage());
+    }
+
+    @Test
+    void notBeforeSlightlyInTheFutureIsToleratedAsClockSkew() throws Exception {
+        User user = login(t -> t.notBefore(Date.from(Instant.now().plusSeconds(20))), IDP_KEY).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
     }
 
     @Test
@@ -116,7 +146,9 @@ public class OAuth2IdTokenValidationTests {
 
     @Test
     void expiredIdTokenFails() {
-        failure(t -> t.expiration(Date.from(Instant.now().minusSeconds(600))), IDP_KEY);
+        Throwable cause = failure(t -> t.expiration(Date.from(Instant.now().minusSeconds(600))), IDP_KEY);
+
+        assertInstanceOf(TokenExpiredException.class, cause);
     }
 
     @Test

@@ -764,8 +764,10 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         .parse(webKeys).getKeys().stream()
                         .collect(toMap(Identifiable::getId, Jwk::toKey));
 
+                final JWTOptions parserOptions = options.getJWTOptions();
                 final JwtParser jwtParser = Jwts.parser()
                         .keyLocator(header -> keyMap.get(header.getOrDefault("kid", "").toString()))
+                        .clockSkewSeconds(parserOptions == null ? 0 : parserOptions.getLeeway())
                         .build();
 
                 final Jws<Claims> jws = jwtParser.parseSignedClaims(token);
@@ -821,15 +823,13 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         }
 
         // Validate issuer
-        if (jwtOptions.getIssuer() != null) {
-            if (!jwtOptions.getIssuer().equals(payload.optString(Claims.ISSUER, null))) {
-                throw new IllegalStateException("Invalid JWT issuer, expected: " + jwtOptions.getIssuer() +
-                        ", actual: " + payload.optString(Claims.ISSUER, null));
-            }
+        if (jwtOptions.getIssuer() != null && !isExpectedIssuer(jwtOptions.getIssuer(), payload)) {
+            throw new IllegalStateException("Invalid JWT issuer, expected: " + jwtOptions.getIssuer() +
+                    ", actual: " + payload.optString(Claims.ISSUER, null));
         }
 
         // OIDC: an ID token must be issued to this client
-        if (idToken && !audList.contains(options.getClientId())) {
+        if (idToken && (options.getClientId() == null || !audList.contains(options.getClientId()))) {
             throw new IllegalStateException("Invalid ID token audience, expected: " + options.getClientId() +
                     ", actual: " + audList);
         }
@@ -851,6 +851,17 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         }
 
         return json;
+    }
+
+    private static boolean isExpectedIssuer(@NotNull final String expected, @NotNull final JSONObject payload) {
+        final String actual = payload.optString(Claims.ISSUER, null);
+        if (actual == null) return false;
+        // Microsoft's multi-tenant discovery documents the issuer with a placeholder for the user's tenant
+        final String resolved = expected.contains("{tenantid}") && payload.has("tid")
+                ? expected.replace("{tenantid}", payload.getString("tid")) : expected;
+        if (resolved.equals(actual)) return true;
+        // Google documents both forms of its issuer
+        return resolved.equals("https://accounts.google.com") && actual.equals("accounts.google.com");
     }
 
     private static List<String> audience(@NotNull final JSONObject payload) {
