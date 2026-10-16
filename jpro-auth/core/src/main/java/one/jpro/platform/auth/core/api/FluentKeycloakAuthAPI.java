@@ -5,6 +5,9 @@ import one.jpro.platform.auth.core.oauth2.OAuth2Flow;
 import one.jpro.platform.auth.core.oauth2.provider.KeycloakAuthenticationProvider;
 import org.json.JSONObject;
 
+import java.net.http.HttpClient;
+import java.util.function.Consumer;
+
 /**
  * Fluent Keycloak Authentication API.
  *
@@ -18,6 +21,7 @@ public class FluentKeycloakAuthAPI implements FluentKeycloakAuth {
     private String clientSecret;
     private String realm;
     private String redirectUri;
+    private Consumer<HttpClient.Builder> httpClientConfigurator;
 
     @Override
     public FluentKeycloakAuth flow(OAuth2Flow flow) {
@@ -55,6 +59,12 @@ public class FluentKeycloakAuthAPI implements FluentKeycloakAuth {
     }
 
     @Override
+    public FluentKeycloakAuth configureHttpClient(Consumer<HttpClient.Builder> configurator) {
+        this.httpClientConfigurator = configurator;
+        return this;
+    }
+
+    @Override
     public KeycloakAuthenticationProvider create(Stage stage) {
         final JSONObject config = new JSONObject();
         if (site != null) config.put("auth-server-url", site);
@@ -63,6 +73,7 @@ public class FluentKeycloakAuthAPI implements FluentKeycloakAuth {
         if (realm != null) config.put("realm", realm);
 
         final var keycloakAuthProvider = new KeycloakAuthenticationProvider(stage, flow, config);
+        keycloakAuthProvider.getOptions().setHttpClientConfigurator(httpClientConfigurator);
         keycloakAuthProvider.getCredentials().setRedirectUri(redirectUri);
         return keycloakAuthProvider;
     }

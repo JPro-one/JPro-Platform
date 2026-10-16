@@ -3,6 +3,9 @@ package one.jpro.platform.auth.core.api;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
 
+import java.net.http.HttpClient;
+import java.util.function.Consumer;
+
 /**
  * Fluent Google Authentication interface.
  *
@@ -33,6 +36,15 @@ public interface FluentGoogleAuth {
      * @return self
      */
     FluentGoogleAuth redirectUri(String redirectUri);
+
+    /**
+     * Set a callback to configure the {@link HttpClient} used for all requests to the provider,
+     * e.g. to set an {@code SSLContext}, proxy or connect timeout.
+     *
+     * @param configurator the callback applied to the {@link HttpClient.Builder}
+     * @return self
+     */
+    FluentGoogleAuth configureHttpClient(Consumer<HttpClient.Builder> configurator);
 
     /**
      * Create a Google authentication provider.
