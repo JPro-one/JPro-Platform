@@ -79,11 +79,9 @@ public final class ScrollDispatcher implements ScrollImpl {
     }
 
     /**
-     * Invoked by a reparenting delegate ({@link WebScrollImpl} / {@link DesktopFixedImpl}) once its flow
-     * slot has left the scene (a route navigate-away). Uninstalling the delegate restores the node to its
-     * (now-detached) flow parent; this dispatcher stays alive so that when the subtree returns to a scene
-     * it re-selects and re-pins, rather than leaving the node in plain flow while
-     * {@link one.jpro.platform.sticky.Scroll#getScrollPosition} still reports it as positioned.
+     * Invoked by the delegate once the node (for a reparenting delegate, its flow slot) has left
+     * the scene. Uninstalling the delegate restores the node to its flow parent and drops its
+     * listeners on longer-lived nodes. The dispatcher stays alive to re-pin when the node returns.
      */
     private void onDelegateDetached() {
         if (torndown) {
@@ -124,8 +122,8 @@ public final class ScrollDispatcher implements ScrollImpl {
         // pure-FX pin stays in sync by construction.
         final ScrollPane scrollPane = nearestScrollPane(node);
         if (scrollPane != null) {
-            // stays in flow (no reparenting), survives a re-mount on its own, no detach callback needed.
-            return new ScrollPaneStickyImpl(node, anchor, within, scrollPane, stuckSink);
+            // stays in flow, but its ScrollPane listeners must not outlive the node.
+            return new ScrollPaneStickyImpl(node, anchor, within, scrollPane, stuckSink, this::onDelegateDetached);
         }
         if (WebAPI.isBrowser()) {
             // natively scrolled browser document: the browser-native pin.

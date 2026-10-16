@@ -1,10 +1,12 @@
 package one.jpro.platform.sticky.impl;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import one.jpro.platform.sticky.ScrollAnchor;
 import one.jpro.platform.sticky.ScrollAnchor.Axis;
@@ -49,6 +51,8 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
     private final ScrollPane scrollPane;
     /** Pin/unpin transition sink (the node's stuck channels), {@code null} if unobserved. */
     private final Consumer<Boolean> stuckSink;
+    /** Called once the node has left the scene. */
+    private final Runnable onDetach;
 
     private Node content;
     private Node container;
@@ -58,15 +62,17 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
     private final InvalidationListener relayout = obs -> sync();
     /** Rebinds the flow-geometry listener when the ScrollPane's content node is swapped out. */
     private final ChangeListener<Node> contentWaiter = (obs, oldContent, newContent) -> rebindContent(oldContent, newContent);
+    private ChangeListener<Scene> detachWaiter;
     private boolean torndown;
 
     public ScrollPaneStickyImpl(Node node, ScrollAnchor anchor, Node within, ScrollPane scrollPane,
-                                Consumer<Boolean> stuckSink) {
+                                Consumer<Boolean> stuckSink, Runnable onDetach) {
         this.node = node;
         this.anchor = anchor;
         this.within = within;
         this.scrollPane = scrollPane;
         this.stuckSink = stuckSink;
+        this.onDetach = onDetach;
     }
 
     @Override
@@ -87,11 +93,25 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
             container.layoutBoundsProperty().addListener(relayout);
             container.localToSceneTransformProperty().addListener(relayout);
         }
+
+        // the ScrollPane can outlive the node (a routing app keeps it across pages), so release on
+        // detach. re-check later to ignore a transient detach, such as a move into new content.
+        detachWaiter = (obs, old, scene) -> {
+            if (scene == null && !torndown) {
+                Platform.runLater(() -> {
+                    if (!torndown && node.getScene() == null) {
+                        onDetach.run();
+                    }
+                });
+            }
+        };
+        node.sceneProperty().addListener(detachWaiter);
         sync();
     }
 
     private void sync() {
-        if (torndown || content == null) {
+        // skip a detached node until the deferred detach check runs.
+        if (torndown || content == null || node.getScene() == null) {
             return;
         }
         final Bounds vp = scrollPane.getViewportBounds();
@@ -208,6 +228,10 @@ public final class ScrollPaneStickyImpl implements ScrollImpl {
     @Override
     public void uninstall() {
         torndown = true;
+        if (detachWaiter != null) {
+            node.sceneProperty().removeListener(detachWaiter);
+            detachWaiter = null;
+        }
         scrollPane.vvalueProperty().removeListener(relayout);
         scrollPane.hvalueProperty().removeListener(relayout);
         scrollPane.viewportBoundsProperty().removeListener(relayout);
