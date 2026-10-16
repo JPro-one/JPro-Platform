@@ -5,6 +5,11 @@
 ### 0.8.1 (unreleased)
 
 #### Features
+* **jpro-playwright:** the new `JProWait` polls Java-side conditions with the same tiers (`waitUntil`,
+  `waitForValue`, `waitForFunction`) and asserts that a condition or value stays unchanged (`ensureStaysTrue`,
+  `ensureStaysValue`), replacing fixed `waitForTimeout(...)` sleeps.
+* **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
+  fails to launch now throws an `IllegalStateException` naming it as an environment fault.
 * **jpro-auth-core:** `configureHttpClient(...)` on the fluent Keycloak, Google and Microsoft builders,
   and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all OAuth2 requests
   to the identity provider, e.g. to set an `SSLContext` or a connect timeout.
@@ -20,6 +25,9 @@
   opened browser tab instead of the first one.
 
 #### Behaviour changes
+* **jpro-playwright:** `PlaywrightTimeouts.withTimeout(...)` calls the operation once per tier, with 50%, 50%
+  and then 100% of the budget (before: once, with twice the budget), so the operation must be safe to repeat.
+  A timed-out web-first `assertThat` now counts as a timeout too.
 * **jpro-auth-routing:** the OAuth2 redirect route no longer sets the code and username on
   `provider.getCredentials()`; use the returned `User` instead.
 * **jpro-auth-core:** when the credentials have a `state`, the callback must return the same value. An `error`
