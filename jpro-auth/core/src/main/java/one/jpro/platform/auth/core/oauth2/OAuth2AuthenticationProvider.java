@@ -229,23 +229,70 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             OAuth2Credentials oauth2Credentials = (OAuth2Credentials) credentials;
 
             // Grab query parameters from the local HTTP server if present
-            final JSONObject queryParams = new JSONObject(httpServer.getQueryParams());
+            final Map<String, String> queryParams = httpServer.getQueryParams();
             logger.debug("URL query parameters: {}", queryParams);
+            applyCallbackParams(oauth2Credentials, queryParams);
 
-            // Retrieve the authorization code
-            if (queryParams.has("code")) {
-                oauth2Credentials.setCode(queryParams.getString("code"));
-                if (oauth2Credentials.getCode().isBlank()) {
-                    return CompletableFuture.failedFuture(new RuntimeException("Authorization code is missing"));
-                }
-            }
+            return exchangeToken(oauth2Credentials);
+        } catch (ClassCastException | CredentialValidationException | AuthenticationException ex) {
+            return CompletableFuture.failedFuture(ex);
+        }
+    }
 
-            // Retrieve scopes
-            if (queryParams.has("scope")) {
-                final String[] scopes = queryParams.getString("scope").split("\\+");
-                oauth2Credentials.setScopes(List.of(scopes));
-            }
+    /**
+     * Authenticates with the parameters of the OAuth2 redirect callback, e.g. the query parameters of the
+     * routing request or of the {@link WebAPI.View} the identity provider redirected to. Unlike
+     * {@link #authenticate(Credentials)}, the session URL is not consulted and the given credentials
+     * are not modified.
+     * <p>
+     * If the credentials have a {@code state}, the callback must return the same value.
+     * An {@code error} in the callback fails the authentication with its description.
+     *
+     * @param credentials    the credentials used for the authorization request
+     * @param callbackParams the query parameters of the redirect callback
+     * @return a future that completes with the authenticated {@link User}, or completes exceptionally if
+     * authentication fails
+     */
+    public CompletableFuture<User> authenticate(@NotNull final OAuth2Credentials credentials,
+                                                @NotNull final Map<String, String> callbackParams) {
+        Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
+        Objects.requireNonNull(callbackParams, "callbackParams cannot be null");
+        try {
+            return exchangeToken(applyCallbackParams(new OAuth2Credentials(credentials), callbackParams));
+        } catch (CredentialValidationException | AuthenticationException ex) {
+            return CompletableFuture.failedFuture(ex);
+        }
+    }
 
+    static OAuth2Credentials applyCallbackParams(@NotNull final OAuth2Credentials credentials,
+                                                 @NotNull final Map<String, String> callbackParams) {
+        final String error = callbackParams.get("error");
+        if (error != null) {
+            final String description = callbackParams.get("error_description");
+            throw new AuthenticationException(description == null ? error : error + ": " + description);
+        }
+
+        final String code = callbackParams.get("code");
+        if (code == null) {
+            return credentials;
+        }
+        if (code.isBlank()) {
+            throw new AuthenticationException("Authorization code is missing");
+        }
+        if (credentials.getState() != null && !credentials.getState().equals(callbackParams.get("state"))) {
+            throw new AuthenticationException("The state of the callback does not match the authorization request");
+        }
+        credentials.setCode(code);
+
+        final String scope = callbackParams.get("scope");
+        if (scope != null) {
+            credentials.setScopes(List.of(scope.trim().split("[+ ]+")));
+        }
+        return credentials;
+    }
+
+    private CompletableFuture<User> exchangeToken(@NotNull final OAuth2Credentials oauth2Credentials) {
+        try {
             // Validate flow and set appropriate parameters
             final JSONObject params = new JSONObject();
             final OAuth2Flow flow = (oauth2Credentials.getFlow() != null)
@@ -319,7 +366,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         }
                     });
 
-        } catch (ClassCastException | CredentialValidationException ex) {
+        } catch (CredentialValidationException ex) {
             return CompletableFuture.failedFuture(ex);
         }
     }

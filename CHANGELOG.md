@@ -8,6 +8,22 @@
 * **jpro-auth-core:** `configureHttpClient(...)` on the fluent Keycloak, Google and Microsoft builders,
   and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all OAuth2 requests
   to the identity provider, e.g. to set an `SSLContext` or a connect timeout.
+* **jpro-auth-core:** `OAuth2AuthenticationProvider.authenticate(credentials, callbackParams)` takes the
+  query parameters of the redirect callback, e.g. `view.getURLQueryParams()` in a view-opened listener.
+  A `state` set on the credentials must match the callback, and an `error` from the identity provider
+  fails with its description.
+
+#### Bugfixes
+* **jpro-auth-routing:** the OAuth2 redirect route takes the code from its own request instead of the URL
+  the session was started with.
+* **jpro-auth-core:** on JPro, `authenticate(credentials)` reads the callback from the most recently
+  opened browser tab instead of the first one.
+
+#### Behaviour changes
+* **jpro-auth-routing:** the OAuth2 redirect route no longer sets the code and username on
+  `provider.getCredentials()`; use the returned `User` instead.
+* **jpro-auth-core:** when the credentials have a `state`, the callback must return the same value. An `error`
+  in the callback now fails with an `AuthenticationException` carrying the identity provider's description.
 
 ### 0.8.0 (September 30, 2026)
 
