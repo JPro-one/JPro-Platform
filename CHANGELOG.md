@@ -25,8 +25,10 @@
 
 #### Bugfixes
 * **jpro-auth-core:** providers created without OIDC discovery now check the token issuer too: Google
-  (`https://accounts.google.com`), Microsoft (`https://login.microsoftonline.com/{tenantid}/v2.0`) and Keycloak
-  (the site, when it ends with `/realms/<realm>`). Before, `iss` was only checked after `discover()`.
+  (`https://accounts.google.com`), Microsoft (`https://login.microsoftonline.com/<tenant>/v2.0`, with the tenant
+  from the token's `tid` unless a tenant ID is configured; v1 tokens of the same tenant from `sts.windows.net` are
+  accepted too) and Keycloak (the site, when it ends with `/realms/<realm>`). Before, `iss` was only checked after
+  `discover()`.
 * **jpro-auth-core:** `authenticate(TokenCredentials)` on OAuth2 providers: token introspection rejected active
   tokens and accepted inactive ones, and a successful introspection could never log in. A token is now accepted only
   if it is a JWT with a valid signature issued to this client (`aud`, `azp` or `client_id`; before, a signed token of

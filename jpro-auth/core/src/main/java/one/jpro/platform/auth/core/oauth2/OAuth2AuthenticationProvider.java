@@ -38,6 +38,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -901,6 +903,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 || clientId.equals(payload.optString("client_id", null)));
     }
 
+    private static final Pattern MICROSOFT_V2_ISSUER =
+            Pattern.compile("https://login\\.microsoftonline\\.com/([^/{}]+)/v2\\.0");
+
     private static boolean isExpectedIssuer(@NotNull final String expected, @NotNull final JSONObject payload) {
         final String actual = payload.optString(Claims.ISSUER, null);
         if (actual == null) return false;
@@ -908,6 +913,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         final String resolved = expected.contains("{tenantid}") && payload.has("tid")
                 ? expected.replace("{tenantid}", payload.getString("tid")) : expected;
         if (resolved.equals(actual)) return true;
+        // Microsoft v1 tokens (e.g. for the app's own API) name the same tenant as https://sts.windows.net/<tenant>/
+        final Matcher microsoft = MICROSOFT_V2_ISSUER.matcher(resolved);
+        if (microsoft.matches() && actual.equals("https://sts.windows.net/" + microsoft.group(1) + "/")) return true;
         // Google documents both forms of its issuer
         return resolved.equals("https://accounts.google.com") && actual.equals("accounts.google.com");
     }
