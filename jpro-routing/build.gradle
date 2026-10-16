@@ -101,11 +101,20 @@ configure([project(':jpro-routing:dev')]) {
 configure([project(':jpro-routing:core-test')]) {
     dependencies {
         implementation project(':jpro-routing:core')
+        testImplementation project(':jpro-playwright')
     }
 
     test {
         jvmArgs = [
                 "-Dglass.platform=Monocle", "-Dmonocle.platform=Headless"]
+        // QueryPlaywrightTest drives :jpro-routing:example in a browser via jpro-playwright.
+        dependsOn ':jpro-playwright:installPlaywright'
+        environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
+        ['jpro.test.port', 'jpro.test.browser', 'jpro.test.headless'].each { key ->
+            if (System.getProperty(key) != null) systemProperty key, System.getProperty(key)
+        }
+        // The app under test is started by a nested Gradle build, so Gradle can't see what the tests depend on.
+        outputs.upToDateWhen { false }
     }
 }
 
@@ -130,11 +139,15 @@ configure(project(':jpro-routing:example')) {
 
     jpro {
         openingPath = "/"
+        // Playwright tests pass -Pjpro.test.port; fall back to 8080 for manual `jproRun`.
+        port = project.hasProperty('jpro.test.port') ? project.property('jpro.test.port') as int : 8080
+        openURLOnStartup = !project.hasProperty('jpro.test.port')
     }
 
     def examples = [
             'colors': 'example.colors.ColorsApp',
             'popup' : 'example.popup.PopupApp',
+            'query-playwright': 'example.query.QueryPlaywrightApp',
             'test'  : 'example.scala.TestWebApplication',
             'extensions': 'example.scala.TestExtensions'
     ]

@@ -24,7 +24,25 @@ class TestRequest {
     assert(Request.fromString("http://localhost:8081/d").getQueryParametersScala() == Map())
     assert(Request.fromString("http://localhost:8081/d?").getQueryParametersScala() == Map())
     assert(Request.fromString("http://localhost:8081/d?x=1&y=2").getQueryParametersScala() == Map("x" -> "1", "y" -> "2"))
-    assert(Request.fromString("http://localhost:8081/d?name=aa%26bb").getQueryParametersScala() == Map("name" -> "aa%26bb"))
+    assert(Request.fromString("http://localhost:8081/d?name=aa%26bb").getQueryParametersScala() == Map("name" -> "aa&bb"))
+  }
+
+  @Test
+  def queryParametersAreDecoded(): Unit = {
+    val r = Request.fromString("http://localhost:8081/cb?code=4%2F0AX%3D&scope=openid+email%20profile&a%20b=%C3%BC")
+    assert(r.getQueryParametersScala() == Map("code" -> "4/0AX=", "scope" -> "openid email profile", "a b" -> "ü"))
+  }
+
+  @Test
+  def queryParametersWithoutOrWithExtraEquals(): Unit = {
+    assert(Request.fromString("/d?flag&code=").getQueryParametersScala() == Map("flag" -> "", "code" -> ""))
+    assert(Request.fromString("/d?state=ab==&x=1").getQueryParametersScala() == Map("state" -> "ab==", "x" -> "1"))
+    assert(Request.fromString("/d?&x=1&").getQueryParametersScala() == Map("x" -> "1"))
+  }
+
+  @Test
+  def queryParametersAreDecodedOnce(): Unit = {
+    assert(Request.fromString("/d?x=100%25&y=%2541").getQueryParametersScala() == Map("x" -> "100%", "y" -> "%41"))
   }
 
 
