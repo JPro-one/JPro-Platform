@@ -5,6 +5,13 @@
 ### 0.8.1 (unreleased)
 
 #### Features
+* **jpro-playwright:** `PlaywrightTimeouts.withTimeout(...)` retries the wait once per tier (50%, 50%, 100% of
+  the budget) and treats a timed-out web-first `assertThat` as a timeout. The operation must be safe to repeat.
+* **jpro-playwright:** the new `JProWait` polls Java-side conditions with the same tiers (`waitUntil`,
+  `waitForValue`, `waitForFunction`) and asserts that a value stays unchanged (`ensureStaysValue`), replacing
+  fixed `waitForTimeout(...)` sleeps.
+* **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
+  fails to launch now throws an `IllegalStateException` naming it as an environment fault.
 * **jpro-auth-core:** `configureHttpClient(...)` on the fluent Keycloak, Google and Microsoft builders,
   and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all OAuth2 requests
   to the identity provider, e.g. to set an `SSLContext` or a connect timeout.

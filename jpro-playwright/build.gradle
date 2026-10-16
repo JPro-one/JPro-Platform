@@ -9,21 +9,24 @@ test {
     useJUnitPlatform()
     // Ensure the Chromium the Playwright tests drive is installed first (CI has no separate step).
     dependsOn 'installPlaywright'
-    // Forward an explicit port override; otherwise JProPlaywrightTest picks a free port.
-    if (System.getProperty('jpro.test.port') != null) {
-        systemProperty 'jpro.test.port', System.getProperty('jpro.test.port')
+    // Forward the test overrides (port, browser, headless) to the test JVM.
+    ['jpro.test.port', 'jpro.test.browser', 'jpro.test.headless'].each { key ->
+        if (System.getProperty(key) != null) systemProperty key, System.getProperty(key)
     }
+    // The app under test is started by a nested Gradle build, so Gradle can't see what the tests depend on.
+    outputs.upToDateWhen { false }
     // installPlaywright already provisioned the browser — don't re-download during the run.
     environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
 }
 
-// Installs the Chromium build Playwright drives (with system deps, as CI needs them).
+// Installs the browser Playwright drives (with system deps, as CI needs them).
+// -Djpro.test.browser=chromium|firefox|webkit (default chromium).
 tasks.register('installPlaywright', JavaExec) {
     group = 'verification'
-    description = 'Install the Chromium browser used by the Playwright tests'
+    description = 'Install the browser used by the Playwright tests'
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.microsoft.playwright.CLI'
-    args = ['install', '--with-deps', 'chromium']
+    args = ['install', '--with-deps', System.getProperty('jpro.test.browser') ?: 'chromium']
 }
 
 publishing {

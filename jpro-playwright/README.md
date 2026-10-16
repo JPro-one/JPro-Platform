@@ -112,7 +112,10 @@ Every interaction is asynchronous, so wait rather than read once.
 
 - `waitForRunning(page)` — block until `jpro-app` reports `data-status="running"`; call after every `navigate`.
 - `JProInput.awaitText(page, selector, expected)` — poll until the text matches (≈ Playwright's `assertThat(locator).hasText(expected)`).
-- `PlaywrightTimeouts.withTimeout(budget, unit, label, op)` — wrap a Playwright wait in a 4-tier diagnostic budget (silent <50%, warn >50%, "too slow" >100%, "never completed" >200%; the op gets 2× the budget).
+- `PlaywrightTimeouts.withTimeout(budget, unit, label, op)` — wrap a Playwright wait in a 4-tier diagnostic budget (silent <50%, warn >50%, "too slow" >100%, "never completed" >200%). The op is called once per tier with that tier's timeout (50%, 50%, 100% of the budget), so it must be safe to repeat; a timed-out web-first `assertThat` counts as a timeout too.
+- `JProWait.waitUntil(condition, state)` / `JProWait.waitForValue(expected, actual)` — poll a Java-side condition with the same tiers (default budget `JProWait.SETTLE_BUDGET_MS`); the failure message describes the state it last saw.
+- `JProWait.waitForFunction(page, budgetMs, label, js, arg)` — `page.waitForFunction` with the tiered budget.
+- `JProWait.ensureStaysValue(durationMs, expected, actual)` / `ensureStaysTrue(...)` — assert a value does *not* change for a while, failing at the first flicker. Use this instead of `page.waitForTimeout(...)` followed by a single read.
 
 To assert something *didn't* happen (a label stayed empty), don't read once — that races the round-trip. Establish happens-before first: trigger an ordered probe (e.g. a click whose counter you `awaitText`); since the WebSocket is ordered, once the probe lands the earlier action was processed too.
 
@@ -163,22 +166,27 @@ Files go to `build/playwright-screenshots/` (override with `-Djpro.test.screensh
 
 ## Installing the browser
 
-Playwright drives a real Chromium that must be installed once per project. Add an install task and make `test` depend on it, so CI provisions the browser with no separate step:
+Playwright drives a real browser (Chromium by default) that must be installed once per project. Add an install task and make `test` depend on it, so CI provisions the browser with no separate step:
 
 ```groovy
 tasks.register('installPlaywright', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.microsoft.playwright.CLI'
-    args = ['install', '--with-deps', 'chromium']   // --with-deps installs Linux system libs (CI)
+    // --with-deps installs Linux system libs (CI)
+    args = ['install', '--with-deps', System.getProperty('jpro.test.browser') ?: 'chromium']
 }
 
 test {
     dependsOn 'installPlaywright'
     environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'   // already provisioned; don't re-download
+    ['jpro.test.port', 'jpro.test.browser', 'jpro.test.headless'].each { key ->
+        if (System.getProperty(key) != null) systemProperty key, System.getProperty(key)
+    }
+    outputs.upToDateWhen { false }   // the app is started by a nested build Gradle can't track
 }
 ```
 
-Pass `-Djpro.test.headless=false` to watch the browser (read by `JProPlaywrightTest`).
+Pass `-Djpro.test.headless=false` to watch the browser, and `-Djpro.test.browser=firefox|webkit` to run on another engine (both read by `JProPlaywrightTest`). A browser that fails to launch throws an `IllegalStateException` that names it as an environment fault, not a test failure.
 
 ## Gotchas
 
@@ -193,4 +201,6 @@ Mistakes that compile fine and then fail without pointing at the cause — scan 
 - **Expecting `onAction`/`TextFormatter` per keystroke** → they fire on Enter (JavaFX commit). Call `JProInput.commit(page)` first.
 - **Interacting before `waitForRunning(page)`** → events land on a half-loaded app and are lost.
 - **Wrong `logsDir`** → "No 'Server started' marker found" on a clean run. Point it at the served module's `logs/`.
-- **Chromium not installed** → launch fails at startup. Run the `installPlaywright` task once.
+- **Browser not installed** → launch fails at startup with an `IllegalStateException`. Run the `installPlaywright` task once (with the same `-Djpro.test.browser`).
+- **Test task reported UP-TO-DATE** → the tests silently don't run. Add `outputs.upToDateWhen { false }` (see above).
+- **`page.waitForTimeout(...)` then a single read** → flaky on slow machines, slow on fast ones. Use `JProWait`.

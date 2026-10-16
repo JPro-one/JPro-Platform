@@ -27,7 +27,8 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>Provides the boilerplate every JPro Playwright test needs:
  * <ul>
- *   <li>A shared headless Chromium ({@link #setupBrowser()} / {@link #teardownBrowser()}).</li>
+ *   <li>A shared headless browser ({@link #setupBrowser()} / {@link #teardownBrowser()}): Chromium,
+ *       or {@code -Djpro.test.browser=firefox|webkit}.</li>
  *   <li>A {@link #PORT} (from {@code -Djpro.test.port} or a free port in 9100–9200) and the
  *       derived {@link #BASE_URL}.</li>
  *   <li>{@link #startServer(File, String...)} / {@link #stopServer(String...)} that launch and
@@ -49,15 +50,29 @@ public abstract class JProPlaywrightTest {
 
     private static final File PROJECT_ROOT = findProjectRoot();
 
+    /** {@code -Djpro.test.browser=chromium|firefox|webkit} (default chromium). */
+    protected static final String BROWSER = System.getProperty("jpro.test.browser", "chromium");
+
     protected static Playwright playwright;
     protected static Browser browser;
 
     @BeforeAll
     static void setupBrowser() {
         playwright = Playwright.create();
+        BrowserType type = switch (BROWSER) {
+            case "firefox" -> playwright.firefox();
+            case "webkit" -> playwright.webkit();
+            default -> playwright.chromium();
+        };
         boolean headless = !"false".equals(System.getProperty("jpro.test.headless"));
-        browser = playwright.chromium().launch(
-                new BrowserType.LaunchOptions().setHeadless(headless));
+        try {
+            browser = type.launch(new BrowserType.LaunchOptions().setHeadless(headless));
+        } catch (RuntimeException e) {
+            // An environment fault, not a test failure: make it unmistakable.
+            throw new IllegalStateException("Playwright '" + BROWSER + "' browser failed to launch. This is an"
+                    + " environment fault (browser not installed, missing system libraries or an unsupported OS),"
+                    + " not a test failure. WebKit requires Ubuntu 24.04+. Root cause: " + e.getMessage(), e);
+        }
     }
 
     @AfterAll
