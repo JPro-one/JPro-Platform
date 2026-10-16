@@ -38,3 +38,54 @@ application {
     mainClass = project.hasProperty("sample") ? examples[project.getProperties().get("sample")] : examples["google-login"]
     mainModule = "one.jpro.platform.auth.example"
 }
+jpro {
+    // Playwright tests pass -Pjpro.test.port; fall back to 8080 for manual `jproRun`.
+    port = project.hasProperty('jpro.test.port') ? project.property('jpro.test.port') as int : 8080
+    openURLOnStartup = !project.hasProperty('jpro.test.port')
+}
+
+dependencies {
+    testImplementation project(':jpro-playwright')
+    testImplementation(platform("org.junit:junit-bom:$JUNIT_VERSION"))
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+// The Playwright test only drives the app through the browser, so it doesn't need to be patched into the app's module.
+compileTestJava {
+    moduleOptions {
+        compileOnClasspath = true
+    }
+}
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
+    useJUnitPlatform {
+        excludeTags 'keycloak'
+    }
+}
+
+// Logs in against a Keycloak started in Docker (requires a running Docker daemon).
+tasks.register('keycloakTest', Test) {
+    group = 'verification'
+    description = 'Runs the Keycloak login Playwright test (requires Docker)'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'keycloak'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat "full"
+    }
+    dependsOn ':jpro-playwright:installPlaywright'
+    environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
+    ['jpro.test.port', 'jpro.test.browser', 'jpro.test.headless'].each { key ->
+        if (System.getProperty(key) != null) systemProperty key, System.getProperty(key)
+    }
+    // The app under test is started by a nested Gradle build, so Gradle can't see what the tests depend on.
+    outputs.upToDateWhen { false }
+}

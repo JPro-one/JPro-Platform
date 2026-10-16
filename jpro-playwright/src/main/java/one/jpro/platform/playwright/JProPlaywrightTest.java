@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -146,10 +147,19 @@ public abstract class JProPlaywrightTest {
      */
     protected static void startServer(File logsDir, String... command)
             throws IOException, InterruptedException {
+        startServer(logsDir, Map.of(), command);
+    }
+
+    /**
+     * Like {@link #startServer(File, String...)}, with extra environment variables for the start command
+     * (and the app it launches), e.g. the URL of an identity provider the test started itself.
+     */
+    protected static void startServer(File logsDir, Map<String, String> environment, String... command)
+            throws IOException, InterruptedException {
         if (logsDir != null) deleteRecursively(logsDir);
 
         System.out.println("[jpro-server] Starting " + String.join(" ", command) + " ...");
-        int exit = runCommand(command);
+        int exit = runCommand(environment, command);
         if (exit != 0) {
             throw new RuntimeException("Failed to start JPro server (exit code " + exit + ")");
         }
@@ -160,7 +170,7 @@ public abstract class JProPlaywrightTest {
     /** Stop a JPro server by running an arbitrary {@code command} from the project root. */
     protected static void stopServer(String... command) throws IOException, InterruptedException {
         System.out.println("[jpro-server] Stopping " + String.join(" ", command) + " ...");
-        int exit = runCommand(command);
+        int exit = runCommand(Map.of(), command);
         if (exit != 0) {
             System.err.println("[jpro-server] Warning: stop command exited with code " + exit);
         }
@@ -197,11 +207,13 @@ public abstract class JProPlaywrightTest {
         return cmd.toArray(new String[0]);
     }
 
-    private static int runCommand(String... command) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(command)
+    private static int runCommand(Map<String, String> environment, String... command)
+            throws IOException, InterruptedException {
+        ProcessBuilder builder = new ProcessBuilder(command)
                 .directory(PROJECT_ROOT)
-                .inheritIO()
-                .start();
+                .inheritIO();
+        builder.environment().putAll(environment);
+        Process process = builder.start();
         return process.waitFor();
     }
 

@@ -23,6 +23,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -38,6 +40,8 @@ public abstract class BaseOAuthApp extends RouteApp {
     static final String AZURE_CLIENT_ID = System.getenv("AZURE_TEST_CLIENT_ID");
     static final String AZURE_CLIENT_SECRET = System.getenv("AZURE_TEST_CLIENT_SECRET");
 
+    static final String KEYCLOAK_SITE = Objects.requireNonNullElse(
+            System.getenv("KEYCLOAK_TEST_SITE"), "http://localhost:8080/realms/{realm}");
     static final String KEYCLOAK_CLIENT_ID = System.getenv("KEYCLOAK_TEST_CLIENT_ID");
     static final String KEYCLOAK_CLIENT_SECRET = System.getenv("KEYCLOAK_TEST_CLIENT_SECRET");
 
@@ -185,6 +189,7 @@ public abstract class BaseOAuthApp extends RouteApp {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         final var button = new Button(buttonText);
+        button.setId(buttonText.toLowerCase(Locale.ROOT).replace(' ', '-') + "-button");
         if (buttonText.equalsIgnoreCase("Sign In")) {
             button.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.ACCENT);
         } else if (buttonText.equalsIgnoreCase("Sign Out")) {

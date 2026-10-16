@@ -61,7 +61,7 @@ public class OAuthApp extends BaseOAuthApp {
 
         // Keycloak Auth provider
         final var keycloakAuth = AuthAPI.keycloakAuth()
-                .site("http://localhost:8080/realms/{realm}")
+                .site(KEYCLOAK_SITE)
                 .clientId(KEYCLOAK_CLIENT_ID)
                 .clientSecret(KEYCLOAK_CLIENT_SECRET)
                 .realm("myrealm")

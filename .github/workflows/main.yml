@@ -85,6 +85,12 @@ jobs:
           ./gradlew test
         shell: bash
 
+      - name: Keycloak login test (Linux, needs Docker)
+        if: runner.os == 'Linux'
+        run: |
+          ./gradlew :jpro-auth:example:keycloakTest
+        shell: bash
+
       - name: Store Gradle Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -93,6 +99,7 @@ jobs:
           path: |
             **/build/reports/
             **/build/test-results/
+            **/build/playwright-screenshots/
             **/hs_err_pid*.log
             **/replay_pid*.log
             hs_err_pid*.log

@@ -1,0 +1,36 @@
+{
+  "realm": "myrealm",
+  "enabled": true,
+  "sslRequired": "none",
+  "clients": [
+    {
+      "clientId": "jpro-example",
+      "name": "JPro auth example",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "jpro-example-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost:${APP_PORT}/*"],
+      "webOrigins": ["http://localhost:${APP_PORT}"],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:${APP_PORT}/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "test",
+      "enabled": true,
+      "email": "test@example.com",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        { "type": "password", "value": "test", "temporary": false }
+      ]
+    }
+  ]
+}

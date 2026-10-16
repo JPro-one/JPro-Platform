@@ -10,6 +10,8 @@
   `ensureStaysValue`), replacing fixed `waitForTimeout(...)` sleeps.
 * **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
   fails to launch now throws an `IllegalStateException` naming it as an environment fault.
+* **jpro-playwright:** `startServer(logsDir, environment, command...)` passes extra environment variables to the
+  started app, e.g. the URL of an identity provider the test started itself.
 * **jpro-auth-core:** `configureHttpClient(...)` on the fluent Keycloak, Google and Microsoft builders,
   and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all OAuth2 requests
   to the identity provider, e.g. to set an `SSLContext` or a connect timeout.
