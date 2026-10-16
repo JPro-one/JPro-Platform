@@ -24,6 +24,8 @@
   fails with its description.
 
 #### Bugfixes
+* **jpro-auth-core:** an ID token that fails validation (signature, issuer, expiry, `azp`) now fails the login;
+  it was only logged. The ID token's `aud` must contain the client ID, and a single-string `aud` is accepted.
 * **jpro-auth-core:** each `OAuth2Options` gets its own `JWTOptions`. They shared one instance, so OIDC
   discovery of one provider changed the expected token issuer of all others in the same JVM.
 * **jpro-auth-routing:** the OAuth2 redirect route takes the code from its own request instead of the URL
@@ -34,6 +36,7 @@
   longer fail to parse.
 
 #### Behaviour changes
+* **jpro-auth-core:** logins whose ID token is invalid or issued to another client are now rejected.
 * **jpro-auth-core:** an authorization code callback is rejected unless its `state` belongs to a login started
   with `authorizeUrl(...)` (or matches the `state` set on the credentials). The authorization URL now contains
   `code_challenge` and `nonce`.
