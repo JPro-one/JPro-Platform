@@ -23,6 +23,8 @@
   the session was started with.
 * **jpro-auth-core:** on JPro, `authenticate(credentials)` reads the callback from the most recently
   opened browser tab instead of the first one.
+* **jpro-routing:** `Request` query parameters without a value (`?flag&x=1`) or with `=` in the value no
+  longer fail to parse.
 
 #### Behaviour changes
 * **jpro-playwright:** `PlaywrightTimeouts.withTimeout(...)` calls the operation once per tier, with 50%, 50%
@@ -32,6 +34,8 @@
   `provider.getCredentials()`; use the returned `User` instead.
 * **jpro-auth-core:** when the credentials have a `state`, the callback must return the same value. An `error`
   in the callback now fails with an `AuthenticationException` carrying the identity provider's description.
+* **jpro-routing:** `Request` query parameter names and values are now URL-decoded (`%2F` → `/`, `+` → space).
+  Apps that decoded them themselves must stop doing so.
 
 ### 0.8.0 (September 30, 2026)
 

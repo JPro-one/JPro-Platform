@@ -7,7 +7,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.jetbrains.annotations.Nullable
 
 import java.lang.ref.WeakReference
-import java.net.URI
+import java.net.{URI, URLDecoder}
+import java.nio.charset.StandardCharsets
 import java.util.{Map => JMap, Optional}
 
 /**
@@ -103,6 +104,8 @@ object Request {
     val oldViewW = new WeakReference(oldView)
     Request.fromString(s).copy(oldContent = oldViewW, origOldContent = oldViewW)
   }
+  private def decode(s: String): String = URLDecoder.decode(s, StandardCharsets.UTF_8)
+
   /** Parses a request from a URL string (path, query, and — for full URLs — protocol/host/port). */
   def fromString(s: String): Request = {
     try {
@@ -111,9 +114,9 @@ object Request {
       }
       val uri = new URI(s)
       val rawQuery = uri.getRawQuery
-      val query: Map[String,String] = if(rawQuery == null || rawQuery == "") Map() else rawQuery.split("&").map(x => {
-        val Array(a,b) = x.split("=")
-        a -> b
+      val query: Map[String,String] = if(rawQuery == null) Map() else rawQuery.split("&").filter(_.nonEmpty).map(x => {
+        val i = x.indexOf('=')
+        if (i < 0) decode(x) -> "" else decode(x.substring(0, i)) -> decode(x.substring(i + 1))
       }).toMap
       val path = uri.getPath
       val res = Request(s, uri.getScheme, uri.getHost, uri.getPort, path,path,"/", query,wref_null,wref_null)
