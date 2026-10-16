@@ -6,6 +6,7 @@ import one.jpro.platform.auth.core.http.HttpMethod;
 import one.jpro.platform.auth.core.oauth2.OAuth2API;
 import one.jpro.platform.auth.core.oauth2.OAuth2AuthenticationProvider;
 import one.jpro.platform.auth.core.oauth2.OAuth2Flow;
+import one.jpro.platform.auth.core.jwt.JWTOptions;
 import one.jpro.platform.auth.core.oauth2.OAuth2Options;
 import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +59,8 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
                 .setJwkPath("https://www.googleapis.com/oauth2/v3/certs")
                 .setIntrospectionPath("https://oauth2.googleapis.com/tokeninfo")
                 .setRevocationPath("https://oauth2.googleapis.com/revoke")
-                .setUserInfoParams(new JSONObject().put("alt", "json"))));
+                .setUserInfoParams(new JSONObject().put("alt", "json"))
+                .setJWTOptions(new JWTOptions().setIssuer("https://accounts.google.com"))));
     }
 
     /**

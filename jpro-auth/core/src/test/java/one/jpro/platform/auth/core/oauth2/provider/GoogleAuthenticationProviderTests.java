@@ -28,6 +28,7 @@ public class GoogleAuthenticationProviderTests {
         assertEquals("https://www.googleapis.com/oauth2/v3/certs", options.getJwkPath());
         assertEquals("https://oauth2.googleapis.com/tokeninfo", options.getIntrospectionPath());
         assertEquals("https://oauth2.googleapis.com/revoke", options.getRevocationPath());
+        assertEquals("https://accounts.google.com", options.getJWTOptions().getIssuer());
     }
 
     @Test
