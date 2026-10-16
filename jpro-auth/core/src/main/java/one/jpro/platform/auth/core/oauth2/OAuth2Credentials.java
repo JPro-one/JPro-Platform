@@ -37,6 +37,26 @@ public class OAuth2Credentials implements Credentials {
     public OAuth2Credentials() {
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param other the credentials to copy
+     */
+    public OAuth2Credentials(OAuth2Credentials other) {
+        code = other.code;
+        codeVerifier = other.codeVerifier;
+        redirectUri = other.redirectUri;
+        jwt = other.jwt == null ? null : new JSONObject(other.jwt.toString());
+        assertion = other.assertion;
+        password = other.password;
+        username = other.username;
+        scopes = other.scopes;
+        flow = other.flow;
+        nonce = other.nonce;
+        state = other.state;
+        normalizedRedirectUri = other.normalizedRedirectUri;
+    }
+
     public String getCode() {
         return code;
     }

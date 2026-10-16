@@ -7,20 +7,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.ProxySelector;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.http.HttpClient;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,49 +20,19 @@ public class HttpClientConfiguratorTests {
 
     private static final String SITE = "http://idp.invalid/realms/test";
 
-    private ServerSocket proxy;
-    private final List<String> requests = new CopyOnWriteArrayList<>();
-    private Consumer<HttpClient.Builder> viaProxy;
+    private FakeIdp idp;
 
     @BeforeEach
-    void startProxy() throws IOException {
-        proxy = new ServerSocket(0);
-        viaProxy = builder -> builder.proxy(ProxySelector.of(new InetSocketAddress("localhost", proxy.getLocalPort())));
-        Thread thread = new Thread(() -> {
-            while (!proxy.isClosed()) {
-                try (Socket socket = proxy.accept()) {
-                    handle(socket);
-                } catch (IOException ignored) {
-                }
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+    void startIdp() throws IOException {
+        idp = new FakeIdp(request -> new FakeIdp.Response(200,
+                request.line().contains("/.well-known/openid-configuration")
+                        ? "{\"issuer\":\"" + SITE + "\",\"jwks_uri\":\"" + SITE + "/certs\"}"
+                        : "{\"keys\":[]}"));
     }
 
     @AfterEach
-    void stopProxy() throws IOException {
-        proxy.close();
-    }
-
-    private void handle(Socket socket) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-        String requestLine = in.readLine();
-        if (requestLine == null) return;
-        requests.add(requestLine);
-        String line;
-        while ((line = in.readLine()) != null && !line.isEmpty()) {
-            // skip headers
-        }
-        String body = requestLine.contains("/.well-known/openid-configuration")
-                ? "{\"issuer\":\"" + SITE + "\",\"jwks_uri\":\"" + SITE + "/certs\"}"
-                : "{\"keys\":[]}";
-        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-        OutputStream out = socket.getOutputStream();
-        out.write(("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + bytes.length
-                + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.UTF_8));
-        out.write(bytes);
-        out.flush();
+    void stopIdp() throws IOException {
+        idp.close();
     }
 
     @Test
@@ -81,11 +40,12 @@ public class HttpClientConfiguratorTests {
         OAuth2Options options = new OAuth2Options()
                 .setSite(SITE)
                 .setClientId("clientId")
-                .setHttpClientConfigurator(viaProxy);
+                .setHttpClientConfigurator(idp.viaProxy());
 
         OpenIDAuthenticationProvider provider = new OAuth2AuthenticationProvider(null, options)
                 .discover().get(10, TimeUnit.SECONDS);
-        assertTrue(requests.contains("GET " + SITE + "/.well-known/openid-configuration HTTP/1.1"), requests::toString);
+        assertTrue(idp.requestLines().contains("GET " + SITE + "/.well-known/openid-configuration HTTP/1.1"),
+                idp.requestLines()::toString);
 
         try {
             provider.authenticate(new TokenCredentials("header.payload.signature"))
@@ -93,7 +53,7 @@ public class HttpClientConfiguratorTests {
         } catch (RuntimeException ignored) {
             // the fake key set is empty, only the request matters
         }
-        assertTrue(requests.contains("GET " + SITE + "/certs HTTP/1.1"), requests::toString);
+        assertTrue(idp.requestLines().contains("GET " + SITE + "/certs HTTP/1.1"), idp.requestLines()::toString);
     }
 
     @Test
@@ -102,9 +62,10 @@ public class HttpClientConfiguratorTests {
                 .site("http://idp.invalid/realms/{realm}")
                 .realm("test")
                 .clientId("clientId")
-                .configureHttpClient(viaProxy)
+                .configureHttpClient(idp.viaProxy())
                 .create(null)
                 .discover().get(10, TimeUnit.SECONDS);
-        assertTrue(requests.contains("GET " + SITE + "/.well-known/openid-configuration HTTP/1.1"), requests::toString);
+        assertTrue(idp.requestLines().contains("GET " + SITE + "/.well-known/openid-configuration HTTP/1.1"),
+                idp.requestLines()::toString);
     }
 }

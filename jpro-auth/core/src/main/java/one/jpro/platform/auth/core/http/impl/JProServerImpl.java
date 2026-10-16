@@ -4,6 +4,7 @@ import com.jpro.webapi.WebAPI;
 import one.jpro.platform.auth.core.http.HttpServer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -52,9 +53,14 @@ public class JProServerImpl implements HttpServer {
         return (idx >= 0) ? Integer.parseInt(serverName.substring(idx + 1)) : -1;
     }
 
+    /**
+     * Returns the URL of the most recently opened browser tab of this instance, so a callback
+     * that reconnects to a running instance is seen.
+     */
     @Override
     public String getFullRequestedURL() {
-        return webAPI.getBrowserURL();
+        final List<WebAPI.View> views = webAPI.getViews();
+        return views.isEmpty() ? webAPI.getBrowserURL() : views.get(views.size() - 1).getBrowserURL();
     }
 
     @Override

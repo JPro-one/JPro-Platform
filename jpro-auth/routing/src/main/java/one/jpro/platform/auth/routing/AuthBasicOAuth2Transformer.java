@@ -79,7 +79,7 @@ public interface AuthBasicOAuth2Transformer {
 
         return (route) -> (request) -> {
             if (Request.matchesSoft(request, credentials.getRedirectUri())) {
-                return new Response(FXFuture.fromJava(authProvider.authenticate(credentials))
+                return new Response(FXFuture.fromJava(authProvider.authenticate(credentials, request.getQueryParameters()))
                         .flatMap(r -> {
                             if(userSession != null) {
                                 userSession.setUser(r);
