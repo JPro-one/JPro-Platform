@@ -682,7 +682,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         final JSONObject authJSON = new JSONObject(json.toString());
 
         // Attempt to verify or decode the access token
-        if (json.has("access_token")) {
+        // Many providers (e.g. Google) issue opaque access tokens; only a JWT can be verified
+        if (json.has("access_token") && json.getString("access_token").split("\\.", -1).length == 3) {
             // attempt to verify the token
             final String token = json.getString("access_token");
             try {
@@ -701,7 +702,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
                 authJSON.put("claimToken", "accessToken");
             } catch (JwtException | IllegalStateException ex) {
-                logger.error("Cannot decode/verify access token:", ex);
+                logger.warn("Cannot verify the access token, the user is identified by the ID token: {}", ex.getMessage());
             }
         }
 

@@ -43,12 +43,13 @@ public class OAuth2IdTokenValidationTests {
     private FakeIdp idp;
     private OAuth2AuthenticationProvider provider;
     private String idToken;
+    private String accessToken = accessToken();
 
     @BeforeEach
     void setUp() throws IOException {
         idp = new FakeIdp(request -> request.line().contains("/certs")
                 ? new FakeIdp.Response(200, "{\"keys\":[" + jwk((RSAPublicKey) IDP_KEY.getPublic()) + "]}")
-                : new FakeIdp.Response(200, "{\"token_type\":\"Bearer\",\"access_token\":\"" + accessToken()
+                : new FakeIdp.Response(200, "{\"token_type\":\"Bearer\",\"access_token\":\"" + accessToken
                 + "\",\"id_token\":\"" + idToken + "\"}"));
         provider = new OAuth2AuthenticationProvider(null, new OAuth2Options()
                 .setSite(ISSUER)
@@ -149,6 +150,16 @@ public class OAuth2IdTokenValidationTests {
         Throwable cause = failure(t -> t.expiration(Date.from(Instant.now().minusSeconds(600))), IDP_KEY);
 
         assertInstanceOf(TokenExpiredException.class, cause);
+    }
+
+    @Test
+    void googleLikeResponseWithOpaqueAccessTokenLogsIn() throws Exception {
+        provider.getOptions().getJWTOptions().setIssuer("https://accounts.google.com");
+        accessToken = "ya29.opaque-google-access-token";
+
+        User user = login(t -> t.issuer("accounts.google.com"), IDP_KEY).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
     }
 
     @Test
