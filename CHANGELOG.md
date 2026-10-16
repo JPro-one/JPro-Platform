@@ -26,8 +26,9 @@
 #### Bugfixes
 * **jpro-auth-core:** `authenticate(TokenCredentials)` on OAuth2 providers: token introspection rejected active
   tokens and accepted inactive ones, and a successful introspection could never log in. A token is now accepted only
-  if it is a JWT with a valid signature, or the introspection reports it as `active` for this client. Google's
-  `tokeninfo` response is mapped to `active` and `client_id`.
+  if it is a JWT with a valid signature issued to this client (`aud`, `azp` or `client_id`; before, a signed token of
+  any client of the same provider was accepted), or the introspection reports it as an `active` access token of this
+  client. Google's `tokeninfo` response is mapped to `active` and `client_id`.
 * **jpro-auth-core:** an ID token that fails validation (signature, issuer, expiry, `azp`) now fails the login;
   it was only logged. The ID token's `aud` must contain the client ID, and a single-string `aud` is accepted.
 * **jpro-auth-core:** token time checks allow 60 s of clock skew (`JWTOptions.leeway`, previously unused). The

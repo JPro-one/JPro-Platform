@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -176,8 +177,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * credentials, different OAuth2 flows or validations may be triggered:
      * <ul>
      *   <li>{@link UsernamePasswordCredentials} triggers the Password flow.</li>
-     *   <li>{@link TokenCredentials} attempts to validate an existing token, optionally
-     *   performing token introspection if the token is not a valid JWT or is expired.</li>
+     *   <li>{@link TokenCredentials} accepts an existing access token only if it is a JWT with a valid signature,
+     *   issuer and expiry issued to this client, or the introspection endpoint reports it as an active access
+     *   token of this client.</li>
      *   <li>{@link OAuth2Credentials} triggers the configured OAuth2 flow (e.g., AUTH_CODE,
      *   PASSWORD, CLIENT, etc.).</li>
      * </ul>
@@ -187,7 +189,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * authentication fails
      * @throws ClassCastException            if {@code credentials} is not a recognized subtype
      * @throws CredentialValidationException if the credentials fail validation
-     * @throws RuntimeException              if the flow is unsupported, or if token introspection is unavailable
+     * @throws RuntimeException              if the flow is unsupported
      * @see OAuth2Credentials
      */
     @Override
@@ -210,9 +212,11 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
                 if (options.isVerifyToken() && token.split("\\.", -1).length == 3) {
                     try {
-                        return CompletableFuture.completedFuture(
-                                createUser(new JSONObject().put("access_token", token)));
-                    } catch (AuthenticationException | IllegalStateException ex) {
+                        final User user = userFromVerifiedAccessToken(token);
+                        if (user != null) {
+                            return CompletableFuture.completedFuture(user);
+                        }
+                    } catch (AuthenticationException | IllegalStateException | JSONException ex) {
                         logger.debug("Token not verified as JWT, trying introspection: {}", ex.getMessage());
                     }
                 }
@@ -233,6 +237,11 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                             if (clientId != null && !clientId.equals(options.getClientId())) {
                                 return CompletableFuture.failedFuture(
                                         new AuthenticationException("The token was issued to another client"));
+                            }
+                            final String typ = json.optString("typ", null);
+                            if (typ != null && !typ.equalsIgnoreCase("Bearer")) {
+                                return CompletableFuture.failedFuture(
+                                        new AuthenticationException("The token is not an access token: " + typ));
                             }
                             final String name = Optional.ofNullable(json.optString("username", null))
                                     .or(() -> Optional.ofNullable(json.optString("email", null)))
@@ -850,6 +859,46 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         }
 
         return json;
+    }
+
+    /**
+     * Returns the user of a JWT access token whose signature, issuer and expiry are valid and which was issued to
+     * this client ({@code aud}, {@code azp} or {@code client_id}), or {@code null} if it can't be used.
+     */
+    @Nullable
+    private User userFromVerifiedAccessToken(@NotNull final String token) {
+        final JSONObject verified = verifyToken(token, false);
+        final JSONObject payload = verified.getJSONObject("payload");
+        if ("ID".equalsIgnoreCase(payload.optString("typ", ""))) {
+            return null; // Keycloak marks its ID tokens; they are no bearer tokens
+        }
+        if (!isIssuedToThisClient(payload)) {
+            return null;
+        }
+        final String name = Stream.of("name", "email", "preferred_username", "sub")
+                .map(claim -> payload.optString(claim, null))
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        if (name == null) {
+            return null;
+        }
+        return new User(name, Map.of("auth", new JSONObject()
+                .put("access_token", token)
+                .put("accessToken", verified)
+                .put("claimToken", "accessToken")));
+    }
+
+    private boolean isIssuedToThisClient(@NotNull final JSONObject payload) {
+        final List<String> audience = audience(payload);
+        final JWTOptions jwtOptions = options.getJWTOptions();
+        if (jwtOptions != null && jwtOptions.getAudience() != null
+                && audience.stream().anyMatch(jwtOptions.getAudience()::contains)) {
+            return true;
+        }
+        final String clientId = options.getClientId();
+        return clientId != null && (audience.contains(clientId)
+                || clientId.equals(payload.optString("azp", null))
+                || clientId.equals(payload.optString("client_id", null)));
     }
 
     private static boolean isExpectedIssuer(@NotNull final String expected, @NotNull final JSONObject payload) {

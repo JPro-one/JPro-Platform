@@ -68,9 +68,13 @@ public class TokenCredentialsAuthenticationTests {
     }
 
     private static String jwt(KeyPair signer) {
-        return Jwts.builder().header().keyId("k1").and()
-                .issuer(ISSUER).subject("1").claim("email", "test@example.com")
-                .expiration(Date.from(Instant.now().plusSeconds(300)))
+        return jwt(signer, b -> b.audience().add("clientId").and());
+    }
+
+    private static String jwt(KeyPair signer, java.util.function.UnaryOperator<io.jsonwebtoken.JwtBuilder> change) {
+        return change.apply(Jwts.builder().header().keyId("k1").and()
+                        .issuer(ISSUER).subject("1").claim("email", "test@example.com")
+                        .expiration(Date.from(Instant.now().plusSeconds(300))))
                 .signWith(signer.getPrivate(), Jwts.SIG.RS256).compact();
     }
 
@@ -83,7 +87,63 @@ public class TokenCredentialsAuthenticationTests {
 
     @Test
     void jwtSignedWithAnotherKeyIsRejectedWithoutIntrospection() {
-        failure(authenticate(options(), jwt(OTHER_KEY)));
+        Throwable cause = failure(authenticate(options(), jwt(OTHER_KEY)));
+
+        assertTrue(cause.getMessage().contains("Cannot verify the token"), cause.getMessage());
+    }
+
+    @Test
+    void signedJwtIssuedToAnotherClientIsRejected() {
+        Throwable cause = failure(authenticate(options(), jwt(IDP_KEY, b -> b.audience().add("otherClient").and())));
+
+        assertTrue(cause.getMessage().contains("Cannot verify the token"), cause.getMessage());
+    }
+
+    @Test
+    void signedJwtWithoutAudienceIsRejected() {
+        failure(authenticate(options(), jwt(IDP_KEY, b -> b)));
+    }
+
+    @Test
+    void signedJwtAuthorizedForThisClientIsAccepted() throws Exception {
+        // Keycloak style: aud is another resource, azp is the client that requested the token
+        User user = authenticate(options(), jwt(IDP_KEY, b -> b.audience().add("account").and().claim("azp", "clientId")))
+                .get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
+    }
+
+    @Test
+    void keycloakIdTokenIsRejected() {
+        failure(authenticate(options(), jwt(IDP_KEY, b -> b.audience().add("clientId").and().claim("typ", "ID"))));
+    }
+
+    @Test
+    void signedJwtWithOnlySubjectUsesIt() throws Exception {
+        String token = Jwts.builder().header().keyId("k1").and().issuer(ISSUER).subject("user-42")
+                .audience().add("clientId").and().expiration(Date.from(Instant.now().plusSeconds(300)))
+                .signWith(IDP_KEY.getPrivate(), Jwts.SIG.RS256).compact();
+
+        assertEquals("user-42", authenticate(options(), token).get(10, TimeUnit.SECONDS).getName());
+    }
+
+    @Test
+    void jwtForAnotherClientFallsBackToIntrospection() throws Exception {
+        introspection = "{\"active\":true,\"client_id\":\"clientId\",\"username\":\"alice\"}";
+
+        User user = authenticate(options().setIntrospectionPath("/introspect"),
+                jwt(IDP_KEY, b -> b.audience().add("otherClient").and())).get(10, TimeUnit.SECONDS);
+
+        assertEquals("alice", user.getName());
+    }
+
+    @Test
+    void introspectedRefreshTokenIsRejected() {
+        introspection = "{\"active\":true,\"client_id\":\"clientId\",\"username\":\"alice\",\"typ\":\"Refresh\"}";
+
+        Throwable cause = failure(authenticate(options().setIntrospectionPath("/introspect"), "opaque"));
+
+        assertTrue(cause.getMessage().contains("access token"), cause.getMessage());
     }
 
     @Test
