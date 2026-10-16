@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -557,27 +556,25 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         try {
             if (options.isVerifyToken()) {
                 // Fetch JWKS and verify signature
-                try (HttpClient httpClient = HttpClient.newHttpClient()) {
-                    final String webKeys = httpClient.send(
-                            HttpRequest.newBuilder(URI.create(options.getJwkPath())).build(),
-                            HttpResponse.BodyHandlers.ofString()).body();
+                final String webKeys = api.getHttpClient().send(
+                        HttpRequest.newBuilder(URI.create(options.getJwkPath())).build(),
+                        HttpResponse.BodyHandlers.ofString()).body();
 
-                    final Map<String, ? extends Key> keyMap = Jwks.setParser().build()
-                            .parse(webKeys).getKeys().stream()
-                            .collect(toMap(Identifiable::getId, Jwk::toKey));
+                final Map<String, ? extends Key> keyMap = Jwks.setParser().build()
+                        .parse(webKeys).getKeys().stream()
+                        .collect(toMap(Identifiable::getId, Jwk::toKey));
 
-                    final JwtParser jwtParser = Jwts.parser()
-                            .keyLocator(header -> keyMap.get(header.getOrDefault("kid", "").toString()))
-                            .build();
+                final JwtParser jwtParser = Jwts.parser()
+                        .keyLocator(header -> keyMap.get(header.getOrDefault("kid", "").toString()))
+                        .build();
 
-                    final Jws<Claims> jws = jwtParser.parseSignedClaims(token);
-                    Optional.ofNullable(jws.getHeader())
-                            .ifPresent(header -> json.put("header", new JSONObject(header)));
-                    Optional.ofNullable(jws.getPayload())
-                            .ifPresent(payload -> json.put("payload", new JSONObject(payload)));
-                    Optional.ofNullable(jws.getDigest())
-                            .ifPresent(digest -> json.put("signature", Encoders.BASE64URL.encode(digest)));
-                }
+                final Jws<Claims> jws = jwtParser.parseSignedClaims(token);
+                Optional.ofNullable(jws.getHeader())
+                        .ifPresent(header -> json.put("header", new JSONObject(header)));
+                Optional.ofNullable(jws.getPayload())
+                        .ifPresent(payload -> json.put("payload", new JSONObject(payload)));
+                Optional.ofNullable(jws.getDigest())
+                        .ifPresent(digest -> json.put("signature", Encoders.BASE64URL.encode(digest)));
             } else {
                 // Decode without verifying signature
                 final String[] parts = token.split("\\.");

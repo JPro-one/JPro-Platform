@@ -9,9 +9,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
@@ -86,6 +88,7 @@ public class OAuth2Options implements Options {
     private List<PubSecKeyOptions> pubSecKeys;
     private JWTOptions jwtOptions;
     private JSONObject extraParams; // extra parameters to be added while requesting a token
+    private Consumer<HttpClient.Builder> httpClientConfigurator;
 
     /**
      * Default constructor.
@@ -143,6 +146,7 @@ public class OAuth2Options implements Options {
         userAgent = other.userAgent;
         pubSecKeys = other.pubSecKeys;
         jwtOptions = other.jwtOptions;
+        httpClientConfigurator = other.httpClientConfigurator;
         // extra parameters
         if (other.extraParams != null) {
             extraParams = new JSONObject(other.extraParams.toString());
@@ -1008,6 +1012,28 @@ public class OAuth2Options implements Options {
      */
     public OAuth2Options setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+        return this;
+    }
+
+    /**
+     * Gets the callback used to configure the {@link HttpClient} for OAuth2 requests.
+     *
+     * @return the HTTP client configurator, or {@code null} if none is set
+     */
+    public Consumer<HttpClient.Builder> getHttpClientConfigurator() {
+        return httpClientConfigurator;
+    }
+
+    /**
+     * Sets a callback to configure the {@link HttpClient} used for OAuth2 requests,
+     * e.g. to set an {@code SSLContext}, proxy or connect timeout.
+     * Must be set before the first request is sent.
+     *
+     * @param httpClientConfigurator the callback applied to the {@link HttpClient.Builder}
+     * @return the current instance of {@code OAuth2Options} for method chaining
+     */
+    public OAuth2Options setHttpClientConfigurator(Consumer<HttpClient.Builder> httpClientConfigurator) {
+        this.httpClientConfigurator = httpClientConfigurator;
         return this;
     }
 

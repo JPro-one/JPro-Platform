@@ -4,6 +4,9 @@ import javafx.stage.Stage;
 import one.jpro.platform.auth.core.oauth2.OAuth2Flow;
 import one.jpro.platform.auth.core.oauth2.provider.KeycloakAuthenticationProvider;
 
+import java.net.http.HttpClient;
+import java.util.function.Consumer;
+
 /**
  * Fluent Keycloak Authentication interface.
  *
@@ -58,6 +61,15 @@ public interface FluentKeycloakAuth {
      * @return self
      */
     FluentKeycloakAuth redirectUri(String redirectUri);
+
+    /**
+     * Set a callback to configure the {@link HttpClient} used for all requests to the provider,
+     * e.g. to set an {@code SSLContext}, proxy or connect timeout.
+     *
+     * @param configurator the callback applied to the {@link HttpClient.Builder}
+     * @return self
+     */
+    FluentKeycloakAuth configureHttpClient(Consumer<HttpClient.Builder> configurator);
 
     /**
      * Create a Keycloak authentication provider.

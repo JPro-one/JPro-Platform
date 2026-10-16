@@ -40,8 +40,7 @@ public class OAuth2API {
 
     @NotNull
     protected final OAuth2Options options;
-    @NotNull
-    private final HttpClient httpClient;
+    private HttpClient httpClient;
 
     /**
      * Creates an OAuth2 API object.
@@ -50,7 +49,24 @@ public class OAuth2API {
      */
     public OAuth2API(@NotNull final OAuth2Options options) {
         this.options = Objects.requireNonNull(options, "OAuth2 options cannot be null");
-        this.httpClient = HttpClient.newHttpClient();
+    }
+
+    /**
+     * Returns the HTTP client used for requests to the provider, created on first use
+     * with the {@link OAuth2Options#getHttpClientConfigurator() configurator} applied.
+     *
+     * @return the HTTP client
+     */
+    @NotNull
+    synchronized HttpClient getHttpClient() {
+        if (httpClient == null) {
+            final HttpClient.Builder builder = HttpClient.newBuilder();
+            if (options.getHttpClientConfigurator() != null) {
+                options.getHttpClientConfigurator().accept(builder);
+            }
+            httpClient = builder.build();
+        }
+        return httpClient;
     }
 
     /**
@@ -700,7 +716,7 @@ public class OAuth2API {
             requestBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(payload.getBytes()));
         }
 
-        return httpClient.sendAsync(requestBuilder.build(), HttpResponse.BodyHandlers.ofString())
+        return getHttpClient().sendAsync(requestBuilder.build(), HttpResponse.BodyHandlers.ofString())
                 .thenCompose(response -> {
                     // read the body regardless
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
