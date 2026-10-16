@@ -1,9 +1,9 @@
 package one.jpro.platform.routing
 
 import org.junit.platform.launcher.{LauncherSession, LauncherSessionListener}
-import simplefx.core._
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Initializes the SimpleFX core once, before any test class is loaded. SimpleFX's
@@ -15,6 +15,7 @@ import scala.concurrent.Await
  */
 class FXCoreInitListener extends LauncherSessionListener {
   override def launcherSessionOpened(session: LauncherSession): Unit = {
-    Await.result(simplefx.cores.initializeCore(), (second))
+    // Nothing from simplefx.core may be touched here: on this (non-FX) thread it would race the initialization
+    Await.result(simplefx.cores.initializeCore(), 30.seconds)
   }
 }
