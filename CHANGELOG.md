@@ -5,6 +5,9 @@
 ### 0.8.1 (unreleased)
 
 #### Features
+* **jpro-auth-core:** the authorization code flow is protected by a `state`, PKCE (`S256`) and, with the
+  `openid` scope, a `nonce`, generated per login attempt by `authorizeUrl(...)` and checked in the callback.
+  On JPro, the attempt is kept in a short-lived login cookie, so it survives the redirect into a new session.
 * **jpro-playwright:** the new `JProWait` polls Java-side conditions with the same tiers (`waitUntil`,
   `waitForValue`, `waitForFunction`) and asserts that a condition or value stays unchanged (`ensureStaysTrue`,
   `ensureStaysValue`), replacing fixed `waitForTimeout(...)` sleeps.
@@ -21,6 +24,8 @@
   fails with its description.
 
 #### Bugfixes
+* **jpro-auth-core:** each `OAuth2Options` gets its own `JWTOptions`. They shared one instance, so OIDC
+  discovery of one provider changed the expected token issuer of all others in the same JVM.
 * **jpro-auth-routing:** the OAuth2 redirect route takes the code from its own request instead of the URL
   the session was started with.
 * **jpro-auth-core:** on JPro, `authenticate(credentials)` reads the callback from the most recently
@@ -29,6 +34,9 @@
   longer fail to parse.
 
 #### Behaviour changes
+* **jpro-auth-core:** an authorization code callback is rejected unless its `state` belongs to a login started
+  with `authorizeUrl(...)` (or matches the `state` set on the credentials). The authorization URL now contains
+  `code_challenge` and `nonce`.
 * **jpro-playwright:** `PlaywrightTimeouts.withTimeout(...)` calls the operation once per tier, with 50%, 50%
   and then 100% of the budget (before: once, with twice the budget), so the operation must be safe to repeat.
   A timed-out web-first `assertThat` now counts as a timeout too.

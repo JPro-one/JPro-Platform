@@ -18,6 +18,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +121,18 @@ public class OAuth2API {
             query.put("state", state);
         }
 
+        final String nonce = credentials.getNonce();
+        if (nonce != null && !nonce.isBlank()) {
+            query.put("nonce", nonce);
+        }
+
+        // PKCE (RFC 7636): only the hash of the verifier goes to the browser
+        final String codeVerifier = credentials.getCodeVerifier();
+        if (codeVerifier != null && !codeVerifier.isBlank()) {
+            query.put("code_challenge", codeChallenge(codeVerifier));
+            query.put("code_challenge_method", "S256");
+        }
+
         final String clientId = options.getClientId();
         if (clientId != null) {
             query.put("client_id", clientId);
@@ -132,6 +146,16 @@ public class OAuth2API {
         }
 
         return options.getAuthorizationPath() + '?' + jsonToQuery(query);
+    }
+
+    static String codeChallenge(@NotNull final String codeVerifier) {
+        try {
+            final byte[] hash = MessageDigest.getInstance("SHA-256")
+                    .digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     /**

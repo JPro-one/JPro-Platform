@@ -42,7 +42,6 @@ public class OAuth2Options implements Options {
     private static final String AUTHORIZATION_PATH = "/oauth/authorize";
     private static final String TOKEN_PATH = "/oauth/token";
     private static final String REVOCATION_PATH = "/oauth/revoke";
-    private static final JWTOptions JWT_OPTIONS = new JWTOptions();
     private static final String SCOPE_SEPARATOR = " ";
     private static final boolean VERIFY_TOKEN = true;
     private static final boolean VALIDATE_ISSUER = true;
@@ -102,7 +101,7 @@ public class OAuth2Options implements Options {
         tokenPath = TOKEN_PATH;
         revocationPath = REVOCATION_PATH;
         scopeSeparator = SCOPE_SEPARATOR;
-        jwtOptions = JWT_OPTIONS;
+        jwtOptions = new JWTOptions();
         jwkMaxAge = JWK_DEFAULT_AGE;
     }
 
@@ -145,7 +144,7 @@ public class OAuth2Options implements Options {
         clientAssertion = other.clientAssertion;
         userAgent = other.userAgent;
         pubSecKeys = other.pubSecKeys;
-        jwtOptions = other.jwtOptions;
+        jwtOptions = other.jwtOptions == null ? null : new JWTOptions(other.jwtOptions);
         httpClientConfigurator = other.httpClientConfigurator;
         // extra parameters
         if (other.extraParams != null) {

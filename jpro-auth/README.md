@@ -268,6 +268,20 @@ The OAuth2 filter matches the provider's `redirectUri` (here `/auth/google`), ex
 authorization code for tokens, stores the resulting `User` in the `UserSession`, and then runs
 your success/error callback.
 
+### Login security (state, PKCE, nonce)
+
+For the authorization code flow, `authorizeUrl(...)` generates a fresh `state`, a PKCE code verifier and,
+with the `openid` scope, a `nonce` for every login attempt. The callback is accepted only if its `state`
+belongs to such an attempt (each attempt can be used once, for 10 minutes); the code verifier is sent with
+the token request and the ID token's `nonce` must match. Values you set on the `OAuth2Credentials`
+yourself are used instead of generated ones; a `state` you set must be random for every login attempt,
+since a constant one disables the protection against login CSRF.
+
+On JPro, the redirect back from the identity provider can start a new session, so the attempt is also kept
+in a short-lived, host-only cookie (`jpro_oauth_*`, `Max-Age=600`, `SameSite=Lax`; on https `Secure` with the
+`__Host-` prefix), deleted once the callback
+is handled. It holds only random values, is set only when the user starts a login and is strictly necessary
+for it; mention it in your privacy policy like your session cookie.
 
 ### Launch the examples
 
