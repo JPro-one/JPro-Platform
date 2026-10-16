@@ -16,7 +16,8 @@
       "redirectUris": ["http://localhost:${APP_PORT}/*"],
       "webOrigins": ["http://localhost:${APP_PORT}"],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:${APP_PORT}/*"
+        "post.logout.redirect.uris": "http://localhost:${APP_PORT}/*",
+        "pkce.code.challenge.method": "S256"
       }
     }
   ],

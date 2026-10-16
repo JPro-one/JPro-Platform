@@ -28,12 +28,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -130,11 +133,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     public CompletableFuture<String> authorizeUrl(@NotNull final OAuth2Credentials credentials) {
         Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
 
-        // Generate the authorization URL
-        final String authorizeUrl = api.authorizeURL(
-                credentials.setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri()))
-        );
-        logger.debug("Authorize URL: {}", authorizeUrl);
+        final String authorizeUrl = authorizationUrl(credentials);
 
         // Ensure the local HTTP server is running in a non-browser environment
         if (!WebAPI.isBrowser()) {
@@ -146,6 +145,29 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
         // Return a future that completes with the URL once the server is ready
         return httpServer.openURL(authorizeUrl);
+    }
+
+    /**
+     * Builds the authorization URL. For the authorization code flow, a fresh {@code state}, PKCE code verifier and
+     * (with the {@code openid} scope) {@code nonce} are generated for this login attempt, unless the credentials
+     * set them, and remembered until the callback: in memory and, in the browser, in a short-lived cookie,
+     * since the redirect back can start a new session.
+     */
+    String authorizationUrl(@NotNull final OAuth2Credentials credentials) {
+        credentials.setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri()));
+        final OAuth2Credentials request = new OAuth2Credentials(credentials);
+        final OAuth2Flow flow = request.getFlow() != null ? request.getFlow() : options.getFlow();
+        if (flow == OAuth2Flow.AUTH_CODE) {
+            if (request.getState() == null) request.setState(randomToken());
+            if (request.getCodeVerifier() == null) request.setCodeVerifier(randomToken());
+            if (request.getNonce() == null && request.getScopes() != null && request.getScopes().contains("openid")) {
+                request.setNonce(randomToken());
+            }
+            rememberLoginAttempt(request.getState(), new LoginAttempt(request.getCodeVerifier(), request.getNonce()));
+        }
+        final String authorizeUrl = api.authorizeURL(request);
+        logger.debug("Authorize URL: {}", authorizeUrl);
+        return authorizeUrl;
     }
 
     /**
@@ -233,7 +255,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             logger.debug("URL query parameters: {}", queryParams);
             applyCallbackParams(oauth2Credentials, queryParams);
 
-            return exchangeToken(oauth2Credentials);
+            return exchangeToken(withLoginAttempt(oauth2Credentials, queryParams));
         } catch (ClassCastException | CredentialValidationException | AuthenticationException ex) {
             return CompletableFuture.failedFuture(ex);
         }
@@ -245,8 +267,10 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * {@link #authenticate(Credentials)}, the session URL is not consulted and the given credentials
      * are not modified.
      * <p>
-     * If the credentials have a {@code state}, the callback must return the same value.
-     * An {@code error} in the callback fails the authentication with its description.
+     * The callback's {@code state} must belong to a login started with {@link #authorizeUrl(OAuth2Credentials)}
+     * (or match the {@code state} of the credentials); its PKCE code verifier is sent with the token request
+     * and its {@code nonce} must match the ID token. An {@code error} in the callback fails the authentication
+     * with its description.
      *
      * @param credentials    the credentials used for the authorization request
      * @param callbackParams the query parameters of the redirect callback
@@ -258,7 +282,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
         Objects.requireNonNull(callbackParams, "callbackParams cannot be null");
         try {
-            return exchangeToken(applyCallbackParams(new OAuth2Credentials(credentials), callbackParams));
+            final OAuth2Credentials callbackCredentials = applyCallbackParams(new OAuth2Credentials(credentials), callbackParams);
+            return exchangeToken(withLoginAttempt(callbackCredentials, callbackParams));
         } catch (CredentialValidationException | AuthenticationException ex) {
             return CompletableFuture.failedFuture(ex);
         }
@@ -289,6 +314,117 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             credentials.setScopes(List.of(scope.trim().split("[+ ]+")));
         }
         return credentials;
+    }
+
+    /**
+     * Returns the credentials for exchanging the callback's code, with the code verifier and nonce of the login
+     * attempt its {@code state} belongs to.
+     */
+    private OAuth2Credentials withLoginAttempt(@NotNull final OAuth2Credentials credentials,
+                                               @NotNull final Map<String, String> callbackParams) {
+        if (callbackParams.get("code") == null) {
+            return credentials;
+        }
+        final String state = callbackParams.get("state");
+        final LoginAttempt attempt = state == null ? null : takeLoginAttempt(state);
+        if (attempt == null) {
+            if (credentials.getState() != null) {
+                return credentials; // the app manages the state itself; applyCallbackParams compared it
+            }
+            throw new AuthenticationException("The callback does not belong to a login started here: "
+                    + "its state is missing, unknown or expired");
+        }
+        final OAuth2Credentials result = new OAuth2Credentials(credentials);
+        if (result.getCodeVerifier() == null) result.setCodeVerifier(attempt.codeVerifier());
+        if (result.getNonce() == null) result.setNonce(attempt.nonce());
+        return result;
+    }
+
+    record LoginAttempt(String codeVerifier, String nonce, long createdMillis) {
+
+        LoginAttempt(String codeVerifier, String nonce) {
+            this(codeVerifier, nonce, System.currentTimeMillis());
+        }
+
+        String encode() {
+            final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+            return encoder.encodeToString(codeVerifier.getBytes(StandardCharsets.UTF_8)) + "."
+                    + (nonce == null ? "" : encoder.encodeToString(nonce.getBytes(StandardCharsets.UTF_8)));
+        }
+
+        static LoginAttempt decode(String value) {
+            final String[] parts = value.split("\\.", -1);
+            if (parts.length != 2) return null;
+            final Base64.Decoder decoder = Base64.getUrlDecoder();
+            try {
+                return new LoginAttempt(new String(decoder.decode(parts[0]), StandardCharsets.UTF_8),
+                        parts[1].isEmpty() ? null : new String(decoder.decode(parts[1]), StandardCharsets.UTF_8));
+            } catch (IllegalArgumentException ex) {
+                return null;
+            }
+        }
+    }
+
+    private static final String LOGIN_ATTEMPT_COOKIE_PREFIX = "jpro_oauth_";
+    private static final int LOGIN_ATTEMPT_MAX_AGE_SECONDS = 600;
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private final Map<String, LoginAttempt> loginAttempts = new ConcurrentHashMap<>();
+
+    private void rememberLoginAttempt(@NotNull final String state, @NotNull final LoginAttempt attempt) {
+        final long expired = System.currentTimeMillis() - LOGIN_ATTEMPT_MAX_AGE_SECONDS * 1000L;
+        loginAttempts.values().removeIf(a -> a.createdMillis() < expired);
+        loginAttempts.put(state, attempt);
+
+        final WebAPI webAPI = browserWebAPI();
+        if (webAPI != null) {
+            webAPI.executeScript("document.cookie = '" + loginAttemptCookie(state) + "=" + attempt.encode()
+                    + "; Max-Age=" + LOGIN_ATTEMPT_MAX_AGE_SECONDS + "; Path=/; SameSite=Lax';");
+        }
+    }
+
+    private LoginAttempt takeLoginAttempt(@NotNull final String state) {
+        LoginAttempt attempt = loginAttempts.remove(state);
+        final WebAPI webAPI = browserWebAPI();
+        if (webAPI != null) {
+            final String cookie = webAPI.getCookies().get(loginAttemptCookie(state));
+            if (cookie != null) {
+                webAPI.deleteCookie(loginAttemptCookie(state));
+                if (attempt == null) attempt = LoginAttempt.decode(cookie);
+            }
+        }
+        if (attempt != null && attempt.createdMillis() < System.currentTimeMillis() - LOGIN_ATTEMPT_MAX_AGE_SECONDS * 1000L) {
+            return null;
+        }
+        return attempt;
+    }
+
+    @Nullable
+    private WebAPI browserWebAPI() {
+        return WebAPI.isBrowser() && stage != null ? WebAPI.getWebAPI(stage) : null;
+    }
+
+    // The state may come from the app, so the cookie name uses its hash.
+    private static String loginAttemptCookie(@NotNull final String state) {
+        return LOGIN_ATTEMPT_COOKIE_PREFIX + OAuth2API.codeChallenge(state);
+    }
+
+    private static String randomToken() {
+        final byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    @Nullable
+    private static String idTokenNonce(@NotNull final String idToken) {
+        final String[] parts = idToken.split("\\.");
+        if (parts.length < 2) return null;
+        try {
+            final JSONObject payload = new JSONObject(new String(Decoders.BASE64URL.decode(parts[1]), StandardCharsets.UTF_8));
+            return payload.optString("nonce", null);
+        } catch (RuntimeException ex) {
+            return null;
+        }
     }
 
     private CompletableFuture<User> exchangeToken(@NotNull final OAuth2Credentials oauth2Credentials) {
@@ -355,6 +491,12 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             // Exchange for an access token
             return api.token(flow.getGrantType(), params)
                     .thenCompose(json -> {
+                        final String expectedNonce = oauth2Credentials.getNonce();
+                        if (flow == OAuth2Flow.AUTH_CODE && expectedNonce != null && json.has("id_token")
+                                && !expectedNonce.equals(idTokenNonce(json.getString("id_token")))) {
+                            return CompletableFuture.failedFuture(new AuthenticationException(
+                                    "The nonce of the ID token does not match the authorization request"));
+                        }
                         // attempt to create a user from the json object
                         try {
                             final User newUser = createUser(json);

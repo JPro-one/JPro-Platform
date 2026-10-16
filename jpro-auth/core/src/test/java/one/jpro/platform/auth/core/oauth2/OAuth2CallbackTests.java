@@ -47,9 +47,9 @@ public class OAuth2CallbackTests {
 
     @Test
     void codeFromCallbackIsExchangedWithoutChangingCredentials() {
-        OAuth2Credentials credentials = credentials();
+        OAuth2Credentials credentials = credentials().setState("s1");
 
-        failure(credentials, Map.of("code", "callback-code"));
+        failure(credentials, Map.of("code", "callback-code", "state", "s1"));
 
         assertEquals(1, idp.requests().size(), idp.requestLines()::toString);
         FakeIdp.Request request = idp.requests().get(0);
