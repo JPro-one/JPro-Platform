@@ -99,6 +99,7 @@ jobs:
           path: |
             **/build/reports/
             **/build/test-results/
+            **/build/playwright-screenshots/
             **/hs_err_pid*.log
             **/replay_pid*.log
             hs_err_pid*.log

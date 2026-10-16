@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -188,7 +189,7 @@ public abstract class BaseOAuthApp extends RouteApp {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         final var button = new Button(buttonText);
-        button.setId(buttonText.toLowerCase().replace(' ', '-') + "-button");
+        button.setId(buttonText.toLowerCase(Locale.ROOT).replace(' ', '-') + "-button");
         if (buttonText.equalsIgnoreCase("Sign In")) {
             button.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.ACCENT);
         } else if (buttonText.equalsIgnoreCase("Sign Out")) {

@@ -6,12 +6,14 @@
 # Admin console: http://localhost:8180/admin (admin/admin). Stop with stop.sh.
 set -e
 cd "$(dirname "$0")"
-IMPORT_DIR="$(mktemp -d)"
-sed 's/${APP_PORT}/8080/g' ../src/test/resources/keycloak/myrealm.json > "$IMPORT_DIR/myrealm.json"
+REALM_FILE="$(mktemp)"
+sed 's/${APP_PORT}/8080/g' ../src/test/resources/keycloak/myrealm.json > "$REALM_FILE"
+# Keycloak runs as another user in the container; on Linux the mount keeps the host permissions.
+chmod 644 "$REALM_FILE"
 docker rm -f jpro-keycloak >/dev/null 2>&1 || true
 docker run -d --name jpro-keycloak -p 8180:8080 \
   -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
-  -v "$IMPORT_DIR:/opt/keycloak/data/import:ro" \
+  -v "$REALM_FILE:/opt/keycloak/data/import/myrealm.json:ro" \
   quay.io/keycloak/keycloak:26.4.0 start-dev --import-realm
 echo "Waiting for Keycloak ..."
 for i in $(seq 1 90); do

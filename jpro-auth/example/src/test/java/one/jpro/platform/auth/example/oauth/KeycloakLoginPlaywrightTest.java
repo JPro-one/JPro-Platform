@@ -19,6 +19,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,15 +43,19 @@ public class KeycloakLoginPlaywrightTest extends JProPlaywrightTest {
     static void startKeycloakAndApp() throws Exception {
         keycloakPort = freePort();
         container = "jpro-keycloak-test-" + keycloakPort;
-        Path importDir = Files.createTempDirectory("keycloak-import");
+        Path realmFile = Files.createTempFile("keycloak-myrealm", ".json");
         try (InputStream realm = KeycloakLoginPlaywrightTest.class.getResourceAsStream("/keycloak/myrealm.json")) {
             String json = new String(realm.readAllBytes(), StandardCharsets.UTF_8)
                     .replace("${APP_PORT}", String.valueOf(PORT));
-            Files.writeString(importDir.resolve("myrealm.json"), json);
+            Files.writeString(realmFile, json);
+        }
+        // Keycloak runs as another user in the container; on Linux the mount keeps the host permissions.
+        if (realmFile.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+            Files.setPosixFilePermissions(realmFile, PosixFilePermissions.fromString("rw-r--r--"));
         }
         docker("run", "-d", "--name", container, "-p", keycloakPort + ":8080",
                 "-e", "KC_BOOTSTRAP_ADMIN_USERNAME=admin", "-e", "KC_BOOTSTRAP_ADMIN_PASSWORD=admin",
-                "-v", importDir.toAbsolutePath() + ":/opt/keycloak/data/import:ro",
+                "-v", realmFile.toAbsolutePath() + ":/opt/keycloak/data/import/myrealm.json:ro",
                 KEYCLOAK_IMAGE, "start-dev", "--import-realm");
         String realmUrl = "http://localhost:" + keycloakPort + "/realms/myrealm";
         JProWait.waitUntil(60_000, () -> isUp(realmUrl + "/.well-known/openid-configuration"),
@@ -68,7 +73,7 @@ public class KeycloakLoginPlaywrightTest extends JProPlaywrightTest {
         try {
             stopAndAssertNoServerErrors(LOGS_DIR, gradleCommand(":jpro-auth:example:jproStop"));
         } finally {
-            if (container != null) docker("rm", "-f", container);
+            if (container != null) new ProcessBuilder("docker", "rm", "-f", container).inheritIO().start().waitFor();
         }
     }
 
