@@ -1,0 +1,175 @@
+package one.jpro.platform.auth.core.oauth2;
+
+import io.jsonwebtoken.Jwts;
+import one.jpro.platform.auth.core.authentication.User;
+import one.jpro.platform.auth.core.jwt.TokenCredentials;
+import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * {@code authenticate(TokenCredentials)} must only accept a token it could verify: a validly signed JWT, or a
+ * token the identity provider reports as active for this client.
+ */
+public class TokenCredentialsAuthenticationTests {
+
+    private static final String ISSUER = "http://idp.invalid";
+    private static final KeyPair IDP_KEY = rsaKeyPair();
+    private static final KeyPair OTHER_KEY = rsaKeyPair();
+
+    private FakeIdp idp;
+    private String introspection = "{\"active\":false}";
+
+    @BeforeEach
+    void setUp() throws IOException {
+        idp = new FakeIdp(request -> request.line().contains("/certs")
+                ? new FakeIdp.Response(200, "{\"keys\":[" + jwk((RSAPublicKey) IDP_KEY.getPublic()) + "]}")
+                : new FakeIdp.Response(200, introspection));
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        idp.close();
+    }
+
+    private OAuth2Options options() {
+        return new OAuth2Options()
+                .setSite(ISSUER)
+                .setClientId("clientId")
+                .setClientSecret("secret")
+                .setJwkPath("/certs")
+                .setHttpClientConfigurator(idp.viaProxy());
+    }
+
+    private CompletableFuture<User> authenticate(OAuth2Options options, String token) {
+        return new OAuth2AuthenticationProvider(null, options).authenticate(new TokenCredentials(token));
+    }
+
+    private static Throwable failure(CompletableFuture<User> result) {
+        return assertThrows(ExecutionException.class, () -> result.get(10, TimeUnit.SECONDS)).getCause();
+    }
+
+    private static String jwt(KeyPair signer) {
+        return Jwts.builder().header().keyId("k1").and()
+                .issuer(ISSUER).subject("1").claim("email", "test@example.com")
+                .expiration(Date.from(Instant.now().plusSeconds(300)))
+                .signWith(signer.getPrivate(), Jwts.SIG.RS256).compact();
+    }
+
+    @Test
+    void validSignedJwtIsAccepted() throws Exception {
+        User user = authenticate(options(), jwt(IDP_KEY)).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
+    }
+
+    @Test
+    void jwtSignedWithAnotherKeyIsRejectedWithoutIntrospection() {
+        failure(authenticate(options(), jwt(OTHER_KEY)));
+    }
+
+    @Test
+    void opaqueTokenIsRejectedWithoutIntrospection() {
+        failure(authenticate(options(), "any-opaque-token"));
+    }
+
+    @Test
+    void unverifiedJwtIsRejectedWhenVerificationIsOff() {
+        failure(authenticate(options().setVerifyToken(false), jwt(OTHER_KEY)));
+    }
+
+    @Test
+    void activeIntrospectedTokenIsAccepted() throws Exception {
+        introspection = "{\"active\":true,\"client_id\":\"clientId\",\"username\":\"alice\"}";
+
+        User user = authenticate(options().setIntrospectionPath("/introspect"), "opaque").get(10, TimeUnit.SECONDS);
+
+        assertEquals("alice", user.getName());
+    }
+
+    @Test
+    void inactiveIntrospectedTokenIsRejected() {
+        introspection = "{\"active\":false}";
+
+        Throwable cause = failure(authenticate(options().setIntrospectionPath("/introspect"), "opaque"));
+
+        assertTrue(cause.getMessage().contains("not active"), cause.getMessage());
+    }
+
+    @Test
+    void introspectionWithoutActiveIsRejected() {
+        introspection = "{\"client_id\":\"clientId\",\"username\":\"alice\"}";
+
+        Throwable cause = failure(authenticate(options().setIntrospectionPath("/introspect"), "opaque"));
+
+        assertTrue(cause.getMessage().contains("not active"), cause.getMessage());
+    }
+
+    @Test
+    void tokenIssuedToAnotherClientIsRejected() {
+        introspection = "{\"active\":true,\"client_id\":\"otherClient\",\"username\":\"alice\"}";
+
+        Throwable cause = failure(authenticate(options().setIntrospectionPath("/introspect"), "opaque"));
+
+        assertTrue(cause.getMessage().contains("client"), cause.getMessage());
+    }
+
+    @Test
+    void googleTokenInfoIsAcceptedForThisClient() throws Exception {
+        introspection = "{\"azp\":\"clientId\",\"aud\":\"clientId\",\"email\":\"g@example.com\",\"expires_in\":\"3599\"}";
+        GoogleAuthenticationProvider google = new GoogleAuthenticationProvider(null, options()
+                .setIntrospectionPath("http://idp.invalid/tokeninfo"));
+
+        User user = google.authenticate(new TokenCredentials("ya29.opaque")).get(10, TimeUnit.SECONDS);
+
+        assertEquals("g@example.com", user.getName());
+    }
+
+    @Test
+    void googleTokenInfoForAnotherClientIsRejected() {
+        introspection = "{\"azp\":\"otherClient\",\"aud\":\"otherClient\",\"email\":\"g@example.com\",\"expires_in\":\"3599\"}";
+        GoogleAuthenticationProvider google = new GoogleAuthenticationProvider(null, options()
+                .setIntrospectionPath("http://idp.invalid/tokeninfo"));
+
+        failure(google.authenticate(new TokenCredentials("ya29.opaque")));
+    }
+
+    private static String jwk(RSAPublicKey key) {
+        return "{\"kty\":\"RSA\",\"kid\":\"k1\",\"use\":\"sig\",\"alg\":\"RS256\",\"n\":\"" + base64Url(key.getModulus())
+                + "\",\"e\":\"" + base64Url(key.getPublicExponent()) + "\"}";
+    }
+
+    private static String base64Url(BigInteger value) {
+        byte[] bytes = value.toByteArray();
+        if (bytes[0] == 0) bytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private static KeyPair rsaKeyPair() {
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+            generator.initialize(2048);
+            return generator.generateKeyPair();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+}

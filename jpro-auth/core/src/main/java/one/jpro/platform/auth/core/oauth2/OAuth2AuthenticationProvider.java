@@ -203,48 +203,46 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                 return authenticate(oauth2Credentials);
             }
 
-            // Handle existing tokens (TokenCredentials)
+            // Handle existing tokens (TokenCredentials): accepted only if verified by signature or introspection
             if (credentials instanceof TokenCredentials tokenCredentials) {
                 tokenCredentials.validate(null);
+                final String token = tokenCredentials.getToken();
 
-                // Attempt to create a user from the token if valid
-                try {
-                    final User newUser = createUser(new JSONObject().put("access_token", tokenCredentials.getToken()));
-                    // Basic validation passed
-                    return CompletableFuture.completedFuture(newUser);
-                } catch (TokenExpiredException | IllegalStateException ex) {
-                    logger.error(ex.getMessage(), ex);
-                    // Fall through to introspection if supported
+                if (options.isVerifyToken() && token.split("\\.", -1).length == 3) {
+                    try {
+                        return CompletableFuture.completedFuture(
+                                createUser(new JSONObject().put("access_token", token)));
+                    } catch (AuthenticationException | IllegalStateException ex) {
+                        logger.debug("Token not verified as JWT, trying introspection: {}", ex.getMessage());
+                    }
                 }
 
-                // If token is not a valid JWT or is expired, try introspection
                 if (options.getIntrospectionPath() == null) {
-                    return CompletableFuture.failedFuture(
-                            new RuntimeException("Can't authenticate `access_token`: no introspection support"));
+                    return CompletableFuture.failedFuture(new AuthenticationException(
+                            "Cannot verify the token: it is no verifiable JWT and there is no introspection endpoint"));
                 }
 
-                // Perform the introspection in accordance to RFC7662
-                return api.tokenIntrospection("access_token", tokenCredentials.getToken())
+                // RFC 7662: the token is only valid if the provider reports it as active
+                return api.tokenIntrospection("access_token", token)
                         .thenCompose(json -> {
-                            // RFC7662 dictates that there is a boolean active field,
-                            // however token info implementation may not return this
-                            if (json.has("active") && json.getBoolean("active")) {
-                                return CompletableFuture.failedFuture(new RuntimeException("Inactive Token"));
+                            if (!json.optBoolean("active", false)) {
+                                return CompletableFuture.failedFuture(
+                                        new AuthenticationException("The token is not active"));
                             }
-
-                            // validate client_id
-                            if (json.has("client_id")) {
-                                final String clientId = options.getClientId();
-                                if (clientId != null && !clientId.equals(json.getString("client_id"))) {
-                                    // client identifier for the OAuth2 client that requested this token
-                                    logger.info("Introspect `client_id` doesn't match configured `client_id`");
-                                }
+                            final String clientId = json.optString("client_id", null);
+                            if (clientId != null && !clientId.equals(options.getClientId())) {
+                                return CompletableFuture.failedFuture(
+                                        new AuthenticationException("The token was issued to another client"));
                             }
-                            try {
-                                return CompletableFuture.completedFuture(createUser(json));
-                            } catch (TokenExpiredException | IllegalStateException ex) {
-                                return CompletableFuture.failedFuture(ex);
+                            final String name = Optional.ofNullable(json.optString("username", null))
+                                    .or(() -> Optional.ofNullable(json.optString("email", null)))
+                                    .orElse(json.optString("sub", null));
+                            if (name == null) {
+                                return CompletableFuture.failedFuture(new AuthenticationException(
+                                        "The introspection response names no user (username, email or sub)"));
                             }
+                            return CompletableFuture.completedFuture(new User(name, Map.of("auth",
+                                    new JSONObject().put("access_token", token).put("introspection", json))));
                         });
             }
 

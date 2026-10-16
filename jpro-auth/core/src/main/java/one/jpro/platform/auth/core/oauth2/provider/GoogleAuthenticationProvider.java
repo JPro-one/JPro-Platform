@@ -128,6 +128,9 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
                                     new RuntimeException(AuthUtils.extractErrorDescription(json)));
                         } else {
                             AuthUtils.processNonStandardHeaders(json, response, options.getScopeSeparator());
+                            // tokeninfo is not RFC 7662: a successful response describes a valid token
+                            if (!json.has("active")) json.put("active", json.optLong("expires_in", 0) > 0);
+                            if (!json.has("client_id") && json.has("azp")) json.put("client_id", json.getString("azp"));
                             return CompletableFuture.completedFuture(json);
                         }
                     });
