@@ -23,6 +23,7 @@ public class SignedInUserPage extends Page {
 
     public SignedInUserPage(OAuthApp loginApp) {
         final var headerLabel = new Label("Not signed in.");
+        headerLabel.setId("signed-in-user");
         headerLabel.getStyleClass().add("header-label");
 
         final var authProvider = loginApp.getAuthProvider();
