@@ -2,7 +2,11 @@ package one.jpro.platform.auth.core.oauth2;
 
 import org.junit.jupiter.api.Test;
 
+import java.net.http.HttpClient;
+import java.util.function.Consumer;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 /**
@@ -11,6 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
  * @author Besmir Beqiri
  */
 public class OAuth2OptionsTests {
+
+    @Test
+    public void copyConstructorKeepsHttpClientConfigurator() {
+        Consumer<HttpClient.Builder> configurator = builder -> {};
+        OAuth2Options options = new OAuth2Options().setHttpClientConfigurator(configurator);
+
+        assertSame(configurator, new OAuth2Options(options).getHttpClientConfigurator());
+    }
 
     @Test
     public void trailingSlashShouldBeRemoved() {

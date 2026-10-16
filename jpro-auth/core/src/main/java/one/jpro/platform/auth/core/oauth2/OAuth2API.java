@@ -58,7 +58,7 @@ public class OAuth2API {
      * @return the HTTP client
      */
     @NotNull
-    public synchronized HttpClient getHttpClient() {
+    synchronized HttpClient getHttpClient() {
         if (httpClient == null) {
             final HttpClient.Builder builder = HttpClient.newBuilder();
             if (options.getHttpClientConfigurator() != null) {

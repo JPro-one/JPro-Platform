@@ -59,6 +59,7 @@ public class HttpClientConfiguratorTests {
     private void handle(Socket socket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         String requestLine = in.readLine();
+        if (requestLine == null) return;
         requests.add(requestLine);
         String line;
         while ((line = in.readLine()) != null && !line.isEmpty()) {

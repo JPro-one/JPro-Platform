@@ -6,7 +6,7 @@
 
 #### Features
 * **jpro-auth-core:** `configureHttpClient(...)` on the fluent Keycloak, Google and Microsoft builders,
-  and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all requests
+  and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all OAuth2 requests
   to the identity provider, e.g. to set an `SSLContext` or a connect timeout.
 
 ### 0.8.0 (September 30, 2026)
