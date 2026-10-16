@@ -16,6 +16,8 @@ import one.jpro.platform.routing.dev.StatisticsTransformer;
 import one.jpro.platform.session.SessionManager;
 
 import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import static one.jpro.platform.routing.Route.get;
 
@@ -26,6 +28,8 @@ import static one.jpro.platform.routing.Route.get;
  * @author Besmir Beqiri
  */
 public class OAuthApp extends BaseOAuthApp {
+
+    private final Map<String, OpenIDAuthenticationProvider> providers = new LinkedHashMap<>();
 
     private static final SessionManager sessionManager = new SessionManager("oauth-app");
 
@@ -44,31 +48,43 @@ public class OAuthApp extends BaseOAuthApp {
         getScene().getStylesheets().add(OAuthApp.class
                 .getResource("/one/jpro/platform/auth/example/css/login.css").toExternalForm());
 
-        // Google Auth provider
-        final var googleAuth = AuthAPI.googleAuth()
-                .clientId(GOOGLE_CLIENT_ID)
-                .clientSecret(GOOGLE_CLIENT_SECRET)
-                .redirectUri("/auth/google")
-                .create(getStage());
+        // Only providers whose client ID is set are offered, so the app starts with any subset configured.
+        providers.clear();
+        if (isSet(GOOGLE_CLIENT_ID)) {
+            providers.put("google", AuthAPI.googleAuth()
+                    .clientId(GOOGLE_CLIENT_ID)
+                    .clientSecret(GOOGLE_CLIENT_SECRET)
+                    .redirectUri("/auth/google")
+                    .create(getStage()));
+        }
+        if (isSet(AZURE_CLIENT_ID)) {
+            providers.put("microsoft", AuthAPI.microsoftAuth()
+                    .clientId(AZURE_CLIENT_ID)
+                    .clientSecret(AZURE_CLIENT_SECRET)
+                    .tenant("common")
+                    .redirectUri("/auth/microsoft")
+                    .create(getStage()));
+        }
+        if (isSet(KEYCLOAK_CLIENT_ID)) {
+            providers.put("keycloak", AuthAPI.keycloakAuth()
+                    .site(KEYCLOAK_SITE)
+                    .clientId(KEYCLOAK_CLIENT_ID)
+                    .clientSecret(KEYCLOAK_CLIENT_SECRET)
+                    .realm("myrealm")
+                    .redirectUri("/auth/keycloak")
+                    .create(getStage()));
+        }
 
-        // Microsoft Auth provider
-        final var microsoftAuth = AuthAPI.microsoftAuth()
-                .clientId(AZURE_CLIENT_ID)
-                .clientSecret(AZURE_CLIENT_SECRET)
-                .tenant("common")
-                .redirectUri("/auth/microsoft")
-                .create(getStage());
+        Route providerRoutes = Route.empty();
+        Route discoveryRoutes = Route.empty();
+        for (var provider : providers.entrySet()) {
+            providerRoutes = providerRoutes.and(get("/" + provider.getKey(),
+                    request -> Response.node(new AuthProviderPage(this, provider.getValue()))));
+            discoveryRoutes = discoveryRoutes.and(get("/" + provider.getKey(),
+                    request -> Response.node(new AuthProviderDiscoveryPage(this, provider.getValue()))));
+        }
 
-        // Keycloak Auth provider
-        final var keycloakAuth = AuthAPI.keycloakAuth()
-                .site(KEYCLOAK_SITE)
-                .clientId(KEYCLOAK_CLIENT_ID)
-                .clientSecret(KEYCLOAK_CLIENT_SECRET)
-                .realm("myrealm")
-                .redirectUri("/auth/keycloak")
-                .create(getStage());
-
-        return Route.empty()
+        Route route = Route.empty()
                 .and(get("/", request -> Response.node(new LoginPage(this))))
                 .path("/user", Route.empty()
                         .and(get("/console", request -> Response.node(new SignedInUserPage(this))))
@@ -80,17 +96,11 @@ public class OAuthApp extends BaseOAuthApp {
                         .and(get("/logout", request -> Response.node(new LoginPage(this)))))
                 .path("/auth", Route.empty()
                         .and(get("/error", request -> Response.node(new ErrorPage(this)))))
-                .path("/provider", Route.empty()
-                        .and(get("/google", request -> Response.node(new AuthProviderPage(this, googleAuth))))
-                        .and(get("/microsoft", request -> Response.node(new AuthProviderPage(this, microsoftAuth))))
-                        .and(get("/keycloak", request -> Response.node(new AuthProviderPage(this, keycloakAuth))))
-                        .path("/discovery", Route.empty()
-                                .and(get("/google", request -> Response.node(new AuthProviderDiscoveryPage(this, googleAuth))))
-                                .and(get("/microsoft", request -> Response.node(new AuthProviderDiscoveryPage(this, microsoftAuth))))
-                                .and(get("/keycloak", request -> Response.node(new AuthProviderDiscoveryPage(this, keycloakAuth))))))
-                .transform(oauth2Filter(googleAuth))
-                .transform(oauth2Filter(microsoftAuth))
-                .transform(oauth2Filter(keycloakAuth))
+                .path("/provider", providerRoutes.path("/discovery", discoveryRoutes));
+        for (var provider : providers.values()) {
+            route = route.transform(oauth2Filter(provider));
+        }
+        return route
                 .transform(StatisticsTransformer.create())
                 .transform(DevTransformer.create());
     }
@@ -116,5 +126,14 @@ public class OAuthApp extends BaseOAuthApp {
 
     public UserSession getUserSession() {
         return userSession;
+    }
+
+    /** Whether the provider ("google", "microsoft", "keycloak") has a client ID configured. */
+    public boolean isProviderConfigured(String name) {
+        return providers.containsKey(name);
+    }
+
+    private static boolean isSet(String value) {
+        return value != null && !value.isBlank();
     }
 }
