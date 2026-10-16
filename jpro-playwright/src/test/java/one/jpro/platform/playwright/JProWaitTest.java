@@ -41,6 +41,14 @@ class JProWaitTest {
     }
 
     @Test
+    void neverTrueStillReportsWhenStateThrows() {
+        AssertionError err = assertThrows(AssertionError.class, () ->
+                JProWait.waitUntil(50, () -> false, THROWING_STATE));
+        assertTrue(err.getMessage().contains("never true"), err.getMessage());
+        assertTrue(err.getMessage().contains("diagnostic failed"), err.getMessage());
+    }
+
+    @Test
     void waitForValueReportsExpectedAndActual() {
         AssertionError err = assertThrows(AssertionError.class, () ->
                 JProWait.waitForValue(50, "done", () -> "pending"));

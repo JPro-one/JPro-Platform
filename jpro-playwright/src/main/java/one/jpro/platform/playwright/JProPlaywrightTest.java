@@ -62,7 +62,9 @@ public abstract class JProPlaywrightTest {
         BrowserType type = switch (BROWSER) {
             case "firefox" -> playwright.firefox();
             case "webkit" -> playwright.webkit();
-            default -> playwright.chromium();
+            case "chromium" -> playwright.chromium();
+            default -> throw new IllegalArgumentException(
+                    "Unknown -Djpro.test.browser=" + BROWSER + ", expected chromium, firefox or webkit");
         };
         boolean headless = !"false".equals(System.getProperty("jpro.test.headless"));
         try {
@@ -71,7 +73,8 @@ public abstract class JProPlaywrightTest {
             // An environment fault, not a test failure: make it unmistakable.
             throw new IllegalStateException("Playwright '" + BROWSER + "' browser failed to launch. This is an"
                     + " environment fault (browser not installed, missing system libraries or an unsupported OS),"
-                    + " not a test failure. WebKit requires Ubuntu 24.04+. Root cause: " + e.getMessage(), e);
+                    + " not a test failure." + ("webkit".equals(BROWSER) ? " WebKit requires Ubuntu 24.04+." : "")
+                    + " Root cause: " + e.getMessage(), e);
         }
     }
 
