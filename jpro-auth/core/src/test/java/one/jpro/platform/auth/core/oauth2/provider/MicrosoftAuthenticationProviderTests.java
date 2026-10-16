@@ -30,6 +30,7 @@ public class MicrosoftAuthenticationProviderTests {
         assertEquals("https://login.microsoftonline.com/common/discovery/v2.0/keys", options.getJwkPath());
         assertEquals("https://login.microsoftonline.com/common/oauth2/v2.0/logout", options.getLogoutPath());
         assertEquals("SHA-256", options.getJWTOptions().getNonceAlgorithm());
+        assertEquals("https://login.microsoftonline.com/{tenantid}/v2.0", provider.getOptions().getJWTOptions().getIssuer());
     }
 
     @Test

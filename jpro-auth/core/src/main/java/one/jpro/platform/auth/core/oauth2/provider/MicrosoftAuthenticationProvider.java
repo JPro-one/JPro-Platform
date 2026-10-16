@@ -70,7 +70,9 @@ public class MicrosoftAuthenticationProvider extends OpenIDAuthenticationProvide
                 .setUserInfoPath("https://graph.microsoft.com/oidc/userinfo")
                 .setJwkPath("https://login.microsoftonline.com/{tenant}/discovery/v2.0/keys")
                 .setLogoutPath("https://login.microsoftonline.com/{tenant}/oauth2/v2.0/logout")
-                .setJWTOptions(new JWTOptions().setNonceAlgorithm("SHA-256")));
+                .setJWTOptions(new JWTOptions().setNonceAlgorithm("SHA-256")
+                        // {tenantid} is resolved from the token's tid claim
+                        .setIssuer("https://login.microsoftonline.com/{tenantid}/v2.0")));
     }
 
     /**

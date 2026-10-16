@@ -24,6 +24,9 @@
   fails with its description.
 
 #### Bugfixes
+* **jpro-auth-core:** providers created without OIDC discovery now check the token issuer too: Google
+  (`https://accounts.google.com`), Microsoft (`https://login.microsoftonline.com/{tenantid}/v2.0`) and Keycloak
+  (the site, when it ends with `/realms/<realm>`). Before, `iss` was only checked after `discover()`.
 * **jpro-auth-core:** `authenticate(TokenCredentials)` on OAuth2 providers: token introspection rejected active
   tokens and accepted inactive ones, and a successful introspection could never log in. A token is now accepted only
   if it is a JWT with a valid signature issued to this client (`aud`, `azp` or `client_id`; before, a signed token of
@@ -46,6 +49,9 @@
   longer fail to parse.
 
 #### Behaviour changes
+* **jpro-auth-core:** a Keycloak provider rejects tokens whose `iss` differs from its site, e.g. when Keycloak's
+  public hostname differs from the configured site URL. Set the expected issuer with
+  `getOptions().getJWTOptions().setIssuer(...)` in that case.
 * **jpro-auth-core:** with `verifyToken=false`, `authenticate(TokenCredentials)` no longer accepts unverified JWTs;
   it requires an introspection endpoint.
 * **jpro-auth-core:** logins whose ID token is invalid or issued to another client are now rejected.
