@@ -349,16 +349,19 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         String encode() {
             final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
             return encoder.encodeToString(codeVerifier.getBytes(StandardCharsets.UTF_8)) + "."
-                    + (nonce == null ? "" : encoder.encodeToString(nonce.getBytes(StandardCharsets.UTF_8)));
+                    + (nonce == null ? "" : encoder.encodeToString(nonce.getBytes(StandardCharsets.UTF_8))) + "."
+                    + createdMillis;
         }
 
+        @Nullable
         static LoginAttempt decode(String value) {
             final String[] parts = value.split("\\.", -1);
-            if (parts.length != 2) return null;
+            if (parts.length != 3) return null;
             final Base64.Decoder decoder = Base64.getUrlDecoder();
             try {
                 return new LoginAttempt(new String(decoder.decode(parts[0]), StandardCharsets.UTF_8),
-                        parts[1].isEmpty() ? null : new String(decoder.decode(parts[1]), StandardCharsets.UTF_8));
+                        parts[1].isEmpty() ? null : new String(decoder.decode(parts[1]), StandardCharsets.UTF_8),
+                        Long.parseLong(parts[2]));
             } catch (IllegalArgumentException ex) {
                 return null;
             }
@@ -378,20 +381,26 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
         final WebAPI webAPI = browserWebAPI();
         if (webAPI != null) {
-            webAPI.executeScript("document.cookie = '" + loginAttemptCookie(state) + "=" + attempt.encode()
-                    + "; Max-Age=" + LOGIN_ATTEMPT_MAX_AGE_SECONDS + "; Path=/; SameSite=Lax';");
+            webAPI.executeScript(loginAttemptCookieScript(state, attempt.encode(), LOGIN_ATTEMPT_MAX_AGE_SECONDS));
         }
+    }
+
+    // On https, Secure and the __Host- prefix keep the cookie on this host and off plain http.
+    private static String loginAttemptCookieScript(String state, String value, int maxAgeSeconds) {
+        return "(function() { var https = location.protocol === 'https:';"
+                + " document.cookie = (https ? '__Host-' : '') + '" + loginAttemptCookie(state) + "=" + value
+                + "; Max-Age=" + maxAgeSeconds + "; Path=/; SameSite=Lax' + (https ? '; Secure' : ''); })();";
     }
 
     private LoginAttempt takeLoginAttempt(@NotNull final String state) {
         LoginAttempt attempt = loginAttempts.remove(state);
         final WebAPI webAPI = browserWebAPI();
         if (webAPI != null) {
-            final String cookie = webAPI.getCookies().get(loginAttemptCookie(state));
-            if (cookie != null) {
-                webAPI.deleteCookie(loginAttemptCookie(state));
-                if (attempt == null) attempt = LoginAttempt.decode(cookie);
-            }
+            final String name = loginAttemptCookie(state);
+            final String cookie = Objects.requireNonNullElse(
+                    webAPI.getCookies().get("__Host-" + name), webAPI.getCookies().get(name));
+            webAPI.executeScript(loginAttemptCookieScript(state, "", 0));
+            if (attempt == null && cookie != null) attempt = LoginAttempt.decode(cookie);
         }
         if (attempt != null && attempt.createdMillis() < System.currentTimeMillis() - LOGIN_ATTEMPT_MAX_AGE_SECONDS * 1000L) {
             return null;

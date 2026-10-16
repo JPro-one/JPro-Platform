@@ -17,7 +17,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -98,9 +100,9 @@ public class OAuth2LoginAttemptTests {
         Map<String, String> first = query(provider.authorizationUrl(credentials()));
         Map<String, String> second = query(provider.authorizationUrl(credentials()));
 
-        assertTrue(!first.get("state").equals(second.get("state")));
-        assertTrue(!first.get("nonce").equals(second.get("nonce")));
-        assertTrue(!first.get("code_challenge").equals(second.get("code_challenge")));
+        assertNotEquals(first.get("state"), second.get("state"));
+        assertNotEquals(first.get("nonce"), second.get("nonce"));
+        assertNotEquals(first.get("code_challenge"), second.get("code_challenge"));
     }
 
     @Test
@@ -170,5 +172,30 @@ public class OAuth2LoginAttemptTests {
         assertEquals("app-state", url.get("state"));
         assertEquals(s256(credentials.getCodeVerifier()), url.get("code_challenge"));
         provider.authenticate(credentials, Map.of("code", "c", "state", "app-state")).get(10, TimeUnit.SECONDS);
+        assertEquals(credentials.getCodeVerifier(),
+                AuthUtils.queryToJson(idp.requests().get(0).body()).getString("code_verifier"));
+    }
+
+    @Test
+    void withoutOpenidScopeNoNonceIsSentOrChecked() throws Exception {
+        OAuth2Credentials credentials = new OAuth2Credentials().setRedirectUri("http://app.invalid/callback");
+        Map<String, String> url = query(provider.authorizationUrl(credentials));
+        idTokenNonce = "anything";
+
+        assertNull(url.get("nonce"));
+        assertNotNull(provider.authenticate(credentials, Map.of("code", "c", "state", url.get("state")))
+                .get(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void loginAttemptSurvivesTheCookieEncoding() {
+        var attempt = new OAuth2AuthenticationProvider.LoginAttempt("verifier.with-dots", "nonce", 1234L);
+
+        assertEquals(attempt, OAuth2AuthenticationProvider.LoginAttempt.decode(attempt.encode()));
+        assertEquals(new OAuth2AuthenticationProvider.LoginAttempt("v", null, 5L),
+                OAuth2AuthenticationProvider.LoginAttempt.decode(
+                        new OAuth2AuthenticationProvider.LoginAttempt("v", null, 5L).encode()));
+        assertNull(OAuth2AuthenticationProvider.LoginAttempt.decode("garbage"));
+        assertNull(OAuth2AuthenticationProvider.LoginAttempt.decode("a.b.notanumber"));
     }
 }

@@ -24,6 +24,8 @@
   fails with its description.
 
 #### Bugfixes
+* **jpro-auth-core:** each `OAuth2Options` gets its own `JWTOptions`. They shared one instance, so OIDC
+  discovery of one provider changed the expected token issuer of all others in the same JVM.
 * **jpro-auth-routing:** the OAuth2 redirect route takes the code from its own request instead of the URL
   the session was started with.
 * **jpro-auth-core:** on JPro, `authenticate(credentials)` reads the callback from the most recently

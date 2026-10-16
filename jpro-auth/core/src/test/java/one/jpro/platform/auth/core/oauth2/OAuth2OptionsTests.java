@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
@@ -15,6 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
  * @author Besmir Beqiri
  */
 public class OAuth2OptionsTests {
+
+    @Test
+    public void jwtOptionsAreNotSharedBetweenInstances() {
+        OAuth2Options first = new OAuth2Options();
+        OAuth2Options second = new OAuth2Options();
+        first.getJWTOptions().setIssuer("https://first.example");
+        OAuth2Options copy = new OAuth2Options(first);
+        copy.getJWTOptions().setIssuer("https://copy.example");
+
+        assertNull(second.getJWTOptions().getIssuer());
+        assertEquals("https://first.example", first.getJWTOptions().getIssuer());
+    }
 
     @Test
     public void copyConstructorKeepsHttpClientConfigurator() {
