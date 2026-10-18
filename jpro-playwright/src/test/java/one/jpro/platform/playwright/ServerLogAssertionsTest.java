@@ -9,6 +9,8 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -139,6 +141,46 @@ class ServerLogAssertionsTest {
         assertDoesNotThrow(() -> ServerLogAssertions.dumpServerLogs(null));
     }
 
+
+    @Test
+    void knownIssueBlockIsTolerated() throws Exception {
+        writeLog("jpro.console.log", STARTED
+                + "Exception in thread \"main\" java.lang.NullPointerException: known boom\n"
+                + "\tat com.known.Frame.foo(Frame.java:10)\n");
+
+        assertThrows(AssertionError.class, () -> ServerLogAssertions.assertNoServerErrors(logsDir.toFile()));
+        ServerLogAssertions.assertNoServerErrors(logsDir.toFile(), true, List.of(Pattern.compile("known boom")));
+    }
+
+    @Test
+    void knownIssueToleratedAcrossNativeMethodFrame() throws Exception {
+        writeLog("jpro.warn.log", STARTED
+                + "java.io.UncheckedIOException: java.net.SocketException: Connection reset by peer\n"
+                + "\tat io.helidon.common.buffers.GrowingBufferData.writeTo(GrowingBufferData.java:69)\n"
+                + "Caused by: java.net.SocketException: Connection reset by peer\n"
+                + "\tat java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)\n"
+                + "\tat java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:65)\n"
+                + "\tat jdk.internal.reflect.GeneratedMethodAccessor1.invoke(Unknown Source)\n"
+                + "\t... 16 common frames omitted\n"
+                + "\t... 3 more\n");
+
+        ServerLogAssertions.assertNoServerErrors(logsDir.toFile(), true,
+                List.of(Pattern.compile("SocketException: Connection reset by peer")));
+    }
+
+    @Test
+    void unrelatedErrorStillFailsWithKnownIssues() throws Exception {
+        writeLog("jpro.console.log", STARTED
+                + "java.lang.NullPointerException: known boom\n"
+                + "[INFO] back to normal\n"
+                + "[ERROR] a different, unexpected failure\n");
+
+        AssertionError err = assertThrows(AssertionError.class,
+                () -> ServerLogAssertions.assertNoServerErrors(logsDir.toFile(), true,
+                        List.of(Pattern.compile("known boom"))));
+        assertTrue(err.getMessage().contains("different, unexpected failure"), "Actual: " + err.getMessage());
+        assertFalse(err.getMessage().contains("known boom"), "Actual: " + err.getMessage());
+    }
     @Test
     void collectsMatchesAcrossMultipleFiles() throws Exception {
         writeLog("jpro.info.log", STARTED + "[INFO] normal\n[ERROR] boom\n");

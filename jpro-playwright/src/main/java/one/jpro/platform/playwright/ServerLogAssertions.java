@@ -32,7 +32,10 @@ public final class ServerLogAssertions {
             Pattern.compile("(?i)\\w*error\\b"),
             // Stack-frame suffix — covers cases where a frame line carries no keyword but the
             // Foo.java:N) / Bar.scala:N) / Baz.kt:N) signature is unambiguous.
-            Pattern.compile("\\b\\w+\\.(?:java|scala|kt):\\d+\\)")
+            Pattern.compile("\\b\\w+\\.(?:java|scala|kt):\\d+\\)"),
+            // Frames and tails without either, so a stack stays one block for knownIssues
+            Pattern.compile("\\((?:Native Method|Unknown Source)\\)"),
+            Pattern.compile("\\.\\.\\.\\s+\\d+\\s+(?:more|common frames omitted)")
     );
 
     /**
@@ -53,7 +56,7 @@ public final class ServerLogAssertions {
      * @throws AssertionError if the sanity check fails or any log file contains a matching line.
      */
     public static void assertNoServerErrors(File logsDir) {
-        assertNoServerErrors(logsDir, true);
+        assertNoServerErrors(logsDir, true, List.of());
     }
 
     /**
@@ -61,6 +64,15 @@ public final class ServerLogAssertions {
      * startup path which exits before {@link #SERVER_STARTED_MARKER} is ever emitted.
      */
     public static void assertNoServerErrors(File logsDir, boolean requireServerStarted) {
+        assertNoServerErrors(logsDir, requireServerStarted, List.of());
+    }
+
+    /**
+     * Like {@link #assertNoServerErrors(File, boolean)}, but tolerates known issues: a contiguous block of
+     * error lines (one logged throwable with its stack) is ignored if any of its lines matches one of
+     * {@code knownIssues}. Any other error block still fails.
+     */
+    public static void assertNoServerErrors(File logsDir, boolean requireServerStarted, List<Pattern> knownIssues) {
         if (!logsDir.isDirectory()) {
             throw new AssertionError("Expected server log directory does not exist: " + logsDir);
         }
@@ -79,9 +91,7 @@ public final class ServerLogAssertions {
             }
             // activity.log counts for the marker lookup above but is skipped by the error scan.
             if (logFile.getName().equals("jpro.activity.log")) continue;
-            List<String> matches = lines.stream()
-                    .filter(ServerLogAssertions::lineLooksLikeError)
-                    .toList();
+            List<String> matches = scanErrors(lines, knownIssues);
             if (!matches.isEmpty()) {
                 problems.add(logFile.getName() + " contains " + matches.size()
                         + " error/throwable line(s):\n" + String.join("\n", matches));
@@ -97,6 +107,21 @@ public final class ServerLogAssertions {
             throw new AssertionError("Server log contains errors or throwables:\n\n"
                     + String.join("\n\n", problems));
         }
+    }
+
+    private static List<String> scanErrors(List<String> lines, List<Pattern> knownIssues) {
+        List<String> reportable = new ArrayList<>();
+        int i = 0;
+        while (i < lines.size()) {
+            if (!lineLooksLikeError(lines.get(i))) { i++; continue; }
+            int start = i;
+            while (i < lines.size() && lineLooksLikeError(lines.get(i))) i++;
+            List<String> block = lines.subList(start, i);
+            boolean known = knownIssues.stream()
+                    .anyMatch(p -> block.stream().anyMatch(l -> p.matcher(l).find()));
+            if (!known) reportable.addAll(block);
+        }
+        return reportable;
     }
 
     private static boolean lineLooksLikeError(String line) {

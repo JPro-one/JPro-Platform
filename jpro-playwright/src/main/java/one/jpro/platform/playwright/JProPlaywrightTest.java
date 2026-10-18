@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * Base class for Playwright tests that drive a JPro application in a headless browser.
@@ -186,12 +187,21 @@ public abstract class JProPlaywrightTest {
      */
     protected static void stopAndAssertNoServerErrors(File logsDir, String... stopCommand)
             throws IOException, InterruptedException {
+        stopAndAssertNoServerErrors(logsDir, List.of(), stopCommand);
+    }
+
+    /**
+     * Like {@link #stopAndAssertNoServerErrors(File, String...)}, but tolerates the error blocks matching
+     * {@code knownIssues} (see {@link ServerLogAssertions#assertNoServerErrors(File, boolean, List)}).
+     */
+    protected static void stopAndAssertNoServerErrors(File logsDir, List<Pattern> knownIssues, String... stopCommand)
+            throws IOException, InterruptedException {
         try {
             stopServer(stopCommand);
         } finally {
             ServerLogAssertions.dumpServerLogs(logsDir);
         }
-        ServerLogAssertions.assertNoServerErrors(logsDir);
+        ServerLogAssertions.assertNoServerErrors(logsDir, true, knownIssues);
     }
 
     /**

@@ -11,6 +11,10 @@
 * **jpro-playwright:** the new `JProWait` polls Java-side conditions with the same tiers (`waitUntil`,
   `waitForValue`, `waitForFunction`) and asserts that a condition or value stays unchanged (`ensureStaysTrue`,
   `ensureStaysValue`), replacing fixed `waitForTimeout(...)` sleeps.
+* **jpro-playwright:** `ServerLogAssertions.assertNoServerErrors(logsDir, requireServerStarted, knownIssues)` and
+  `stopAndAssertNoServerErrors(logsDir, knownIssues, command...)` tolerate known errors: a logged throwable with its
+  stack is ignored if one of its lines matches a pattern. `(Native Method)`, `(Unknown Source)` and `... N more`
+  lines count as part of the stack.
 * **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
   fails to launch now throws an `IllegalStateException` naming it as an environment fault.
 * **jpro-playwright:** `startServer(logsDir, environment, command...)` passes extra environment variables to the
