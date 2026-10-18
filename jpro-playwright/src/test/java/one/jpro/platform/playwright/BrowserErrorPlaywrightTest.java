@@ -9,8 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -57,16 +57,16 @@ public class BrowserErrorPlaywrightTest extends JProPlaywrightTest {
         waitForRunning(page);
 
         // The console.error arrives asynchronously — poll until the collector reports it.
-        AssertionError caught = null;
-        for (int i = 0; i < 20 && caught == null; i++) {
+        AtomicReference<AssertionError> caught = new AtomicReference<>();
+        JProWait.waitUntil(() -> {
             try {
                 errors.assertNoErrors();
-                page.waitForTimeout(150);
+                return false;
             } catch (AssertionError e) {
-                caught = e;
+                caught.set(e);
+                return true;
             }
-        }
-        assertNotNull(caught, "expected BrowserErrorCollector to capture the console.error");
-        assertTrue(caught.getMessage().contains("intentional test error"), caught.getMessage());
+        }, () -> "expected BrowserErrorCollector to capture the console.error");
+        assertTrue(caught.get().getMessage().contains("intentional test error"), caught.get().getMessage());
     }
 }

@@ -6,6 +6,7 @@ import one.jpro.platform.playwright.BrowserErrorCollector;
 import one.jpro.platform.playwright.JProInput;
 import one.jpro.platform.playwright.JProPlaywrightTest;
 import one.jpro.platform.playwright.JProScroll;
+import one.jpro.platform.playwright.JProWait;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,8 +64,7 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
         browserErrors = new BrowserErrorCollector(page);
         page.navigate(BASE_URL);
         waitForRunning(page);
-        // Let the scene lay out before the first geometry read.
-        page.waitForTimeout(500);
+        page.locator(".jpro-id-sticky-header").waitFor();
     }
 
     @AfterEach
@@ -177,11 +177,9 @@ public class StickyPlaywrightTest extends JProPlaywrightTest {
         page.evaluate("() => { document.querySelector('jpro-app').style.transform"
                 + " = 'translateY(40px)'; }");
         // the host owns that transform, so only the rebind heartbeat sees it change.
-        page.waitForTimeout(900);
-
-        double after = JProScroll.awaitTop(page, ".jpro-id-sticky-header");
-        assertTrue(Math.abs(after - pinned) <= PIN_TOLERANCE_PX + 1,
-                "pin should hold its inset under a translated ancestor: " + pinned + " -> " + after
+        JProWait.waitUntil(() -> Math.abs(JProScroll.top(page, ".jpro-id-sticky-header") - pinned) <= PIN_TOLERANCE_PX + 1,
+                () -> "pin should hold its inset under a translated ancestor: " + pinned + " -> "
+                        + JProScroll.top(page, ".jpro-id-sticky-header")
                         + " (uncompensated would land near " + (pinned + 40) + ")");
 
         page.evaluate("() => { document.querySelector('jpro-app').style.removeProperty('transform'); }");
