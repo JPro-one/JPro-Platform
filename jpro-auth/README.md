@@ -282,12 +282,15 @@ in a short-lived, host-only cookie (`jpro_oauth_*`, `Max-Age=600`, `SameSite=Lax
 is handled. It holds only random values, is set only when the user starts a login and is strictly necessary
 for it; mention it in your privacy policy like your session cookie.
 
-### Threading
+### Sessions and threading
 
-Call a provider's methods on the JavaFX application thread and use one provider per JPro session (e.g. create it
-in `createRoute()`). The returned futures usually complete on a background thread, so move UI updates back to the FX
-thread, e.g. with `Platform.runLater(...)`. `authenticate(...)` leaves the given
-credentials unchanged.
+* **One provider per JPro session:** a provider is bound to the `Stage` it was created with and opens the login
+  page, reads the redirect and sets the login cookie in that stage's session. Create it per session, e.g. in
+  `createRoute()`, never as a shared static.
+* **FX thread:** call a provider's methods on the JavaFX application thread. The returned futures usually complete
+  on a background thread, so move UI updates back with `Platform.runLater(...)`.
+
+`authenticate(...)` leaves the given credentials unchanged.
 
 ### Launch the examples
 

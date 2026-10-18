@@ -61,8 +61,10 @@ import static java.util.stream.Collectors.toMap;
  * This class can also handle optional tasks such as token introspection, token refresh, token revocation,
  * user information retrieval, and logout.
  * <p>
- * Call its methods on the JavaFX application thread and use one instance per JPro session. The returned futures
- * usually complete on a background thread; move UI updates back to the FX thread.
+ * Use one instance per JPro session: it is bound to the session of the given {@link Stage}.
+ * <p>
+ * Call its methods on the JavaFX application thread. The returned futures usually complete on a background
+ * thread; move UI updates back to the FX thread.
  *
  * @author Besmir Beqiri
  */
