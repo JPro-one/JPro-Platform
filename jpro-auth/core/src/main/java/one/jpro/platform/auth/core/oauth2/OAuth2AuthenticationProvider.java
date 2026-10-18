@@ -62,7 +62,7 @@ import static java.util.stream.Collectors.toMap;
  * user information retrieval, and logout.
  * <p>
  * Call its methods on the JavaFX application thread and use one instance per JPro session. The returned futures
- * complete on a background thread; move UI updates back to the FX thread.
+ * usually complete on a background thread; move UI updates back to the FX thread.
  *
  * @author Besmir Beqiri
  */

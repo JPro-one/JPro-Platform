@@ -285,7 +285,7 @@ for it; mention it in your privacy policy like your session cookie.
 ### Threading
 
 Call a provider's methods on the JavaFX application thread and use one provider per JPro session (e.g. create it
-in `createRoute()`). The returned futures complete on a background thread, so move UI updates back to the FX
+in `createRoute()`). The returned futures usually complete on a background thread, so move UI updates back to the FX
 thread, e.g. with `Platform.runLater(...)`. `authenticate(...)` leaves the given
 credentials unchanged.
 
