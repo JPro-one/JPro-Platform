@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,12 +50,17 @@ public class HttpClientConfiguratorTests {
                 idp.requestLines()::toString);
 
         try {
-            provider.authenticate(new TokenCredentials("header.payload.signature"))
+            provider.authenticate(new TokenCredentials(b64("{\"alg\":\"RS256\",\"kid\":\"k1\"}") + "."
+                            + b64("{\"sub\":\"1\"}") + ".c2ln"))
                     .handle((user, ex) -> null).get(10, TimeUnit.SECONDS);
         } catch (RuntimeException ignored) {
             // the fake key set is empty, only the request matters
         }
         assertTrue(idp.requestLines().contains("GET " + SITE + "/certs HTTP/1.1"), idp.requestLines()::toString);
+    }
+
+    private static String b64(String json) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
