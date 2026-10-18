@@ -15,6 +15,8 @@
   `stopAndAssertNoServerErrors(logsDir, knownIssues, command...)` tolerate known errors: a logged throwable with its
   stack is ignored if one of its lines matches a pattern. `(Native Method)`, `(Unknown Source)` and `... N more`
   lines count as part of the stack.
+* **jpro-playwright:** `JProInput.focus`/`typeInto` wait until the field's `<input>` has the focus instead of a
+  fixed 300 ms, and `awaitText` uses `JProWait`. The README now documents `fill()` on `.jpro-id-x input`.
 * **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
   fails to launch now throws an `IllegalStateException` naming it as an environment fault.
 * **jpro-playwright:** `startServer(logsDir, environment, command...)` passes extra environment variables to the

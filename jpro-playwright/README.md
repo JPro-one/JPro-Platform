@@ -86,14 +86,14 @@ If a selector matches nothing, check these two first.
 Use `JProInput` — it applies the sequence that works against a JPro control.
 
 ```java
-JProInput.typeInto(page, ".jpro-id-field", "hello");   // focus (click), settle, then type
+JProInput.typeInto(page, ".jpro-id-field", "hello");   // click, wait until its input has the focus, then type
 JProInput.awaitText(page, ".jpro-id-echo", "hello");   // poll for the round-trip result
 ```
 
 The rules behind it, all observed against the example app:
 
-- **Type with the real keyboard, after focusing.** `typeInto` clicks the field, waits briefly, then types via `page.keyboard()`.
-- **`Locator.fill()` does not work.** Playwright rejects it: *"Element is not an `<input>`, `<textarea>`, `<select>` or `[contenteditable]`"* — a JPro control is none of those.
+- **Type with the real keyboard, after focusing.** `typeInto` clicks the field, waits until the `<input>` JPro renders inside it has the focus, then types via `page.keyboard()`.
+- **`fill()` works on that `<input>`, not on the field.** `page.locator(".jpro-id-field input").fill("hello")` sets the whole value in one step; `fill()` on `.jpro-id-field` itself fails with *"Element is not an `<input>`, …"*.
 - **Don't assert immediately; poll.** Each keystroke round-trips to the JVM and back, so use `awaitText` (or Playwright's auto-retrying `assertThat(locator).hasText(...)`).
 
 **Commit (Enter):** JavaFX `onAction` handlers and `TextFormatter` converters fire on Enter, not per keystroke:
@@ -192,8 +192,8 @@ Pass `-Djpro.test.headless=false` to watch the browser, and `-Djpro.test.browser
 
 Mistakes that compile fine and then fail without pointing at the cause — scan here first.
 
-- **`Locator.fill()` to enter text** → Playwright throws "Element is not an `<input>`/…"; a JPro control is not a DOM input. Use `JProInput.typeInto(...)`.
-- **Typing right after clicking** → dropped/missing characters. `typeInto` focuses and waits first.
+- **`fill()` on `.jpro-id-field`** → Playwright throws "Element is not an `<input>`/…". Target the input inside it: `.jpro-id-field input`, or use `JProInput.typeInto(...)`.
+- **Typing right after clicking** → dropped/missing characters. `typeInto` waits until the field's input has the focus first.
 - **Asserting right after acting** → reads the stale value. Poll with `awaitText(...)`.
 - **No `jpro.mirrorCSSToDOM = true`** → every selector matches nothing (it's off by default). Add it to `jpro.conf`.
 - **Selecting by `#textfield` or `#jpro-textfield`** → matches nothing. Use `.jpro-id-textfield`.
