@@ -1,6 +1,5 @@
 package one.jpro.platform.auth.core.oauth2.provider;
 
-import io.jsonwebtoken.io.Encoders;
 import javafx.stage.Stage;
 import one.jpro.platform.auth.core.http.HttpMethod;
 import one.jpro.platform.auth.core.oauth2.OAuth2API;
@@ -13,8 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -94,22 +91,12 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
 
         @Override
         public CompletableFuture<JSONObject> tokenIntrospection(String tokenType, String token) {
-            final JSONObject headers = new JSONObject();
+            final JSONObject headers = new JSONObject()
+                    .put("Content-Type", "application/x-www-form-urlencoded")
+                    .put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
+            final String payload = AuthUtils.jsonToQuery(new JSONObject().put(tokenType, token));
 
-            final boolean confidentialClient = options.getClientId() != null && options.getClientSecret() != null;
-            if (confidentialClient) {
-                String basic = options.getClientId() + ":" + options.getClientSecret();
-                headers.put("Authorization", "Basic " +
-                        Base64.getEncoder().encodeToString(basic.getBytes(StandardCharsets.UTF_8)));
-            }
-
-            final String path = options.getIntrospectionPath() + "?" + tokenType + "=" + token;
-
-            headers.put("Content-Type", "application/x-www-form-urlencoded");
-            // specify preferred accepted accessToken type
-            headers.put("Accept", "application/json,application/x-www-form-urlencoded;q=0.9");
-
-            return fetch(HttpMethod.POST, path, headers, null)
+            return fetch(HttpMethod.POST, options.getIntrospectionPath(), headers, payload)
                     .thenCompose(response -> {
                         if (response.body() == null || response.body().isEmpty()) {
                             return CompletableFuture.failedFuture(new RuntimeException("No Body"));

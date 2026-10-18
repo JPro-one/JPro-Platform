@@ -24,6 +24,8 @@
   fails with its description.
 
 #### Bugfixes
+* **jpro-auth-core:** the Google provider sends the token to `tokeninfo` in a POST body, URL-encoded, without the
+  client secret; before, the token was in the URL query.
 * **jpro-auth-core:** providers created without OIDC discovery now check the token issuer too: Google
   (`https://accounts.google.com`), Microsoft (`https://login.microsoftonline.com/<tenant>/v2.0`, with the tenant
   from the token's `tid` unless a tenant ID is configured; v1 tokens of the same tenant from `sts.windows.net` are
