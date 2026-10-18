@@ -38,6 +38,13 @@ public class OAuth2OptionsTests {
     }
 
     @Test
+    public void copyConstructorKeepsUseLoopbackIpAddress() {
+        OAuth2Options options = new OAuth2Options().setUseLoopbackIpAddress(!new OAuth2Options().isUseLoopbackIpAddress());
+
+        assertEquals(options.isUseLoopbackIpAddress(), new OAuth2Options(options).isUseLoopbackIpAddress());
+    }
+
+    @Test
     public void trailingSlashShouldBeRemoved() {
         OAuth2Options options = new OAuth2Options()
                 .setSite("https://accounts.google.com/");

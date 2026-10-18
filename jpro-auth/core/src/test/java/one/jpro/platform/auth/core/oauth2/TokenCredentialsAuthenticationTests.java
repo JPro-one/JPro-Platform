@@ -38,11 +38,12 @@ public class TokenCredentialsAuthenticationTests {
 
     private FakeIdp idp;
     private String introspection = "{\"active\":false}";
+    private String jwks = "{\"keys\":[" + jwk((RSAPublicKey) IDP_KEY.getPublic(), "k1") + "]}";
 
     @BeforeEach
     void setUp() throws IOException {
         idp = new FakeIdp(request -> request.line().contains("/certs")
-                ? new FakeIdp.Response(200, "{\"keys\":[" + jwk((RSAPublicKey) IDP_KEY.getPublic()) + "]}")
+                ? new FakeIdp.Response(200, jwks)
                 : new FakeIdp.Response(200, introspection));
     }
 
@@ -246,8 +247,57 @@ public class TokenCredentialsAuthenticationTests {
         failure(google.authenticate(new TokenCredentials("ya29.opaque")));
     }
 
-    private static String jwk(RSAPublicKey key) {
-        return "{\"kty\":\"RSA\",\"kid\":\"k1\",\"use\":\"sig\",\"alg\":\"RS256\",\"n\":\"" + base64Url(key.getModulus())
+    private long certRequests() {
+        return idp.requestLines().stream().filter(line -> line.contains("/certs")).count();
+    }
+
+    @Test
+    void signingKeysAreFetchedOnce() throws Exception {
+        OAuth2AuthenticationProvider provider = new OAuth2AuthenticationProvider(null, options());
+
+        provider.authenticate(new TokenCredentials(jwt(IDP_KEY))).get(10, TimeUnit.SECONDS);
+        provider.authenticate(new TokenCredentials(jwt(IDP_KEY))).get(10, TimeUnit.SECONDS);
+
+        assertEquals(1, certRequests());
+    }
+
+    @Test
+    void rotatedSigningKeyIsFetched() throws Exception {
+        OAuth2AuthenticationProvider provider = new OAuth2AuthenticationProvider(null, options());
+        provider.authenticate(new TokenCredentials(jwt(IDP_KEY))).get(10, TimeUnit.SECONDS);
+        jwks = "{\"keys\":[" + jwk((RSAPublicKey) OTHER_KEY.getPublic(), "k2") + "]}";
+        provider.jwksRefetchDelay = java.time.Duration.ZERO;
+
+        User user = provider.authenticate(new TokenCredentials(jwt(OTHER_KEY, b -> b.header().keyId("k2").and()
+                .audience().add("clientId").and()))).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
+        assertEquals(2, certRequests());
+    }
+
+    @Test
+    void unknownKeyIdDoesNotRefetchRightAway() throws Exception {
+        OAuth2AuthenticationProvider provider = new OAuth2AuthenticationProvider(null, options());
+        provider.authenticate(new TokenCredentials(jwt(IDP_KEY))).get(10, TimeUnit.SECONDS);
+
+        failure(provider.authenticate(new TokenCredentials(jwt(IDP_KEY, b -> b.header().keyId("unknown").and()
+                .audience().add("clientId").and()))));
+
+        assertEquals(1, certRequests());
+    }
+
+    @Test
+    void signingKeysOlderThanTheMaxAgeAreFetchedAgain() throws Exception {
+        OAuth2AuthenticationProvider provider = new OAuth2AuthenticationProvider(null, options().setJwkMaxAge(0));
+
+        provider.authenticate(new TokenCredentials(jwt(IDP_KEY))).get(10, TimeUnit.SECONDS);
+        provider.authenticate(new TokenCredentials(jwt(IDP_KEY))).get(10, TimeUnit.SECONDS);
+
+        assertEquals(2, certRequests());
+    }
+
+    private static String jwk(RSAPublicKey key, String kid) {
+        return "{\"kty\":\"RSA\",\"kid\":\"" + kid + "\",\"use\":\"sig\",\"alg\":\"RS256\",\"n\":\"" + base64Url(key.getModulus())
                 + "\",\"e\":\"" + base64Url(key.getPublicExponent()) + "\"}";
     }
 

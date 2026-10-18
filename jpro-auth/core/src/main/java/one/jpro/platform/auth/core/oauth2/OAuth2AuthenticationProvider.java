@@ -30,6 +30,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
@@ -74,6 +75,11 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     private final OAuth2Options options;
 
     private HttpServer httpServer;
+
+    // an unknown key ID refetches the key set at most this often
+    Duration jwksRefetchDelay = Duration.ofSeconds(10);
+    private Map<String, Key> jwks;
+    private Instant jwksFetchedAt;
 
     /**
      * Creates an OAuth2 authentication provider.
@@ -765,18 +771,9 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
         try {
             if (options.isVerifyToken()) {
-                // Fetch JWKS and verify signature
-                final String webKeys = api.getHttpClient().send(
-                        HttpRequest.newBuilder(URI.create(options.getJwkPath())).build(),
-                        HttpResponse.BodyHandlers.ofString()).body();
-
-                final Map<String, ? extends Key> keyMap = Jwks.setParser().build()
-                        .parse(webKeys).getKeys().stream()
-                        .collect(toMap(Identifiable::getId, Jwk::toKey));
-
                 final JWTOptions parserOptions = options.getJWTOptions();
                 final JwtParser jwtParser = Jwts.parser()
-                        .keyLocator(header -> keyMap.get(header.getOrDefault("kid", "").toString()))
+                        .keyLocator(header -> signingKey(header.getOrDefault("kid", "").toString()))
                         .clockSkewSeconds(parserOptions == null ? 0 : parserOptions.getLeeway())
                         .build();
 
@@ -807,7 +804,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             throw new TokenExpiredException(e.getMessage(), e.getClaims() != null
                             ? e.getClaims().getExpiration().toInstant()
                             : Instant.now());
-        } catch (JwtException | IOException | InterruptedException e) {
+        } catch (JwtException e) {
             throw new IllegalStateException(e);
         }
 
@@ -861,6 +858,34 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         }
 
         return json;
+    }
+
+    /**
+     * Returns the signing key with the given ID from the provider's key set. The key set is cached; it is fetched
+     * again when older than {@link OAuth2Options#getJwkMaxAge()} or, for an unknown key ID, after key rotation.
+     */
+    private synchronized Key signingKey(String kid) {
+        final Instant now = Instant.now();
+        final boolean expired = jwks != null && options.getJwkMaxAge() >= 0
+                && !jwksFetchedAt.plusSeconds(options.getJwkMaxAge()).isAfter(now);
+        final boolean unknownKid = jwks != null && !jwks.containsKey(kid)
+                && !now.isBefore(jwksFetchedAt.plus(jwksRefetchDelay));
+        if (jwks == null || expired || unknownKid) {
+            try {
+                final String webKeys = api.getHttpClient().send(
+                        HttpRequest.newBuilder(URI.create(options.getJwkPath())).timeout(Duration.ofSeconds(10)).build(),
+                        HttpResponse.BodyHandlers.ofString()).body();
+                jwks = Jwks.setParser().build().parse(webKeys).getKeys().stream()
+                        .collect(toMap(Identifiable::getId, Jwk::toKey));
+                jwksFetchedAt = now;
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot load the signing keys from " + options.getJwkPath(), e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Interrupted while loading the signing keys", e);
+            }
+        }
+        return jwks.get(kid);
     }
 
     /**

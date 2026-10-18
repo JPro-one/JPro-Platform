@@ -452,20 +452,21 @@ public class OAuth2API {
     public CompletableFuture<OpenIDAuthenticationProvider> discover(final Stage stage,
                                                                     final OAuth2Options config) {
         if (config.getSite() == null) {
-            CompletableFuture.failedFuture(new RuntimeException("the site url cannot be null"));
+            return CompletableFuture.failedFuture(new RuntimeException("the site url cannot be null"));
         }
 
         // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
         final String oidc_discovery_path = "/.well-known/openid-configuration";
 
-        String issuer = config.getSite();
-        if (issuer.endsWith(oidc_discovery_path)) {
-            issuer = issuer.substring(0, issuer.length() - oidc_discovery_path.length());
+        String site = config.getSite();
+        if (site.endsWith(oidc_discovery_path)) {
+            site = site.substring(0, site.length() - oidc_discovery_path.length());
         }
+        final String expectedIssuer = site;
 
         // fetch the OpenID Connect provider metadata as defined in:
         // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
-        return fetch(HttpMethod.GET, issuer + oidc_discovery_path,
+        return fetch(HttpMethod.GET, site + oidc_discovery_path,
                 new JSONObject().put("Accept", "application/json"), null)
                 .thenCompose(response -> {
                     if (response.statusCode() != 200) {
@@ -488,6 +489,16 @@ public class OAuth2API {
                                 new RuntimeException(extractErrorDescription(json)));
                     }
 
+                    // the issuer must be the site the document was loaded from (OIDC Discovery 4.3)
+                    if (config.isValidateIssuer() && json.has("issuer")) {
+                        final String issuer = json.getString("issuer");
+                        if (!stripTrailingSlash(issuer).equals(stripTrailingSlash(expectedIssuer))) {
+                            return CompletableFuture.failedFuture(
+                                    new RuntimeException("Issuer validation failed: received ["
+                                            + issuer + "]" + " but expected [" + expectedIssuer + "]"));
+                        }
+                    }
+
                     config.setAuthorizationPath(json.optString("authorization_endpoint", null));
                     config.setTokenPath(json.optString("token_endpoint", null));
                     config.setLogoutPath(json.optString("end_session_endpoint", null));
@@ -508,25 +519,6 @@ public class OAuth2API {
 
                         // set the issuer
                         jwtOptions.setIssuer(json.getString("issuer"));
-                    }
-
-                    // issuer validation
-                    if (config.isValidateIssuer()) {
-                        String issuerEndpoint = json.getString("issuer");
-                        if (issuerEndpoint != null) {
-                            // the provider is letting the user know the issuer endpoint, so we need to validate it
-                            // by removing the trailing slash (if present) and comparing it to the received endpoint
-                            if (issuerEndpoint.endsWith("/")) {
-                                issuerEndpoint = issuerEndpoint.substring(0, issuerEndpoint.length() - 1);
-                            }
-
-                            if (!issuerEndpoint.equals(config.getJWTOptions().getIssuer())) {
-                                return CompletableFuture.failedFuture(
-                                        new RuntimeException("Issuer validation failed: received ["
-                                                + issuerEndpoint + "]" + " but expected ["
-                                                + config.getJWTOptions().getIssuer() + "]"));
-                            }
-                        }
                     }
 
                     // reset supported response types
@@ -643,8 +635,13 @@ public class OAuth2API {
                                 config.addSupportedRequestObjectSigningAlgValue((String) requestObjectSigningAlgValue));
                     }
 
-                    return CompletableFuture.completedFuture(new OpenIDAuthenticationProvider(stage, config));
+                    return CompletableFuture.completedFuture(
+                            new OpenIDAuthenticationProvider(stage, config == options ? this : new OAuth2API(config)));
                 });
+    }
+
+    private static String stripTrailingSlash(String url) {
+        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }
 
     /**

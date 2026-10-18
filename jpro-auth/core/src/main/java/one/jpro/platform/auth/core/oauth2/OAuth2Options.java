@@ -131,6 +131,7 @@ public class OAuth2Options implements Options {
         scopeSeparator = other.scopeSeparator;
         verifyToken = other.verifyToken;
         validateIssuer = other.validateIssuer;
+        useLoopbackIpAddress = other.useLoopbackIpAddress;
         logoutPath = other.logoutPath;
         userInfoPath = other.userInfoPath;
         introspectionPath = other.introspectionPath;
@@ -699,7 +700,10 @@ public class OAuth2Options implements Options {
     }
 
     /**
-     * Enables or disables token verification.
+     * Enables or disables token verification. When disabled, the signature and the time claims ({@code exp},
+     * {@code nbf}) of JWTs are not checked; issuer, audience, {@code azp} and {@code nonce} still are, and
+     * {@link one.jpro.platform.auth.core.jwt.TokenCredentials} are only accepted through token introspection.
+     * Only disable it for testing.
      *
      * @param verifyToken {@code true} to enable token verification, {@code false} to disable it
      * @return the current instance of {@code OAuth2Options} for method chaining
@@ -850,18 +854,19 @@ public class OAuth2Options implements Options {
     }
 
     /**
-     * Gets the maximum age of the JWK set before it is refreshed.
+     * Gets the maximum age of the cached JWK set before it is fetched again.
      *
-     * @return the maximum age in milliseconds
+     * @return the maximum age in seconds, {@code -1} to keep it until a token names an unknown key
      */
     public long getJwkMaxAge() {
         return jwkMaxAge;
     }
 
     /**
-     * Sets the maximum age of the JWK set before it needs to be refreshed.
+     * Sets the maximum age of the cached JWK set before it is fetched again. A token signed with an unknown key
+     * fetches it again regardless, at most every 10 seconds.
      *
-     * @param jwkMaxAge the maximum age in milliseconds
+     * @param jwkMaxAge the maximum age in seconds, {@code -1} to keep it until a token names an unknown key
      * @return the current instance of {@code OAuth2Options} for method chaining
      */
     public OAuth2Options setJwkMaxAge(long jwkMaxAge) {

@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
 
     public static final List<String> DEFAULT_SCOPES = List.of("openid", "email", "profile");
+    private static final String TOKEN_INFO = "https://oauth2.googleapis.com/tokeninfo";
 
     /**
      * Create an {@link OAuth2AuthenticationProvider} for Google.
@@ -54,7 +55,7 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
                 .setAuthorizationPath("/o/oauth2/v2/auth")
                 .setUserInfoPath("https://www.googleapis.com/oauth2/v1/userinfo")
                 .setJwkPath("https://www.googleapis.com/oauth2/v3/certs")
-                .setIntrospectionPath("https://oauth2.googleapis.com/tokeninfo")
+                .setIntrospectionPath(TOKEN_INFO)
                 .setRevocationPath("https://oauth2.googleapis.com/revoke")
                 .setUserInfoParams(new JSONObject().put("alt", "json"))
                 .setJWTOptions(new JWTOptions().setIssuer("https://accounts.google.com"))));
@@ -72,12 +73,20 @@ public class GoogleAuthenticationProvider extends OpenIDAuthenticationProvider {
     public static CompletableFuture<OpenIDAuthenticationProvider> discover(@Nullable final Stage stage,
                                                                            @NotNull final OAuth2Options options) {
         final String site = options.getSite() == null ? "https://accounts.google.com" : options.getSite();
+        final String tokenInfo = options.getIntrospectionPath() == null ? TOKEN_INFO : options.getIntrospectionPath();
 
         return new GoogleAuthenticationProvider(stage,
                 new OAuth2Options(options)
                         .setSite(site)
                         .setUserInfoParams(new JSONObject().put("alt", "json")))
-                .discover();
+                .discover()
+                .thenApply(provider -> {
+                    // Google's discovery document names no introspection endpoint
+                    if (provider.getOptions().getIntrospectionPath() == null) {
+                        provider.getOptions().setIntrospectionPath(tokenInfo);
+                    }
+                    return provider;
+                });
     }
 
     /**

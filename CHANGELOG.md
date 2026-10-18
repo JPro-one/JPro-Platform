@@ -24,6 +24,15 @@
   fails with its description.
 
 #### Bugfixes
+* **jpro-auth-core:** the signing keys (JWKS) are cached per provider instead of fetched for every token. They
+  are fetched again for a token with an unknown key ID (at most every 10 s) and, if set, after
+  `OAuth2Options.setJwkMaxAge(seconds)`.
+* **jpro-auth-core:** `discover()` checks that the discovery document's `issuer` is the site it was loaded from; it
+  compared the issuer with itself and failed for issuers with a trailing slash. A provider whose issuer differs from
+  the configured site needs `setValidateIssuer(false)`.
+* **jpro-auth-core:** a Google provider created by `GoogleAuthenticationProvider.discover(...)` uses `tokeninfo` to
+  verify opaque tokens, like one created without discovery.
+* **jpro-auth-core:** the `OAuth2Options` copy constructor keeps `useLoopbackIpAddress`.
 * **jpro-auth-core:** the Google provider sends the token to `tokeninfo` in a POST body, URL-encoded, without the
   client secret; before, the token was in the URL query.
 * **jpro-auth-core:** providers created without OIDC discovery now check the token issuer too: Google

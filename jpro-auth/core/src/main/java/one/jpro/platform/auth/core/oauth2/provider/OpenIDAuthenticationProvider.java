@@ -27,7 +27,7 @@ public class OpenIDAuthenticationProvider extends OAuth2AuthenticationProvider {
      * @param stage the JavaFX application stage
      * @param api   the OAuth2 api
      */
-    protected OpenIDAuthenticationProvider(@Nullable Stage stage, @NotNull OAuth2API api) {
+    public OpenIDAuthenticationProvider(@Nullable Stage stage, @NotNull OAuth2API api) {
         super(stage, api);
 
         final OAuth2Options options = api.getOptions();
