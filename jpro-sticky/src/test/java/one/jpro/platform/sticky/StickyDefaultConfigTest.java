@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,12 +58,14 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
             return sheets > 0 && sheets == page.locator("[data-jpro-sticky-el]").count() && sheets == stickyCount(page);
         }, () -> "sheets=" + page.locator("style[data-jpro-sticky]").count()
                 + " bound=" + page.locator("[data-jpro-sticky-el]").count() + " sticky=" + stickyCount(page));
+        int bound = page.locator("[data-jpro-sticky-el]").count();
+        JProWait.ensureStaysValue(1000, bound, () -> page.locator("[data-jpro-sticky-el]").count());
 
         String tops = "() => [...document.querySelectorAll('[data-jpro-sticky-el]')]"
                 + ".map(e => e.getBoundingClientRect().top)";
         List<Number> before = (List<Number>) page.evaluate(tops);
         page.evaluate("() => window.scrollBy(0, 400)");
-        JProWait.waitUntil(() -> {
+        BooleanSupplier held = () -> {
             List<Number> after = (List<Number>) page.evaluate(tops);
             for (int i = 0; i < Math.min(before.size(), after.size()); i++) {
                 if (Math.abs(before.get(i).doubleValue()) < 1 && Math.abs(after.get(i).doubleValue()) < 1) {
@@ -69,7 +73,11 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
                 }
             }
             return false;
-        }, () -> "a pin at the viewport top should hold across the scroll: " + before + " -> " + page.evaluate(tops));
+        };
+        Supplier<String> heldState = () -> "a pin at the viewport top should hold across the scroll: "
+                + before + " -> " + page.evaluate(tops);
+        JProWait.waitUntil(held, heldState);
+        JProWait.ensureStaysTrue(1000, held, heldState);
 
         // the section header sits deep in the page and pins under the 48px page header, so its rule
         // carries a non-zero span offset. a wrong offset would put it anywhere but there.

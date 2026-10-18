@@ -16,7 +16,6 @@ def playwrightTest = tasks.register('playwrightTest', Test) {
         includeTags 'playwright'
         excludeTags 'keycloak'
     }
-    jvmArgumentProviders.add({ tasks.test.jvmArgs } as CommandLineArgumentProvider)
     testLogging {
         events "passed", "skipped", "failed"
         showStandardStreams = true
