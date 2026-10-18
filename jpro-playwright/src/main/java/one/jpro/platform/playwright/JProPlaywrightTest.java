@@ -7,6 +7,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +45,11 @@ import java.util.regex.Pattern;
  * {@code jpro.mirrorCSSToDOM = true} in the app's {@code jpro.conf} — then a node with
  * {@code setId("foo")} is reachable as {@code ".jpro-id-foo"}.
  */
+@Tag(JProPlaywrightTest.TAG)
 public abstract class JProPlaywrightTest {
+
+    /** Tag of every subclass ({@code @Tag} is inherited), to run Playwright tests apart from unit tests. */
+    public static final String TAG = "playwright";
 
     protected static final int PORT = resolvePort();
     protected static final String BASE_URL = "http://localhost:" + PORT;

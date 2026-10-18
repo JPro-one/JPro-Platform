@@ -186,6 +186,22 @@ test {
 }
 ```
 
+Every `JProPlaywrightTest` subclass carries the JUnit tag `playwright` (`JProPlaywrightTest.TAG`). To keep `test` quick, run them in a task of their own:
+
+```groovy
+test {
+    useJUnitPlatform { excludeTags 'playwright' }
+}
+
+tasks.register('playwrightTest', Test) {
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'playwright' }
+    // plus the dependsOn, environment, systemProperty and upToDateWhen lines from the test block above
+}
+check.dependsOn 'playwrightTest'
+```
+
 Pass `-Djpro.test.headless=false` to watch the browser, and `-Djpro.test.browser=firefox|webkit` to run on another engine (both read by `JProPlaywrightTest`). A browser that fails to launch throws an `IllegalStateException` that names it as an environment fault, not a test failure.
 
 ## Gotchas

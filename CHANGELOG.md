@@ -22,6 +22,8 @@
 * **jpro-playwright:** `JProPlaywrightTest` launches its browser on the first `newPage()` (or `browser()`), so a test
   that brings its own browser doesn't start the default one too. Code reading the `browser` field before that must
   call `browser()`.
+* **jpro-playwright:** `JProPlaywrightTest` subclasses carry the JUnit tag `playwright`. In this repository `test`
+  now runs only the unit tests; `./gradlew playwrightTest` runs the browser tests, and `check` runs both.
 * **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
   fails to launch now throws an `IllegalStateException` naming it as an environment fault.
 * **jpro-playwright:** `startServer(logsDir, environment, command...)` passes extra environment variables to the
