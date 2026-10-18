@@ -36,6 +36,10 @@
   A `state` set on the credentials must match the callback, and an `error` from the identity provider
   fails with its description.
 
+#### Removed
+* **jpro-auth-core:** `JWTAuthenticationProvider`, `JWTAuthAPI` and `JWTAuthOptions`. The provider could not verify
+  a token and rejected every one. `TokenCredentials` with an OAuth2 provider verifies JWTs against the provider's keys.
+
 #### Bugfixes
 * **jpro-auth-core:** the signing keys (JWKS) are cached per provider instead of fetched for every token. They
   are fetched again for a token with an unknown key ID (at most every 10 s) and, if set, after

@@ -77,11 +77,10 @@ processes.
            OAuth2 provider.
     - The **AuthenticationProvider** interface is the base interface for all authentication providers. Authentication is
       done asynchronously by calling the `authenticate` method with a given Credentials object, resulting in a User
-      object. There are three major implementations:
+      object. There are two major implementations:
         1. **BasicAuthenticationProvider**: This is the most basic implementation and can be used to authenticate users
            with a `username` and `password`.
-        2. **TokenAuthenticationProvider**: This implementation can be used to authenticate users with a JWT token.
-        3. **OAuth2AuthenticationProvider**: This implementation can be used to authenticate users with an OAuth2 based
+        2. **OAuth2AuthenticationProvider**: This implementation can be used to authenticate users with an OAuth2 based
            providers. Currently, we provide ready to be used, out of the box, pre-configured classes for known
            providers like Google, Microsoft and Keycloak. However, it is still possible to create a custom ones for any
            OAuth2 provider.
