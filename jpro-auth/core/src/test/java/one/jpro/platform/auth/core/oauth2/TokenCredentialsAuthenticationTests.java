@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.jwt.TokenCredentials;
 import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
+import one.jpro.platform.auth.core.utils.AuthUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -221,6 +222,19 @@ public class TokenCredentialsAuthenticationTests {
         User user = google.authenticate(new TokenCredentials("ya29.opaque")).get(10, TimeUnit.SECONDS);
 
         assertEquals("g@example.com", user.getName());
+    }
+
+    @Test
+    void googleTokenInfoSendsTheTokenInTheBody() throws Exception {
+        introspection = "{\"azp\":\"clientId\",\"aud\":\"clientId\",\"email\":\"g@example.com\",\"expires_in\":\"3599\"}";
+        GoogleAuthenticationProvider google = new GoogleAuthenticationProvider(null, options()
+                .setIntrospectionPath("http://idp.invalid/tokeninfo"));
+
+        google.authenticate(new TokenCredentials("ya29.opaque+/=")).get(10, TimeUnit.SECONDS);
+
+        FakeIdp.Request request = idp.requests().get(idp.requests().size() - 1);
+        assertEquals("POST http://idp.invalid/tokeninfo HTTP/1.1", request.line());
+        assertEquals("ya29.opaque+/=", AuthUtils.queryToJson(request.body()).getString("access_token"));
     }
 
     @Test
