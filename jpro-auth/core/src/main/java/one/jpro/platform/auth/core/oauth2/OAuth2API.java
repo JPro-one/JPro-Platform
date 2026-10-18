@@ -489,6 +489,16 @@ public class OAuth2API {
                                 new RuntimeException(extractErrorDescription(json)));
                     }
 
+                    // the issuer must be the site the document was loaded from (OIDC Discovery 4.3)
+                    if (config.isValidateIssuer() && json.has("issuer")) {
+                        final String issuer = json.getString("issuer");
+                        if (!stripTrailingSlash(issuer).equals(stripTrailingSlash(expectedIssuer))) {
+                            return CompletableFuture.failedFuture(
+                                    new RuntimeException("Issuer validation failed: received ["
+                                            + issuer + "]" + " but expected [" + expectedIssuer + "]"));
+                        }
+                    }
+
                     config.setAuthorizationPath(json.optString("authorization_endpoint", null));
                     config.setTokenPath(json.optString("token_endpoint", null));
                     config.setLogoutPath(json.optString("end_session_endpoint", null));
@@ -509,16 +519,6 @@ public class OAuth2API {
 
                         // set the issuer
                         jwtOptions.setIssuer(json.getString("issuer"));
-                    }
-
-                    // the issuer must be the site the document was loaded from (OIDC Discovery 4.3)
-                    if (config.isValidateIssuer() && json.has("issuer")) {
-                        final String issuer = json.getString("issuer");
-                        if (!stripTrailingSlash(issuer).equals(stripTrailingSlash(expectedIssuer))) {
-                            return CompletableFuture.failedFuture(
-                                    new RuntimeException("Issuer validation failed: received ["
-                                            + issuer + "]" + " but expected [" + expectedIssuer + "]"));
-                        }
                     }
 
                     // reset supported response types

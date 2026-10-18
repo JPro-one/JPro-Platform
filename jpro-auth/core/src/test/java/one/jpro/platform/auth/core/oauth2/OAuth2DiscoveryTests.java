@@ -3,6 +3,7 @@ package one.jpro.platform.auth.core.oauth2;
 import one.jpro.platform.auth.core.authentication.User;
 import one.jpro.platform.auth.core.jwt.TokenCredentials;
 import one.jpro.platform.auth.core.oauth2.provider.GoogleAuthenticationProvider;
+import one.jpro.platform.auth.core.oauth2.provider.MicrosoftAuthenticationProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,11 +49,25 @@ public class OAuth2DiscoveryTests {
     @Test
     void issuerOfAnotherSiteIsRejected() {
         issuer = "http://evil.invalid";
+        OAuth2AuthenticationProvider provider = new OAuth2AuthenticationProvider(null, options().setJwkPath("/keys"));
 
         ExecutionException ex = assertThrows(ExecutionException.class,
-                () -> new OAuth2AuthenticationProvider(null, options()).discover().get(10, TimeUnit.SECONDS));
+                () -> provider.discover().get(10, TimeUnit.SECONDS));
 
         assertTrue(ex.getCause().getMessage().contains("Issuer validation failed"), ex.getCause().getMessage());
+        assertEquals(SITE + "/keys", provider.getOptions().getJwkPath());
+        assertNull(provider.getOptions().getJWTOptions().getIssuer());
+    }
+
+    @Test
+    void microsoftMultiTenantProviderCanDiscover() throws Exception {
+        issuer = SITE + "/{tenantid}/v2.0";
+        var microsoft = new MicrosoftAuthenticationProvider(null, "clientId", "secret", "common");
+        microsoft.getOptions().setSite(SITE + "/{tenant}/v2.0").setHttpClientConfigurator(idp.viaProxy());
+
+        var provider = microsoft.discover().get(10, TimeUnit.SECONDS);
+
+        assertEquals(SITE + "/{tenantid}/v2.0", provider.getOptions().getJWTOptions().getIssuer());
     }
 
     @Test

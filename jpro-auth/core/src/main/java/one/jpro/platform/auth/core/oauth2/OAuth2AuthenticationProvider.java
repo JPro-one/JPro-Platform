@@ -873,7 +873,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         if (jwks == null || expired || unknownKid) {
             try {
                 final String webKeys = api.getHttpClient().send(
-                        HttpRequest.newBuilder(URI.create(options.getJwkPath())).build(),
+                        HttpRequest.newBuilder(URI.create(options.getJwkPath())).timeout(Duration.ofSeconds(10)).build(),
                         HttpResponse.BodyHandlers.ofString()).body();
                 jwks = Jwks.setParser().build().parse(webKeys).getKeys().stream()
                         .collect(toMap(Identifiable::getId, Jwk::toKey));

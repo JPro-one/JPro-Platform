@@ -64,6 +64,8 @@ public class MicrosoftAuthenticationProvider extends OpenIDAuthenticationProvide
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
                 .setTenant(tenant)
+                // discovery names the issuer with {tenantid} or the tenant's GUID, not the configured tenant
+                .setValidateIssuer(false)
                 .setSupportedScopes(DEFAULT_SCOPES)
                 .setSite("https://login.microsoftonline.com/{tenant}/v2.0")
                 .setTokenPath("https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token")
