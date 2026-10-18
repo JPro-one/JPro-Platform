@@ -60,6 +60,9 @@ import static java.util.stream.Collectors.toMap;
  * <p>
  * This class can also handle optional tasks such as token introspection, token refresh, token revocation,
  * user information retrieval, and logout.
+ * <p>
+ * Call its methods on the JavaFX application thread and use one instance per JPro session. The returned futures
+ * complete on a background thread; move UI updates back to the FX thread.
  *
  * @author Besmir Beqiri
  */
@@ -263,8 +266,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         });
             }
 
-            // From this point, the only allowed credentials subtype is OAuth2Credentials
-            OAuth2Credentials oauth2Credentials = (OAuth2Credentials) credentials;
+            // From this point, the only allowed credentials subtype is OAuth2Credentials; the caller's stay unchanged
+            final OAuth2Credentials oauth2Credentials = new OAuth2Credentials((OAuth2Credentials) credentials);
 
             // Grab query parameters from the local HTTP server if present
             final Map<String, String> queryParams = httpServer.getQueryParams();
@@ -280,8 +283,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     /**
      * Authenticates with the parameters of the OAuth2 redirect callback, e.g. the query parameters of the
      * routing request or of the {@link WebAPI.View} the identity provider redirected to. Unlike
-     * {@link #authenticate(Credentials)}, the session URL is not consulted and the given credentials
-     * are not modified.
+     * {@link #authenticate(Credentials)}, the session URL is not consulted.
      * <p>
      * The callback's {@code state} must belong to a login started with {@link #authorizeUrl(OAuth2Credentials)}
      * (or match the {@code state} of the credentials); its PKCE code verifier is sent with the token request
@@ -524,10 +526,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         }
                         // attempt to create a user from the json object
                         try {
-                            final User newUser = createUser(json);
-                            oauth2Credentials.setUsername(newUser.getName());
-                            // basic validation passed
-                            return CompletableFuture.completedFuture(newUser);
+                            return CompletableFuture.completedFuture(createUser(json));
                         } catch (TokenExpiredException | IllegalStateException ex) {
                             return CompletableFuture.failedFuture(ex);
                         }

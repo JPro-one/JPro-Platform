@@ -41,6 +41,9 @@
   a token and rejected every one. `TokenCredentials` with an OAuth2 provider verifies JWTs against the provider's keys.
 
 #### Bugfixes
+* **jpro-auth-core:** `authenticate(OAuth2Credentials)` no longer changes the given credentials (it set the code,
+  scopes and the user's name, from a background thread) and no longer throws a `NullPointerException` for the
+  password or client flow before a login URL was opened. The README documents the threading rules.
 * **jpro-auth-core:** `new TokenCredentials(user)` works for a user with an opaque access token (e.g. Google's).
 * **jpro-auth-core:** the signing keys (JWKS) are cached per provider instead of fetched for every token. They
   are fetched again for a token with an unknown key ID (at most every 10 s) and, if set, after
