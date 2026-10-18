@@ -6,14 +6,13 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import one.jpro.platform.playwright.JProPlaywrightTest;
+import one.jpro.platform.playwright.JProWait;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Regression guard for issue #127, which was reported against Firefox: every pinned node sat a
@@ -55,23 +54,28 @@ public class StickyFirefoxTest extends JProPlaywrightTest {
         // Firefox boots the app slower than the shared waitForRunning budget allows; wait plainly.
         page.locator(".jpro-id-sticky-header").waitFor(
                 new Locator.WaitForOptions().setTimeout(180_000));
-        page.waitForTimeout(3000);
-
+        JProWait.waitUntil(() -> page.locator("[data-jpro-sticky-el]").count() > 0, () -> "no pin bound");
         page.evaluate("() => window.scrollBy(0, 400)");
-        page.waitForTimeout(1500);
-
         // the bug parked pinned nodes about a document height down (~6300px).
-        for (String id : new String[]{".jpro-id-sticky-header", ".jpro-id-toast", ".jpro-id-bottom-bar",
-                ".jpro-id-fab", ".jpro-id-overlay"}) {
-            double top = page.locator(id).boundingBox().y;
-            assertTrue(top < page.viewportSize().height,
-                    id + " is parked off-screen at top=" + top + " (issue #127)");
-        }
-
-        double headerTop = page.locator(".jpro-id-sticky-header").boundingBox().y;
-        assertTrue(headerTop < PINNED_MAX_TOP_PX,
-                "sticky header should be pinned near the viewport top, was at " + headerTop);
+        JProWait.waitUntil(() -> pinnedOnScreen(page), () -> positions(page));
+        JProWait.ensureStaysTrue(1500, () -> pinnedOnScreen(page), () -> positions(page));
 
         page.context().close();
+    }
+
+    private static final String[] PINNED = {".jpro-id-sticky-header", ".jpro-id-toast", ".jpro-id-bottom-bar",
+            ".jpro-id-fab", ".jpro-id-overlay"};
+
+    private static boolean pinnedOnScreen(Page page) {
+        for (String id : PINNED) {
+            if (page.locator(id).boundingBox().y >= page.viewportSize().height) return false;
+        }
+        return page.locator(".jpro-id-sticky-header").boundingBox().y < PINNED_MAX_TOP_PX;
+    }
+
+    private static String positions(Page page) {
+        StringBuilder state = new StringBuilder("tops (issue #127; on screen, header top < " + PINNED_MAX_TOP_PX + "):");
+        for (String id : PINNED) state.append(' ').append(id).append('=').append(page.locator(id).boundingBox().y);
+        return state.toString();
     }
 }

@@ -7,7 +7,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * Base class for Playwright tests that drive a JPro application in a headless browser.
  *
  * <p>Provides the boilerplate every JPro Playwright test needs:
  * <ul>
- *   <li>A shared headless browser ({@link #setupBrowser()} / {@link #teardownBrowser()}): Chromium,
+ *   <li>A shared headless browser ({@link #browser()}, launched by the first {@link #newPage()}): Chromium,
  *       or {@code -Djpro.test.browser=firefox|webkit}.</li>
  *   <li>A {@link #PORT} (from {@code -Djpro.test.port} or a free port in 9100–9200) and the
  *       derived {@link #BASE_URL}.</li>
@@ -44,7 +45,11 @@ import java.util.concurrent.TimeUnit;
  * {@code jpro.mirrorCSSToDOM = true} in the app's {@code jpro.conf} — then a node with
  * {@code setId("foo")} is reachable as {@code ".jpro-id-foo"}.
  */
+@Tag(JProPlaywrightTest.TAG)
 public abstract class JProPlaywrightTest {
+
+    /** Tag of every subclass ({@code @Tag} is inherited), to run Playwright tests apart from unit tests. */
+    public static final String TAG = "playwright";
 
     protected static final int PORT = resolvePort();
     protected static final String BASE_URL = "http://localhost:" + PORT;
@@ -54,11 +59,13 @@ public abstract class JProPlaywrightTest {
     /** {@code -Djpro.test.browser=chromium|firefox|webkit} (default chromium). */
     protected static final String BROWSER = System.getProperty("jpro.test.browser", "chromium");
 
+    /** Set by {@link #browser()} on first use, closed after the test class. */
     protected static Playwright playwright;
     protected static Browser browser;
 
-    @BeforeAll
-    static void setupBrowser() {
+    /** The {@link #BROWSER} the pages of {@link #newPage()} run in, launched on first use. */
+    protected static synchronized Browser browser() {
+        if (browser != null) return browser;
         playwright = Playwright.create();
         BrowserType type = switch (BROWSER) {
             case "firefox" -> playwright.firefox();
@@ -71,23 +78,28 @@ public abstract class JProPlaywrightTest {
         try {
             browser = type.launch(new BrowserType.LaunchOptions().setHeadless(headless));
         } catch (RuntimeException e) {
+            playwright.close();
+            playwright = null;
             // An environment fault, not a test failure: make it unmistakable.
             throw new IllegalStateException("Playwright '" + BROWSER + "' browser failed to launch. This is an"
                     + " environment fault (browser not installed, missing system libraries or an unsupported OS),"
                     + " not a test failure." + ("webkit".equals(BROWSER) ? " WebKit requires Ubuntu 24.04+." : "")
                     + " Root cause: " + e.getMessage(), e);
         }
+        return browser;
     }
 
     @AfterAll
-    static void teardownBrowser() {
+    static synchronized void teardownBrowser() {
         if (browser != null) browser.close();
         if (playwright != null) playwright.close();
+        browser = null;
+        playwright = null;
     }
 
     /** A fresh page in its own browser context. */
     protected Page newPage() {
-        return browser.newContext().newPage();
+        return browser().newContext().newPage();
     }
 
     /** Repository root (directory containing {@code gradlew}). */
@@ -186,12 +198,21 @@ public abstract class JProPlaywrightTest {
      */
     protected static void stopAndAssertNoServerErrors(File logsDir, String... stopCommand)
             throws IOException, InterruptedException {
+        stopAndAssertNoServerErrors(logsDir, List.of(), stopCommand);
+    }
+
+    /**
+     * Like {@link #stopAndAssertNoServerErrors(File, String...)}, but tolerates the error blocks matching
+     * {@code knownIssues} (see {@link ServerLogAssertions#assertNoServerErrors(File, boolean, List)}).
+     */
+    protected static void stopAndAssertNoServerErrors(File logsDir, List<Pattern> knownIssues, String... stopCommand)
+            throws IOException, InterruptedException {
         try {
             stopServer(stopCommand);
         } finally {
             ServerLogAssertions.dumpServerLogs(logsDir);
         }
-        ServerLogAssertions.assertNoServerErrors(logsDir);
+        ServerLogAssertions.assertNoServerErrors(logsDir, true, knownIssues);
     }
 
     /**

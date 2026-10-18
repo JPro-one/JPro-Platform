@@ -55,6 +55,23 @@ public class TextInputPlaywrightTest extends JProPlaywrightTest {
     }
 
     @Test
+    @DisplayName("focus returns once the field's input has the focus")
+    void focusWaitsForTheFieldsInput() {
+        JProInput.focus(page, ".jpro-id-textfield");
+
+        assertEquals(Boolean.TRUE, page.evaluate("() => { const el = document.querySelector('.jpro-id-textfield');"
+                + " const a = document.activeElement; return !!el && !!a && el !== a && el.contains(a); }"));
+    }
+
+    @Test
+    @DisplayName("fill() on the field's input round-trips to the bound label")
+    void fillOnTheFieldsInput() {
+        page.locator(".jpro-id-textfield input").fill("hello");
+
+        JProInput.awaitText(page, ".jpro-id-echo", "hello");
+    }
+
+    @Test
     @DisplayName("Typing into a JPro TextField round-trips to the bound label")
     void typingRoundTripsToBoundLabel() {
         JProInput.typeInto(page, ".jpro-id-textfield", "hello");

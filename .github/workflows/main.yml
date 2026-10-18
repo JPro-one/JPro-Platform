@@ -85,6 +85,11 @@ jobs:
           ./gradlew test
         shell: bash
 
+      - name: Playwright tests
+        run: |
+          ./gradlew playwrightTest
+        shell: bash
+
       - name: Keycloak login test (Linux, needs Docker)
         if: runner.os == 'Linux'
         run: |

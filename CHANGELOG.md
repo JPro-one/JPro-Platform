@@ -11,6 +11,19 @@
 * **jpro-playwright:** the new `JProWait` polls Java-side conditions with the same tiers (`waitUntil`,
   `waitForValue`, `waitForFunction`) and asserts that a condition or value stays unchanged (`ensureStaysTrue`,
   `ensureStaysValue`), replacing fixed `waitForTimeout(...)` sleeps.
+* **jpro-playwright:** `ServerLogAssertions.assertNoServerErrors(logsDir, requireServerStarted, knownIssues)` and
+  `stopAndAssertNoServerErrors(logsDir, knownIssues, command...)` tolerate known errors: a logged throwable with its
+  stack is ignored if one of its lines matches a pattern. `(Native Method)`, `(Unknown Source)` and `... N more`
+  lines count as part of the stack.
+* **jpro-playwright:** `JProInput.focus`/`typeInto` wait until the field's `<input>` has the focus instead of a
+  fixed 300 ms, and `awaitText` uses `JProWait`. The README now documents `fill()` on `.jpro-id-x input`.
+* **jpro-playwright:** `CdpFileDrop.drop(locator, file)` drops a file from the OS onto an element with native drag
+  events (Chromium only).
+* **jpro-playwright:** `JProPlaywrightTest` launches its browser on the first `newPage()` (or `browser()`), so a test
+  that brings its own browser doesn't start the default one too. Code reading the `browser` field before that must
+  call `browser()`.
+* **jpro-playwright:** `JProPlaywrightTest` subclasses carry the JUnit tag `playwright`. In this repository `test`
+  now runs only the unit tests; `./gradlew playwrightTest` runs the browser tests, and `check` runs both.
 * **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
   fails to launch now throws an `IllegalStateException` naming it as an environment fault.
 * **jpro-playwright:** `startServer(logsDir, environment, command...)` passes extra environment variables to the

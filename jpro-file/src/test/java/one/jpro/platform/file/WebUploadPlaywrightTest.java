@@ -1,14 +1,11 @@
 package one.jpro.platform.file;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.microsoft.playwright.CDPSession;
 import com.microsoft.playwright.FileChooser;
-import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.BoundingBox;
 import one.jpro.platform.playwright.BrowserErrorCollector;
+import one.jpro.platform.playwright.CdpFileDrop;
 import one.jpro.platform.playwright.JProPlaywrightTest;
+import one.jpro.platform.playwright.JProWait;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,7 +18,6 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * End-to-end tests of the web implementation ({@code WebFileOpenPicker}, {@code WebFileDropper},
@@ -81,21 +77,16 @@ public class WebUploadPlaywrightTest extends JProPlaywrightTest {
     @Test
     void pickerIgnoresOtherExtensions() {
         choose(".jpro-id-pngZone", "photo.jpg");
-        page.waitForTimeout(2000);
-        assertEquals("", text(".jpro-id-selected"), "A .jpg must not be selected by a .PNG picker");
+        JProWait.ensureStaysValue(2000, "", () -> text(".jpro-id-selected"));
         choose(".jpro-id-pngZone", "cursor.png");
         awaitText(".jpro-id-selected", "cursor.png");
     }
 
     @Test
     void dropperIgnoresOtherExtensions() {
-        CDPSession cdp = page.context().newCDPSession(page);
-        BoundingBox box = page.locator(".jpro-id-pngZone").boundingBox();
-        double x = box.x + box.width / 2, y = box.y + box.height / 2;
-        drop(cdp, x, y, FILES.resolve("photo.jpg"));
-        page.waitForTimeout(2000);
-        assertEquals("", text(".jpro-id-selected"), "A .jpg must not be dropped on a .PNG dropper");
-        drop(cdp, x, y, FILES.resolve("cursor.png"));
+        CdpFileDrop.drop(page.locator(".jpro-id-pngZone"), FILES.resolve("photo.jpg"));
+        JProWait.ensureStaysValue(2000, "", () -> text(".jpro-id-selected"));
+        CdpFileDrop.drop(page.locator(".jpro-id-pngZone"), FILES.resolve("cursor.png"));
         awaitText(".jpro-id-selected", "cursor.png");
     }
 
@@ -122,35 +113,12 @@ public class WebUploadPlaywrightTest extends JProPlaywrightTest {
         chooser.setFiles(file);
     }
 
-    private static void drop(CDPSession cdp, double x, double y, Path file) {
-        for (String type : new String[]{"dragEnter", "dragOver", "drop"}) {
-            JsonArray files = new JsonArray();
-            files.add(file.toAbsolutePath().toString());
-            JsonObject data = new JsonObject();
-            data.add("items", new JsonArray());
-            data.add("files", files);
-            data.addProperty("dragOperationsMask", 1);
-            JsonObject params = new JsonObject();
-            params.addProperty("type", type);
-            params.addProperty("x", x);
-            params.addProperty("y", y);
-            params.add("data", data);
-            cdp.send("Input.dispatchDragEvent", params);
-        }
-    }
-
     private String text(String selector) {
         return page.locator(selector).textContent().trim();
     }
 
     private void awaitText(String selector, String expected) {
-        long deadline = System.currentTimeMillis() + 30000;
-        String t = "";
-        while (System.currentTimeMillis() < deadline) {
-            t = text(selector);
-            if (t.contains(expected)) return;
-            page.waitForTimeout(250);
-        }
-        fail("Expected '" + selector + "' to contain '" + expected + "' but got: " + t);
+        JProWait.waitUntil(15_000, () -> text(selector).contains(expected),
+                () -> "'" + selector + "' should contain '" + expected + "' but is '" + text(selector) + "'");
     }
 }

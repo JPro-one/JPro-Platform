@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import one.jpro.platform.playwright.BrowserErrorCollector;
 import one.jpro.platform.playwright.JProPlaywrightTest;
+import one.jpro.platform.playwright.JProWait;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,44 +48,50 @@ public class StickyDefaultConfigTest extends JProPlaywrightTest {
         waitForRunning(page);
         page.locator("[data-jpro-sticky-el]").first().waitFor(
                 new Locator.WaitForOptions().setTimeout(30_000));
-        page.waitForTimeout(1000);
 
         assertEquals(0, page.locator(".jpro-id-sticky-header").count(),
                 "the sample's ids must be absent, or this test runs with the flag on");
 
-        int sheets = page.locator("style[data-jpro-sticky]").count();
+        // every installed pin binds its element, and every bound element is position: sticky
+        JProWait.waitUntil(() -> {
+            int sheets = page.locator("style[data-jpro-sticky]").count();
+            return sheets > 0 && sheets == page.locator("[data-jpro-sticky-el]").count() && sheets == stickyCount(page);
+        }, () -> "sheets=" + page.locator("style[data-jpro-sticky]").count()
+                + " bound=" + page.locator("[data-jpro-sticky-el]").count() + " sticky=" + stickyCount(page));
         int bound = page.locator("[data-jpro-sticky-el]").count();
-        assertTrue(sheets > 0, "no pin installed");
-        assertEquals(sheets, bound, "every installed pin must bind its element");
-        int sticky = ((Number) page.evaluate("() => [...document.querySelectorAll('[data-jpro-sticky-el]')]"
-                + ".filter(e => getComputedStyle(e).position === 'sticky').length")).intValue();
-        assertEquals(bound, sticky, "every bound element must be position: sticky");
+        JProWait.ensureStaysValue(1000, bound, () -> page.locator("[data-jpro-sticky-el]").count());
 
         String tops = "() => [...document.querySelectorAll('[data-jpro-sticky-el]')]"
                 + ".map(e => e.getBoundingClientRect().top)";
         List<Number> before = (List<Number>) page.evaluate(tops);
         page.evaluate("() => window.scrollBy(0, 400)");
-        page.waitForTimeout(1000);
-        List<Number> after = (List<Number>) page.evaluate(tops);
-        assertEquals(before.size(), after.size(), "the bound set changed during the scroll");
-
-        boolean held = false;
-        for (int i = 0; i < before.size(); i++) {
-            if (Math.abs(before.get(i).doubleValue()) < 1 && Math.abs(after.get(i).doubleValue()) < 1) {
-                held = true;
+        BooleanSupplier held = () -> {
+            List<Number> after = (List<Number>) page.evaluate(tops);
+            for (int i = 0; i < Math.min(before.size(), after.size()); i++) {
+                if (Math.abs(before.get(i).doubleValue()) < 1 && Math.abs(after.get(i).doubleValue()) < 1) {
+                    return before.size() == after.size();
+                }
             }
-        }
-        assertTrue(held, "a pin at the viewport top should hold across the scroll: " + before + " -> " + after);
+            return false;
+        };
+        Supplier<String> heldState = () -> "a pin at the viewport top should hold across the scroll: "
+                + before + " -> " + page.evaluate(tops);
+        JProWait.waitUntil(held, heldState);
+        JProWait.ensureStaysTrue(1000, held, heldState);
 
         // the section header sits deep in the page and pins under the 48px page header, so its rule
         // carries a non-zero span offset. a wrong offset would put it anywhere but there.
         page.evaluate("() => window.scrollTo(0, 2400)");
-        page.waitForTimeout(1000);
-        List<Number> deep = (List<Number>) page.evaluate(tops);
-        boolean sectionPinned = deep.stream().anyMatch(t -> Math.abs(t.doubleValue() - 48) < 1);
-        assertTrue(sectionPinned, "the section header should pin at 48px: " + deep);
+        JProWait.waitUntil(() -> ((List<Number>) page.evaluate(tops)).stream()
+                        .anyMatch(t -> Math.abs(t.doubleValue() - 48) < 1),
+                () -> "the section header should pin at 48px: " + page.evaluate(tops));
 
         page.context().close();
         browserErrors.assertNoErrors();
+    }
+
+    private static int stickyCount(Page page) {
+        return ((Number) page.evaluate("() => [...document.querySelectorAll('[data-jpro-sticky-el]')]"
+                + ".filter(e => getComputedStyle(e).position === 'sticky').length")).intValue();
     }
 }

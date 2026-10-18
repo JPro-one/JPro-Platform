@@ -107,15 +107,9 @@ configure([project(':jpro-routing:core-test')]) {
     test {
         jvmArgs = [
                 "-Dglass.platform=Monocle", "-Dmonocle.platform=Headless"]
-        // QueryPlaywrightTest drives :jpro-routing:example in a browser via jpro-playwright.
-        dependsOn ':jpro-playwright:installPlaywright'
-        environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
-        ['jpro.test.port', 'jpro.test.browser', 'jpro.test.headless'].each { key ->
-            if (System.getProperty(key) != null) systemProperty key, System.getProperty(key)
-        }
-        // The app under test is started by a nested Gradle build, so Gradle can't see what the tests depend on.
-        outputs.upToDateWhen { false }
     }
+    // QueryPlaywrightTest drives :jpro-routing:example in a browser via jpro-playwright.
+    apply from: rootProject.file('gradle/playwright-tests.gradle')
 }
 
 configure(project(':jpro-routing:example')) {

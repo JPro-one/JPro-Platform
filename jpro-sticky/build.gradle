@@ -8,26 +8,10 @@ dependencies {
   testImplementation project(":jpro-playwright")
 }
 
-test {
-  // The Playwright tests need a Chromium (installPlaywright provides it) and the example's port.
-  dependsOn 'installPlaywright', 'installPlaywrightFirefox'
-  // Forward the test overrides (port, browser, headless) to the test JVM.
-  ['jpro.test.port', 'jpro.test.browser', 'jpro.test.headless'].each { key ->
-    if (System.getProperty(key) != null) systemProperty key, System.getProperty(key)
-  }
-  // The app under test is started by a nested Gradle build, so Gradle can't see what the tests depend on.
-  outputs.upToDateWhen { false }
-  // installPlaywright already provisioned the browser, so skip the download during the run.
-  environment 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', '1'
-}
+apply from: rootProject.file('gradle/playwright-tests.gradle')
 
-// Installs the browser the Playwright tests drive (with system deps, as CI needs them).
-tasks.register('installPlaywright', JavaExec) {
-  group = 'verification'
-  description = 'Install the browser used by the Playwright tests (-Djpro.test.browser, default chromium)'
-  classpath = sourceSets.test.runtimeClasspath
-  mainClass = 'com.microsoft.playwright.CLI'
-  args = ['install', '--with-deps', System.getProperty('jpro.test.browser') ?: 'chromium']
+tasks.named('playwrightTest') {
+  dependsOn 'installPlaywrightFirefox'
 }
 
 // StickyFirefoxTest drives the engine issue #127 was reported against.

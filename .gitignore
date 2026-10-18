@@ -8,3 +8,4 @@ example/logs/
 RUNNING_PID
 .DS_Store
 .claude/skills/docs/.tmp/
+scenicView.properties
