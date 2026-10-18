@@ -30,6 +30,16 @@ public class MicrosoftAuthenticationProviderTests {
         assertEquals("https://login.microsoftonline.com/common/discovery/v2.0/keys", options.getJwkPath());
         assertEquals("https://login.microsoftonline.com/common/oauth2/v2.0/logout", options.getLogoutPath());
         assertEquals("SHA-256", options.getJWTOptions().getNonceAlgorithm());
+        assertEquals("https://login.microsoftonline.com/{tenantid}/v2.0", options.getJWTOptions().getIssuer());
+    }
+
+    @Test
+    public void singleTenantExpectsItsOwnIssuer() {
+        MicrosoftAuthenticationProvider provider = new MicrosoftAuthenticationProvider(null,
+                "clientId", "clientSecret", "6f2c1a3e-0000-4000-8000-000000000001");
+
+        assertEquals("https://login.microsoftonline.com/6f2c1a3e-0000-4000-8000-000000000001/v2.0",
+                provider.getOptions().getJWTOptions().getIssuer());
     }
 
     @Test

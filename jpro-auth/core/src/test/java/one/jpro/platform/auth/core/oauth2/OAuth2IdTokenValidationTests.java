@@ -163,6 +163,35 @@ public class OAuth2IdTokenValidationTests {
     }
 
     @Test
+    void keycloakFromTheFluentApiChecksTheRealmIssuer() throws Exception {
+        provider = new one.jpro.platform.auth.core.api.FluentKeycloakAuthAPI()
+                .site("http://idp.invalid/realms/{realm}")
+                .realm("test")
+                .clientId("clientId")
+                .clientSecret("secret")
+                .configureHttpClient(idp.viaProxy())
+                .create(null);
+        assertEquals("http://idp.invalid/realms/test", provider.getOptions().getJWTOptions().getIssuer());
+
+        Throwable cause = failure(t -> t.issuer("http://evil.invalid/realms/test"), IDP_KEY);
+        assertTrue(cause.getMessage().contains("issuer"), cause.getMessage());
+
+        User user = login(t -> t.issuer("http://idp.invalid/realms/test"), IDP_KEY).get(10, TimeUnit.SECONDS);
+        assertEquals("test@example.com", user.getName());
+    }
+
+    @Test
+    void accessTokenThatFailsVerificationDoesNotBlockTheLogin() throws Exception {
+        accessToken = Jwts.builder().header().keyId("k1").and().issuer("http://other-issuer.invalid").subject("1")
+                .expiration(Date.from(Instant.now().plusSeconds(300)))
+                .signWith(IDP_KEY.getPrivate(), Jwts.SIG.RS256).compact();
+
+        User user = login(t -> t, IDP_KEY).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
+    }
+
+    @Test
     void idTokenWithSingleStringAudienceLogsIn() throws Exception {
         User user = login(t -> t.audience().single("clientId"), IDP_KEY).get(10, TimeUnit.SECONDS);
 

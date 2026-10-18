@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 /**
  * Simplified factory to create an {@link OAuth2AuthenticationProvider} for Microsoft.
@@ -70,7 +71,7 @@ public class MicrosoftAuthenticationProvider extends OpenIDAuthenticationProvide
                 .setUserInfoPath("https://graph.microsoft.com/oidc/userinfo")
                 .setJwkPath("https://login.microsoftonline.com/{tenant}/discovery/v2.0/keys")
                 .setLogoutPath("https://login.microsoftonline.com/{tenant}/oauth2/v2.0/logout")
-                .setJWTOptions(new JWTOptions().setNonceAlgorithm("SHA-256")));
+                .setJWTOptions(new JWTOptions().setNonceAlgorithm("SHA-256").setIssuer(issuer(tenant))));
     }
 
     /**
@@ -82,6 +83,14 @@ public class MicrosoftAuthenticationProvider extends OpenIDAuthenticationProvide
      * @param options custom OAuth2 options
      * @return a future with the instantiated {@link OAuth2AuthenticationProvider}
      */
+    private static final Pattern TENANT_ID = Pattern.compile("[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}");
+
+    // A tenant ID pins the issuer; for common/organizations/consumers or a domain, {tenantid} comes from the token's tid
+    private static String issuer(String tenant) {
+        return "https://login.microsoftonline.com/"
+                + (TENANT_ID.matcher(tenant).matches() ? tenant : "{tenantid}") + "/v2.0";
+    }
+
     public static CompletableFuture<OpenIDAuthenticationProvider> discover(Stage stage, OAuth2Options options) {
         final String site = options.getSite() == null ?
                 "https://login.microsoftonline.com/{tenant}/v2.0" : options.getSite();

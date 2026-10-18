@@ -92,6 +92,14 @@ public class KeycloakAuthenticationProvider extends OpenIDAuthenticationProvider
             options.setJwkPath("/protocol/openid-connect/certs");
         }
 
+        // Keycloak issues its tokens for <server>/realms/<realm>; with an older adapter config the site lacks the realm
+        if (config.has("realm")) {
+            final String site = options.getSite();
+            if (site != null && site.endsWith("/realms/" + config.getString("realm"))) {
+                options.getJWTOptions().setIssuer(site);
+            }
+        }
+
         if (config.has("realm-public-key")) {
             options.addPubSecKeys(new PubSecKeyOptions()
                     .setAlgorithm("RS256")

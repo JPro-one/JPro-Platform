@@ -138,6 +138,26 @@ public class TokenCredentialsAuthenticationTests {
     }
 
     @Test
+    void microsoftV1AccessTokenOfTheSameTenantIsAccepted() throws Exception {
+        OAuth2Options options = options();
+        options.getJWTOptions().setIssuer("https://login.microsoftonline.com/{tenantid}/v2.0");
+
+        User user = authenticate(options, jwt(IDP_KEY, b -> b.issuer("https://sts.windows.net/tenant-1/")
+                .claim("tid", "tenant-1").audience().add("clientId").and())).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
+    }
+
+    @Test
+    void microsoftV1AccessTokenOfAnotherTenantIsRejected() {
+        OAuth2Options options = options();
+        options.getJWTOptions().setIssuer("https://login.microsoftonline.com/{tenantid}/v2.0");
+
+        failure(authenticate(options, jwt(IDP_KEY, b -> b.issuer("https://sts.windows.net/tenant-2/")
+                .claim("tid", "tenant-1").audience().add("clientId").and())));
+    }
+
+    @Test
     void introspectedRefreshTokenIsRejected() {
         introspection = "{\"active\":true,\"client_id\":\"clientId\",\"username\":\"alice\",\"typ\":\"Refresh\"}";
 
