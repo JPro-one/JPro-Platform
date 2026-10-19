@@ -8,7 +8,7 @@ classes. It runs **in the browser only** (every class needs a JPro `WebAPI`).
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-webrtc:0.8.0")
+    implementation("one.jpro.platform:jpro-webrtc:0.8.1")
 }
 ```
 

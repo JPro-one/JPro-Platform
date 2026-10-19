@@ -8,7 +8,7 @@ browser or by an explicit key on the desktop.
 
 ```groovy
 dependencies {
-    implementation("one.jpro.platform:jpro-session:0.8.0")
+    implementation("one.jpro.platform:jpro-session:0.8.1")
 }
 ```
 
