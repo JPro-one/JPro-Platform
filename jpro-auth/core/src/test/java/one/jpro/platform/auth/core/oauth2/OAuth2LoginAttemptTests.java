@@ -121,6 +121,18 @@ public class OAuth2LoginAttemptTests {
     }
 
     @Test
+    void loginLeavesTheCredentialsUnchanged() throws Exception {
+        OAuth2Credentials credentials = new OAuth2Credentials().setFlow(OAuth2Flow.PASSWORD)
+                .setUsername("test").setPassword("secret");
+        idTokenNonce = "unused";
+
+        User user = provider.authenticate(credentials).get(10, TimeUnit.SECONDS);
+
+        assertEquals("test@example.com", user.getName());
+        assertEquals("test", credentials.getUsername());
+    }
+
+    @Test
     void wrongNonceInIdTokenFails() {
         OAuth2Credentials credentials = credentials();
         Map<String, String> url = query(provider.authorizationUrl(credentials));

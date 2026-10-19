@@ -91,6 +91,7 @@ public interface HttpServer extends AutoCloseable {
      */
     default Map<String, List<String>> getParameters() {
         final String uri = getFullRequestedURL();
+        if (uri == null) return Collections.emptyMap();
         int qmi = uri.indexOf('?');
         return (qmi >= 0) ? decodeParams(uri.substring(qmi + 1)) : Collections.emptyMap();
     }

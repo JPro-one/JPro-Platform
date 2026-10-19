@@ -41,7 +41,7 @@ public abstract class BaseOAuthApp extends RouteApp {
     static final String AZURE_CLIENT_SECRET = System.getenv("AZURE_TEST_CLIENT_SECRET");
 
     static final String KEYCLOAK_SITE = Objects.requireNonNullElse(
-            System.getenv("KEYCLOAK_TEST_SITE"), "http://localhost:8080/realms/{realm}");
+            System.getenv("KEYCLOAK_TEST_SITE"), "http://localhost:8180/realms/{realm}");
     static final String KEYCLOAK_CLIENT_ID = System.getenv("KEYCLOAK_TEST_CLIENT_ID");
     static final String KEYCLOAK_CLIENT_SECRET = System.getenv("KEYCLOAK_TEST_CLIENT_SECRET");
 

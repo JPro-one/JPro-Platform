@@ -85,9 +85,20 @@ public class TokenCredentials implements Credentials {
      * @param user the user object
      */
     public TokenCredentials(@NotNull final User user) {
-        this(user.toJSON().optJSONObject(Authentication.KEY_ATTRIBUTES)
-                .optJSONObject("auth", new JSONObject())
-                .optJSONObject("accessToken"));
+        this(accessToken(user));
+    }
+
+    @Nullable
+    private static JSONObject accessToken(@NotNull final User user) {
+        final JSONObject attributes = user.toJSON().optJSONObject(Authentication.KEY_ATTRIBUTES);
+        final JSONObject auth = attributes == null ? null : attributes.optJSONObject("auth");
+        if (auth == null) return null;
+        if (auth.has("accessToken")) return auth.getJSONObject("accessToken");
+        // an opaque access token (e.g. Google's) is only in the token response
+        if (!auth.has("access_token")) return null;
+        final JSONObject json = new JSONObject().put("token", auth.getString("access_token"));
+        if (auth.has("scope")) json.put("scope", auth.optString("scope"));
+        return json;
     }
 
     @NotNull

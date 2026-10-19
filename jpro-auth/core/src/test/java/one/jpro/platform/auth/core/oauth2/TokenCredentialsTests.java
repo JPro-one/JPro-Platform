@@ -66,6 +66,23 @@ public class TokenCredentialsTests {
     }
 
     @Test
+    public void userWithAnOpaqueAccessTokenGivesItsToken() {
+        // Google: the access token is no JWT, so only the token response carries it
+        User user = new User("Username", java.util.Map.of("auth",
+                java.util.Map.of("access_token", "ya29.opaque", "token_type", "Bearer")));
+
+        assertEquals("ya29.opaque", new TokenCredentials(user).getToken());
+    }
+
+    @Test
+    public void userWithAVerifiedAccessTokenGivesItsToken() {
+        User user = new User("Username", java.util.Map.of("auth", java.util.Map.of(
+                "access_token", TOKEN, "accessToken", java.util.Map.of("token", TOKEN, "token_type", "access_token"))));
+
+        assertEquals(TOKEN, new TokenCredentials(user).getToken());
+    }
+
+    @Test
     public void credentialsWithTheSameUsernameAndPasswordShouldBeEqual() {
         TokenCredentials credentials1 = new TokenCredentials("name@mail.com");
         TokenCredentials credentials2 = new TokenCredentials("name@mail.com");
