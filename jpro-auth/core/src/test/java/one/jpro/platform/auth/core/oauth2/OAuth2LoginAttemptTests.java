@@ -121,6 +121,36 @@ public class OAuth2LoginAttemptTests {
     }
 
     @Test
+    void codeSetOnTheCredentialsIsExchangedWithoutCallback() throws Exception {
+        idTokenNonce = "unused";
+        provider.authenticate(credentials().setCode("own-code"), Map.of()).get(10, TimeUnit.SECONDS);
+
+        assertEquals("own-code", AuthUtils.queryToJson(idp.requests().get(0).body()).getString("code"));
+    }
+
+    @Test
+    void verifierSetOnTheCredentialsWinsOverTheAttempt() throws Exception {
+        Map<String, String> url = query(provider.authorizationUrl(credentials()));
+        idTokenNonce = url.get("nonce");
+
+        provider.authenticate(credentials().setCodeVerifier("own-verifier"),
+                Map.of("code", "c", "state", url.get("state"))).get(10, TimeUnit.SECONDS);
+
+        assertEquals("own-verifier", AuthUtils.queryToJson(idp.requests().get(0).body()).getString("code_verifier"));
+    }
+
+    @Test
+    void authorizationUrlLeavesTheCredentialsUnchanged() {
+        OAuth2Credentials credentials = new OAuth2Credentials().setRedirectUri("/callback")
+                .setScopes(List.of("openid"));
+        String before = credentials.toJSON().toString();
+
+        provider.authorizationUrl(credentials);
+
+        assertEquals(before, credentials.toJSON().toString());
+    }
+
+    @Test
     void loginLeavesTheCredentialsUnchanged() throws Exception {
         OAuth2Credentials credentials = new OAuth2Credentials().setFlow(OAuth2Flow.PASSWORD)
                 .setUsername("test").setPassword("secret");

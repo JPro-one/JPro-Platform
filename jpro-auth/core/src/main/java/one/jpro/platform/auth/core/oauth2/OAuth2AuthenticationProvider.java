@@ -169,18 +169,20 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
      * since the redirect back can start a new session.
      */
     String authorizationUrl(@NotNull final OAuth2Credentials credentials) {
-        credentials.setNormalizedRedirectUri(normalizeUri(credentials.getRedirectUri()));
-        final OAuth2Credentials request = new OAuth2Credentials(credentials);
-        final OAuth2Flow flow = request.getFlow() != null ? request.getFlow() : options.getFlow();
+        final OAuth2Flow flow = credentials.getFlow() != null ? credentials.getFlow() : options.getFlow();
+        String state = credentials.getState();
+        String codeVerifier = credentials.getCodeVerifier();
+        String nonce = credentials.getNonce();
         if (flow == OAuth2Flow.AUTH_CODE) {
-            if (request.getState() == null) request.setState(randomToken());
-            if (request.getCodeVerifier() == null) request.setCodeVerifier(randomToken());
-            if (request.getNonce() == null && request.getScopes() != null && request.getScopes().contains("openid")) {
-                request.setNonce(randomToken());
+            if (state == null) state = randomToken();
+            if (codeVerifier == null) codeVerifier = randomToken();
+            if (nonce == null && credentials.getScopes() != null && credentials.getScopes().contains("openid")) {
+                nonce = randomToken();
             }
-            rememberLoginAttempt(request.getState(), new LoginAttempt(request.getCodeVerifier(), request.getNonce()));
+            rememberLoginAttempt(state, new LoginAttempt(codeVerifier, nonce));
         }
-        final String authorizeUrl = api.authorizeURL(request);
+        final String authorizeUrl = api.authorizeURL(new OAuth2API.AuthorizationRequest(flow,
+                normalizeUri(credentials.getRedirectUri()), credentials.getScopes(), state, nonce, codeVerifier));
         logger.debug("Authorize URL: {}", authorizeUrl);
         return authorizeUrl;
     }
@@ -268,15 +270,14 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                         });
             }
 
-            // From this point, the only allowed credentials subtype is OAuth2Credentials; the caller's stay unchanged
-            final OAuth2Credentials oauth2Credentials = new OAuth2Credentials((OAuth2Credentials) credentials);
+            // From this point, the only allowed credentials subtype is OAuth2Credentials
+            final OAuth2Credentials oauth2Credentials = (OAuth2Credentials) credentials;
 
             // Grab query parameters from the local HTTP server if present
             final Map<String, String> queryParams = httpServer.getQueryParams();
             logger.debug("URL query parameters: {}", queryParams);
-            applyCallbackParams(oauth2Credentials, queryParams);
 
-            return exchangeToken(withLoginAttempt(oauth2Credentials, queryParams));
+            return exchangeToken(oauth2Credentials, codeExchange(oauth2Credentials, queryParams));
         } catch (ClassCastException | CredentialValidationException | AuthenticationException ex) {
             return CompletableFuture.failedFuture(ex);
         }
@@ -302,15 +303,47 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         Objects.requireNonNull(credentials, "OAuth2Credentials cannot be null");
         Objects.requireNonNull(callbackParams, "callbackParams cannot be null");
         try {
-            final OAuth2Credentials callbackCredentials = applyCallbackParams(new OAuth2Credentials(credentials), callbackParams);
-            return exchangeToken(withLoginAttempt(callbackCredentials, callbackParams));
+            return exchangeToken(credentials, codeExchange(credentials, callbackParams));
         } catch (CredentialValidationException | AuthenticationException ex) {
             return CompletableFuture.failedFuture(ex);
         }
     }
 
-    static OAuth2Credentials applyCallbackParams(@NotNull final OAuth2Credentials credentials,
-                                                 @NotNull final Map<String, String> callbackParams) {
+    /**
+     * The per-login values of the code exchange: the callback's code (or the one set on the credentials) and the
+     * PKCE code verifier and nonce of the login attempt the callback's {@code state} belongs to.
+     */
+    record CodeExchange(@Nullable String code, @Nullable String codeVerifier, @Nullable String nonce) {
+    }
+
+    private CodeExchange codeExchange(@NotNull final OAuth2Credentials credentials,
+                                      @NotNull final Map<String, String> callbackParams) {
+        final String code = callbackCode(credentials, callbackParams);
+        if (code == null) {
+            return new CodeExchange(credentials.getCode(), credentials.getCodeVerifier(), credentials.getNonce());
+        }
+        final String state = callbackParams.get("state");
+        final LoginAttempt attempt = state == null ? null : takeLoginAttempt(state);
+        if (attempt == null) {
+            if (credentials.getState() != null) {
+                // the app manages the state itself; callbackCode compared it
+                return new CodeExchange(code, credentials.getCodeVerifier(), credentials.getNonce());
+            }
+            throw new AuthenticationException("The callback does not belong to a login started here: "
+                    + "its state is missing, unknown or expired");
+        }
+        return new CodeExchange(code,
+                credentials.getCodeVerifier() != null ? credentials.getCodeVerifier() : attempt.codeVerifier(),
+                credentials.getNonce() != null ? credentials.getNonce() : attempt.nonce());
+    }
+
+    /**
+     * Returns the callback's authorization code, or {@code null} if it has none. Fails on an {@code error} from
+     * the identity provider and on a {@code state} that differs from the one set on the credentials.
+     */
+    @Nullable
+    static String callbackCode(@NotNull final OAuth2Credentials credentials,
+                               @NotNull final Map<String, String> callbackParams) {
         final String error = callbackParams.get("error");
         if (error != null) {
             final String description = callbackParams.get("error_description");
@@ -319,7 +352,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
         final String code = callbackParams.get("code");
         if (code == null) {
-            return credentials;
+            return null;
         }
         if (code.isBlank()) {
             throw new AuthenticationException("Authorization code is missing");
@@ -327,37 +360,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         if (credentials.getState() != null && !credentials.getState().equals(callbackParams.get("state"))) {
             throw new AuthenticationException("The state of the callback does not match the authorization request");
         }
-        credentials.setCode(code);
-
-        final String scope = callbackParams.get("scope");
-        if (scope != null) {
-            credentials.setScopes(List.of(scope.trim().split("[+ ]+")));
-        }
-        return credentials;
-    }
-
-    /**
-     * Returns the credentials for exchanging the callback's code, with the code verifier and nonce of the login
-     * attempt its {@code state} belongs to.
-     */
-    private OAuth2Credentials withLoginAttempt(@NotNull final OAuth2Credentials credentials,
-                                               @NotNull final Map<String, String> callbackParams) {
-        if (callbackParams.get("code") == null) {
-            return credentials;
-        }
-        final String state = callbackParams.get("state");
-        final LoginAttempt attempt = state == null ? null : takeLoginAttempt(state);
-        if (attempt == null) {
-            if (credentials.getState() != null) {
-                return credentials; // the app manages the state itself; applyCallbackParams compared it
-            }
-            throw new AuthenticationException("The callback does not belong to a login started here: "
-                    + "its state is missing, unknown or expired");
-        }
-        final OAuth2Credentials result = new OAuth2Credentials(credentials);
-        if (result.getCodeVerifier() == null) result.setCodeVerifier(attempt.codeVerifier());
-        if (result.getNonce() == null) result.setNonce(attempt.nonce());
-        return result;
+        return code;
     }
 
     record LoginAttempt(String codeVerifier, String nonce, long createdMillis) {
@@ -456,7 +459,8 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         }
     }
 
-    private CompletableFuture<User> exchangeToken(@NotNull final OAuth2Credentials oauth2Credentials) {
+    private CompletableFuture<User> exchangeToken(@NotNull final OAuth2Credentials oauth2Credentials,
+                                                  @NotNull final CodeExchange codeExchange) {
         try {
             // Validate flow and set appropriate parameters
             final JSONObject params = new JSONObject();
@@ -464,8 +468,12 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
                     ? oauth2Credentials.getFlow()
                     : options.getFlow();
 
-            // Validate credentials
-            oauth2Credentials.validate(flow);
+            // Validate credentials; the code may come from the callback instead
+            if (flow == OAuth2Flow.AUTH_CODE) {
+                oauth2Credentials.validateAuthCode(codeExchange.code());
+            } else {
+                oauth2Credentials.validate(flow);
+            }
 
             if (options.getSupportedGrantTypes() != null
                     && !options.getSupportedGrantTypes().isEmpty()
@@ -477,14 +485,14 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             switch (flow) {
                 case AUTH_CODE:
                     // code & redirect_uri & code_verifier
-                    params.put("code", oauth2Credentials.getCode());
+                    params.put("code", codeExchange.code());
                     // must be identical to the redirect URI provided in the original link
                     if (oauth2Credentials.getRedirectUri() != null) {
                         params.put("redirect_uri", normalizeUri(oauth2Credentials.getRedirectUri()));
                     }
                     // the plaintext string that was previously hashed to create the code_challenge
-                    if (oauth2Credentials.getCodeVerifier() != null) {
-                        params.put("code_verifier", oauth2Credentials.getCodeVerifier());
+                    if (codeExchange.codeVerifier() != null) {
+                        params.put("code_verifier", codeExchange.codeVerifier());
                     }
                     break;
 
@@ -520,7 +528,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
             // Exchange for an access token
             return api.token(flow.getGrantType(), params)
                     .thenCompose(json -> {
-                        final String expectedNonce = oauth2Credentials.getNonce();
+                        final String expectedNonce = codeExchange.nonce();
                         if (flow == OAuth2Flow.AUTH_CODE && expectedNonce != null && json.has("id_token")
                                 && !expectedNonce.equals(idTokenNonce(json.getString("id_token")))) {
                             return CompletableFuture.failedFuture(new AuthenticationException(

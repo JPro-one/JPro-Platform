@@ -11,7 +11,12 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 /**
- * Credentials specific to the {@link OAuth2AuthenticationProvider}.
+ * Credentials specific to the {@link OAuth2AuthenticationProvider}: the flow, redirect URI and scopes to request,
+ * and the grant input of the flow (code, username and password, or assertion). The provider never modifies them.
+ * <p>
+ * For the authorization code flow, {@link OAuth2AuthenticationProvider#authorizeUrl(OAuth2Credentials)} generates
+ * the {@code state}, PKCE code verifier and {@code nonce} per login and keeps them until the callback. Set them
+ * here only to manage them yourself.
  *
  * @author Besmir Beqiri
  */
@@ -28,8 +33,6 @@ public class OAuth2Credentials implements Credentials {
     private OAuth2Flow flow;
     private String nonce;
     private String state;
-
-    private String normalizedRedirectUri;
 
     /**
      * Default constructor.
@@ -54,7 +57,6 @@ public class OAuth2Credentials implements Credentials {
         flow = other.flow;
         nonce = other.nonce;
         state = other.state;
-        normalizedRedirectUri = other.normalizedRedirectUri;
     }
 
     public String getCode() {
@@ -156,27 +158,6 @@ public class OAuth2Credentials implements Credentials {
         return this;
     }
 
-    /**
-     * Returns the normalized version of the redirect uri.
-     *
-     * @return the normalized redirected uri
-     */
-    public String getNormalizedRedirectUri() {
-        if (normalizedRedirectUri == null) {
-            return redirectUri;
-        }
-        return normalizedRedirectUri;
-    }
-
-    /**
-     * Sets the normalized version of the redirect uri.
-     * This method is used internally.
-     */
-    OAuth2Credentials setNormalizedRedirectUri(String completeRedirectUri) {
-        this.normalizedRedirectUri = completeRedirectUri;
-        return this;
-    }
-
     @Override
     public <V> void validate(V arg) throws CredentialValidationException {
         OAuth2Flow flow = (OAuth2Flow) arg;
@@ -186,12 +167,7 @@ public class OAuth2Credentials implements Credentials {
         // when there's no access token, validation shall be performed according to each flow
         switch (flow) {
             case AUTH_CODE:
-                if (code == null || code.isBlank()) {
-                    throw new CredentialValidationException("code cannot be null or blank");
-                }
-                if (redirectUri != null && redirectUri.isBlank()) {
-                    throw new CredentialValidationException("redirectUri cannot be blank");
-                }
+                validateAuthCode(code);
                 break;
             case PASSWORD:
                 if (username == null || username.isBlank()) {
@@ -212,12 +188,21 @@ public class OAuth2Credentials implements Credentials {
         }
     }
 
+    void validateAuthCode(String code) throws CredentialValidationException {
+        if (code == null || code.isBlank()) {
+            throw new CredentialValidationException("code cannot be null or blank");
+        }
+        if (redirectUri != null && redirectUri.isBlank()) {
+            throw new CredentialValidationException("redirectUri cannot be blank");
+        }
+    }
+
     @Override
     public JSONObject toJSON() {
         final JSONObject json = new JSONObject();
         Optional.ofNullable(getCode()).ifPresent(code -> json.put("code", code));
         Optional.ofNullable(getCodeVerifier()).ifPresent(codeVerifier -> json.put("code_verifier", codeVerifier));
-        Optional.ofNullable(getNormalizedRedirectUri()).ifPresent(redirectUri -> json.put("redirect_uri", redirectUri));
+        Optional.ofNullable(getRedirectUri()).ifPresent(redirectUri -> json.put("redirect_uri", redirectUri));
         Optional.ofNullable(getFlow()).ifPresent(flow -> json.put("flow", flow.getGrantType()));
         Optional.ofNullable(getJwt()).ifPresent(jwt -> json.put("jwt", jwt));
         Optional.ofNullable(getAssertion()).ifPresent(assertion -> json.put("assertion", assertion));
