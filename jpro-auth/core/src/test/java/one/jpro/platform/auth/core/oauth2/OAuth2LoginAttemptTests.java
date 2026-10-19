@@ -121,6 +121,17 @@ public class OAuth2LoginAttemptTests {
     }
 
     @Test
+    void authorizationUrlLeavesTheCredentialsUnchanged() {
+        OAuth2Credentials credentials = new OAuth2Credentials().setRedirectUri("/callback")
+                .setScopes(List.of("openid"));
+        String before = credentials.toJSON().toString();
+
+        provider.authorizationUrl(credentials);
+
+        assertEquals(before, credentials.toJSON().toString());
+    }
+
+    @Test
     void loginLeavesTheCredentialsUnchanged() throws Exception {
         OAuth2Credentials credentials = new OAuth2Credentials().setFlow(OAuth2Flow.PASSWORD)
                 .setUsername("test").setPassword("secret");

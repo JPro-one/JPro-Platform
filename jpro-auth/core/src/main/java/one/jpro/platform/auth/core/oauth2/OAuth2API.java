@@ -90,14 +90,23 @@ public class OAuth2API {
      * @see <a href="https://tools.ietf.org/html/rfc6749">https://tools.ietf.org/html/rfc6749</a>
      */
     public String authorizeURL(@NotNull final OAuth2Credentials credentials) {
+        return authorizeURL(new AuthorizationRequest(
+                credentials.getFlow() != null ? credentials.getFlow() : options.getFlow(),
+                credentials.getRedirectUri(), credentials.getScopes(),
+                credentials.getState(), credentials.getNonce(), credentials.getCodeVerifier()));
+    }
+
+    /**
+     * The values of one authorization request.
+     */
+    record AuthorizationRequest(OAuth2Flow flow, String redirectUri, List<String> scopes,
+                                String state, String nonce, String codeVerifier) {
+    }
+
+    String authorizeURL(@NotNull final AuthorizationRequest request) {
         final JSONObject query = new JSONObject();
 
-        final OAuth2Flow flow;
-        if (credentials.getFlow() != null) {
-            flow = credentials.getFlow();
-        } else {
-            flow = options.getFlow();
-        }
+        final OAuth2Flow flow = request.flow();
 
         if (flow == OAuth2Flow.AUTH_CODE) {
             query.put("response_type", "code");
@@ -106,28 +115,28 @@ public class OAuth2API {
 //            throw new IllegalStateException("authorization URL cannot be computed for non AUTH_CODE flow");
 //        }
 
-        final String redirectUri = credentials.getNormalizedRedirectUri();
+        final String redirectUri = request.redirectUri();
         if (redirectUri != null && !redirectUri.isBlank()) {
             query.put("redirect_uri", redirectUri);
         }
 
-        if (credentials.getScopes() != null) {
+        if (request.scopes() != null) {
             // scopes have been passed as a list so the provider must generate the correct string for it
-            query.put("scope", String.join(options.getScopeSeparator(), credentials.getScopes()));
+            query.put("scope", String.join(options.getScopeSeparator(), request.scopes()));
         }
 
-        final String state = credentials.getState();
+        final String state = request.state();
         if (state != null && !state.isBlank()) {
             query.put("state", state);
         }
 
-        final String nonce = credentials.getNonce();
+        final String nonce = request.nonce();
         if (nonce != null && !nonce.isBlank()) {
             query.put("nonce", nonce);
         }
 
         // PKCE (RFC 7636): only the hash of the verifier goes to the browser
-        final String codeVerifier = credentials.getCodeVerifier();
+        final String codeVerifier = request.codeVerifier();
         if (codeVerifier != null && !codeVerifier.isBlank()) {
             query.put("code_challenge", codeChallenge(codeVerifier));
             query.put("code_challenge_method", "S256");

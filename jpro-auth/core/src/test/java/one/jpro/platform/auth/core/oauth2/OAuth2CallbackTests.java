@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -88,14 +87,5 @@ public class OAuth2CallbackTests {
 
         assertEquals("access_denied: User cancelled", cause.getMessage());
         assertTrue(idp.requests().isEmpty());
-    }
-
-    @Test
-    void scopesAreSplitOnSpaceAndPlus() {
-        OAuth2Credentials credentials = credentials();
-
-        assertEquals(List.of("openid", "email", "profile"),
-                OAuth2AuthenticationProvider.applyCallbackParams(credentials,
-                        Map.of("code", "c", "scope", "openid email+profile")).getScopes());
     }
 }

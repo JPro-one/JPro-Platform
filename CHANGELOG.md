@@ -39,8 +39,11 @@
 #### Removed
 * **jpro-auth-core:** `JWTAuthenticationProvider`, `JWTAuthAPI` and `JWTAuthOptions`. The provider could not verify
   a token and rejected every one. `TokenCredentials` with an OAuth2 provider verifies JWTs against the provider's keys.
+* **jpro-auth-core:** `OAuth2Credentials.getNormalizedRedirectUri()`; use `getRedirectUri()`.
 
 #### Bugfixes
+* **jpro-auth-core:** `authorizeUrl(credentials)` no longer changes the given credentials (it set the expanded
+  redirect URI on them). The per-login state of the code exchange is kept apart from `OAuth2Credentials`.
 * **jpro-auth-core:** `authenticate(OAuth2Credentials)` no longer changes the given credentials (it set the code,
   scopes and the user's name, from a background thread) and no longer throws a `NullPointerException` for the
   password or client flow before a login URL was opened. The README documents the session and threading rules.
