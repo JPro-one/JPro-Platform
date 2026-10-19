@@ -2,110 +2,33 @@
 
 ## 0.8.x
 
-### 0.8.1 (unreleased)
+### 0.8.1 (October 19, 2026)
 
 #### Features
-* **jpro-auth-core:** the authorization code flow is protected by a `state`, PKCE (`S256`) and, with the
-  `openid` scope, a `nonce`, generated per login attempt by `authorizeUrl(...)` and checked in the callback.
-  On JPro, the attempt is kept in a short-lived login cookie, so it survives the redirect into a new session.
-* **jpro-playwright:** the new `JProWait` polls Java-side conditions with the same tiers (`waitUntil`,
-  `waitForValue`, `waitForFunction`) and asserts that a condition or value stays unchanged (`ensureStaysTrue`,
-  `ensureStaysValue`), replacing fixed `waitForTimeout(...)` sleeps.
-* **jpro-playwright:** `ServerLogAssertions.assertNoServerErrors(logsDir, requireServerStarted, knownIssues)` and
-  `stopAndAssertNoServerErrors(logsDir, knownIssues, command...)` tolerate known errors: a logged throwable with its
-  stack is ignored if one of its lines matches a pattern. `(Native Method)`, `(Unknown Source)` and `... N more`
-  lines count as part of the stack.
-* **jpro-playwright:** `JProInput.focus`/`typeInto` wait until the field's `<input>` has the focus instead of a
-  fixed 300 ms, and `awaitText` uses `JProWait`. The README now documents `fill()` on `.jpro-id-x input`.
-* **jpro-playwright:** `CdpFileDrop.drop(locator, file)` drops a file from the OS onto an element with native drag
-  events (Chromium only).
-* **jpro-playwright:** `JProPlaywrightTest` launches its browser on the first `newPage()` (or `browser()`), so a test
-  that brings its own browser doesn't start the default one too. Code reading the `browser` field before that must
-  call `browser()`.
-* **jpro-playwright:** `JProPlaywrightTest` subclasses carry the JUnit tag `playwright`. In this repository `test`
-  now runs only the unit tests; `./gradlew playwrightTest` runs the browser tests, and `check` runs both.
-* **jpro-playwright:** `-Djpro.test.browser=firefox|webkit` runs the tests on another engine. A browser that
-  fails to launch now throws an `IllegalStateException` naming it as an environment fault.
-* **jpro-playwright:** `startServer(logsDir, environment, command...)` passes extra environment variables to the
-  started app, e.g. the URL of an identity provider the test started itself.
-* **jpro-auth-core:** `configureHttpClient(...)` on the fluent Keycloak, Google and Microsoft builders,
-  and `OAuth2Options.setHttpClientConfigurator(...)`, configure the `HttpClient` used for all OAuth2 requests
-  to the identity provider, e.g. to set an `SSLContext` or a connect timeout.
-* **jpro-auth-core:** `OAuth2AuthenticationProvider.authenticate(credentials, callbackParams)` takes the
-  query parameters of the redirect callback, e.g. `view.getURLQueryParams()` in a view-opened listener.
-  A `state` set on the credentials must match the callback, and an `error` from the identity provider
-  fails with its description.
-
-#### Removed
-* **jpro-auth-core:** `JWTAuthenticationProvider`, `JWTAuthAPI` and `JWTAuthOptions`. The provider could not verify
-  a token and rejected every one. `TokenCredentials` with an OAuth2 provider verifies JWTs against the provider's keys.
-* **jpro-auth-core:** `OAuth2Credentials.getNormalizedRedirectUri()`; use `getRedirectUri()`.
+* **jpro-auth:** CI now tests the full login against a real Keycloak in Docker: the JPro example app, the browser
+  redirect, the code exchange and the signed-in user (`./gradlew :jpro-auth:example:keycloakTest`).
+* **jpro-auth-core:** authorization code logins are protected by `state`, PKCE and `nonce`, generated per login by
+  `authorizeUrl(...)`; other callbacks are rejected. New: `authenticate(credentials, callbackParams)` and
+  `configureHttpClient(...)`.
+* **jpro-playwright:** `JProWait`, `CdpFileDrop`, known-issue patterns in `ServerLogAssertions`,
+  `-Djpro.test.browser=firefox|webkit`, and environment variables for `startServer(...)`.
 
 #### Bugfixes
-* **jpro-auth-core:** `authorizeUrl(credentials)` no longer changes the given credentials (it set the expanded
-  redirect URI on them), so `OAuth2API.authorizeURL(credentials)` always uses the redirect URI as set. The `scope`
-  of an authorization code callback is no longer copied into the credentials and sent with a later password,
-  client or JWT token request.
-* **jpro-auth-core:** `authenticate(OAuth2Credentials)` no longer changes the given credentials (it set the code,
-  scopes and the user's name, from a background thread) and no longer throws a `NullPointerException` for the
-  password or client flow before a login URL was opened. The README documents the session and threading rules.
-* **jpro-auth-core:** `new TokenCredentials(user)` works for a user with an opaque access token (e.g. Google's).
-* **jpro-auth-core:** the signing keys (JWKS) are cached per provider instead of fetched for every token. They
-  are fetched again for a token with an unknown key ID (at most every 10 s) and, if set, after
-  `OAuth2Options.setJwkMaxAge(seconds)`.
-* **jpro-auth-core:** `discover()` checks that the discovery document's `issuer` is the site it was loaded from; it
-  compared the issuer with itself and failed for issuers with a trailing slash. A provider whose issuer differs from
-  the configured site needs `setValidateIssuer(false)`.
-* **jpro-auth-core:** a Google provider created by `GoogleAuthenticationProvider.discover(...)` uses `tokeninfo` to
-  verify opaque tokens, like one created without discovery.
-* **jpro-auth-core:** the `OAuth2Options` copy constructor keeps `useLoopbackIpAddress`.
-* **jpro-auth-core:** the Google provider sends the token to `tokeninfo` in a POST body, URL-encoded, without the
-  client secret; before, the token was in the URL query.
-* **jpro-auth-core:** providers created without OIDC discovery now check the token issuer too: Google
-  (`https://accounts.google.com`), Microsoft (`https://login.microsoftonline.com/<tenant>/v2.0`, with the tenant
-  from the token's `tid` unless a tenant ID is configured; v1 tokens of the same tenant from `sts.windows.net` are
-  accepted too) and Keycloak (the site, when it ends with `/realms/<realm>`). Before, `iss` was only checked after
-  `discover()`.
-* **jpro-auth-core:** `authenticate(TokenCredentials)` on OAuth2 providers: token introspection rejected active
-  tokens and accepted inactive ones, and a successful introspection could never log in. A token is now accepted only
-  if it is a JWT with a valid signature issued to this client (`aud`, `azp` or `client_id`; before, a signed token of
-  any client of the same provider was accepted), or the introspection reports it as an `active` access token of this
-  client. Google's `tokeninfo` response is mapped to `active` and `client_id`.
-* **jpro-auth-core:** an ID token that fails validation (signature, issuer, expiry, `azp`) now fails the login;
-  it was only logged. The ID token's `aud` must contain the client ID, and a single-string `aud` is accepted.
-* **jpro-auth-core:** token time checks allow 60 s of clock skew (`JWTOptions.leeway`, previously unused). The
-  Microsoft multi-tenant issuer (`{tenantid}`) is resolved from the token's `tid`, and Google's `accounts.google.com`
-  issuer form is accepted.
-* **jpro-auth-core:** opaque access tokens (e.g. Google's) are no longer verified as JWTs, which logged a
-  misleading error with a stack trace on every login.
-* **jpro-auth-core:** each `OAuth2Options` gets its own `JWTOptions`. They shared one instance, so OIDC
-  discovery of one provider changed the expected token issuer of all others in the same JVM.
-* **jpro-auth-routing:** the OAuth2 redirect route takes the code from its own request instead of the URL
-  the session was started with.
-* **jpro-auth-core:** on JPro, `authenticate(credentials)` reads the callback from the most recently
-  opened browser tab instead of the first one.
-* **jpro-routing:** `Request` query parameters without a value (`?flag&x=1`) or with `=` in the value no
-  longer fail to parse.
+* **jpro-auth-core:** tokens are checked for issuer, audience and signature for Google, Microsoft and Keycloak, with
+  or without discovery. Introspection works, invalid ID tokens fail the login, and signing keys are cached.
+* **jpro-auth-core:** providers no longer modify the given credentials. Fixes for Google `tokeninfo`,
+  `TokenCredentials(user)` with opaque tokens, and providers sharing `JWTOptions`.
+* **jpro-routing:** query parameters without a value or with `=` in the value parse.
+* **jpro-sticky:** a sticky node in a long-lived `ScrollPane` no longer keeps the old page in memory after navigation.
+* **jpro-flexbox:** a wrapping `FlexBox` reports enough height for children with wrapped text.
 
-#### Behaviour changes
-* **jpro-auth-core:** a Keycloak provider rejects tokens whose `iss` differs from its site, e.g. when Keycloak's
-  public hostname differs from the configured site URL. Set the expected issuer with
-  `getOptions().getJWTOptions().setIssuer(...)` in that case.
-* **jpro-auth-core:** with `verifyToken=false`, `authenticate(TokenCredentials)` no longer accepts unverified JWTs;
-  it requires an introspection endpoint.
-* **jpro-auth-core:** logins whose ID token is invalid or issued to another client are now rejected.
-* **jpro-auth-core:** an authorization code callback is rejected unless its `state` belongs to a login started
-  with `authorizeUrl(...)` (or matches the `state` set on the credentials). The authorization URL now contains
-  `code_challenge` and `nonce`.
-* **jpro-playwright:** `PlaywrightTimeouts.withTimeout(...)` calls the operation once per tier, with 50%, 50%
-  and then 100% of the budget (before: once, with twice the budget), so the operation must be safe to repeat.
-  A timed-out web-first `assertThat` now counts as a timeout too.
-* **jpro-auth-routing:** the OAuth2 redirect route no longer sets the code and username on
-  `provider.getCredentials()`; use the returned `User` instead.
-* **jpro-auth-core:** when the credentials have a `state`, the callback must return the same value. An `error`
-  in the callback now fails with an `AuthenticationException` carrying the identity provider's description.
-* **jpro-routing:** `Request` query parameter names and values are now URL-decoded (`%2F` → `/`, `+` → space).
-  Apps that decoded them themselves must stop doing so.
+#### Removed
+* **jpro-auth-core:** `JWTAuthenticationProvider`; use `TokenCredentials` with an OAuth2 provider.
+
+#### Migration
+* **jpro-auth-core:** if the token issuer differs from the configured site (e.g. Keycloak behind a proxy or in
+  Docker), logins fail until you set it with `getOptions().getJWTOptions().setIssuer(...)`.
+* **jpro-routing:** `Request` query parameters are now URL-decoded; remove your own decoding.
 
 ### 0.8.0 (September 30, 2026)
 
