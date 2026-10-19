@@ -470,12 +470,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
 
             // Validate credentials; the code may come from the callback instead
             if (flow == OAuth2Flow.AUTH_CODE) {
-                if (codeExchange.code() == null || codeExchange.code().isBlank()) {
-                    throw new CredentialValidationException("code cannot be null or blank");
-                }
-                if (oauth2Credentials.getRedirectUri() != null && oauth2Credentials.getRedirectUri().isBlank()) {
-                    throw new CredentialValidationException("redirectUri cannot be blank");
-                }
+                oauth2Credentials.validateAuthCode(codeExchange.code());
             } else {
                 oauth2Credentials.validate(flow);
             }
