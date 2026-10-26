@@ -16,6 +16,8 @@ import one.jpro.platform.file.WebFileSource;
 import one.jpro.platform.file.event.DataTransfer;
 import one.jpro.platform.file.event.FileDragEvent;
 import one.jpro.platform.file.util.NodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.function.Consumer;
  * @author Besmir Beqiri
  */
 public class WebFileDropper extends BaseFileDropper {
+    private static final Logger logger = LoggerFactory.getLogger(WebFileDropper.class);
 
     private final WebAPI.MultiFileUploader multiFileUploader;
     private List<WebFileSource> webFileSources = List.of();
@@ -46,6 +49,10 @@ public class WebFileDropper extends BaseFileDropper {
             if (newFilter != null || oldFilter != null) applyExtensionFilter(newFilter);
         });
         if (getExtensionFilter() != null) applyExtensionFilter(getExtensionFilter());
+
+        acceptDirectoriesProperty().addListener((obs, oldValue, accept) -> {
+            if (accept) logger.warn("Dropping directories is not supported on the web; acceptDirectories is ignored.");
+        });
 
         // Add file drag over listener
         fileDragOverListener = (observable) -> {

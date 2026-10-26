@@ -89,6 +89,7 @@ public class TextEditorSample extends Application {
 
         FileDropper fileDropper = FileDropper.create(contentPane);
         fileDropper.setExtensionFilter(SUBTITLE_EXTENSION_FILTER);
+        fileDropper.setAcceptDirectories(!WebAPI.isBrowser());
         fileDropper.setOnDragEntered(event -> {
             dropPane.pseudoClassStateChanged(FILES_DRAG_OVER_PSEUDO_CLASS, true);
             contentPane.getChildren().setAll(textArea, dropPane);
@@ -169,6 +170,10 @@ public class TextEditorSample extends Application {
         fileSources.stream().findFirst().ifPresentOrElse(fileSource -> // Set the last opened file
                 fileSource.uploadFileAsync()
                         .thenCompose(file -> {
+                            if (file.isDirectory()) {
+                                LOGGER.info("Dropped directory: {}", file.getAbsolutePath());
+                                return CompletableFuture.<File>completedFuture(null);
+                            }
                             try {
                                 final String fileContent = new String(Files.readAllBytes(file.toPath()));
                                 Platform.runLater(() -> textArea.setText(fileContent));
@@ -177,7 +182,9 @@ public class TextEditorSample extends Application {
                                 LOGGER.error("Error reading file: {}", file.getAbsolutePath(), ex);
                                 return CompletableFuture.failedFuture(ex);
                             }
-                        }).thenAccept(lastOpenedFile::set), () -> LOGGER.warn("No file selected"));
+                        }).thenAccept(file -> {
+                            if (file != null) lastOpenedFile.set(file);
+                        }), () -> LOGGER.warn("No file selected"));
     }
 
     /**
