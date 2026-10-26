@@ -81,6 +81,26 @@ public class NativeDirectoryOpenPicker implements DirectoryOpenPicker {
         return initialDirectory;
     }
 
+    private ObjectProperty<Runnable> onShowing;
+
+    @Override
+    public final Runnable getOnShowing() {
+        return onShowing == null ? null : onShowing.get();
+    }
+
+    @Override
+    public final void setOnShowing(Runnable value) {
+        onShowingProperty().set(value);
+    }
+
+    @Override
+    public final ObjectProperty<Runnable> onShowingProperty() {
+        if (onShowing == null) {
+            onShowing = new SimpleObjectProperty<>(this, "onShowing");
+        }
+        return onShowing;
+    }
+
     private ObjectProperty<Consumer<File>> onDirectorySelected;
 
     @Override
@@ -102,9 +122,11 @@ public class NativeDirectoryOpenPicker implements DirectoryOpenPicker {
     }
 
     DirectoryChooser createDirectoryChooser() {
+        final Runnable handler = getOnShowing();
+        if (handler != null) handler.run();
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.titleProperty().bind(titleProperty());
-        chooser.initialDirectoryProperty().bind(initialDirectoryProperty());
+        chooser.initialDirectoryProperty().bind(BaseFilePicker.existingDirectory(initialDirectoryProperty()));
         return chooser;
     }
 }

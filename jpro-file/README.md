@@ -101,6 +101,19 @@ an `UnsupportedOperationException` in the browser, so guard it with `WebAPI.isBr
       directoryPicker.setOnDirectorySelected(directory -> openDirectory(directory));
       ```
 
+- **Initial directory (desktop):** if the initial directory of a picker no longer exists, the dialog opens in its
+nearest existing parent. To choose another directory yourself, set it in `onShowing`, which runs right before the
+dialog is shown.
+
+    * Usage Example
+
+      ```java
+      picker.setOnShowing(() -> {
+          File dir = picker.getInitialDirectory();
+          if (dir == null || !dir.isDirectory()) picker.setInitialDirectory(documentsDir);
+      });
+      ```
+
 #### Limitations
 * `FileOpenPicker` and `FileSavePicker` handle files only. Directories can be chosen with `DirectoryOpenPicker`
 on desktop. `FileDropper` delivers dropped directories next to the files with `setAcceptDirectories(true)`

@@ -44,8 +44,8 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
         // Define the action that should be performed when the user clicks on the node.
         NodeUtils.addEventHandler(node, MouseEvent.MOUSE_CLICKED, actionEvent -> {
             Window window = node.getScene().getWindow();
+            FileChooser fileChooser = createFileChooser();
             if (getSelectionMode() == SelectionMode.MULTIPLE) {
-                FileChooser fileChooser = createFileChooser();
                 final List<File> files = fileChooser.showOpenMultipleDialog(window);
                 if (files != null && !files.isEmpty()) {
                     // Create a list of native file sources from the selected files.
@@ -58,7 +58,6 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
                     }
                 }
             } else {
-                FileChooser fileChooser = createFileChooser();
                 final File file = fileChooser.showOpenDialog(window);
                 if (file != null) {
                     // Create a list of native file sources from the selected file.
@@ -83,18 +82,19 @@ public class NativeFileOpenPicker extends BaseFileOpenPicker {
     }
 
     /**
-     * Creates and configures a new {@link FileChooser} instance.
+     * Runs the {@code onShowing} handler, then creates and configures a new {@link FileChooser} instance.
      * <p>
      * The file chooser's title, initial directory, and initial file name are bound to the corresponding
-     * properties of this picker. Additionally, it applies the extension filters defined in the picker to
-     * filter the visible files.
+     * properties of this picker; a missing initial directory falls back to its nearest existing parent.
+     * Additionally, it applies the extension filters defined in the picker to filter the visible files.
      *
      * @return a configured {@code FileChooser} instance.
      */
     FileChooser createFileChooser() {
+        runOnShowing();
         final FileChooser fileChooser = new FileChooser();
         fileChooser.titleProperty().bind(titleProperty());
-        fileChooser.initialDirectoryProperty().bind(initialDirectoryProperty());
+        fileChooser.initialDirectoryProperty().bind(existingDirectory(initialDirectoryProperty()));
         fileChooser.initialFileNameProperty().bind(initialFileNameProperty());
         fileChooser.getExtensionFilters().addAll(getExtensionFilters().stream()
                 .map(ExtensionFilter::toJavaFXExtensionFilter)

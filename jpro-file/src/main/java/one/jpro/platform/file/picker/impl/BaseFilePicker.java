@@ -1,9 +1,12 @@
 package one.jpro.platform.file.picker.impl;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -78,6 +81,26 @@ abstract class BaseFilePicker implements FilePicker {
         return initialDirectory;
     }
 
+    private ObjectProperty<Runnable> onShowing;
+
+    @Override
+    public final Runnable getOnShowing() {
+        return (onShowing != null) ? onShowing.get() : null;
+    }
+
+    @Override
+    public final void setOnShowing(final Runnable value) {
+        onShowingProperty().set(value);
+    }
+
+    @Override
+    public final ObjectProperty<Runnable> onShowingProperty() {
+        if (onShowing == null) {
+            onShowing = new SimpleObjectProperty<>(this, "onShowing");
+        }
+        return onShowing;
+    }
+
     private StringProperty title;
 
     @Override
@@ -124,6 +147,23 @@ abstract class BaseFilePicker implements FilePicker {
             selectedExtensionFilter = new SimpleObjectProperty<>(this, "selectedExtensionFilter");
         }
         return selectedExtensionFilter;
+    }
+
+    final void runOnShowing() {
+        final Runnable handler = getOnShowing();
+        if (handler != null) handler.run();
+    }
+
+    /**
+     * The given directory, or its nearest existing parent if it is missing.
+     * JavaFX before 27 throws when a dialog is shown with a missing initial directory.
+     */
+    static ObjectBinding<File> existingDirectory(ObservableValue<File> directory) {
+        return Bindings.createObjectBinding(() -> {
+            File dir = directory.getValue();
+            while (dir != null && !dir.isDirectory()) dir = dir.getAbsoluteFile().getParentFile();
+            return dir;
+        }, directory);
     }
 
     /**

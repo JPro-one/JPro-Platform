@@ -56,6 +56,15 @@ public interface DirectoryOpenPicker {
      */
     ObjectProperty<File> initialDirectoryProperty();
 
+    Runnable getOnShowing();
+
+    void setOnShowing(Runnable value);
+
+    /**
+     * Called right before the chooser is shown, e.g. to update the initial directory.
+     */
+    ObjectProperty<Runnable> onShowingProperty();
+
     Consumer<File> getOnDirectorySelected();
 
     void setOnDirectorySelected(Consumer<File> value);
