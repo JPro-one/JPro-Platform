@@ -7,6 +7,12 @@
 #### Features
 * **jpro-file:** `FileDropper.setAcceptDirectories(true)` delivers dropped directories next to the files on the
   desktop. The extension filter applies to files only.
+* **jpro-file:** pickers have an `onShowing` handler, called on the desktop right before the dialog is shown, e.g.
+  to update the initial directory.
+
+#### Bugfixes
+* **jpro-file:** a missing initial directory no longer stops a desktop picker from opening (JavaFX before 27 threw);
+  the dialog opens in the nearest existing parent instead.
 
 ### 0.8.1 (October 19, 2026)
 

@@ -2,6 +2,9 @@ package one.jpro.platform.file.picker.impl;
 
 import javafx.scene.control.Label;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
 
 import static one.jpro.jmemorybuddy.JMemoryBuddy.memoryTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +46,15 @@ public class NativeFileSavePickerTest extends NativeFilePickerTest {
 
             picker.setInitialFileName("test123.txt");
             assertEquals("test123.txt", chooser.getInitialFileName());
+        });
+    }
+
+    @Test
+    public void onShowingAndMissingInitialDirectory(@TempDir File tempDir) {
+        inFX(() -> {
+            NativeFileSavePicker picker = new NativeFileSavePicker(new Label());
+            picker.setOnShowing(() -> picker.setInitialDirectory(new File(tempDir, "deleted")));
+            assertEquals(tempDir, picker.createFileChooser().getInitialDirectory());
         });
     }
 }

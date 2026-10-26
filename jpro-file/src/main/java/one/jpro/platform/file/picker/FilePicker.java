@@ -87,6 +87,26 @@ public interface FilePicker {
     ObjectProperty<File> initialDirectoryProperty();
 
     /**
+     * Gets the handler called right before the file dialog is shown.
+     *
+     * @return the handler or {@code null}
+     */
+    Runnable getOnShowing();
+
+    /**
+     * Sets the handler called right before the file dialog is shown.
+     *
+     * @param value the handler or {@code null}
+     */
+    void setOnShowing(Runnable value);
+
+    /**
+     * Called on the desktop right before the file dialog is shown, e.g. to update the initial
+     * directory. Not called on the web, where the browser shows its dialog directly.
+     */
+    ObjectProperty<Runnable> onShowingProperty();
+
+    /**
      * Gets the extension filters used in the displayed file dialog. Only
      * one extension filter from the list is active at any time in the displayed
      * dialog and only files which correspond to this extension filter are
