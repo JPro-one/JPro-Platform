@@ -1,7 +1,9 @@
 package one.jpro.platform.file.dropper;
 
 import com.sun.javafx.event.EventHandlerManager;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventHandler;
@@ -53,6 +55,27 @@ abstract class BaseFileDropper implements FileDropper {
             extensionFilter = new SimpleObjectProperty<>(this, "extensionFilter");
         }
         return extensionFilter;
+    }
+
+    // accept directories property
+    private BooleanProperty acceptDirectories;
+
+    @Override
+    public final boolean isAcceptDirectories() {
+        return acceptDirectories != null && acceptDirectories.get();
+    }
+
+    @Override
+    public final void setAcceptDirectories(boolean value) {
+        acceptDirectoriesProperty().set(value);
+    }
+
+    @Override
+    public final BooleanProperty acceptDirectoriesProperty() {
+        if (acceptDirectories == null) {
+            acceptDirectories = new SimpleBooleanProperty(this, "acceptDirectories", false);
+        }
+        return acceptDirectories;
     }
 
     // selection mode property
@@ -158,8 +181,17 @@ abstract class BaseFileDropper implements FileDropper {
         return tail.prepend(eventHandlerManager);
     }
 
-    boolean hasSupportedExtension(List<File> files) {
+    boolean hasAcceptedFile(List<File> files) {
+        return files.stream().anyMatch(this::accepts);
+    }
+
+    List<File> acceptedFiles(List<File> files) {
+        return files.stream().filter(this::accepts).toList();
+    }
+
+    private boolean accepts(File file) {
+        if (file.isDirectory()) return isAcceptDirectories();
         final ExtensionFilter extensionFilter = getExtensionFilter();
-        return files.stream().anyMatch(file -> !file.isDirectory() && (extensionFilter == null || extensionFilter.accepts(file)));
+        return extensionFilter == null || extensionFilter.accepts(file);
     }
 }

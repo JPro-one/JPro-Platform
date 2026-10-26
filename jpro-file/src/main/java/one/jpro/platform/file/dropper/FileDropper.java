@@ -1,6 +1,7 @@
 package one.jpro.platform.file.dropper;
 
 import com.jpro.webapi.WebAPI;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.event.EventHandler;
@@ -65,6 +66,26 @@ public interface FileDropper extends MultipleFileSelector, EventTarget {
      * Defines the property for the extension filter.
      */
     ObjectProperty<ExtensionFilter> extensionFilterProperty();
+
+    /**
+     * Whether dropped directories are accepted.
+     *
+     * @return {@code true} if directories are accepted, {@code false} by default
+     */
+    boolean isAcceptDirectories();
+
+    /**
+     * Sets whether dropped directories are accepted.
+     *
+     * @param value {@code true} to accept directories
+     */
+    void setAcceptDirectories(boolean value);
+
+    /**
+     * Defines whether dropped directories are delivered next to the files. The extension
+     * filter applies to files only. Desktop only; on the web it is ignored with a warning.
+     */
+    BooleanProperty acceptDirectoriesProperty();
 
     /**
      * Retrieves the event handler to be called when file dragging gesture enters

@@ -2,6 +2,12 @@
 
 ## 0.8.x
 
+### 0.8.2 (unreleased)
+
+#### Features
+* **jpro-file:** `FileDropper.setAcceptDirectories(true)` delivers dropped directories next to the files on the
+  desktop. The extension filter applies to files only.
+
 ### 0.8.1 (October 19, 2026)
 
 #### Features

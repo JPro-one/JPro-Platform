@@ -7,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
-import one.jpro.platform.file.ExtensionFilter;
 import one.jpro.platform.file.FileSource;
 import one.jpro.platform.file.NativeFileSource;
 import one.jpro.platform.file.event.DataTransfer;
@@ -37,7 +36,7 @@ public class NativeFileDropper extends BaseFileDropper {
         NodeUtils.addEventHandler(node, DragEvent.DRAG_OVER, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
                 List<File> files = dragEvent.getDragboard().getFiles();
-                if (hasSupportedExtension(files)) {
+                if (hasAcceptedFile(files)) {
                     dragEvent.acceptTransferModes(TransferMode.COPY);
                     setFilesDragOver(true);
                 } else {
@@ -63,9 +62,7 @@ public class NativeFileDropper extends BaseFileDropper {
 
         NodeUtils.addEventHandler(node, DragEvent.DRAG_DROPPED, dragEvent -> {
             if (dragEvent.getDragboard().hasFiles()) {
-                final ExtensionFilter extensionFilter = getExtensionFilter();
-                List<NativeFileSource> nativeFileSources = dragEvent.getDragboard().getFiles().stream()
-                        .filter(file -> !file.isDirectory() && (extensionFilter == null || extensionFilter.accepts(file)))
+                List<NativeFileSource> nativeFileSources = acceptedFiles(dragEvent.getDragboard().getFiles()).stream()
                         .map(NativeFileSource::new)
                         .toList();
 

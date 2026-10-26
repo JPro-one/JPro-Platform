@@ -102,8 +102,9 @@ an `UnsupportedOperationException` in the browser, so guard it with `WebAPI.isBr
       ```
 
 #### Limitations
-* `FileOpenPicker`, `FileSavePicker` and `FileDropper` handle files only. Directories can be chosen with
-`DirectoryOpenPicker` on desktop; the web has no directory support.
+* `FileOpenPicker` and `FileSavePicker` handle files only. Directories can be chosen with `DirectoryOpenPicker`
+on desktop. `FileDropper` delivers dropped directories next to the files with `setAcceptDirectories(true)`
+on desktop. The web has no directory support.
 
 ## Installation
 
