@@ -240,4 +240,14 @@ public class OAuth2LoginAttemptTests {
         assertNull(OAuth2AuthenticationProvider.LoginAttempt.decode("garbage"));
         assertNull(OAuth2AuthenticationProvider.LoginAttempt.decode("a.b.notanumber"));
     }
+
+    @Test
+    void loginAttemptCookieIsReadWithOrWithoutHostPrefixAndMayBeMissing() {
+        String name = OAuth2AuthenticationProvider.loginAttemptCookie("s");
+
+        assertNull(OAuth2AuthenticationProvider.loginAttemptCookieValue(Map.of(), "s"));
+        assertEquals("plain", OAuth2AuthenticationProvider.loginAttemptCookieValue(Map.of(name, "plain"), "s"));
+        assertEquals("host", OAuth2AuthenticationProvider.loginAttemptCookieValue(
+                Map.of("__Host-" + name, "host", name, "plain"), "s"));
+    }
 }

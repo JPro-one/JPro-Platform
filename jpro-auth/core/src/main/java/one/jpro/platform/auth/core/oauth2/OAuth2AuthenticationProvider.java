@@ -419,9 +419,7 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
         LoginAttempt attempt = loginAttempts.remove(state);
         final WebAPI webAPI = browserWebAPI();
         if (webAPI != null) {
-            final String name = loginAttemptCookie(state);
-            final String cookie = Objects.requireNonNullElse(
-                    webAPI.getCookies().get("__Host-" + name), webAPI.getCookies().get(name));
+            final String cookie = loginAttemptCookieValue(webAPI.getCookies(), state);
             webAPI.executeScript(loginAttemptCookieScript(state, "", 0));
             if (attempt == null && cookie != null) attempt = LoginAttempt.decode(cookie);
         }
@@ -437,8 +435,15 @@ public class OAuth2AuthenticationProvider implements AuthenticationProvider<Cred
     }
 
     // The state may come from the app, so the cookie name uses its hash.
-    private static String loginAttemptCookie(@NotNull final String state) {
+    static String loginAttemptCookie(@NotNull final String state) {
         return LOGIN_ATTEMPT_COOKIE_PREFIX + OAuth2API.codeChallenge(state);
+    }
+
+    @Nullable
+    static String loginAttemptCookieValue(@NotNull final Map<String, String> cookies, @NotNull final String state) {
+        final String name = loginAttemptCookie(state);
+        final String hostCookie = cookies.get("__Host-" + name);
+        return hostCookie != null ? hostCookie : cookies.get(name);
     }
 
     private static String randomToken() {
