@@ -13,6 +13,8 @@
 #### Bugfixes
 * **jpro-file:** a missing initial directory no longer stops a desktop picker from opening (JavaFX before 27 threw);
   the dialog opens in the nearest existing parent instead.
+* **jpro-auth-core:** in the browser, `authenticate(...)` no longer fails with a `NullPointerException` when the
+  callback page has no login cookie (since 0.8.1).
 
 ### 0.8.1 (October 19, 2026)
 
