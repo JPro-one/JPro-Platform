@@ -16,7 +16,8 @@
 * **jpro-auth-core:** in the browser, `authenticate(...)` no longer fails with a `NullPointerException` when the
   callback page has no login cookie (since 0.8.1).
 * **jpro-scenegraph:** anonymous subclasses (e.g. `new VBox() {...}`) are shown by their named superclass instead
-  of an empty name, and `Label`/`Button` text is included as documented. Lines no longer end with a space.
+  of an empty name, and the text of `Labeled` nodes (labels, buttons, cells, ...) is included as documented. Lines
+  no longer end with a space.
 
 ### 0.8.1 (October 19, 2026)
 

@@ -49,10 +49,10 @@ class SceneGraphSerializerTest {
 
     @Test
     void labeledShowsItsTextOnOneLine() {
-        var root = new VBox(new Label("Two\nlines"), new Button("Save"), new Label());
+        var root = new VBox(new Label("Two\r\nlines \"quoted\" \\n"), new Button("Save"), new Label());
         assertEquals("""
                 VBox
-                - Label [label] "Two\\nlines"
+                - Label [label] "Two\\r\\nlines \\"quoted\\" \\\\n"
                 - Button [button] "Save"
                 - Label [label]
                 """, SceneGraphSerializer.serialize(root));

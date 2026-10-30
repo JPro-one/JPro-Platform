@@ -72,7 +72,7 @@ public class SceneGraphSerializer {
         }
         if(node instanceof Labeled labeled && labeled.getText() != null && !labeled.getText().isEmpty()) {
             sb.append(" \"");
-            sb.append(labeled.getText().replace("\n", "\\n"));
+            sb.append(escape(labeled.getText()));
             sb.append("\"");
         }
         sb.append("\n");
@@ -96,6 +96,10 @@ public class SceneGraphSerializer {
         return sb.toString();
     }
 
+
+    private static String escape(String text) {
+        return text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "\\r").replace("\n", "\\n");
+    }
 
     // Anonymous classes have an empty simple name.
     private Class<?> getNamedClass(Class<?> clazz) {
