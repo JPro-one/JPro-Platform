@@ -25,5 +25,6 @@ System.out.println(tree);
 ```
 
 Layout containers (`VBox`, `HBox`, `StackPane`, `GridPane`, `ScrollPane`) are rendered with their
-children nested by indentation; leaf controls such as `Label` and `Button` are rendered inline with
-their text. The method is static and side-effect free.
+children nested by indentation; leaf controls such as `Label` and `Button` are rendered inline, and
+every `Labeled` shows its text in quotes. Anonymous subclasses are shown by their nearest named
+superclass. The method is static and side-effect free.
