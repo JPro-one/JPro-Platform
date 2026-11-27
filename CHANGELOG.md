@@ -2,22 +2,19 @@
 
 ## 0.8.x
 
-### 0.8.2 (unreleased)
+### 0.8.2 (November 27, 2026)
 
 #### Features
-* **jpro-file:** `FileDropper.setAcceptDirectories(true)` delivers dropped directories next to the files on the
-  desktop. The extension filter applies to files only.
-* **jpro-file:** pickers have an `onShowing` handler, called on the desktop right before the dialog is shown, e.g.
-  to update the initial directory.
+* **jpro-file:** `FileDropper.setAcceptDirectories(true)` delivers dropped directories on the desktop, and pickers
+  have an `onShowing` handler, e.g. to update the initial directory.
 
 #### Bugfixes
-* **jpro-file:** a missing initial directory no longer stops a desktop picker from opening (JavaFX before 27 threw);
-  the dialog opens in the nearest existing parent instead.
-* **jpro-auth-core:** in the browser, `authenticate(...)` no longer fails with a `NullPointerException` when the
-  callback page has no login cookie (since 0.8.1).
-* **jpro-scenegraph:** anonymous subclasses (e.g. `new VBox() {...}`) are shown by their named superclass instead
-  of an empty name, and the text of `Labeled` nodes (labels, buttons, cells, ...) is included as documented. Lines
-  no longer end with a space.
+* **jpro-file:** a missing initial directory no longer stops a desktop picker from opening; it opens in the nearest
+  existing parent.
+* **jpro-auth-core:** `authenticate(...)` no longer throws a `NullPointerException` when the callback page has no
+  login cookie (since 0.8.1).
+* **jpro-scenegraph:** anonymous subclasses are shown by their named superclass, and the text of `Labeled` nodes
+  is included.
 
 ### 0.8.1 (October 19, 2026)
 
